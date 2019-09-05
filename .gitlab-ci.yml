@@ -1,0 +1,60 @@
+image: docker:latest
+
+services:
+  - docker:dind
+
+before_script:
+  - docker build -t tpm2software/tpm2-tss-python
+      -f .ci/Dockerfile.tpm2-tss-python .
+
+build:
+  stage: build
+  script:
+    - docker run --rm
+        -u $(id -u):$(id -g)
+        -v "${PWD}:/workspace/tpm2-pytss"
+        --env-file .ci/docker.env
+        tpm2software/tpm2-tss-python
+        /bin/bash -c 'python3 setup.py sdist && python3 setup.py bdist'
+  artifacts:
+    paths:
+      - dist
+
+test:
+  stage: test
+  script:
+    - docker run --rm
+        -u $(id -u):$(id -g)
+        -v "${PWD}:/workspace/tpm2-pytss"
+        --env-file .ci/docker.env
+        tpm2software/tpm2-tss-python
+        /bin/bash -c '/workspace/tpm2-pytss/.ci/docker.run'
+  artifacts:
+    paths:
+      - tpm2_pytss
+    expire_in: 1h
+
+style:
+  stage: test
+  script:
+    - black --check .
+
+pages:
+  stage: deploy
+  script:
+    - rm -rf public
+    - docker run --rm
+        -u $(id -u):$(id -g)
+        -v "${PWD}:/workspace/tpm2-pytss"
+        --env-file .ci/docker.env
+        tpm2software/tpm2-tss-python
+        /bin/bash -c "./scripts/docs.sh && mv pages public"
+  artifacts:
+    paths:
+      - public
+    expire_in: 1h
+  dependencies:
+    - test
+    - style
+  only:
+    - master

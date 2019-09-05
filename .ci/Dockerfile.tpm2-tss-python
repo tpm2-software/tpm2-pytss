@@ -1,0 +1,18 @@
+FROM tpm2software/tpm2-tss
+
+RUN apt-get -y update && \
+  apt-get -y install \
+    python3 \
+    python3-dev \
+    python3-pip \
+    swig && \
+  rm -rf /var/lib/apt/lists/* && \
+  python3 -m pip install -U pip && \
+  python3 -m pip install -U coverage codecov sphinx sphinxcontrib-asyncio
+
+COPY .ci/download-deps.sh /workspace/tpm2-pytss/.ci/download-deps.sh
+
+RUN bash -c 'source /workspace/tpm2-pytss/.ci/download-deps.sh && get_deps /workspace'
+
+WORKDIR /workspace/tpm2-pytss
+COPY . /workspace/tpm2-pytss
