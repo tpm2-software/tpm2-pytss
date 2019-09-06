@@ -57,7 +57,8 @@ class PkgConfigNeededExtension(Extension):
         if not self.pkg_config_cflags:
             return []
         return shlex.split(
-            check_output(["pkg-config", "--cflags"] + self.pkg_config_cflags).decode()
+            check_output(["pkg-config", "--cflags"] + self.pkg_config_cflags,
+                env=dict(os.environ, PKG_CONFIG_ALLOW_SYSTEM_CFLAGS="1")).decode()
         )
 
     @property
