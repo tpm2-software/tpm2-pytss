@@ -1,5 +1,7 @@
 # tpm2-pytss
 
+[![Build Status](https://travis-ci.org/tpm2-software/tpm2-pytss.svg?branch=master)](https://travis-ci.org/tpm2-software/tpm2-pytss)
+
 TPM2 TSS Python bindings for Enhanced System API (ESYS).
 
 Supported versions of Python are
