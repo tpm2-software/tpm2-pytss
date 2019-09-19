@@ -1,18 +1,11 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2019 Intel Corporation
-import sys
-import inspect
-import pkgutil
-import functools
-import contextlib
-from pathlib import Path
-from functools import wraps
-from typing import Any, Callable, List, Optional, ByteString
+from functools import partial, wraps
+from typing import Optional, ByteString
 
-from . import exceptions
 from .tcti import TCTIContext
 from .util.swig import Wrapper
-from .binding import *
+from .binding import AuthSessionContext, ESYSBinding, FlushTRContext, NVContext
 
 
 class InvalidArgumentError(Exception):
@@ -122,21 +115,21 @@ class ESYSContext(Wrapper, metaclass=ESYSContextMetaClass):
         Create and return a ESYS_TR_PTR that will be set to ESYS_TR_NONE and
         flushed when it's context exits.
         """
-        return functools.partial(FlushTRContext, self)
+        return partial(FlushTRContext, self)
 
     @property
     def auth_session(self):
         """
         Create and return a auth session context.
         """
-        return functools.partial(AuthSessionContext, self)
+        return partial(AuthSessionContext, self)
 
     @property
     def nv(self):
         """
         Create and return a nv context.
         """
-        return functools.partial(NVContext, self)
+        return partial(NVContext, self)
 
     def get_random(
         self,

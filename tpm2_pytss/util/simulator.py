@@ -128,13 +128,13 @@ class SimulatorTest:
     Testcase that requires the tpm_server simulator to be running.
     """
 
-    def setUp(cls):
+    def setUp(self):
         super().setUp()
-        cls.simulator = Simulator()
+        self.simulator = Simulator()
         if not os.getenv("SIM_RUNNING", default=""):
-            cls.simulator.start()
+            self.simulator.start()
 
-    def tearDown(cls):
+    def tearDown(self):
         super().tearDown()
         if not os.getenv("SIM_RUNNING", default=""):
-            cls.simulator.stop()
+            self.simulator.stop()
