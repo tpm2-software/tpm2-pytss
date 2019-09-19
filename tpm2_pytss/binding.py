@@ -3,8 +3,7 @@ import abc
 import sys
 import inspect
 import pkgutil
-import contextlib
-from contextlib import contextmanager
+from contextlib import contextmanager, _GeneratorContextManager
 from typing import Any, Callable, Optional, List
 
 from . import exceptions
@@ -421,7 +420,7 @@ class ContextManagedPointerClass:
 
 @WrapperMetaClass.register_call_mod
 def call_mod_context_managed_pointer_class(name, annotation, value):
-    if isinstance(value, contextlib._GeneratorContextManager):
+    if isinstance(value, _GeneratorContextManager):
         raise UsedWithoutEnteringContext(name)
     if isinstance(value, ContextManagedPointerClass):
         if value.ptr is None:
