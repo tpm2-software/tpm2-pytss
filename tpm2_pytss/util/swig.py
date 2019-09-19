@@ -1,8 +1,5 @@
 import inspect
-import pkgutil
 import logging
-import pkg_resources
-from pathlib import Path
 from functools import partial, wraps
 from typing import Any
 

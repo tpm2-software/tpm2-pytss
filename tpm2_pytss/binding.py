@@ -3,7 +3,6 @@ import abc
 import sys
 import inspect
 import pkgutil
-from pathlib import Path
 import contextlib
 from contextlib import contextmanager
 from typing import Any, Callable, Optional, List

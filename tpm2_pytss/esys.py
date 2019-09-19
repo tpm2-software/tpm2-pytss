@@ -1,15 +1,9 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2019 Intel Corporation
-import sys
-import inspect
-import pkgutil
 import functools
-import contextlib
-from pathlib import Path
 from functools import wraps
-from typing import Any, Callable, List, Optional, ByteString
+from typing import Optional, ByteString
 
-from . import exceptions
 from .tcti import TCTIContext
 from .util.swig import Wrapper
 from .binding import *

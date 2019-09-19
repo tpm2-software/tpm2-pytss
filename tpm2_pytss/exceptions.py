@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2019 Intel Corporation
-import sys
 import inspect
 from functools import wraps
 from typing import Optional, Callable, List, Any
