@@ -18,6 +18,12 @@ Supported versions of Python are
 This has been tested against TPM2 TSS 2.3.1
 
 ```console
+$ python3 -m pip install tpm2-pytss
+```
+
+Or install from the master branch via GitHub
+
+```console
 $ python3 -m pip install git+https://github.com/tpm2-software/tpm2-pytss
 ```
 
