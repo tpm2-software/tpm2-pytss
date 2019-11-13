@@ -55,6 +55,17 @@ $ python3 -m pip install git+https://github.com/tpm2-software/tpm2-pytss
 
 See [`tests/`](tests/) folder for example usage.
 
+## Testing
+
+You need to have `tpm_server` installed in your path to run the tests.
+
+Download the latest version from https://sourceforge.net/projects/ibmswtpm2/files/
+and put it somewher in your `$PATH`.
+
+```console
+$ python3 setup.py test
+```
+
 ## Contributing
 
 - See [HACKING](HACKING.md)
