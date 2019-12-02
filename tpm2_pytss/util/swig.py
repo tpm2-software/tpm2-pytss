@@ -1,10 +1,77 @@
+import os
 import inspect
 import logging
 from functools import partial, wraps
 from typing import Any
 
-# logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(
+    level=getattr(logging, os.environ.get("TPM2_PYTSS_LOG_LEVEL", "CRITICAL").upper())
+)
 LOGGER = logging.getLogger(__name__)
+
+
+class PointerAlreadyInUse(Exception):
+    pass  # pragma: no cov
+
+
+class ContextManagedPointerClass:
+    """
+    By forcing context management we ensure users of the bindings are explicit
+    about their usage and freeing of allocated resources. Rather than relying on
+    the garbage collector. This makes it harder for them to leave assets lying
+    around.
+    """
+
+    def __init__(self, value: Any = None):
+        self._init_value = value
+        self.ptr = None
+
+    @property
+    def value(self) -> Any:
+        return self._value(self.ptr)
+
+    @value.setter
+    def value(self, value) -> None:
+        self._assign(self.ptr, value)
+
+    @classmethod
+    def frompointer(cls, ptr: Any) -> "ContextManagedPointerClass":
+        return cls(ptr)
+
+    def __enter__(self):
+        if self.ptr is not None:
+            raise PointerAlreadyInUse()
+        self.ptr = self._new()
+        if self._init_value is not None:
+            self.value = self._init_value
+        return self
+
+    def __exit__(self, _exc_type, _exc_value, _traceback):
+        self._delete(self.ptr)
+        self.ptr = None
+
+
+def pointer_class(name, *, module=None):
+    """
+    Creates a class of the requested pointer functions data type
+    which supports context management.
+    """
+    check = {
+        "_new": "new_{}",
+        "_copy": "copy_{}",
+        "_delete": "delete_{}",
+        "_assign": "{}_assign",
+        "_value": "{}_value",
+    }
+    # Look up the methods
+    for key, value in check.items():
+        check[key] = module.__dict__.get(value.format(name), None)
+    if not all(check.values()):
+        return AttributeError
+    # Ensure we don't pass self to the functions
+    for key, value in check.items():
+        check[key] = partial(value)
+    return type(name, (ContextManagedPointerClass,), check)
 
 
 class Wrapper:
@@ -18,33 +85,13 @@ class Wrapper:
             return super().__getattribute__(name)
         except AttributeError:
             for attempt in [
-                partial(self._pointer_class, module=self.MODULE),
+                partial(pointer_class, module=self.MODULE),
                 lambda name: self.MODULE.__dict__.get(name, AttributeError),
             ]:
                 prop = attempt(name)
                 if prop is not AttributeError:
                     return prop
             raise
-
-    @classmethod
-    def _pointer_class(cls, name, *, module=None):
-        """
-        Creates a class of the requested pointer functions data type
-        which supports context management.
-        """
-        check = {
-            "_new": "new_{}",
-            "_copy": "copy_{}",
-            "_delete": "delete_{}",
-            "_assign": "{}_assign",
-            "_value": "{}_value",
-        }
-        # Look up the methods
-        for key, value in check.items():
-            check[key] = module.__dict__.get(value.format(name), None)
-        if not all(check.values()):
-            return AttributeError
-        return type(name, (ContextManagedPointerClass,), check)
 
 
 class WrapperMetaClass(type, Wrapper):
@@ -68,7 +115,7 @@ class WrapperMetaClass(type, Wrapper):
         for key, func in module.__dict__.items():
             if not key.startswith("_") and inspect.isfunction(func):
                 func = cls.wrap(func)
-                setattr(cls, key, func)
+                setattr(cls, key, partial(func))
         return cls
 
     def __getattribute__(cls, name):
@@ -77,7 +124,7 @@ class WrapperMetaClass(type, Wrapper):
         except AttributeError:
             module = object.__getattribute__(cls, "MODULE")
             for attempt in [
-                partial(cls._pointer_class, module=module),
+                partial(pointer_class, module=module),
                 lambda name: module.__dict__.get(name, AttributeError),
             ]:
                 prop = attempt(name)
@@ -136,32 +183,6 @@ class WrapperMetaClass(type, Wrapper):
         # Otherwise we pass the value that is being pointed to by the SessionContext
         # pointer
         return value.value
-
-
-class ContextManagedPointerClass:
-    def __init__(self, *, ptr: Any = None):
-        self.ptr = ptr
-
-    @property
-    def value(self) -> Any:
-        return self._value(self.ptr)
-
-    @value.setter
-    def value(self, value) -> None:
-        self._assign(self.ptr, value)
-
-    @classmethod
-    def frompointer(cls, ptr: Any) -> "ContextManagedPointerClass":
-        return cls(ptr)
-
-    def __enter__(self):
-        if self.ptr is None:
-            self.ptr = self._new()
-        return self
-
-    def __exit__(self, _exc_type, _exc_value, _traceback):
-        self._delete(self.ptr)
-        self.ptr = None
 
 
 @WrapperMetaClass.register_call_mod
