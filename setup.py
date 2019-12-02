@@ -4,6 +4,7 @@ import stat
 import glob
 import shlex
 import shutil
+import pathlib
 from io import open
 from subprocess import check_output
 from setuptools.command.build_ext import build_ext
@@ -26,8 +27,7 @@ with open(os.path.join(SELF_PATH, IMPORT_NAME, "version.py"), "r") as f:
             VERSION = ast.literal_eval(line.strip().split("=")[-1].strip())
             break
 
-with open(os.path.join(SELF_PATH, "README.md"), "r", encoding="utf-8") as f:
-    readme = f.read()
+README = pathlib.Path(SELF_PATH, "README.md").read_text()
 
 
 class PkgConfigNeededExtension(Extension):
@@ -108,6 +108,13 @@ class PkgConfigNeededExtension(Extension):
 class BuildExtThenCopySWIGPy(build_ext):
     def run(self):
         super().run()
+        # SWIG 4 Support
+        esys_binding_path = pathlib.Path(SELF_PATH, IMPORT_NAME, "esys_binding.py")
+        esys_binding = esys_binding_path.read_text()
+        if not "python_property = property" in esys_binding:
+            esys_binding = esys_binding.replace("= property(", "= python_property(")
+            esys_binding = "python_property = property\n" + esys_binding
+            esys_binding_path.write_text(esys_binding)
         # This is needed because test copies the binding files into IMPORT_NAME
         # but build does not. Making this necessary for working with the package
         # installed in development mode.
@@ -133,7 +140,7 @@ setup(
     name=NAME,
     version=VERSION,
     description=DESCRIPTION,
-    long_description=readme,
+    long_description=README,
     long_description_content_type="text/markdown",
     author=AUTHOR_NAME,
     author_email=AUTHOR_EMAIL,

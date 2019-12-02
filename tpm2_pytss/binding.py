@@ -7,7 +7,7 @@ from contextlib import contextmanager, _GeneratorContextManager
 from typing import Any, Callable, Optional, List
 
 from . import exceptions
-from .util.swig import WrapperMetaClass
+from .util.swig import WrapperMetaClass, pointer_class, ContextManagedPointerClass
 from .esys_binding import *
 
 # MODULE_NAME = "tpm2_pytss"
@@ -348,30 +348,6 @@ class NVContext(TRContext):
         self.ptr = False
 
 
-def pointer_class(name, *, module=None):
-    """
-    Creates a class of the requested pointer functions data type
-    which supports context management.
-    """
-    check = {
-        "_new": "new_{}",
-        "_copy": "copy_{}",
-        "_delete": "delete_{}",
-        "_assign": "{}_assign",
-        "_value": "{}_value",
-    }
-    # Look up the methods
-    for key, value in check.items():
-        check[key] = module.__dict__.get(value.format(name), None)
-    if not all(check.values()):
-        return AttributeError
-    return type(name, (ContextManagedPointerClass,), check)
-
-
-class PointerAlreadyInUse(Exception):
-    pass  # pragma: no cov
-
-
 class UsedWithoutEnteringContext(Exception):
     """
     Attempted to use a pointer without being in a ``with`` block for that
@@ -379,43 +355,6 @@ class UsedWithoutEnteringContext(Exception):
     """
 
     pass  # pragma: no cov
-
-
-class ContextManagedPointerClass:
-    """
-    By forcing context management we ensure users of the bindings are explicit
-    about their usage and freeing of allocated resources. Rather than relying on
-    the garbage collector. This makes it harder for them to leave assets lying
-    around.
-    """
-
-    def __init__(self, value: Any = None):
-        self._init_value = value
-        self.ptr = None
-
-    @property
-    def value(self) -> Any:
-        return self._value(self.ptr)
-
-    @value.setter
-    def value(self, value) -> None:
-        self._assign(self.ptr, value)
-
-    @classmethod
-    def frompointer(cls, ptr: Any) -> "ContextManagedPointerClass":
-        return cls(ptr)
-
-    def __enter__(self):
-        if self.ptr is not None:
-            raise PointerAlreadyInUse()
-        self.ptr = self._new()
-        if self._init_value is not None:
-            self.value = self._init_value
-        return self
-
-    def __exit__(self, _exc_type, _exc_value, _traceback):
-        self._delete(self.ptr)
-        self.ptr = None
 
 
 @WrapperMetaClass.register_call_mod
