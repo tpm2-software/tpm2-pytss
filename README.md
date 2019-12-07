@@ -39,6 +39,32 @@ You need to install [`swig`](http://swig.org/)
 $ sudo apt-get -y install swig pkg-config
 ```
 
+### ldconfig
+
+When you ran `./configure` for tpm2-tss if you didn't supply a prefix it usually
+defaults to `/usr/local/`. When you ran `make install` it then installed the
+libraries under that path. Your pacakge manager usually installs libraries to
+`/usr`. If you properly configure the `ldconfig` tool, it'll make the libraries
+you just installed available from within `/usr/local` (which means they won't
+clash with things your package manager installs). If you don't configure it then
+you might get this error:
+
+```log
+ImportError: libtss2-esys.so.0: cannot open shared object file: No such file or directory
+```
+
+We make a config file that tells `ldconfig` to look in `/usr/local/lib` for
+shared libraries, then we run `ldconfig`.
+
+```console
+$ sudo mkdir -p /etc/ld.so.conf.d/
+$ echo 'include /etc/ld.so.conf.d/*.conf' | sudo tee -a /etc/ld.so.conf
+$ echo '/usr/local/lib' | sudo tee -a /etc/ld.so.conf.d/libc.conf
+$ sudo ldconfig
+```
+
+> More info on ldconfig error: https://stackoverflow.com/a/17653893/3969496
+
 ## Install
 
 Install from PyPi.

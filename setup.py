@@ -49,6 +49,7 @@ class PkgConfigNeededExtension(Extension):
         # Will be populated by respective non-underscore setters
         self._libraries = []
         self._include_dirs = []
+        self._library_dirs = []
         self._swig_opts = []
         super().__init__(*args, **kwargs)
 
@@ -77,9 +78,26 @@ class PkgConfigNeededExtension(Extension):
         """
         return list(map(lambda string: string[number:], iterable))
 
+    def _subset_startswith(self, prefix, iterable):
+        """
+        Subset of list where each element starts with prefix.
+        """
+        return list(filter(lambda option: option.startswith(prefix), iterable))
+
+    def _strip_only_startswith(self, prefix, iterable):
+        """
+        Subset of list where each element starts with prefix, where prefix has
+        now been removed.
+        """
+        return self._strip_leading(
+            len(prefix), self._subset_startswith(prefix, iterable)
+        )
+
     @property
     def include_dirs(self):
-        return self._strip_leading(2, self.cc_include_dirs) + self._include_dirs
+        return (
+            self._strip_only_startswith("-I", self.cc_include_dirs) + self._include_dirs
+        )
 
     @include_dirs.setter
     def include_dirs(self, value):
@@ -87,18 +105,23 @@ class PkgConfigNeededExtension(Extension):
 
     @property
     def libraries(self):
-        return self._strip_leading(2, self.cc_libraries) + self._libraries
+        return self._strip_only_startswith("-l", self.cc_libraries) + self._libraries
 
     @libraries.setter
     def libraries(self, value):
         self._libraries = value
 
     @property
+    def library_dirs(self):
+        return self._strip_only_startswith("-L", self.cc_libraries) + self._library_dirs
+
+    @library_dirs.setter
+    def library_dirs(self, value):
+        self._library_dirs = value
+
+    @property
     def swig_opts(self):
-        return (
-            list(filter(lambda option: option.startswith("-I"), self.cc_include_dirs))
-            + self._swig_opts
-        )
+        return self._subset_startswith("-I", self.cc_include_dirs) + self._swig_opts
 
     @swig_opts.setter
     def swig_opts(self, value):
