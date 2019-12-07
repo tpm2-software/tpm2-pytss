@@ -21,6 +21,12 @@ exceptions.wrap_funcs(
     cond=lambda key, func: key.startswith("Esys_") or key.startswith("Tss2_"),
 )
 
+exceptions.wrap_funcs(
+    esys_binding,
+    dst=[esys_binding, sys.modules[__name__]],
+    cond=lambda key, func: key.startswith("Tss2_MU_"),
+    wrapperfunc=exceptions.raise_tpm2_mu_error
+)
 
 class NoPointerClass(Exception):
     """

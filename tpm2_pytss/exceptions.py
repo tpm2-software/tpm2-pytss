@@ -26,12 +26,28 @@ def raise_tpm2_error(func):
 
     return wrapper
 
+def raise_tpm2_mu_error(func):
+    """
+    Decorator to wrap TPM2 MU functions so that non-zero return code values trigger
+    errors.
+    """
+
+    @wraps(func)
+    def mu_wrapper(*args, **kwargs):
+        rc, offset = func(*args, **kwargs)
+        if isinstance(rc, int) and rc != 0:
+            raise TPM2Error(esys_binding.Tss2_RC_Decode(rc))
+        return rc, offset
+
+    return mu_wrapper
+
 
 def wrap_funcs(
     src,
     *,
     dst: Optional[List[Any]] = None,
-    cond: Optional[Callable[[Callable], bool]] = None
+    cond: Optional[Callable[[Callable], bool]] = None,
+    wrapperfunc = raise_tpm2_error
 ):
     """
     Wrap the functions within the given module with a decorator so that if they
@@ -41,7 +57,7 @@ def wrap_funcs(
         dst = [src]
     for key, func in inspect.getmembers(src):
         if inspect.isfunction(func) and (cond is None or cond(key, func)):
-            wrapped = raise_tpm2_error(func)
+            wrapped = wrapperfunc(func)
             for module in dst:
                 setattr(module, key, wrapped)
     return dst[0]
