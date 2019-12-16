@@ -13,6 +13,13 @@ Supported versions of Python are
 - 3.6
 - 3.7
 
+## Specification
+
+This package primarily exposes the TPM 2.0 Enhanced System API. The
+specification for the ESAPI can be found here:
+
+https://trustedcomputinggroup.org/resource/tcg-tss-2-0-enhanced-system-api-esapi-specification/
+
 ## Dependencies
 
 This has been tested against TPM2 TSS 2.3.1 and SWIG 3.
