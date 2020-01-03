@@ -21,4 +21,3 @@ class TestTPM2RC(BaseTestESYS):
             if tpm2err.rc != 0x1d5:
                 raise Exception("Unexpected RC: %#x, expected %#x" %
                                 (tpm2err.rc, TPM2_RC_SIZE + TPM2_RC_P + TPM2_RC_1))
-                
