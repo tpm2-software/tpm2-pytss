@@ -21,7 +21,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -U -e .[dev]
+        python -m pip install --upgrade black
     - name: Run check
       run: |
         ${{ matrix.check }}=1 GITHUB_PAGES_KEY=${{ secrets.GITHUB_PAGES_KEY }} ./.ci/run.sh
@@ -41,8 +41,8 @@ jobs:
     - name: Install dependencies
       run: |
         mkdir -p ~/.local/bin
-        python -m pip install --upgrade pip twine dffml
-        pip install -U -e .[dev]
+        python -m pip install --upgrade pip
+        python -m pip install --upgrade twine dffml
         docker build -t tpm2software/tpm2-tss-python -f .ci/Dockerfile.tpm2-tss-python .
     - name: Test
       run: |
