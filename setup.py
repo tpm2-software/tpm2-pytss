@@ -185,6 +185,16 @@ setup(
         "Programming Language :: Python :: Implementation :: CPython",
     ],
     install_requires=INSTALL_REQUIRES,
+    extras_require={
+        "dev": [
+            "coverage",
+            "codecov",
+            "sphinx",
+            "sphinxcontrib-asyncio",
+            "black",
+            "sphinx_rtd_theme",
+        ],
+    },
     packages=find_packages(),
     ext_modules=[
         PkgConfigNeededExtension(
