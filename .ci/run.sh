@@ -30,6 +30,9 @@ function run_test() {
   fi
 
   if [ "x${GITHUB_ACTIONS}" == "xtrue" ] && [ "x${GITHUB_REF}" == "xrefs/heads/master" ]; then
+    git status
+    git reset --hard HEAD
+    git clean -fdx
     "${PYTHON}" -m dffml service dev release .
   fi
 }
