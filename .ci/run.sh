@@ -25,6 +25,10 @@ function run_test() {
     tpm2software/tpm2-tss-python \
     /bin/bash -c '/workspace/tpm2-pytss/.ci/docker.run'
 
+  if [ "x${CODECOV_TOKEN}" != "x" ]; then
+    codecov
+  fi
+
   if [ "x${GITHUB_ACTIONS}" == "xtrue" ] && [ "x${GITHUB_REF}" == "xrefs/heads/master" ]; then
     dffml service dev release .
   fi

@@ -3,35 +3,11 @@ name: Tests
 on: [push, pull_request]
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      max-parallel: 3
-      matrix:
-        check: [WHITESPACE, STYLE, DOCS]
-        python-version: [3.7]
-
-    steps:
-    - uses: actions/checkout@v1
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install --upgrade black
-        git submodule init
-        git submodule update
-    - name: Run check
-      run: |
-        ${{ matrix.check }}=1 GITHUB_PAGES_KEY=${{ secrets.GITHUB_PAGES_KEY }} ./.ci/run.sh
-
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        check: [WHITESPACE, STYLE, DOCS, TEST]
         python-version: [3.7]
 
     steps:
@@ -40,7 +16,7 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
+    - name: Install Dependencies
       run: |
         mkdir -p ~/.local/bin
         python -m pip install --upgrade pip
@@ -54,5 +30,7 @@ jobs:
         export PATH="${HOME}/.local/bin:${PATH}"
         export TWINE_USERNAME=__token__
         export TWINE_PASSWORD=${{ secrets.PYPI_TPM2_PYTSS }}
-        TEST=1 ./.ci/run.sh
-        CODECOV_TOKEN=${{ secrets.CODECOV_TOKEN }} codecov
+        export CODECOV_TOKEN=${{ secrets.CODECOV_TOKEN }}
+        export GITHUB_PAGES_KEY=${{ secrets.GITHUB_PAGES_KEY }}
+        export ${{ matrix.check }}=1
+        ./.ci/run.sh
