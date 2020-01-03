@@ -1,0 +1,54 @@
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        check: [WHITESPACE, STYLE, DOCS]
+        python-version: [3.7]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -U -e .[dev]
+    - name: Run check
+      run: |
+        ${{ matrix.check }}=1 GITHUB_PAGES_KEY=${{ secrets.GITHUB_PAGES_KEY }} ./.ci/run.sh
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7]
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        mkdir -p ~/.local/bin
+        python -m pip install --upgrade pip twine dffml
+        pip install -U -e .[dev]
+        docker build -t tpm2software/tpm2-tss-python -f .ci/Dockerfile.tpm2-tss-python .
+    - name: Test
+      run: |
+        export TPM2_PYTSS_LOG_LEVEL=debug
+        export PATH="${HOME}/.local/bin:${PATH}"
+        export TWINE_USERNAME=__token__
+        export TWINE_PASSWORD=${{ secrets.PYPI_TPM2_PYTSS }}
+        TEST=1 ./.ci/run.sh
+        CODECOV_TOKEN=${{ secrets.CODECOV_TOKEN }} codecov
