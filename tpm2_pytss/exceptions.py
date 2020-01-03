@@ -28,6 +28,7 @@ def raise_tpm2_error(func):
 
     return wrapper
 
+
 def raise_tpm2_mu_error(func):
     """
     Decorator to wrap TPM2 MU functions so that non-zero return code values trigger
@@ -49,7 +50,7 @@ def wrap_funcs(
     *,
     dst: Optional[List[Any]] = None,
     cond: Optional[Callable[[Callable], bool]] = None,
-    wrapperfunc = raise_tpm2_error
+    wrapperfunc=raise_tpm2_error
 ):
     """
     Wrap the functions within the given module with a decorator so that if they
