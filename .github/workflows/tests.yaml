@@ -22,7 +22,7 @@ jobs:
       run: |
         mkdir -p ~/.local/bin
         python -m pip install --upgrade pip
-        python -m pip install --upgrade twine dffml
+        python -m pip install --upgrade twine dffml codecov
         git submodule init
         git submodule update
         docker build -t tpm2software/tpm2-tss-python -f .ci/Dockerfile.tpm2-tss-python .

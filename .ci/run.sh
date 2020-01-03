@@ -26,11 +26,11 @@ function run_test() {
     /bin/bash -c '/workspace/tpm2-pytss/.ci/docker.run'
 
   if [ "x${CODECOV_TOKEN}" != "x" ]; then
-    codecov
+    "${PYTHON}" -m codecov
   fi
 
   if [ "x${GITHUB_ACTIONS}" == "xtrue" ] && [ "x${GITHUB_REF}" == "xrefs/heads/master" ]; then
-    dffml service dev release .
+    "${PYTHON}" -m dffml service dev release .
   fi
 }
 
@@ -50,7 +50,7 @@ function run_whitespace() {
 }
 
 function run_style() {
-  black --check "${SRC_ROOT}"
+  "${PYTHON}" -m black --check "${SRC_ROOT}"
 }
 
 function run_docs() {
@@ -58,11 +58,13 @@ function run_docs() {
     return
   fi
 
+  ssh_key_dir="$(mktemp -d)"
+  TEMP_DIRS+=("${ssh_key_dir}")
   mkdir -p ~/.ssh
   chmod 700 ~/.ssh
-  "${PYTHON}" -c "import pathlib, base64, os; keyfile = pathlib.Path('~/.ssh/github_tpm2_pytss').expanduser(); keyfile.write_bytes(b''); keyfile.chmod(0o600); keyfile.write_bytes(base64.b32decode(os.environ['GITHUB_PAGES_KEY']))"
-  ssh-keygen -y -f ~/.ssh/github_tpm2_pytss > ~/.ssh/github_tpm2_pytss.pub
-  export GIT_SSH_COMMAND='ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentityFile=~/.ssh/github_tpm2_pytss'
+  "${PYTHON}" -c "import pathlib, base64, os; keyfile = pathlib.Path(\"${ssh_key_dir}/github_tpm2_pytss\").absolute(); keyfile.write_bytes(b''); keyfile.chmod(0o600); keyfile.write_bytes(base64.b32decode(os.environ['GITHUB_PAGES_KEY']))"
+  ssh-keygen -y -f "${ssh_key_dir}/github_tpm2_pytss" > "${ssh_key_dir}/github_tpm2_pytss.pub"
+  export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentityFile=${ssh_key_dir}/github_tpm2_pytss"
 
   cd "${SRC_ROOT}"
 
