@@ -37,9 +37,6 @@ You need to install pkg-config
 
 You need to install [`swig`](http://swig.org/)
 
-> Currently, only swig versions 3.X are supported. See
-> [#4](https://github.com/tpm2-software/tpm2-pytss/issues/4).
-
 #### Ubuntu
 
 ```console
