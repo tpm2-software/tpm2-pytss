@@ -4,13 +4,37 @@ import inspect
 from functools import wraps
 from typing import Optional, Callable, List, Any
 
-from . import esys_binding
+from .esys_binding import (
+    Tss2_RC_Decode,
+    TPM2_RC_FMT1,
+    TPM2_RC_P,
+    TPM2_RC_S,
+    TPM2_RC_N_MASK,
+)
 
 
 class TPM2Error(Exception):
     def __init__(self, rc: int):
-        super(TPM2Error, self).__init__(esys_binding.Tss2_RC_Decode(rc))
+        super(TPM2Error, self).__init__(Tss2_RC_Decode(rc))
         self.rc = rc
+        self.handle = 0
+        self.parameter = 0
+        self.session = 0
+        self.error = 0
+        if self.rc & TPM2_RC_FMT1:
+            self._parse_fmt1()
+        else:
+            self.error = self.rc
+
+    def _parse_fmt1(self):
+        self.error = TPM2_RC_FMT1 + (self.rc & 0x3F)
+
+        if self.rc & TPM2_RC_P:
+            self.parameter = (self.rc & TPM2_RC_N_MASK) >> 8
+        elif self.rc & TPM2_RC_S:
+            self.session = ((self.rc - TPM2_RC_S) & TPM2_RC_N_MASK) >> 8
+        else:
+            self.handle = (self.rc & TPM2_RC_N_MASK) >> 8
 
 
 def raise_tpm2_error(func):
