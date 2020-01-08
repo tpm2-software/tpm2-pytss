@@ -5,6 +5,31 @@ from .base_esys import BaseTestESYS
 
 
 class TestTPM2RC(BaseTestESYS):
+    def check_error(self, tpm2err, rc, error, parameter, handle, session):
+        self.assertEqual(
+            tpm2err.rc, rc, "Unexpected RC: %#x, expected %#x" % (tpm2err.rc, rc)
+        )
+        self.assertEqual(
+            tpm2err.error,
+            error,
+            "Unexpected error: %#x, expected %#x" % (tpm2err.error, error,),
+        )
+        self.assertEqual(
+            tpm2err.parameter,
+            parameter,
+            "Unexpected parameter: %u, expected %u" % (tpm2err.parameter, parameter,),
+        )
+        self.assertEqual(
+            tpm2err.handle,
+            handle,
+            "Unexpected handle: %u, expected %u" % (tpm2err.handle, handle,),
+        )
+        self.assertEqual(
+            tpm2err.session,
+            session,
+            "Unexpected session: %u, expected %u" % (tpm2err.session, session,),
+        )
+
     def test_tpm2_rc_attribute(self):
         with ExitStack() as stack:
             tpm2err = TPM2Error(0)
@@ -17,24 +42,9 @@ class TestTPM2RC(BaseTestESYS):
             except TPM2Error as e:
                 tpm2err = e
 
-            if tpm2err.rc != 0x1D5:
-                raise Exception(
-                    "Unexpected RC: %#x, expected %#x"
-                    % (tpm2err.rc, TPM2_RC_SIZE + TPM2_RC_P + TPM2_RC_1)
-                )
-            if tpm2err.error != TPM2_RC_SIZE:
-                raise Exception(
-                    "Unexpected error: %#x, expected %#x"
-                    % (tpm2err.error, TPM2_RC_SIZE)
-                )
-            if tpm2err.parameter != 1:
-                raise Exception(
-                    "Unexpected parameter: %u, expected 1" % tpm2err.parameter
-                )
-            if tpm2err.handle != 0:
-                raise Exception("Unexpected handle: %u, expected 0" % tpm2err.handle)
-            if tpm2err.session != 0:
-                raise Exception("Unexpected session: %u, expected 0" % tpm2err.session)
+            self.check_error(
+                tpm2err, TPM2_RC_SIZE + TPM2_RC_P + TPM2_RC_1, TPM2_RC_SIZE, 1, 0, 0
+            )
 
     def test_tpm2_rc_handle(self):
         with ExitStack() as stack:
@@ -46,24 +56,9 @@ class TestTPM2RC(BaseTestESYS):
             except TPM2Error as e:
                 tpm2err = e
 
-            if tpm2err.rc != 0x184:
-                raise Exception(
-                    "Unexpected RC: %#x, expected %#x"
-                    % (tpm2err.rc, TPM2_RC_VALUE + TPM2_RC_H + TPM2_RC_1)
-                )
-            if tpm2err.error != TPM2_RC_VALUE:
-                raise Exception(
-                    "Unexpected error: %#x, expected %#x"
-                    % (tpm2err.error, TPM2_RC_VALUE)
-                )
-            if tpm2err.parameter != 0:
-                raise Exception(
-                    "Unexpected parameter: %u, expected 0" % tpm2err.parameter
-                )
-            if tpm2err.handle != 1:
-                raise Exception("Unexpected handle: %u, expected 1" % tpm2err.handle)
-            if tpm2err.session != 0:
-                raise Exception("Unexpected session: %u, expected 0" % tpm2err.session)
+            self.check_error(
+                tpm2err, TPM2_RC_VALUE + TPM2_RC_H + TPM2_RC_1, TPM2_RC_VALUE, 0, 1, 0
+            )
 
     def test_tpm2_rc_session(self):
         with ExitStack() as stack:
@@ -92,21 +87,11 @@ class TestTPM2RC(BaseTestESYS):
             except TPM2Error as e:
                 tpm2err = e
 
-            if tpm2err.rc != 0x982:
-                raise Exception(
-                    "Unexpected RC: %#x, expected %#x"
-                    % (tpm2err.rc, TPM2_RC_ATTRIBUTES + TPM2_RC_S + TPM2_RC_1)
-                )
-            if tpm2err.error != TPM2_RC_ATTRIBUTES:
-                raise Exception(
-                    "Unexpected error: %#x, expected %#x"
-                    % (tpm2err.error, TPM2_RC_VALUE)
-                )
-            if tpm2err.parameter != 0:
-                raise Exception(
-                    "Unexpected parameter: %u, expected 0" % tpm2err.parameter
-                )
-            if tpm2err.handle != 0:
-                raise Exception("Unexpected handle: %u, expected 0" % tpm2err.handle)
-            if tpm2err.session != 1:
-                raise Exception("Unexpected session: %u, expected 1" % tpm2err.session)
+            self.check_error(
+                tpm2err,
+                TPM2_RC_ATTRIBUTES + TPM2_RC_S + TPM2_RC_1,
+                TPM2_RC_ATTRIBUTES,
+                0,
+                0,
+                1,
+            )
