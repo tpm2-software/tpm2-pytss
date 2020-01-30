@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 # tss -> build: update exported symbols map for libtss2-mu
-export TPM2_TSS_SHA=99fc6371e895b2e09ed8b0ef050e25780f896953
+export TPM2_TSS_SHA=8823180397fed4f7052d4c44e4724935396e3f41
 # TODO (pdxjohnny) Can't remember if we still need abrmd, I think not
 # abrmd -> 2.2.0_rc
 export TPM2_ABRMD_SHA=b41fbe23089b8701d229db1988a2811315288dfc
