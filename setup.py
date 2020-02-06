@@ -132,12 +132,13 @@ class BuildExtThenCopySWIGPy(build_ext):
     def run(self):
         super().run()
         # SWIG 4 Support
-        esys_binding_path = pathlib.Path(SELF_PATH, IMPORT_NAME, "esys_binding.py")
-        esys_binding = esys_binding_path.read_text()
-        if not "python_property = property" in esys_binding:
-            esys_binding = esys_binding.replace("= property(", "= python_property(")
-            esys_binding = "python_property = property\n" + esys_binding
-            esys_binding_path.write_text(esys_binding)
+        for fixfile in ["esys_binding.py", "fapi_binding.py"]:
+            binding_path = pathlib.Path(SELF_PATH, IMPORT_NAME, fixfile)
+            binding = binding_path.read_text()
+            if not "python_property = property" in binding:
+                binding = binding.replace("= property(", "= python_property(")
+                binding = "python_property = property\n" + binding
+                binding_path.write_text(binding)
         # This is needed because test copies the binding files into IMPORT_NAME
         # but build does not. Making this necessary for working with the package
         # installed in development mode.
@@ -203,7 +204,14 @@ setup(
             pkg_config_cflags=["tss2-esys", "tss2-rc", "tss2-tctildr"],
             pkg_config_libs=["tss2-esys", "tss2-rc", "tss2-tctildr"],
             swig_opts=["-py3", "-outdir", IMPORT_NAME],
-        )
+        ),
+        PkgConfigNeededExtension(
+            "{}._fapi_binding".format(IMPORT_NAME),
+            [os.path.join(IMPORT_NAME, "swig", "fapi_binding.i")],
+            pkg_config_cflags=["tss2-fapi", "tss2-rc", "tss2-tctildr"],
+            pkg_config_libs=["tss2-fapi", "tss2-rc", "tss2-tctildr"],
+            swig_opts=["-py3", "-outdir", IMPORT_NAME],
+        ),
     ],
     py_modules=[IMPORT_NAME],
     cmdclass={"build_ext": BuildExtThenCopySWIGPy},
