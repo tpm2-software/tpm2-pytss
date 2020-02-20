@@ -97,6 +97,59 @@ and put it somewher in your `$PATH`.
 $ python3 setup.py test
 ```
 
+## Logging
+
+To get traces of all calls into the TSS, use the `TPM2_PYTSS_LOG_LEVEL`
+environment variable.
+
+```console
+$ export TPM2_PYTSS_LOG_LEVEL=debug
+```
+
+Example logs:
+
+```
+test_random_length (tests.test_esys_get_random.TestGetRandom) ... DEBUG:asyncio:Using selector: EpollSelector
+DEBUG:tpm2_pytss.util.swig:Tss2_TctiLdr_Initialize_Ex(
+    name: mssim,
+    conf: port=63684,
+    context: <Swig Object of type 'TSS2_TCTI_CONTEXT **' at 0x7f5e63d8ea50>,
+)
+DEBUG:tpm2_pytss.util.swig:new_ctx_ptr(
+
+)
+DEBUG:tpm2_pytss.util.swig:Esys_Initialize(
+    esys_context: <Swig Object of type 'ESYS_CONTEXT **' at 0x7f5e63d8e9f0>,
+    tcti: <Swig Object of type 'TSS2_TCTI_CONTEXT *' at 0x7f5e63d8e5d0>,
+    abiVersion: <tpm2_pytss.binding.TSS2_ABI_VERSION; proxy of <Swig Object of type 'TSS2_ABI_VERSION *' at 0x7f5e6337ab10> >,
+)
+DEBUG:tpm2_pytss.util.swig:ctx_ptr_value(
+    obj: <Swig Object of type 'ESYS_CONTEXT **' at 0x7f5e63d8e9f0>,
+)
+DEBUG:tpm2_pytss.util.swig:Esys_Startup(
+    esysContext: <Swig Object of type 'ESYS_CONTEXT *' at 0x7f5e63d8e7e0>,
+    startupType: 0,
+)
+DEBUG:tpm2_pytss.util.swig:Esys_SetTimeout(
+    esys_context: <Swig Object of type 'ESYS_CONTEXT *' at 0x7f5e63d8e7e0>,
+    timeout: -1,
+)
+DEBUG:tpm2_pytss.util.swig:Esys_GetRandom(
+    esysContext: <Swig Object of type 'ESYS_CONTEXT *' at 0x7f5e63d8e7e0>,
+    shandle1: 4095,
+    shandle2: 4095,
+    shandle3: 4095,
+    bytesRequested: 11,
+    randomBytes: <Swig Object of type 'TPM2B_NONCE **' at 0x7f5e63d8e8d0>,
+)
+DEBUG:tpm2_pytss.util.swig:Esys_Finalize(
+    context: <Swig Object of type 'ESYS_CONTEXT **' at 0x7f5e63d8e9f0>,
+)
+DEBUG:tpm2_pytss.util.swig:delete_ctx_ptr(
+    obj: <Swig Object of type 'ESYS_CONTEXT **' at 0x7f5e63d8e9f0>,
+)
+```
+
 ## Contributing
 
 - See [HACKING](HACKING.md)
