@@ -21,7 +21,9 @@ class BaseTestESYS(SimulatorTest, unittest.TestCase):
         super().setUp()
         self.esys = ESYS()
         self.tcti = tcti.TCTI.load(os.getenv(ENV_TCTI, default=ENV_TCTI_DEFAULT))
-        self.tcti_config = os.getenv(ENV_TCTI_CONFIG, default=ENV_TCTI_CONFIG_DEFAULT)
+        self.tcti_config = os.getenv(
+            ENV_TCTI_CONFIG, default="port=%d" % (self.simulator.port)
+        )
         # Create a context stack
         self.ctx_stack = contextlib.ExitStack().__enter__()
         # Enter the contexts

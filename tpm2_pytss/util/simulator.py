@@ -3,6 +3,7 @@
 # All rights reserved.
 import os
 import atexit
+import random
 import asyncio
 import subprocess
 
@@ -95,8 +96,11 @@ class Simulator:
         # We are setting up a simulator in here, because we require the standard
         # ports. pytpm2tss does not yet support setting tctis and thus relies on
         # esys to do so.
+        self.port = random.randrange(49152, 65535)
         self.proc = subprocess.Popen(
-            [self.binary, "-rm"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            [self.binary, "-rm", "-port", str(self.port)],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
         )
         atexit.register(self.stop)
         try:
