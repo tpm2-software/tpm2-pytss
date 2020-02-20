@@ -9,24 +9,27 @@ from typing import Any, Callable, Optional, List
 from . import exceptions
 from .util.swig import WrapperMetaClass, pointer_class, ContextManagedPointerClass
 from .esys_binding import *
+from .fapi_binding import *
 
 # MODULE_NAME = "tpm2_pytss"
 MODULE_NAME = ".".join(__name__.split(".")[:-1])
 esys_binding = sys.modules[MODULE_NAME + ".esys_binding"]
+fapi_binding = sys.modules[MODULE_NAME + ".fapi_binding"]
 
 # TODO signature with return type of TPM_RC
-exceptions.wrap_funcs(
-    esys_binding,
-    dst=[esys_binding, sys.modules[__name__]],
-    cond=lambda key, func: key.startswith("Esys_") or key.startswith("Tss2_"),
-)
+for prefix, module in [("Esys_", esys_binding), ("Fapi_", fapi_binding)]:
+    exceptions.wrap_funcs(
+        module,
+        dst=[module, sys.modules[__name__]],
+        cond=lambda key, func: key.startswith(prefix) or key.startswith("Tss2_"),
+    )
 
-exceptions.wrap_funcs(
-    esys_binding,
-    dst=[esys_binding, sys.modules[__name__]],
-    cond=lambda key, func: key.startswith("Tss2_MU_"),
-    wrapperfunc=exceptions.raise_tpm2_mu_error,
-)
+    exceptions.wrap_funcs(
+        module,
+        dst=[module, sys.modules[__name__]],
+        cond=lambda key, func: key.startswith("Tss2_MU_"),
+        wrapperfunc=exceptions.raise_tpm2_mu_error,
+    )
 
 
 class NoPointerClass(Exception):
@@ -94,12 +97,13 @@ def set_properties_via_init(name, cls):
     return type(name, (SetPropertiesViaInit, cls), {"NAME": name, "SWIG_CLS": cls})
 
 
-wrap_all_matching(
-    set_properties_via_init,
-    esys_binding,
-    dst=[esys_binding, sys.modules[__name__]],
-    cond=lambda key, value: inspect.isclass(value) and key.upper() == key,
-)
+for module in [esys_binding, fapi_binding]:
+    wrap_all_matching(
+        set_properties_via_init,
+        module,
+        dst=[module, sys.modules[__name__]],
+        cond=lambda key, value: inspect.isclass(value) and key.upper() == key,
+    )
 
 
 class ByteArrayHelper:
@@ -190,12 +194,13 @@ def bytearray_helper(name, cls):
     )
 
 
-wrap_all_matching(
-    bytearray_helper,
-    esys_binding,
-    dst=[esys_binding, sys.modules[__name__]],
-    cond=lambda key, value: key in BYTEARRAY_STRUCTURES,
-)
+for module in [esys_binding, fapi_binding]:
+    wrap_all_matching(
+        bytearray_helper,
+        module,
+        dst=[module, sys.modules[__name__]],
+        cond=lambda key, value: key in BYTEARRAY_STRUCTURES,
+    )
 
 
 def var_name(search, str_value):
@@ -376,17 +381,18 @@ def call_mod_context_managed_pointer_class(name, annotation, value):
 
 # Create all the ContextManagedPointerClasses to be used for the
 # pointer_functions
-for name, func in inspect.getmembers(esys_binding):
-    if (
-        name.startswith("new_")
-        and esys_binding.__dict__.get(name.replace("new_", "delete_")) is not None
-    ):
-        name = name[len("new_") :]
-        ptr_ptr = pointer_class(name, module=esys_binding)
-        if ptr_ptr is AttributeError:
-            continue
-        setattr(sys.modules[__name__], name, ptr_ptr)
-        setattr(esys_binding, name, ptr_ptr)
+for module in [esys_binding, fapi_binding]:
+    for name, func in inspect.getmembers(module):
+        if (
+            name.startswith("new_")
+            and module.__dict__.get(name.replace("new_", "delete_")) is not None
+        ):
+            name = name[len("new_") :]
+            ptr_ptr = pointer_class(name, module=module)
+            if ptr_ptr is AttributeError:
+                continue
+            setattr(sys.modules[__name__], name, ptr_ptr)
+            setattr(module, name, ptr_ptr)
 
 
 def typedef_map():
@@ -416,21 +422,27 @@ def typedef_map():
 
 TYPEDEFS = typedef_map()
 
-for alias, typename in TYPEDEFS.items():
-    for alias, typename in zip(
-        [alias, "{}_PTR".format(alias), "{}_PTR_PTR".format(alias)],
-        [typename, "{}_PTR".format(typename), "{}_PTR_PTR".format(typename)],
-    ):
-        # Skip if it already exists
-        if sys.modules[__name__].__dict__.get(alias) is not None:
-            continue
-        reference = sys.modules[__name__].__dict__.get(typename)
-        if reference is None:
-            continue
-        setattr(esys_binding, alias, type(alias, (reference,), {}))
-        setattr(sys.modules[__name__], alias, type(alias, (reference,), {}))
+for module in [esys_binding, fapi_binding]:
+    for alias, typename in TYPEDEFS.items():
+        for alias, typename in zip(
+            [alias, "{}_PTR".format(alias), "{}_PTR_PTR".format(alias)],
+            [typename, "{}_PTR".format(typename), "{}_PTR_PTR".format(typename)],
+        ):
+            # Skip if it already exists
+            if sys.modules[__name__].__dict__.get(alias) is not None:
+                continue
+            reference = sys.modules[__name__].__dict__.get(typename)
+            if reference is None:
+                continue
+            setattr(module, alias, type(alias, (reference,), {}))
+            setattr(sys.modules[__name__], alias, type(alias, (reference,), {}))
 
 
 class ESYSBinding(metaclass=WrapperMetaClass, module=esys_binding):
 
     MODULE = esys_binding
+
+
+class FAPIBinding(metaclass=WrapperMetaClass, module=fapi_binding):
+
+    MODULE = fapi_binding
