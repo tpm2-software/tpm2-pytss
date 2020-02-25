@@ -13,6 +13,7 @@ Supported versions of Python are
 - 3.5
 - 3.6
 - 3.7
+- 3.8
 
 ## Specification
 
