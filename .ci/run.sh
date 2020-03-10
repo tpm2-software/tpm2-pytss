@@ -29,7 +29,11 @@ function run_test() {
     "${PYTHON}" -m codecov
   fi
 
-  if [ "x${GITHUB_ACTIONS}" == "xtrue" ] && [ "x${GITHUB_REF}" == "xrefs/heads/master" ]; then
+  if [ "x${GITHUB_ACTIONS}" != "xtrue" ]; then
+    return
+  fi
+
+  if [ "x${GITHUB_REF}" == "xrefs/heads/master" ] || [ "x${GITHUB_REF}" == *"xrefs/tags/"* ]; then
     git status
     git reset --hard HEAD
     git clean -fdx
