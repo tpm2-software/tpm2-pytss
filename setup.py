@@ -207,4 +207,6 @@ setup(
     ],
     py_modules=[IMPORT_NAME],
     cmdclass={"build_ext": BuildExtThenCopySWIGPy},
+    include_package_data=True,
+    zip_safe=False,
 )
