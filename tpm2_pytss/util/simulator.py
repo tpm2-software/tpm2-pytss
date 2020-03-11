@@ -15,12 +15,11 @@ class SimulatorFailedToStart(Exception):
 class Simulator:
 
     HOST = "127.0.0.1"
-    PORT = 2321
 
     def __init__(self, binary="tpm_server", host=None, port=None):
         self.binary = binary
         self.host = host if host is not None else self.HOST
-        self.port = port if port is not None else self.PORT
+        self.port = port if port is not None else random.randrange(49152, 65535)
         self.proc = None
 
     async def _create_connection_after(self, loop, delay):
@@ -96,7 +95,6 @@ class Simulator:
         # We are setting up a simulator in here, because we require the standard
         # ports. pytpm2tss does not yet support setting tctis and thus relies on
         # esys to do so.
-        self.port = random.randrange(49152, 65535)
         self.proc = subprocess.Popen(
             [self.binary, "-rm", "-port", str(self.port)],
             stdout=subprocess.PIPE,

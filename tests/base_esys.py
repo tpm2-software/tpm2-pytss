@@ -4,6 +4,7 @@ import contextlib
 
 from tpm2_pytss import tcti
 from tpm2_pytss.esys import ESYS
+from tpm2_pytss.fapi import FAPI, FAPIConfig
 from tpm2_pytss.util.simulator import SimulatorTest
 
 ENV_TCTI = "PYESYS_TCTI"
@@ -47,13 +48,10 @@ class BaseTestFAPI(SimulatorTest, unittest.TestCase):
     def setUp(self):
         super().setUp()
         self.fapi = FAPI()
-        self.tcti = tcti.TCTI.load(os.getenv(ENV_TCTI, default=ENV_TCTI_DEFAULT))
-        self.tcti_config = os.getenv(ENV_TCTI_CONFIG, default=ENV_TCTI_CONFIG_DEFAULT)
         # Create a context stack
         self.ctx_stack = contextlib.ExitStack().__enter__()
         # Enter the contexts
-        self.tcti_ctx = self.ctx_stack.enter_context(self.tcti(config=self.tcti_config))
-        self.fapi_ctx = self.ctx_stack.enter_context(self.fapi(self.tcti_ctx))
+        self.fapi_ctx = self.ctx_stack.enter_context(self.fapi)
         # Call Startup and clear the TPM
         self.fapi_ctx.Startup(self.fapi_ctx.TPM2_SU_CLEAR)
         # Set the timeout to blocking

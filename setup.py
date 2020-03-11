@@ -2,6 +2,7 @@ import os
 import ast
 import stat
 import glob
+import json
 import shlex
 import shutil
 import pathlib
@@ -28,6 +29,17 @@ with open(os.path.join(SELF_PATH, IMPORT_NAME, "version.py"), "r") as f:
             break
 
 README = pathlib.Path(SELF_PATH, "README.md").read_text()
+
+
+def build_config():
+    """
+    When building the project we create the file config.json. The settings in
+    config.json are pulled from environment variables at build time. This allows
+    the package maintainer within a distro to set values within config.json
+    equal to their counterparts used via ./configure when building TPM2-TSS.
+    """
+    config = {"sysconfdir": os.environ.get("SYSCONFDIR", "/etc")}
+    return config
 
 
 class PkgConfigNeededExtension(Extension):
@@ -131,6 +143,11 @@ class PkgConfigNeededExtension(Extension):
 class BuildExtThenCopySWIGPy(build_ext):
     def run(self):
         super().run()
+        # Build the config.json file, ensure it ends with a newline
+        config_json = pathlib.Path(SELF_PATH, IMPORT_NAME, "config.json")
+        config_json.write_text(
+            json.dumps(build_config(), sort_keys=True, indent=4) + "\n"
+        )
         # SWIG 4 Support
         for fixfile in ["esys_binding.py", "fapi_binding.py"]:
             binding_path = pathlib.Path(SELF_PATH, IMPORT_NAME, fixfile)

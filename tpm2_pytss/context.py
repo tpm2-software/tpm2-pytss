@@ -6,11 +6,62 @@ from typing import Optional, ByteString
 from .tcti import TCTIContext
 from .util.swig import Wrapper
 from .binding import AuthSessionContext, ESYSBinding, FlushTRContext, NVContext
-from .context import BaseContextMetaClass
 
 
 class InvalidArgumentError(Exception):
     pass  # pragma: no cov
+
+
+class BaseContextMetaClass(type):
+    def __new__(cls, name, bases, props):
+        # Create the class
+        cls = super(BaseContextMetaClass, cls).__new__(cls, name, bases, props)
+        # Go through all the functions in the module
+        module = props["MODULE"].__dict__
+        for key, func in module.items():
+            if key.startswith("_"):
+                continue
+            # Check if a custom wrapper has been defined for this function
+            custom_wrap = getattr(cls, "wrap_{}".format(key), None)
+            if custom_wrap is not None:
+                func = custom_wrap(func)
+            # For all Esys_ functions wrap the function and make the wrapped
+            # function a method in our new class
+            elif key.startswith(cls.PREFIX):
+                if key in cls.NO_PASS_CTXP:
+                    func = cls.wrap_no_pass_ctxp(func)
+                else:
+                    func = cls.wrap_pass_ctxp(func)
+            # Remove Esys_ from function names since they will be called from
+            # the ESYSContext and that's redundant
+            if key.startswith(cls.PREFIX):
+                key = key[len(cls.PREFIX) :]
+            setattr(cls, key, func)
+        return cls
+
+    @classmethod
+    def wrap_no_pass_ctxp(cls, func):
+        @wraps(func)
+        def wrapper(_self, *args, **kwds):
+            """
+            wrapper will be assigned to the ESYSContext class as a method. As
+            such the first argument, self, is an instance of ESYSContext.
+            """
+            return func(*args, **kwds)
+
+        return wrapper
+
+    @classmethod
+    def wrap_pass_ctxp(cls, func):
+        @wraps(func)
+        def wrapper(self, *args, **kwds):
+            """
+            wrapper will be assigned to the ESYSContext class as a method. As
+            such the first argument, self, is an instance of ESYSContext.
+            """
+            return func(self.ctxp, *args, **kwds)
+
+        return wrapper
 
 
 class ESYSContextMetaClass(BaseContextMetaClass):
