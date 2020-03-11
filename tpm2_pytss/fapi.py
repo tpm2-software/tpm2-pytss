@@ -3,6 +3,9 @@
 import os
 import json
 import pathlib
+import logging
+import tempfile
+import contextlib
 from functools import partial, wraps
 from typing import Optional, ByteString, NamedTuple
 
@@ -35,13 +38,16 @@ class FAPIConfig(NamedTuple):
     log_dir: str = DEFAULT_FAPI_CONFIG.get("log_dir", None)
     profile_name: str = DEFAULT_FAPI_CONFIG.get("profile_name", None)
     tcti: str = DEFAULT_FAPI_CONFIG.get("tcti", None)
-    system_pcrs: TPML_PCR_SELECTION_PTR = DEFAULT_FAPI_CONFIG.get("profile_dir", None)
+    system_pcrs: TPML_PCR_SELECTION_PTR = DEFAULT_FAPI_CONFIG.get("system_pcrs", None)
     ek_cert_file: str = DEFAULT_FAPI_CONFIG.get("ek_cert_file", None)
     ek_cert_less: bool = DEFAULT_FAPI_CONFIG.get("ek_cert_less", None)
     ek_fingerprint: TPMT_HA_PTR = DEFAULT_FAPI_CONFIG.get("ek_fingerprint", None)
 
     def export(self):
-        exported = super()._asdict()
+        exported = self._asdict()
+        remove = [key for key, value in exported.items() if value is None]
+        for key in remove:
+            del exported[key]
         print("FAPIConfig._asdict:", exported)
         return exported
 
@@ -53,6 +59,23 @@ class FAPIConfig(NamedTuple):
 
 class InvalidArgumentError(Exception):
     pass  # pragma: no cov
+
+
+@contextlib.contextmanager
+def temp_fapi_config(config):
+    if config is None:
+        yield
+        return
+    with tempfile.NamedTemporaryFile(mode="w") as fileobj:
+        old_fapi_config = os.environ.get(ENV_FAPI_CONFIG, None)
+        try:
+            json.dump(config.export(), fileobj)
+            fileobj.seek(0)
+            os.environ[ENV_FAPI_CONFIG] = fileobj.name
+            yield
+        finally:
+            if old_fapi_config:
+                os.environ[ENV_FAPI_CONFIG] = old_fapi_config
 
 
 class FAPIMetaClass(BaseContextMetaClass):
@@ -70,21 +93,20 @@ class FAPI(Wrapper, metaclass=FAPIMetaClass):
         self.config = config
         self.ctxpp = None
         self.ctxp = None
-
-    def init_config(self, config):
-        if config is None and ENV_FAPI_CONFIG in os.environ:
-            return
-        return
+        self.logger = logging.getLogger(__name__ + "." + self.__class__.__qualname__)
+        self.logger.debug("__init__(%r)", self.config)
 
     def __enter__(self) -> "FAPIContext":
         # Create an FAPI_CONTEXT **
         ctxpp = self.new_fapi_ctx_ptr()
+        # Create an ExitStack
+        self.ctx_stack = contextlib.ExitStack().__enter__()
         # Set the config
-
+        self.ctx_stack.enter_context(temp_fapi_config(self.config))
         # Create the FAPI_CONTEXT * and connect to the TPM
         self.Initialize(ctxpp, None)
         # Grab the allocated FAPI_CONTEXT *
-        ctxp = self.ctx_ptr_value(ctxpp)
+        ctxp = self.fapi_ctx_ptr_value(ctxpp)
         # Save references at the end to avoid possible memory leaks
         self.ctxpp = ctxpp
         self.ctxp = ctxp
@@ -92,6 +114,9 @@ class FAPI(Wrapper, metaclass=FAPIMetaClass):
         return self
 
     def __exit__(self, _exc_type, _exc_value, _traceback):
+        # Exit the ExitStack
+        self.ctx_stack.__exit__(None, None, None)
+        # Clean up the FAPI_CONTEXT *
         self.Finalize(self.ctxpp)
         self.delete_fapi_ctx_ptr(self.ctxpp)
         self.ctxpp = None

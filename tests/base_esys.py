@@ -1,4 +1,5 @@
 import os
+import tempfile
 import unittest
 import contextlib
 
@@ -47,15 +48,23 @@ class BaseTestFAPI(SimulatorTest, unittest.TestCase):
 
     def setUp(self):
         super().setUp()
-        self.fapi = FAPI()
         # Create a context stack
         self.ctx_stack = contextlib.ExitStack().__enter__()
+        # Create temporary directories
+        self.user_dir = self.ctx_stack.enter_context(tempfile.TemporaryDirectory())
+        self.log_dir = self.ctx_stack.enter_context(tempfile.TemporaryDirectory())
+        self.system_dir = self.ctx_stack.enter_context(tempfile.TemporaryDirectory())
+        # Create the FAPI object
+        self.fapi = FAPI(
+            FAPIConfig(
+                user_dir=self.user_dir,
+                system_dir=self.system_dir,
+                log_dir=self.log_dir,
+                tcti="mssim:port=%d" % (self.simulator.port,),
+            )
+        )
         # Enter the contexts
         self.fapi_ctx = self.ctx_stack.enter_context(self.fapi)
-        # Call Startup and clear the TPM
-        self.fapi_ctx.Startup(self.fapi_ctx.TPM2_SU_CLEAR)
-        # Set the timeout to blocking
-        self.fapi_ctx.SetTimeout(self.fapi_ctx.TSS2_TCTI_TIMEOUT_BLOCK)
 
     def tearDown(self):
         super().tearDown()
