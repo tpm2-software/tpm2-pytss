@@ -22,12 +22,13 @@ def retry_tcti_connect(tries=TCTI_CONNECT_TRIES, timeout=TCTI_CONNECT_TIMEOUT):
     for i in range(0, tries):
         try:
             yield i
-            return
         except TPM2Error as error:
             if not "tcti:IO failure" in str(error):
                 raise
             time.sleep(timeout)
             timeout *= 2
+            continue
+        return
 
 
 class BaseTestESYS(SimulatorTest, unittest.TestCase):
