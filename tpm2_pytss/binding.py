@@ -54,8 +54,9 @@ def wrap_all_matching(
         dst = [src]
     for key, value in inspect.getmembers(src):
         if cond is None or cond(key, value):
+            value = wrapper_func(key, value)
             for obj in dst:
-                setattr(obj, key, wrapper_func(key, value))
+                setattr(obj, key, value)
     return dst
 
 
@@ -201,6 +202,18 @@ for module in [esys_binding, fapi_binding]:
         dst=[module, sys.modules[__name__]],
         cond=lambda key, value: key in BYTEARRAY_STRUCTURES,
     )
+
+
+def to_bytearray(length, buf):
+    """
+    Takes any pointer to an array of bytes and that array's length and
+    returns a :py:func:`bytearray` containing those bytes.
+    """
+    buf = ByteArray.frompointer(buf)
+    array = bytearray(length)
+    for i in range(0, length):
+        array[i] = buf[i]
+    return array
 
 
 def var_name(search, str_value):
