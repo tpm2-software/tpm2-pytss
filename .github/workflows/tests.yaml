@@ -13,7 +13,13 @@ jobs:
         python-version: [3.7]
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
+    - name: Checkout submodules
+      shell: bash
+      run: |
+        auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+        git submodule sync --recursive
+        git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
       with:
@@ -23,8 +29,6 @@ jobs:
         mkdir -p ~/.local/bin
         python -m pip install --upgrade pip
         python -m pip install --upgrade twine dffml codecov black
-        git submodule init
-        git submodule update
         docker build -t tpm2software/tpm2-tss-python -f .ci/Dockerfile.tpm2-tss-python .
     - name: Test
       run: |
