@@ -10,6 +10,13 @@ class TestGetRandom(BaseTestFAPI):
     def test_random_length(self):
         length = random.randint(8, 32)
 
-        array = self.fapi_ctx.GetRandom(length)
+        self.fapi_ctx.Provision(None, None, None)
 
-        self.assertEqual(length, len(array))
+        array = UINT8_PTR_PTR()
+
+        with array:
+            self.fapi_ctx.GetRandom(length, array)
+
+            value = to_bytearray(length, array.value)
+
+            self.assertEqual(length, len(value))
