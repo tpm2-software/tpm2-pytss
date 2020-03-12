@@ -8,6 +8,7 @@ from typing import Any, Callable, Optional, List
 
 from . import exceptions
 from .util.swig import WrapperMetaClass, pointer_class, ContextManagedPointerClass
+from .util.calculate import calculate
 from .esys_binding import *
 from .fapi_binding import *
 
@@ -74,7 +75,38 @@ class SetPropertiesViaInit:
         else:
             self.SWIG_CLS.__init__(self)
         for key, value in kwargs.items():
-            setattr(self, key, value)
+            # For arrays which are not BYTEs within structures we check if
+            # attempting to set the value threw an exception complaining about
+            # the wrong data type. If it did and the value is a list or tuple,
+            # then set each index.
+            try:
+                if isinstance(value, dict) and not len(value):
+                    continue
+                setattr(self, key, value)
+            except TypeError as error:
+                if not isinstance(value, (tuple, list, set, bytes, bytearray)):
+                    error.args = (error.args[0], value)
+                    raise
+                str_error = str(error)
+                if not "argument 2 of type" in str_error:
+                    raise
+                str_error = str_error.split("argument 2 of type")
+                str_error = str_error[-1].replace("'", "")
+                str_error = str_error.strip()
+                # Split the type name from the size of the array
+                type_name, max_size = str_error.split(" ")
+                if not (max_size.startswith("[") and max_size[::-1].startswith("]")):
+                    raise
+                max_size = calculate(
+                    sys.modules[__name__], max_size.replace("[", "").replace("]", "")
+                )
+                # Grab the array verion of the type
+                array_cls = getattr(sys.modules[__name__], type_name + "_ARRAY")
+                # Create the array version and assign to each index
+                array = array_cls.frompointer(getattr(self, key))
+                # Copy each index
+                for i in range(0, min(len(value), max_size)):
+                    array[i] = value[i]
 
     @contextmanager
     def ptr(self):
@@ -112,14 +144,19 @@ class ByteArrayHelper:
         # kwargs which need to be copied from a list or bytearry into a C array
         convert_buffer = {}
         for size_prop, buffer_prop, buffer_max in self.BYTEARRAYS:
-            if size_prop in kwargs:
-                # Remove from kwargs so they don't get set
-                del kwargs[size_prop]
             if buffer_prop in kwargs:
+                # Skip if not a python type
+                if not isinstance(kwargs[buffer_prop], (tuple, list, bytes, bytearray)):
+                    continue
+                if buffer_prop == "pcrSelections":
+                    continue
                 # Add to buffers to be converted
                 convert_buffer[buffer_prop] = kwargs[buffer_prop]
                 # Remove from kwargs so they don't get set
                 del kwargs[buffer_prop]
+            if size_prop in kwargs:
+                # Remove from kwargs so they don't get set
+                del kwargs[size_prop]
         self.BYTEARRAY_CLS.__init__(self, **kwargs)
         for size_prop, buffer_prop, buffer_max in self.BYTEARRAYS:
             # Skip buffers we weren't given
