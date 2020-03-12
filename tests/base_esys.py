@@ -6,12 +6,28 @@ import contextlib
 from tpm2_pytss import tcti
 from tpm2_pytss.esys import ESYS
 from tpm2_pytss.fapi import FAPI, FAPIConfig
+from tpm2_pytss.exceptions import TPM2Error
 from tpm2_pytss.util.simulator import SimulatorTest
 
 ENV_TCTI = "PYESYS_TCTI"
 ENV_TCTI_DEFAULT = "mssim"
 ENV_TCTI_CONFIG = "PYESYS_TCTI_CONFIG"
 ENV_TCTI_CONFIG_DEFAULT = None
+
+TCTI_CONNECT_TRIES = 50
+TCTI_CONNECT_TIMEOUT = 0.5
+
+
+def retry_tcti_connect(tries=TCTI_CONNECT_TRIES, timeout=TCTI_CONNECT_TIMEOUT):
+    for i in range(0, tries):
+        try:
+            yield i
+            return
+        except TPM2Error as error:
+            if not "tcti:IO failure" in str(error):
+                raise
+            time.sleep(timeout)
+            timeout *= 2
 
 
 class BaseTestESYS(SimulatorTest, unittest.TestCase):
@@ -29,7 +45,10 @@ class BaseTestESYS(SimulatorTest, unittest.TestCase):
         # Create a context stack
         self.ctx_stack = contextlib.ExitStack().__enter__()
         # Enter the contexts
-        self.tcti_ctx = self.ctx_stack.enter_context(self.tcti(config=self.tcti_config))
+        for _i in retry_tcti_connect():
+            self.tcti_ctx = self.ctx_stack.enter_context(
+                self.tcti(config=self.tcti_config)
+            )
         self.esys_ctx = self.ctx_stack.enter_context(self.esys(self.tcti_ctx))
         # Call Startup and clear the TPM
         self.esys_ctx.Startup(self.esys_ctx.TPM2_SU_CLEAR)
@@ -64,7 +83,8 @@ class BaseTestFAPI(SimulatorTest, unittest.TestCase):
             )
         )
         # Enter the contexts
-        self.fapi_ctx = self.ctx_stack.enter_context(self.fapi)
+        for _i in retry_tcti_connect():
+            self.fapi_ctx = self.ctx_stack.enter_context(self.fapi)
 
     def tearDown(self):
         super().tearDown()
