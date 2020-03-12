@@ -31,30 +31,49 @@ DEFAULT_FAPI_CONFIG = json.loads(DEFAULT_FAPI_CONFIG_CONTENTS)
 ENV_FAPI_CONFIG = "TSS2_FAPICONF"
 
 
-class FAPIConfig(NamedTuple):
-    profile_dir: str = DEFAULT_FAPI_CONFIG.get("profile_dir", None)
-    user_dir: str = DEFAULT_FAPI_CONFIG.get("user_dir", None)
-    system_dir: str = DEFAULT_FAPI_CONFIG.get("system_dir", None)
-    log_dir: str = DEFAULT_FAPI_CONFIG.get("log_dir", None)
-    profile_name: str = DEFAULT_FAPI_CONFIG.get("profile_name", None)
-    tcti: str = DEFAULT_FAPI_CONFIG.get("tcti", None)
-    system_pcrs: TPML_PCR_SELECTION_PTR = DEFAULT_FAPI_CONFIG.get("system_pcrs", None)
-    ek_cert_file: str = DEFAULT_FAPI_CONFIG.get("ek_cert_file", None)
-    ek_cert_less: bool = DEFAULT_FAPI_CONFIG.get("ek_cert_less", None)
-    ek_fingerprint: TPMT_HA_PTR = DEFAULT_FAPI_CONFIG.get("ek_fingerprint", None)
+FAPIConfig = NamedTuple(
+    "FAPIConfig",
+    [
+        ("profile_dir", str),
+        ("user_dir", str),
+        ("system_dir", str),
+        ("log_dir", str),
+        ("profile_name", str),
+        ("tcti", str),
+        ("system_pcrs", TPML_PCR_SELECTION_PTR),
+        ("ek_cert_file", str),
+        ("ek_cert_less", bool),
+        ("ek_fingerprint", TPMT_HA_PTR),
+    ],
+)
 
-    def export(self):
-        exported = self._asdict()
-        remove = [key for key, value in exported.items() if value is None]
-        for key in remove:
-            del exported[key]
-        print("FAPIConfig._asdict:", exported)
-        return exported
 
-    @classmethod
-    def _fromdict(cls, **kwargs):
-        print("FAPIConfig._fromdict:", kwargs)
-        return cls(**kwargs)
+def export(self):
+    exported = self._asdict()
+    remove = [key for key, value in exported.items() if value is None]
+    for key in remove:
+        del exported[key]
+    return exported
+
+
+@classmethod
+def default(cls, **kwargs):
+    return cls(
+        profile_dir=DEFAULT_FAPI_CONFIG.get("profile_dir", None),
+        user_dir=DEFAULT_FAPI_CONFIG.get("user_dir", None),
+        system_dir=DEFAULT_FAPI_CONFIG.get("system_dir", None),
+        log_dir=DEFAULT_FAPI_CONFIG.get("log_dir", None),
+        profile_name=DEFAULT_FAPI_CONFIG.get("profile_name", None),
+        tcti=DEFAULT_FAPI_CONFIG.get("tcti", None),
+        system_pcrs=DEFAULT_FAPI_CONFIG.get("system_pcrs", None),
+        ek_cert_file=DEFAULT_FAPI_CONFIG.get("ek_cert_file", None),
+        ek_cert_less=DEFAULT_FAPI_CONFIG.get("ek_cert_less", None),
+        ek_fingerprint=DEFAULT_FAPI_CONFIG.get("ek_fingerprint", None),
+    )
+
+
+FAPIConfig.export = export
+FAPIConfig.default = default
 
 
 class InvalidArgumentError(Exception):
