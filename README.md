@@ -15,16 +15,13 @@ Supported versions of Python are
 - 3.7
 - 3.8
 
-## Specification
+## Features
 
-This package primarily exposes the TPM 2.0 Enhanced System API. The
-specification for the ESAPI can be found here:
-
-https://trustedcomputinggroup.org/resource/tcg-tss-2-0-enhanced-system-api-esapi-specification/
+We support the FAPI, ESAPI, and marshalling library.
 
 ## Dependencies
 
-This has been tested against TPM2 TSS 2.3.1 and SWIG 3.
+This has been tested against TPM2 TSS 2.4.0, SWIG 3 and SWIG 4.
 
 ### tpm2-tss
 
@@ -84,6 +81,8 @@ Or install from the master branch via GitHub
 ```console
 $ python3 -m pip install git+https://github.com/tpm2-software/tpm2-pytss
 ```
+
+## Examples
 
 See [`tests/`](tests/) folder for example usage.
 
