@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2019 Intel Corporation
-from functools import partial, wraps
+from functools import partial
 from typing import Optional, ByteString
 
 from .tcti import TCTIContext
