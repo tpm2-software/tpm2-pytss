@@ -32,7 +32,6 @@ jobs:
         docker build -t tpm2software/tpm2-tss-python -f .ci/Dockerfile.tpm2-tss-python .
     - name: Test
       run: |
-        export TPM2_PYTSS_LOG_LEVEL=debug
         export PATH="${HOME}/.local/bin:${PATH}"
         export TWINE_USERNAME=__token__
         export TWINE_PASSWORD=${{ secrets.PYPI_TPM2_PYTSS }}
