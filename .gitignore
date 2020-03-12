@@ -27,6 +27,7 @@ __pycache__/
 *.pyc
 *.egg-info/
 **/*_binding.py
+!tests/*_binding.py
 NVChip
 build/
 dist/
