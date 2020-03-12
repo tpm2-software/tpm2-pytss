@@ -56,7 +56,7 @@ class BaseTestFAPI(SimulatorTest, unittest.TestCase):
         self.system_dir = self.ctx_stack.enter_context(tempfile.TemporaryDirectory())
         # Create the FAPI object
         self.fapi = FAPI(
-            FAPIConfig(
+            FAPIConfig.default()._replace(
                 user_dir=self.user_dir,
                 system_dir=self.system_dir,
                 log_dir=self.log_dir,
