@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
 
-# TPM2 2.4.0-rc2
-export TPM2_TSS_SHA=8823180397fed4f7052d4c44e4724935396e3f41
+# TPM2 2.4.0
+export TPM2_TSS_SHA=70da4f245a575948712a7c2cf52de84213dc9db8
 
 function get_deps() {
 
