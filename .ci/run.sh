@@ -40,7 +40,8 @@ function run_test() {
     git status
     git reset --hard HEAD
     git clean -fdx
-    "${PYTHON}" -m dffml service dev release .
+    # Manual releases until submodule issue is fixed
+    # "${PYTHON}" -m dffml service dev release .
   fi
 }
 
