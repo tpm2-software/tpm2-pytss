@@ -204,6 +204,7 @@ setup(
         "Programming Language :: Python :: Implementation :: CPython",
     ],
     install_requires=INSTALL_REQUIRES,
+    tests_require=["cryptography>=2.8"],
     extras_require={
         "dev": [
             "coverage",
