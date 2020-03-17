@@ -199,7 +199,7 @@ setup(
             "sphinx_rtd_theme",
         ],
     },
-    packages=find_packages(),
+    packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     ext_modules=[
         PkgConfigNeededExtension(
             "{}._esys_binding".format(IMPORT_NAME),
