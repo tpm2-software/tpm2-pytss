@@ -85,7 +85,7 @@ class SetPropertiesViaInit:
                 setattr(self, key, value)
             except TypeError as error:
                 if not isinstance(value, (tuple, list, set, bytes, bytearray)):
-                    error.args = (error.args[0], value)
+                    error.args = (error.args[0] + " but got %r" % (value),)
                     raise
                 str_error = str(error)
                 if not "argument 2 of type" in str_error:
