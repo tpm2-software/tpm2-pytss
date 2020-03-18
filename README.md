@@ -76,10 +76,13 @@ Install from PyPi.
 $ python3 -m pip install tpm2-pytss
 ```
 
-Or install from the master branch via GitHub
+Or install from the Git repo
 
 ```console
-$ python3 -m pip install git+https://github.com/tpm2-software/tpm2-pytss
+$ git clone --depth 1 --recurse-submodules -b ${TPM2_PYTSS_VERSION} \
+  https://github.com/tpm2-software/tpm2-pytss
+$ cd tpm2-pytss
+$ python3 -m pip install -e .
 ```
 
 ## Examples
