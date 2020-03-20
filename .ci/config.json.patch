@@ -1,0 +1,9 @@
+diff --git a/tpm2_pytss/config.json b/tpm2_pytss/config.json
+index 7e013d4..22b2785 100644
+--- a/tpm2_pytss/config.json
++++ b/tpm2_pytss/config.json
+@@ -1,3 +1,3 @@
+ {
+-    "sysconfdir": "/etc"
++    "sysconfdir": "/usr/local/etc"
+ }
