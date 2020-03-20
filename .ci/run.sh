@@ -11,6 +11,9 @@ PYTHON=${PYTHON:-"python3.7"}
 TEMP_DIRS=()
 
 function run_test() {
+  # Patch config.json to work with the CI's SYSCONFDIR
+  patch -p1 < .ci/config.json.patch
+
   docker run --rm \
     -u $(id -u):$(id -g) \
     -v "${PWD}:/workspace/tpm2-pytss" \
