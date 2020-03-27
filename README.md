@@ -72,6 +72,10 @@ $ sudo ldconfig
 
 Install from PyPi.
 
+**WARNING** Installing from PyPi will **NOT** work due to
+[Python Issue 37247](https://bugs.python.org/issue37247). You **MUST** install
+from the Git repo.
+
 ```console
 $ python3 -m pip install tpm2-pytss
 ```
