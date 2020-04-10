@@ -65,19 +65,19 @@ function run_style() {
 }
 
 function run_docs() {
-  if [ "x${GITHUB_ACTIONS}" == "xtrue" ] && [ "x${GITHUB_REF}" != "xrefs/heads/master" ]; then
-    return
-  fi
-
-  ssh_key_dir="$(mktemp -d)"
-  TEMP_DIRS+=("${ssh_key_dir}")
-  mkdir -p ~/.ssh
-  chmod 700 ~/.ssh
-  "${PYTHON}" -c "import pathlib, base64, os; keyfile = pathlib.Path(\"${ssh_key_dir}/github_tpm2_pytss\").absolute(); keyfile.write_bytes(b''); keyfile.chmod(0o600); keyfile.write_bytes(base64.b32decode(os.environ['GITHUB_PAGES_KEY']))"
-  ssh-keygen -y -f "${ssh_key_dir}/github_tpm2_pytss" > "${ssh_key_dir}/github_tpm2_pytss.pub"
-  export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o IdentityFile=${ssh_key_dir}/github_tpm2_pytss"
+  export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 
   cd "${SRC_ROOT}"
+
+  # Patch config.json to work with the CI's SYSCONFDIR
+  patch -p1 < .ci/config.json.patch
+
+  docker run --rm \
+    -u $(id -u):$(id -g) \
+    -v "${PWD}:/workspace/tpm2-pytss" \
+    --env-file .ci/docker.env \
+    tpm2software/tpm2-tss-python \
+    /bin/bash -c 'virtualenv .venv && . .venv/bin/activate && . .ci/docker-prelude.sh && python3 -m pip install -e .'
 
   # Make master docs
   master_docs="$(mktemp -d)"
@@ -88,7 +88,7 @@ function run_docs() {
     -v "${PWD}:/workspace/tpm2-pytss" \
     --env-file .ci/docker.env \
     tpm2software/tpm2-tss-python \
-    /bin/bash -c ./scripts/docs.sh
+    /bin/bash -c '. .venv/bin/activate && ./scripts/docs.sh'
   mv pages "${master_docs}/html"
 
   # Make last release docs
@@ -99,15 +99,24 @@ function run_docs() {
   git checkout $(git describe --abbrev=0 --tags --match '*.*.*')
   git clean -fdx
   git reset --hard HEAD
+
   docker run --rm \
     -u $(id -u):$(id -g) \
     -v "${PWD}:/workspace/tpm2-pytss" \
     --env-file .ci/docker.env \
     tpm2software/tpm2-tss-python \
-    /bin/bash -c ./scripts/docs.sh
+    /bin/bash -c 'virtualenv .venv && . .venv/bin/activate && . .ci/docker-prelude.sh && python3 -m pip install -e .'
+
+  docker run --rm \
+    -u $(id -u):$(id -g) \
+    -v "${PWD}:/workspace/tpm2-pytss" \
+    --env-file .ci/docker.env \
+    tpm2software/tpm2-tss-python \
+    /bin/bash -c '. .venv/bin/activate && ./scripts/docs.sh'
+
   mv pages "${release_docs}/html"
 
-  git clone git@github.com:tpm2-software/tpm2-pytss -b gh-pages \
+  git clone https://github.com/tpm2-software/tpm2-pytss -b gh-pages \
     "${release_docs}/old-gh-pages-branch"
 
   mv "${release_docs}/old-gh-pages-branch/.git" "${release_docs}/html/"
@@ -120,7 +129,21 @@ function run_docs() {
 
   git add -A
   git commit -sam "docs: $(date)"
-  git push
+
+  if [ "x${GITHUB_ACTIONS}" == "xtrue" ] && [ "x${GITHUB_REF}" != "xrefs/heads/master" ]; then
+    return
+  fi
+
+  ssh_key_dir="$(mktemp -d)"
+  TEMP_DIRS+=("${ssh_key_dir}")
+  mkdir -p ~/.ssh
+  chmod 700 ~/.ssh
+  "${PYTHON}" -c "import pathlib, base64, os; keyfile = pathlib.Path(\"${ssh_key_dir}/github_tpm2_pytss\").absolute(); keyfile.write_bytes(b''); keyfile.chmod(0o600); keyfile.write_bytes(base64.b32decode(os.environ['GITHUB_PAGES_KEY']))"
+  ssh-keygen -y -f "${ssh_key_dir}/github_tpm2_pytss" > "${ssh_key_dir}/github_tpm2_pytss.pub"
+  export GIT_SSH_COMMAND="${GIT_SSH_COMMAND} -o IdentityFile=${ssh_key_dir}/github_tpm2_pytss"
+
+  git remote set-url origin git@github.com:tpm2-software/tpm2-pytss
+  git push -f
 
   cd -
 
