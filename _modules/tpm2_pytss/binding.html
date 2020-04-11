@@ -1,0 +1,634 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>tpm2_pytss.binding &#8212; tpm2-pytss 0.1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for tpm2_pytss.binding</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">abc</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">pkgutil</span>
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">contextmanager</span><span class="p">,</span> <span class="n">_GeneratorContextManager</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">exceptions</span>
+<span class="kn">from</span> <span class="nn">.util.swig</span> <span class="kn">import</span> <span class="n">WrapperMetaClass</span><span class="p">,</span> <span class="n">pointer_class</span><span class="p">,</span> <span class="n">ContextManagedPointerClass</span>
+<span class="kn">from</span> <span class="nn">.util.calculate</span> <span class="kn">import</span> <span class="n">calculate</span>
+<span class="kn">from</span> <span class="nn">.esys_binding</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">.fapi_binding</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="c1"># MODULE_NAME = &quot;tpm2_pytss&quot;</span>
+<span class="n">MODULE_NAME</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="vm">__name__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">esys_binding</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">MODULE_NAME</span> <span class="o">+</span> <span class="s2">&quot;.esys_binding&quot;</span><span class="p">]</span>
+<span class="n">fapi_binding</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">MODULE_NAME</span> <span class="o">+</span> <span class="s2">&quot;.fapi_binding&quot;</span><span class="p">]</span>
+
+<span class="c1"># TODO signature with return type of TPM_RC</span>
+<span class="k">for</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">module</span> <span class="ow">in</span> <span class="p">[(</span><span class="s2">&quot;Esys_&quot;</span><span class="p">,</span> <span class="n">esys_binding</span><span class="p">),</span> <span class="p">(</span><span class="s2">&quot;Fapi_&quot;</span><span class="p">,</span> <span class="n">fapi_binding</span><span class="p">)]:</span>
+    <span class="n">exceptions</span><span class="o">.</span><span class="n">wrap_funcs</span><span class="p">(</span>
+        <span class="n">module</span><span class="p">,</span>
+        <span class="n">dst</span><span class="o">=</span><span class="p">[</span><span class="n">module</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="vm">__name__</span><span class="p">]],</span>
+        <span class="n">cond</span><span class="o">=</span><span class="k">lambda</span> <span class="n">key</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="ow">or</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;Tss2_&quot;</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="n">exceptions</span><span class="o">.</span><span class="n">wrap_funcs</span><span class="p">(</span>
+        <span class="n">module</span><span class="p">,</span>
+        <span class="n">dst</span><span class="o">=</span><span class="p">[</span><span class="n">module</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="vm">__name__</span><span class="p">]],</span>
+        <span class="n">cond</span><span class="o">=</span><span class="k">lambda</span> <span class="n">key</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;Tss2_MU_&quot;</span><span class="p">),</span>
+        <span class="n">wrapperfunc</span><span class="o">=</span><span class="n">exceptions</span><span class="o">.</span><span class="n">raise_tpm2_mu_error</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">NoPointerClass</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Happens when there is no pointer for a SWIG value, shouldn&#39;t ever happen.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">pass</span>  <span class="c1"># pragma: no cov</span>
+
+
+<span class="k">def</span> <span class="nf">wrap_all_matching</span><span class="p">(</span>
+    <span class="n">wrapper_func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">Callable</span><span class="p">],</span>
+    <span class="n">src</span><span class="p">,</span>
+    <span class="n">dst</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">cond</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Callable</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Wrap the functions within the given module with a decorator so that if they</span>
+<span class="sd">    return integer values that are non-zero an error will be thrown.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">dst</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">dst</span> <span class="o">=</span> <span class="p">[</span><span class="n">src</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span><span class="n">src</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">cond</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">cond</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">wrapper_func</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">dst</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dst</span>
+
+
+<span class="k">class</span> <span class="nc">SetPropertiesViaInit</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    SWIG creates python classes but doesn&#39;t let us set their properties when</span>
+<span class="sd">    passing arguments to their ``__init__`` method. This class is meant to</span>
+<span class="sd">    subclass from those swig classes to allow for that functionality.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SWIG_CLS</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SWIG_CLS</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">SWIG_CLS</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="c1"># For arrays which are not BYTEs within structures we check if</span>
+            <span class="c1"># attempting to set the value threw an exception complaining about</span>
+            <span class="c1"># the wrong data type. If it did and the value is a list or tuple,</span>
+            <span class="c1"># then set each index.</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+                    <span class="k">continue</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">set</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">)):</span>
+                    <span class="n">error</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">error</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; but got </span><span class="si">%r</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">),)</span>
+                    <span class="k">raise</span>
+                <span class="n">str_error</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="s2">&quot;argument 2 of type&quot;</span> <span class="ow">in</span> <span class="n">str_error</span><span class="p">:</span>
+                    <span class="k">raise</span>
+                <span class="n">str_error</span> <span class="o">=</span> <span class="n">str_error</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;argument 2 of type&quot;</span><span class="p">)</span>
+                <span class="n">str_error</span> <span class="o">=</span> <span class="n">str_error</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="n">str_error</span> <span class="o">=</span> <span class="n">str_error</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="c1"># Split the type name from the size of the array</span>
+                <span class="n">type_name</span><span class="p">,</span> <span class="n">max_size</span> <span class="o">=</span> <span class="n">str_error</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">max_size</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">max_size</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;]&quot;</span><span class="p">)):</span>
+                    <span class="k">raise</span>
+                <span class="n">max_size</span> <span class="o">=</span> <span class="n">calculate</span><span class="p">(</span>
+                    <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="vm">__name__</span><span class="p">],</span> <span class="n">max_size</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;]&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="c1"># Grab the array verion of the type</span>
+                <span class="n">array_cls</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="vm">__name__</span><span class="p">],</span> <span class="n">type_name</span> <span class="o">+</span> <span class="s2">&quot;_ARRAY&quot;</span><span class="p">)</span>
+                <span class="c1"># Create the array version and assign to each index</span>
+                <span class="n">array</span> <span class="o">=</span> <span class="n">array_cls</span><span class="o">.</span><span class="n">frompointer</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
+                <span class="c1"># Copy each index</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">max_size</span><span class="p">)):</span>
+                    <span class="n">array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="nd">@contextmanager</span>
+    <span class="k">def</span> <span class="nf">ptr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ptr_cls</span> <span class="o">=</span> <span class="n">ESYSBinding</span><span class="o">.</span><span class="n">MODULE</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">_PTR&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NAME</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ptr_cls</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">NoPointerClass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NAME</span><span class="p">)</span>
+        <span class="c1"># TODO If the value of the pointer changes then we need to set the</span>
+        <span class="c1"># properites of this object to be whatever they were changed to in the</span>
+        <span class="c1"># pointers object (Since we can&#39;t accually point to this value)</span>
+        <span class="k">with</span> <span class="n">ptr_cls</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="k">as</span> <span class="n">ptr</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">ptr</span>
+
+
+<span class="k">def</span> <span class="nf">set_properties_via_init</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">cls</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    SWIG creates python classes but doesn&#39;t let us set their properties when</span>
+<span class="sd">    passing arguments to their ``__init__`` method. Grab the class and use</span>
+<span class="sd">    it and SetPropertiesViaInit to create a new class which will allow for</span>
+<span class="sd">    that functionality.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">SetPropertiesViaInit</span><span class="p">,</span> <span class="bp">cls</span><span class="p">),</span> <span class="p">{</span><span class="s2">&quot;NAME&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span> <span class="s2">&quot;SWIG_CLS&quot;</span><span class="p">:</span> <span class="bp">cls</span><span class="p">})</span>
+
+
+<span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="p">[</span><span class="n">esys_binding</span><span class="p">,</span> <span class="n">fapi_binding</span><span class="p">]:</span>
+    <span class="n">wrap_all_matching</span><span class="p">(</span>
+        <span class="n">set_properties_via_init</span><span class="p">,</span>
+        <span class="n">module</span><span class="p">,</span>
+        <span class="n">dst</span><span class="o">=</span><span class="p">[</span><span class="n">module</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="vm">__name__</span><span class="p">]],</span>
+        <span class="n">cond</span><span class="o">=</span><span class="k">lambda</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">and</span> <span class="n">key</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">==</span> <span class="n">key</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">ByteArrayHelper</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># kwargs which need to be copied from a list or bytearry into a C array</span>
+        <span class="n">convert_buffer</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">size_prop</span><span class="p">,</span> <span class="n">buffer_prop</span><span class="p">,</span> <span class="n">buffer_max</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">BYTEARRAYS</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">buffer_prop</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="c1"># Skip if not a python type</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">buffer_prop</span><span class="p">],</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">)):</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">buffer_prop</span> <span class="o">==</span> <span class="s2">&quot;pcrSelections&quot;</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="c1"># Add to buffers to be converted</span>
+                <span class="n">convert_buffer</span><span class="p">[</span><span class="n">buffer_prop</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">buffer_prop</span><span class="p">]</span>
+                <span class="c1"># Remove from kwargs so they don&#39;t get set</span>
+                <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">buffer_prop</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">size_prop</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="c1"># Remove from kwargs so they don&#39;t get set</span>
+                <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">size_prop</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">BYTEARRAY_CLS</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">size_prop</span><span class="p">,</span> <span class="n">buffer_prop</span><span class="p">,</span> <span class="n">buffer_max</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">BYTEARRAYS</span><span class="p">:</span>
+            <span class="c1"># Skip buffers we weren&#39;t given</span>
+            <span class="k">if</span> <span class="n">buffer_prop</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">convert_buffer</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">buffer_data</span> <span class="o">=</span> <span class="n">convert_buffer</span><span class="p">[</span><span class="n">buffer_prop</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer_data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">buffer_max</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> of size </span><span class="si">{}</span><span class="s2"> is larger than maximum of </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">buffer_prop</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer_data</span><span class="p">),</span> <span class="n">buffer_max</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="c1"># Set size</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size_prop</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer_data</span><span class="p">))</span>
+            <span class="c1"># Set elements of buffer</span>
+            <span class="n">buffer_ptr</span> <span class="o">=</span> <span class="n">ByteArray</span><span class="o">.</span><span class="n">frompointer</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer_prop</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">buffer_data</span><span class="p">):</span>
+                <span class="n">buffer_ptr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+
+<span class="n">BYTEARRAY_STRUCTURES</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;TPM2B_DIGEST&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;size&quot;</span><span class="p">,</span> <span class="s2">&quot;buffer&quot;</span><span class="p">,</span> <span class="n">sizeof_TPMU_HA</span><span class="p">)],</span>
+    <span class="s2">&quot;TPM2B_DATA&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;size&quot;</span><span class="p">,</span> <span class="s2">&quot;buffer&quot;</span><span class="p">,</span> <span class="n">sizeof_TPMU_HA</span><span class="p">)],</span>
+    <span class="s2">&quot;TPM2B_EVENT&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;size&quot;</span><span class="p">,</span> <span class="s2">&quot;buffer&quot;</span><span class="p">,</span> <span class="mi">1024</span><span class="p">)],</span>
+    <span class="s2">&quot;TPM2B_MAX_BUFFER&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;size&quot;</span><span class="p">,</span> <span class="s2">&quot;buffer&quot;</span><span class="p">,</span> <span class="n">TPM2_MAX_DIGEST_BUFFER</span><span class="p">)],</span>
+    <span class="s2">&quot;TPM2B_MAX_NV_BUFFER&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;size&quot;</span><span class="p">,</span> <span class="s2">&quot;buffer&quot;</span><span class="p">,</span> <span class="n">TPM2_MAX_NV_BUFFER_SIZE</span><span class="p">)],</span>
+    <span class="s2">&quot;TPM2B_IV&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;size&quot;</span><span class="p">,</span> <span class="s2">&quot;buffer&quot;</span><span class="p">,</span> <span class="n">TPM2_MAX_SYM_BLOCK_SIZE</span><span class="p">)],</span>
+    <span class="s2">&quot;TPM2B_NAME&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;size&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">sizeof_TPMU_NAME</span><span class="p">)],</span>
+    <span class="s2">&quot;TPMS_PCR_SELECT&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;sizeofSelect&quot;</span><span class="p">,</span> <span class="s2">&quot;pcrSelect&quot;</span><span class="p">,</span> <span class="n">TPM2_PCR_SELECT_MAX</span><span class="p">)],</span>
+    <span class="s2">&quot;TPMS_PCR_SELECTION&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;sizeofSelect&quot;</span><span class="p">,</span> <span class="s2">&quot;pcrSelect&quot;</span><span class="p">,</span> <span class="n">TPM2_PCR_SELECT_MAX</span><span class="p">)],</span>
+    <span class="s2">&quot;TPMS_TAGGED_PCR_SELECT&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;sizeofSelect&quot;</span><span class="p">,</span> <span class="s2">&quot;pcrSelect&quot;</span><span class="p">,</span> <span class="n">TPM2_PCR_SELECT_MAX</span><span class="p">)],</span>
+    <span class="s2">&quot;TPML_CC&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;commandCodes&quot;</span><span class="p">,</span> <span class="n">TPM2_MAX_CAP_CC</span><span class="p">)],</span>
+    <span class="s2">&quot;TPML_CCA&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;commandAttributes&quot;</span><span class="p">,</span> <span class="n">TPM2_MAX_CAP_CC</span><span class="p">)],</span>
+    <span class="s2">&quot;TPML_ALG&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;algorithms&quot;</span><span class="p">,</span> <span class="n">TPM2_MAX_ALG_LIST_SIZE</span><span class="p">)],</span>
+    <span class="s2">&quot;TPML_HANDLE&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;handle&quot;</span><span class="p">,</span> <span class="n">TPM2_MAX_CAP_HANDLES</span><span class="p">)],</span>
+    <span class="s2">&quot;TPML_DIGEST&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;digests&quot;</span><span class="p">,</span> <span class="mi">8</span><span class="p">)],</span>
+    <span class="s2">&quot;TPML_DIGEST_VALUES&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;digests&quot;</span><span class="p">,</span> <span class="n">TPM2_NUM_PCR_BANKS</span><span class="p">)],</span>
+    <span class="s2">&quot;TPML_PCR_SELECTION&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;pcrSelections&quot;</span><span class="p">,</span> <span class="n">TPM2_NUM_PCR_BANKS</span><span class="p">)],</span>
+    <span class="s2">&quot;TPML_ALG_PROPERTY&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;algProperties&quot;</span><span class="p">,</span> <span class="n">TPM2_MAX_CAP_ALGS</span><span class="p">)],</span>
+    <span class="s2">&quot;TPML_TAGGED_TPM_PROPERTY&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;tpmProperty&quot;</span><span class="p">,</span> <span class="n">TPM2_MAX_TPM_PROPERTIES</span><span class="p">)],</span>
+    <span class="s2">&quot;TPML_TAGGED_PCR_PROPERTY&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;pcrProperty&quot;</span><span class="p">,</span> <span class="n">TPM2_MAX_PCR_PROPERTIES</span><span class="p">)],</span>
+    <span class="s2">&quot;TPML_ECC_CURVE&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;eccCurves&quot;</span><span class="p">,</span> <span class="n">TPM2_MAX_ECC_CURVES</span><span class="p">)],</span>
+    <span class="s2">&quot;TPML_INTEL_PTT_PROPERTY&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;property&quot;</span><span class="p">,</span> <span class="n">TPM2_MAX_PTT_PROPERTIES</span><span class="p">)],</span>
+    <span class="s2">&quot;TPM2B_ATTEST&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;size&quot;</span><span class="p">,</span> <span class="s2">&quot;attestationData&quot;</span><span class="p">,</span> <span class="n">sizeof_TPMS_ATTEST</span><span class="p">)],</span>
+    <span class="s2">&quot;TPM2B_SYM_KEY&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;size&quot;</span><span class="p">,</span> <span class="s2">&quot;buffer&quot;</span><span class="p">,</span> <span class="n">TPM2_MAX_SYM_KEY_BYTES</span><span class="p">)],</span>
+    <span class="s2">&quot;TPM2B_SENSITIVE_DATA&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;size&quot;</span><span class="p">,</span> <span class="s2">&quot;buffer&quot;</span><span class="p">,</span> <span class="n">TPM2_MAX_SYM_DATA</span><span class="p">)],</span>
+    <span class="s2">&quot;TPM2B_PUBLIC_KEY_RSA&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;size&quot;</span><span class="p">,</span> <span class="s2">&quot;buffer&quot;</span><span class="p">,</span> <span class="n">TPM2_MAX_RSA_KEY_BYTES</span><span class="p">)],</span>
+    <span class="s2">&quot;TPM2B_PRIVATE_KEY_RSA&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;size&quot;</span><span class="p">,</span> <span class="s2">&quot;buffer&quot;</span><span class="p">,</span> <span class="n">TPM2_MAX_RSA_KEY_BYTES</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)],</span>
+    <span class="s2">&quot;TPM2B_ECC_PARAMETER&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;size&quot;</span><span class="p">,</span> <span class="s2">&quot;buffer&quot;</span><span class="p">,</span> <span class="n">TPM2_MAX_ECC_KEY_BYTES</span><span class="p">)],</span>
+    <span class="s2">&quot;TPM2B_ENCRYPTED_SECRET&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;size&quot;</span><span class="p">,</span> <span class="s2">&quot;secret&quot;</span><span class="p">,</span> <span class="n">sizeof_TPMU_ENCRYPTED_SECRET</span><span class="p">)],</span>
+    <span class="s2">&quot;TPM2B_TEMPLATE&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;size&quot;</span><span class="p">,</span> <span class="s2">&quot;buffer&quot;</span><span class="p">,</span> <span class="n">sizeof_TPMT_PUBLIC</span><span class="p">)],</span>
+    <span class="s2">&quot;TPM2B_PRIVATE_VENDOR_SPECIFIC&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s2">&quot;size&quot;</span><span class="p">,</span> <span class="s2">&quot;buffer&quot;</span><span class="p">,</span> <span class="n">TPM2_PRIVATE_VENDOR_SPECIFIC_BYTES</span><span class="p">)</span>
+    <span class="p">],</span>
+    <span class="s2">&quot;TPM2B_PRIVATE&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;size&quot;</span><span class="p">,</span> <span class="s2">&quot;buffer&quot;</span><span class="p">,</span> <span class="n">sizeof__PRIVATE</span><span class="p">)],</span>
+    <span class="s2">&quot;TPM2B_ID_OBJECT&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;size&quot;</span><span class="p">,</span> <span class="s2">&quot;credential&quot;</span><span class="p">,</span> <span class="n">sizeof_TPMS_ID_OBJECT</span><span class="p">)],</span>
+    <span class="s2">&quot;TPM2B_CONTEXT_SENSITIVE&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;size&quot;</span><span class="p">,</span> <span class="s2">&quot;buffer&quot;</span><span class="p">,</span> <span class="n">TPM2_MAX_CONTEXT_SIZE</span><span class="p">)],</span>
+    <span class="s2">&quot;TPM2B_CONTEXT_DATA&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;size&quot;</span><span class="p">,</span> <span class="s2">&quot;buffer&quot;</span><span class="p">,</span> <span class="n">sizeof_TPMS_CONTEXT_DATA</span><span class="p">)],</span>
+    <span class="s2">&quot;TPML_AC_CAPABILITIES&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="s2">&quot;acCapabilities&quot;</span><span class="p">,</span> <span class="n">TPM2_MAX_AC_CAPABILITIES</span><span class="p">)],</span>
+<span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">bytearray_helper</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">cls</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    For structures which have internal buffers named &quot;buffer&quot;, this function</span>
+<span class="sd">    modifes those classes so that we can set the buffer from an array and it</span>
+<span class="sd">    gets returned as a bytearray.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">type</span><span class="p">(</span>
+        <span class="n">name</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">ByteArrayHelper</span><span class="p">,</span> <span class="bp">cls</span><span class="p">),</span>
+        <span class="p">{</span><span class="s2">&quot;BYTEARRAY_CLS&quot;</span><span class="p">:</span> <span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;BYTEARRAYS&quot;</span><span class="p">:</span> <span class="n">BYTEARRAY_STRUCTURES</span><span class="p">[</span><span class="n">name</span><span class="p">]},</span>
+    <span class="p">)</span>
+
+
+<span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="p">[</span><span class="n">esys_binding</span><span class="p">,</span> <span class="n">fapi_binding</span><span class="p">]:</span>
+    <span class="n">wrap_all_matching</span><span class="p">(</span>
+        <span class="n">bytearray_helper</span><span class="p">,</span>
+        <span class="n">module</span><span class="p">,</span>
+        <span class="n">dst</span><span class="o">=</span><span class="p">[</span><span class="n">module</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="vm">__name__</span><span class="p">]],</span>
+        <span class="n">cond</span><span class="o">=</span><span class="k">lambda</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">BYTEARRAY_STRUCTURES</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">to_bytearray</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">buf</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes any pointer to an array of bytes and that array&#39;s length and</span>
+<span class="sd">    returns a :py:func:`bytearray` containing those bytes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">buf</span> <span class="o">=</span> <span class="n">ByteArray</span><span class="o">.</span><span class="n">frompointer</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+    <span class="n">array</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+        <span class="n">array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">buf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">array</span>
+
+
+<span class="k">def</span> <span class="nf">var_name</span><span class="p">(</span><span class="n">search</span><span class="p">,</span> <span class="n">str_value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Try to find the variable name for the variable ``search`` within the caller</span>
+<span class="sd">    stack.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">stack</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">stack</span><span class="p">():</span>
+        <span class="c1"># Don&#39;t care about variable names within tpm2_pytss or contextlib</span>
+        <span class="c1"># (ExitStack)</span>
+        <span class="k">if</span> <span class="n">stack</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_filename</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">MODULE_NAME</span><span class="p">]</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span>
+        <span class="p">)</span> <span class="ow">or</span> <span class="n">stack</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_filename</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="s2">&quot;contextlib&quot;</span><span class="p">]</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="k">for</span> <span class="n">variable_name</span><span class="p">,</span> <span class="n">variable</span> <span class="ow">in</span> <span class="n">stack</span><span class="o">.</span><span class="n">frame</span><span class="o">.</span><span class="n">f_locals</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">variable</span> <span class="ow">is</span> <span class="n">search</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">variable_name</span>
+    <span class="k">return</span> <span class="n">str_value</span>
+
+
+<span class="k">class</span> <span class="nc">TRContext</span><span class="p">(</span><span class="n">abc</span><span class="o">.</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">esys_ctx</span><span class="p">:</span> <span class="s2">&quot;ESYSContext&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">esys_ctx</span> <span class="o">=</span> <span class="n">esys_ctx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;TRContext&quot;</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span> <span class="o">=</span> <span class="n">ESYS_TR_PTR</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">esys_ctx</span><span class="o">.</span><span class="n">ESYS_TR_NONE</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_exc_type</span><span class="p">,</span> <span class="n">_exc_value</span><span class="p">,</span> <span class="n">_traceback</span><span class="p">):</span>
+        <span class="k">pass</span>  <span class="c1"># pragma: no cov</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
+
+    <span class="nd">@value</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">updated</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">updated</span><span class="p">)</span>
+
+
+<span class="nd">@WrapperMetaClass</span><span class="o">.</span><span class="n">register_call_mod</span>
+<span class="k">def</span> <span class="nf">call_mod_tr_context</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">annotation</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="c1"># Bail out if the value we&#39;re trying to pass isn&#39;t a TRContext</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">TRContext</span><span class="p">):</span>
+        <span class="k">return</span>
+    <span class="k">return</span> <span class="n">WrapperMetaClass</span><span class="o">.</span><span class="n">call_mod_ptr_or_value</span><span class="p">(</span><span class="n">annotation</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">FlushTRContextFlushFailure</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Raised when FlushContext results in a TPM2Error. On exit from the</span>
+<span class="sd">    FlushTRContext.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+<span class="k">class</span> <span class="nc">FlushTRContext</span><span class="p">(</span><span class="n">TRContext</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_exc_type</span><span class="p">,</span> <span class="n">_exc_value</span><span class="p">,</span> <span class="n">_traceback</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">esys_ctx</span><span class="o">.</span><span class="n">ESYS_TR_NONE</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">esys_ctx</span><span class="o">.</span><span class="n">FlushContext</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">TPM2Error</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">FlushTRContextFlushFailure</span><span class="p">(</span><span class="n">var_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">))</span> <span class="kn">from</span> <span class="nn">error</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<span class="k">class</span> <span class="nc">AuthSessionContext</span><span class="p">(</span><span class="n">FlushTRContext</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">esys_ctx</span><span class="p">:</span> <span class="s2">&quot;ESYSContext&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">esys_ctx</span><span class="p">)</span>
+        <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">esys_ctx</span><span class="o">.</span><span class="n">StartAuthSession</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">!=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Wrong number of arguments&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">arg</span><span class="p">,</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;TRContext&quot;</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__enter__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">esys_ctx</span><span class="o">.</span><span class="n">StartAuthSession</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tpmKey</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bind</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shandle1</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shandle2</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shandle3</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nonceCaller</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sessionType</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">symmetric</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">authHash</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+
+<span class="k">class</span> <span class="nc">NVContextUndefineSpaceFailure</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Raised when NV_UndefineSpace results in a TPM2Error. On exit from the</span>
+<span class="sd">    NVContext.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
+<span class="c1"># TODO This and AuthSessionContext should be generated on the file using inspect to</span>
+<span class="c1"># get the arguments of the Define/Undefine and StartAuthSession/Flush</span>
+<span class="c1"># arguments.</span>
+<span class="k">class</span> <span class="nc">NVContext</span><span class="p">(</span><span class="n">TRContext</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    NV_DefineSpace on enter and NV_UndefineSpace on exit.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">esys_ctx</span><span class="p">:</span> <span class="s2">&quot;ESYSContext&quot;</span><span class="p">,</span>
+        <span class="n">authHandle</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">shandle1</span><span class="o">=</span><span class="n">ESYS_TR_NONE</span><span class="p">,</span>
+        <span class="n">shandle2</span><span class="o">=</span><span class="n">ESYS_TR_NONE</span><span class="p">,</span>
+        <span class="n">shandle3</span><span class="o">=</span><span class="n">ESYS_TR_NONE</span><span class="p">,</span>
+        <span class="n">auth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">publicInfo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">esys_ctx</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">authHandle</span> <span class="o">=</span> <span class="n">authHandle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shandle1</span> <span class="o">=</span> <span class="n">shandle1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shandle2</span> <span class="o">=</span> <span class="n">shandle2</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shandle3</span> <span class="o">=</span> <span class="n">shandle3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">auth</span> <span class="o">=</span> <span class="n">auth</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">publicInfo</span> <span class="o">=</span> <span class="n">publicInfo</span>
+
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;TRContext&quot;</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__enter__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">esys_ctx</span><span class="o">.</span><span class="n">NV_DefineSpace</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">authHandle</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shandle1</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shandle2</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">shandle3</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">auth</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">publicInfo</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_exc_type</span><span class="p">,</span> <span class="n">_exc_value</span><span class="p">,</span> <span class="n">_traceback</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">esys_ctx</span><span class="o">.</span><span class="n">ESYS_TR_NONE</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">esys_ctx</span><span class="o">.</span><span class="n">NV_UndefineSpace</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">authHandle</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">shandle1</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">shandle2</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">shandle3</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">TPM2Error</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">NVContextUndefineSpaceFailure</span><span class="p">(</span>
+                    <span class="n">var_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="p">)</span> <span class="kn">from</span> <span class="nn">error</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ptr</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<span class="k">class</span> <span class="nc">UsedWithoutEnteringContext</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Attempted to use a pointer without being in a ``with`` block for that</span>
+<span class="sd">    pointer.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">pass</span>  <span class="c1"># pragma: no cov</span>
+
+
+<span class="nd">@WrapperMetaClass</span><span class="o">.</span><span class="n">register_call_mod</span>
+<span class="k">def</span> <span class="nf">call_mod_context_managed_pointer_class</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">annotation</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">_GeneratorContextManager</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">UsedWithoutEnteringContext</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">ContextManagedPointerClass</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">ptr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">UsedWithoutEnteringContext</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">WrapperMetaClass</span><span class="o">.</span><span class="n">call_mod_ptr_or_value</span><span class="p">(</span><span class="n">annotation</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+
+<span class="c1"># Create all the ContextManagedPointerClasses to be used for the</span>
+<span class="c1"># pointer_functions</span>
+<span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="p">[</span><span class="n">esys_binding</span><span class="p">,</span> <span class="n">fapi_binding</span><span class="p">]:</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmembers</span><span class="p">(</span><span class="n">module</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;new_&quot;</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="n">module</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;new_&quot;</span><span class="p">,</span> <span class="s2">&quot;delete_&quot;</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="s2">&quot;new_&quot;</span><span class="p">)</span> <span class="p">:]</span>
+            <span class="n">ptr_ptr</span> <span class="o">=</span> <span class="n">pointer_class</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">module</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ptr_ptr</span> <span class="ow">is</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="vm">__name__</span><span class="p">],</span> <span class="n">name</span><span class="p">,</span> <span class="n">ptr_ptr</span><span class="p">)</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">ptr_ptr</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">typedef_map</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    SWIG uses typedefs to allow passing a pointer of one type to a function that</span>
+<span class="sd">    accepts a different type. However, it does not generate aliases for all</span>
+<span class="sd">    typedefs.</span>
+
+<span class="sd">    aka</span>
+
+<span class="sd">    typedef A B;</span>
+
+<span class="sd">    user would need to create an instance by the name of A when they want to use</span>
+<span class="sd">    B. This maps B to A so the user can instantiate B without having to know</span>
+<span class="sd">    that B is the same thing as A.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="o">-</span><span class="mi">2</span><span class="p">:][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">pkgutil</span><span class="o">.</span><span class="n">get_data</span><span class="p">(</span><span class="vm">__name__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;swig/tpm2_types.i&quot;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+            <span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;typedef&quot;</span><span class="p">)</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+
+
+<span class="n">TYPEDEFS</span> <span class="o">=</span> <span class="n">typedef_map</span><span class="p">()</span>
+
+<span class="k">for</span> <span class="n">module</span> <span class="ow">in</span> <span class="p">[</span><span class="n">esys_binding</span><span class="p">,</span> <span class="n">fapi_binding</span><span class="p">]:</span>
+    <span class="k">for</span> <span class="n">alias</span><span class="p">,</span> <span class="n">typename</span> <span class="ow">in</span> <span class="n">TYPEDEFS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">alias</span><span class="p">,</span> <span class="n">typename</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">alias</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">_PTR&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">alias</span><span class="p">),</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">_PTR_PTR&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">alias</span><span class="p">)],</span>
+            <span class="p">[</span><span class="n">typename</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">_PTR&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">typename</span><span class="p">),</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">_PTR_PTR&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">typename</span><span class="p">)],</span>
+        <span class="p">):</span>
+            <span class="c1"># Skip if it already exists</span>
+            <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="vm">__name__</span><span class="p">]</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">alias</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">reference</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="vm">__name__</span><span class="p">]</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">typename</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">reference</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">alias</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">alias</span><span class="p">,</span> <span class="p">(</span><span class="n">reference</span><span class="p">,),</span> <span class="p">{}))</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="vm">__name__</span><span class="p">],</span> <span class="n">alias</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">alias</span><span class="p">,</span> <span class="p">(</span><span class="n">reference</span><span class="p">,),</span> <span class="p">{}))</span>
+
+
+<div class="viewcode-block" id="ESYSBinding"><a class="viewcode-back" href="../../binding.html#tpm2_pytss.binding.ESYSBinding">[docs]</a><span class="k">class</span> <span class="nc">ESYSBinding</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">WrapperMetaClass</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">esys_binding</span><span class="p">):</span>
+
+    <span class="n">MODULE</span> <span class="o">=</span> <span class="n">esys_binding</span></div>
+
+
+<span class="k">class</span> <span class="nc">FAPIBinding</span><span class="p">(</span><span class="n">metaclass</span><span class="o">=</span><span class="n">WrapperMetaClass</span><span class="p">,</span> <span class="n">module</span><span class="o">=</span><span class="n">fapi_binding</span><span class="p">):</span>
+
+    <span class="n">MODULE</span> <span class="o">=</span> <span class="n">fapi_binding</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">tpm2-pytss</a></h1>
+
+
+
+<p class="blurb">TPM 2.0 TSS Bindings for Python</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=tpm2-software&repo=tpm2-pytss&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://travis-ci.org/tpm2-software/tpm2-pytss">
+    <img
+        alt="https://secure.travis-ci.org/tpm2-software/tpm2-pytss.svg?branch=master"
+        src="https://secure.travis-ci.org/tpm2-software/tpm2-pytss.svg?branch=master"
+    />
+</a>
+</p>
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://codecov.io/github/tpm2-software/tpm2-pytss">
+    <img
+    alt="https://codecov.io/github/tpm2-software/tpm2-pytss/coverage.svg?branch=master"
+    src="https://codecov.io/github/tpm2-software/tpm2-pytss/coverage.svg?branch=master"
+    />
+</a>
+</p>
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../esys.html">ESYS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tcti.html">TCTIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../binding.html">Esys Bindings</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Intel Corperation.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
