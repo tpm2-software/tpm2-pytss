@@ -8,6 +8,7 @@ import shutil
 import pathlib
 from io import open
 from subprocess import check_output
+from setuptools.command.build_py import build_py
 from setuptools.command.build_ext import build_ext
 from setuptools import find_packages, setup, Extension
 
@@ -126,6 +127,20 @@ class PkgConfigNeededExtension(Extension):
         self._swig_opts = value
 
 
+class BuildSWIGPyFiles(build_py):
+    def run(self):
+        # This is a workaround for https://bugs.python.org/issue37247
+        # Run regular copy of files, required to run SWIG build
+        super().run()
+        # Causes SWIG python files to be built. Results in SWIG build happening
+        # twice, maybe but not sure
+        cmd = BuildExtThenCopySWIGPy(self.distribution)
+        cmd.finalize_options()
+        cmd.run()
+        # Run copy of py files again, now that SWIG has generated py files
+        super().run()
+
+
 class BuildExtThenCopySWIGPy(build_ext):
     def run(self):
         super().run()
@@ -214,7 +229,7 @@ setup(
         ),
     ],
     py_modules=[IMPORT_NAME],
-    cmdclass={"build_ext": BuildExtThenCopySWIGPy},
+    cmdclass={"build_ext": BuildExtThenCopySWIGPy, "build_py": BuildSWIGPyFiles},
     include_package_data=True,
     zip_safe=False,
 )
