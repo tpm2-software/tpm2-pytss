@@ -22,11 +22,8 @@ IMPORT_NAME = NAME.replace("-", "_")
 
 SELF_PATH = os.path.dirname(os.path.realpath(__file__))
 
-with open(os.path.join(SELF_PATH, IMPORT_NAME, "version.py"), "r") as f:
-    for line in f:
-        if line.startswith("VERSION"):
-            VERSION = ast.literal_eval(line.strip().split("=")[-1].strip())
-            break
+with open(os.path.join(SELF_PATH, IMPORT_NAME, "version"), "r") as f:
+    VERSION = "".join(f).strip()
 
 README = pathlib.Path(SELF_PATH, "README.md").read_text()
 

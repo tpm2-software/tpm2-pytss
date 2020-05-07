@@ -1,5 +1,6 @@
 include README.md
 include LICENSE
 exclude tests/
+include tpm2_pytss/version
 include tpm2_pytss/config.json
 recursive-include tpm2_pytss/swig *
