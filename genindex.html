@@ -5,7 +5,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Index &#8212; tpm2-pytss 0.1.4 documentation</title>
+    <title>Index &#8212; tpm2-pytss 0.1.5 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -54,6 +54,7 @@
  | <a href="#T"><strong>T</strong></a>
  | <a href="#U"><strong>U</strong></a>
  | <a href="#V"><strong>V</strong></a>
+ | <a href="#W"><strong>W</strong></a>
  | <a href="#Z"><strong>Z</strong></a>
  
 </div>
@@ -64,11 +65,21 @@
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.ActivateCredential_Async">ActivateCredential_Async() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.ActivateCredential_Finish">ActivateCredential_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.auth_session">auth_session() (tpm2_pytss.esys.ESYSContext property)</a>
+
+      <ul>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.auth_session">(tpm2_pytss.fapi.FAPI property)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.AuthorizePolicy">AuthorizePolicy() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.AuthorizePolicy_Async">AuthorizePolicy_Async() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.AuthorizePolicy_Finish">AuthorizePolicy_Finish() (tpm2_pytss.fapi.FAPI method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -87,6 +98,12 @@
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.CertifyCreation_Async">CertifyCreation_Async() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.CertifyCreation_Finish">CertifyCreation_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.ChangeAuth">ChangeAuth() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.ChangeAuth_Async">ChangeAuth_Async() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.ChangeAuth_Finish">ChangeAuth_Finish() (tpm2_pytss.fapi.FAPI method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.ChangeEPS">ChangeEPS() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
@@ -130,8 +147,6 @@
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Commit_Finish">Commit_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="esys.html#tpm2_pytss.esys.ESYS.CONTEXT">CONTEXT (tpm2_pytss.esys.ESYS attribute)</a>
 
       <ul>
@@ -140,6 +155,8 @@
       </ul></li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.ContextLoad">ContextLoad() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.ContextLoad_Async">ContextLoad_Async() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.ContextLoad_Finish">ContextLoad_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
@@ -162,6 +179,8 @@
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.copy_ESYS_TR_PTR_PTR">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       </ul></li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.copy_fapi_ctx_ptr">copy_fapi_ctx_ptr() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.copy_tcti_ctx_ptr_ptr">copy_tcti_ctx_ptr_ptr() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
@@ -174,17 +193,35 @@
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Create_Finish">Create_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.CreateKey">CreateKey() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.CreateKey_Async">CreateKey_Async() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.CreateKey_Finish">CreateKey_Finish() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.CreateLoaded">CreateLoaded() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.CreateLoaded_Async">CreateLoaded_Async() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.CreateLoaded_Finish">CreateLoaded_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.CreateNv">CreateNv() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.CreateNv_Async">CreateNv_Async() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.CreateNv_Finish">CreateNv_Finish() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.CreatePrimary">CreatePrimary() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.CreatePrimary_Async">CreatePrimary_Async() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.CreatePrimary_Finish">CreatePrimary_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.CreateSeal">CreateSeal() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.CreateSeal_Async">CreateSeal_Async() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.CreateSeal_Finish">CreateSeal_Finish() (tpm2_pytss.fapi.FAPI method)</a>
 </li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.ctx_ptr_assign">ctx_ptr_assign() (tpm2_pytss.binding.ESYSBinding method)</a>
 
@@ -204,7 +241,17 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Decrypt">Decrypt() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Decrypt_Async">Decrypt_Async() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Decrypt_Finish">Decrypt_Finish() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYS.default_abi_version">default_abi_version() (tpm2_pytss.esys.ESYS class method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Delete">Delete() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Delete_Async">Delete_Async() (tpm2_pytss.fapi.FAPI method)</a>
 </li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.delete_ctx_ptr">delete_ctx_ptr() (tpm2_pytss.binding.ESYSBinding method)</a>
 
@@ -218,6 +265,12 @@
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.delete_ESYS_TR_PTR_PTR">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       </ul></li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.delete_fapi_ctx_ptr">delete_fapi_ctx_ptr() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Delete_Finish">Delete_Finish() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.delete_tcti_ctx_ptr_ptr">delete_tcti_ctx_ptr_ptr() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
@@ -226,8 +279,6 @@
       </ul></li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.DictionaryAttackLockReset">DictionaryAttackLockReset() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.DictionaryAttackLockReset_Async">DictionaryAttackLockReset_Async() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.DictionaryAttackLockReset_Finish">DictionaryAttackLockReset_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
@@ -273,6 +324,12 @@
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.ECDH_ZGen_Async">ECDH_ZGen_Async() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.ECDH_ZGen_Finish">ECDH_ZGen_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Encrypt">Encrypt() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Encrypt_Async">Encrypt_Async() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Encrypt_Finish">Encrypt_Finish() (tpm2_pytss.fapi.FAPI method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.EncryptDecrypt">EncryptDecrypt() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
@@ -638,12 +695,12 @@
 </li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Esys_NV_SetBits_Async">Esys_NV_SetBits_Async() (tpm2_pytss.binding.ESYSBinding method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Esys_NV_SetBits_Finish">Esys_NV_SetBits_Finish() (tpm2_pytss.binding.ESYSBinding method)</a>
 </li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Esys_NV_UndefineSpace">Esys_NV_UndefineSpace() (tpm2_pytss.binding.ESYSBinding method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Esys_NV_UndefineSpace_Async">Esys_NV_UndefineSpace_Async() (tpm2_pytss.binding.ESYSBinding method)</a>
 </li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Esys_NV_UndefineSpace_Finish">Esys_NV_UndefineSpace_Finish() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -1036,12 +1093,30 @@
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.EvictControl_Finish">EvictControl_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.ExportKey">ExportKey() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.ExportKey_Async">ExportKey_Async() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.ExportKey_Finish">ExportKey_Finish() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.ExportPolicy">ExportPolicy() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.ExportPolicy_Async">ExportPolicy_Async() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.ExportPolicy_Finish">ExportPolicy_Finish() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI">FAPI (class in tpm2_pytss.fapi)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.fapi_ctx_ptr_assign">fapi_ctx_ptr_assign() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.fapi_ctx_ptr_value">fapi_ctx_ptr_value() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.FieldUpgradeData">FieldUpgradeData() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.FieldUpgradeData_Async">FieldUpgradeData_Async() (tpm2_pytss.esys.ESYSContext method)</a>
@@ -1055,7 +1130,11 @@
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.FieldUpgradeStart_Finish">FieldUpgradeStart_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Finalize">Finalize() (tpm2_pytss.esys.ESYSContext method)</a>
+
+      <ul>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Finalize">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.FirmwareRead">FirmwareRead() (tpm2_pytss.esys.ESYSContext method)</a>
@@ -1065,7 +1144,11 @@
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.FirmwareRead_Finish">FirmwareRead_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.flush_tr">flush_tr() (tpm2_pytss.esys.ESYSContext property)</a>
+
+      <ul>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.flush_tr">(tpm2_pytss.fapi.FAPI property)</a>
 </li>
+      </ul></li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.FlushContext">FlushContext() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.FlushContext_Async">FlushContext_Async() (tpm2_pytss.esys.ESYSContext method)</a>
@@ -1073,7 +1156,11 @@
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.FlushContext_Finish">FlushContext_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Free">Free() (tpm2_pytss.esys.ESYSContext method)</a>
+
+      <ul>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Free">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -1081,8 +1168,22 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.get_random">get_random() (tpm2_pytss.esys.ESYSContext method)</a>
+
+      <ul>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.get_random">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
+      </ul></li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.GET_RANDOM_MAX_LENGTH">GET_RANDOM_MAX_LENGTH (tpm2_pytss.esys.ESYSContext attribute)</a>
+
+      <ul>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.GET_RANDOM_MAX_LENGTH">(tpm2_pytss.fapi.FAPI attribute)</a>
+</li>
+      </ul></li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.GetAppData">GetAppData() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.GetAppData_Async">GetAppData_Async() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.GetAppData_Finish">GetAppData_Finish() (tpm2_pytss.fapi.FAPI method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.GetCapability">GetCapability() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
@@ -1090,22 +1191,62 @@
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.GetCapability_Finish">GetCapability_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.GetCertificate">GetCertificate() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.GetCertificate_Async">GetCertificate_Async() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.GetCertificate_Finish">GetCertificate_Finish() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.GetCommandAuditDigest">GetCommandAuditDigest() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.GetCommandAuditDigest_Async">GetCommandAuditDigest_Async() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.GetCommandAuditDigest_Finish">GetCommandAuditDigest_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
-      <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.GetPollHandles">GetPollHandles() (tpm2_pytss.esys.ESYSContext method)</a>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.GetDescription">GetDescription() (tpm2_pytss.fapi.FAPI method)</a>
 </li>
-      <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.GetRandom">GetRandom() (tpm2_pytss.esys.ESYSContext method)</a>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.GetDescription_Async">GetDescription_Async() (tpm2_pytss.fapi.FAPI method)</a>
 </li>
-      <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.GetRandom_Async">GetRandom_Async() (tpm2_pytss.esys.ESYSContext method)</a>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.GetDescription_Finish">GetDescription_Finish() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.GetInfo">GetInfo() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.GetInfo_Async">GetInfo_Async() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.GetInfo_Finish">GetInfo_Finish() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.GetPlatformCertificates">GetPlatformCertificates() (tpm2_pytss.fapi.FAPI method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.GetRandom_Finish">GetRandom_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.GetPlatformCertificates_Async">GetPlatformCertificates_Async() (tpm2_pytss.fapi.FAPI method)</a>
 </li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.GetPlatformCertificates_Finish">GetPlatformCertificates_Finish() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.GetPollHandles">GetPollHandles() (tpm2_pytss.esys.ESYSContext method)</a>
+
+      <ul>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.GetPollHandles">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      </ul></li>
+      <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.GetRandom">GetRandom() (tpm2_pytss.esys.ESYSContext method)</a>
+
+      <ul>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.GetRandom">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      </ul></li>
+      <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.GetRandom_Async">GetRandom_Async() (tpm2_pytss.esys.ESYSContext method)</a>
+
+      <ul>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.GetRandom_Async">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      </ul></li>
+      <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.GetRandom_Finish">GetRandom_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
+
+      <ul>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.GetRandom_Finish">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      </ul></li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.GetSessionAuditDigest">GetSessionAuditDigest() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.GetSessionAuditDigest_Async">GetSessionAuditDigest_Async() (tpm2_pytss.esys.ESYSContext method)</a>
@@ -1113,7 +1254,11 @@
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.GetSessionAuditDigest_Finish">GetSessionAuditDigest_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.GetTcti">GetTcti() (tpm2_pytss.esys.ESYSContext method)</a>
+
+      <ul>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.GetTcti">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
+      </ul></li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.GetTestResult">GetTestResult() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.GetTestResult_Async">GetTestResult_Async() (tpm2_pytss.esys.ESYSContext method)</a>
@@ -1125,6 +1270,12 @@
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.GetTime_Async">GetTime_Async() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.GetTime_Finish">GetTime_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.GetTpmBlobs">GetTpmBlobs() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.GetTpmBlobs_Async">GetTpmBlobs_Async() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.GetTpmBlobs_Finish">GetTpmBlobs_Finish() (tpm2_pytss.fapi.FAPI method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1177,11 +1328,23 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Import">Import() (tpm2_pytss.esys.ESYSContext method)</a>
+
+      <ul>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Import">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
+      </ul></li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Import_Async">Import_Async() (tpm2_pytss.esys.ESYSContext method)</a>
+
+      <ul>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Import_Async">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
+      </ul></li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Import_Finish">Import_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
+
+      <ul>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Import_Finish">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.IncrementalSelfTest">IncrementalSelfTest() (tpm2_pytss.esys.ESYSContext method)</a>
@@ -1191,6 +1354,14 @@
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.IncrementalSelfTest_Finish">IncrementalSelfTest_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Initialize">Initialize() (tpm2_pytss.esys.ESYSContext method)</a>
+
+      <ul>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Initialize">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      </ul></li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Initialize_Async">Initialize_Async() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Initialize_Finish">Initialize_Finish() (tpm2_pytss.fapi.FAPI method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1198,14 +1369,20 @@
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.List">List() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.List_Async">List_Async() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.List_Finish">List_Finish() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Load">Load() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="tcti.html#tpm2_pytss.tcti.TCTI.load">load() (tpm2_pytss.tcti.TCTI class method)</a>
 </li>
-      <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Load_Async">Load_Async() (tpm2_pytss.esys.ESYSContext method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Load_Async">Load_Async() (tpm2_pytss.esys.ESYSContext method)</a>
+</li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Load_Finish">Load_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.LoadExternal">LoadExternal() (tpm2_pytss.esys.ESYSContext method)</a>
@@ -1235,6 +1412,8 @@
 </li>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.MODULE">(tpm2_pytss.esys.ESYSContext attribute)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.MODULE">(tpm2_pytss.fapi.FAPI attribute)</a>
+</li>
       </ul></li>
   </ul></td>
 </tr></table>
@@ -1254,6 +1433,8 @@
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.new_ESYS_TR_PTR_PTR">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       </ul></li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.new_fapi_ctx_ptr">new_fapi_ctx_ptr() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.new_tcti_ctx_ptr_ptr">new_tcti_ctx_ptr_ptr() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
@@ -1261,7 +1442,11 @@
 </li>
       </ul></li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.nv">nv() (tpm2_pytss.esys.ESYSContext property)</a>
+
+      <ul>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.nv">(tpm2_pytss.fapi.FAPI property)</a>
 </li>
+      </ul></li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.NV_Certify">NV_Certify() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.NV_Certify_Async">NV_Certify_Async() (tpm2_pytss.esys.ESYSContext method)</a>
@@ -1296,8 +1481,6 @@
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.NV_Increment_Async">NV_Increment_Async() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.NV_Increment_Finish">NV_Increment_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.NV_Read">NV_Read() (tpm2_pytss.esys.ESYSContext method)</a>
@@ -1312,6 +1495,8 @@
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.NV_ReadLock_Finish">NV_ReadLock_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.NV_ReadPublic">NV_ReadPublic() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.NV_ReadPublic_Async">NV_ReadPublic_Async() (tpm2_pytss.esys.ESYSContext method)</a>
@@ -1347,6 +1532,36 @@
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.NV_WriteLock_Async">NV_WriteLock_Async() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.NV_WriteLock_Finish">NV_WriteLock_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.NvExtend">NvExtend() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.NvExtend_Async">NvExtend_Async() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.NvExtend_Finish">NvExtend_Finish() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.NvIncrement">NvIncrement() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.NvIncrement_Async">NvIncrement_Async() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.NvIncrement_Finish">NvIncrement_Finish() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.NvRead">NvRead() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.NvRead_Async">NvRead_Async() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.NvRead_Finish">NvRead_Finish() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.NvSetBits">NvSetBits() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.NvSetBits_Async">NvSetBits_Async() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.NvSetBits_Finish">NvSetBits_Finish() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.NvWrite">NvWrite() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.NvWrite_Async">NvWrite_Async() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.NvWrite_Finish">NvWrite_Finish() (tpm2_pytss.fapi.FAPI method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1410,6 +1625,18 @@
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.PCR_SetAuthValue_Finish">PCR_SetAuthValue_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.PcrExtend">PcrExtend() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.PcrExtend_Async">PcrExtend_Async() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.PcrExtend_Finish">PcrExtend_Finish() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.PcrRead">PcrRead() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.PcrRead_Async">PcrRead_Async() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.PcrRead_Finish">PcrRead_Finish() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.PolicyAuthorize">PolicyAuthorize() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.PolicyAuthorize_Async">PolicyAuthorize_Async() (tpm2_pytss.esys.ESYSContext method)</a>
@@ -1452,10 +1679,10 @@
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.PolicyDuplicationSelect_Finish">PolicyDuplicationSelect_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
-      <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.PolicyGetDigest">PolicyGetDigest() (tpm2_pytss.esys.ESYSContext method)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.PolicyGetDigest">PolicyGetDigest() (tpm2_pytss.esys.ESYSContext method)</a>
+</li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.PolicyGetDigest_Async">PolicyGetDigest_Async() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.PolicyGetDigest_Finish">PolicyGetDigest_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
@@ -1544,6 +1771,12 @@
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.PP_Commands_Finish">PP_Commands_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Provision">Provision() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Provision_Async">Provision_Async() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Provision_Finish">Provision_Finish() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -1551,13 +1784,25 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Quote">Quote() (tpm2_pytss.esys.ESYSContext method)</a>
+
+      <ul>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Quote">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
+      </ul></li>
+      <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Quote_Async">Quote_Async() (tpm2_pytss.esys.ESYSContext method)</a>
+
+      <ul>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Quote_Async">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Quote_Async">Quote_Async() (tpm2_pytss.esys.ESYSContext method)</a>
-</li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Quote_Finish">Quote_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
+
+      <ul>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Quote_Finish">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -1626,19 +1871,45 @@
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.SetAlgorithmSet_Finish">SetAlgorithmSet_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.SetAppData">SetAppData() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.SetAppData_Async">SetAppData_Async() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.SetAppData_Finish">SetAppData_Finish() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.SetAuthCB">SetAuthCB() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.SetBranchCB">SetBranchCB() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.SetCertificate">SetCertificate() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.SetCertificate_Async">SetCertificate_Async() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.SetCertificate_Finish">SetCertificate_Finish() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.SetCommandCodeAuditStatus">SetCommandCodeAuditStatus() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.SetCommandCodeAuditStatus_Async">SetCommandCodeAuditStatus_Async() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.SetCommandCodeAuditStatus_Finish">SetCommandCodeAuditStatus_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.SetDescription">SetDescription() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.SetDescription_Async">SetDescription_Async() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.SetDescription_Finish">SetDescription_Finish() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.SetPolicyActionCB">SetPolicyActionCB() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.SetPrimaryPolicy">SetPrimaryPolicy() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.SetPrimaryPolicy_Async">SetPrimaryPolicy_Async() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.SetPrimaryPolicy_Finish">SetPrimaryPolicy_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.SetSignCB">SetSignCB() (tpm2_pytss.fapi.FAPI method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.SetTimeout">SetTimeout() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
@@ -1649,11 +1920,23 @@
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Shutdown_Finish">Shutdown_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Sign">Sign() (tpm2_pytss.esys.ESYSContext method)</a>
+
+      <ul>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Sign">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
+      </ul></li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Sign_Async">Sign_Async() (tpm2_pytss.esys.ESYSContext method)</a>
+
+      <ul>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Sign_Async">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
+      </ul></li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Sign_Finish">Sign_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
+
+      <ul>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Sign_Finish">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
+      </ul></li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.StartAuthSession">StartAuthSession() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.StartAuthSession_Async">StartAuthSession_Async() (tpm2_pytss.esys.ESYSContext method)</a>
@@ -1727,11 +2010,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_BYTE_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_BYTE_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_BYTE_Unmarshal">Tss2_MU_BYTE_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_BYTE_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_BYTE_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_INT16_Marshal">Tss2_MU_INT16_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -1739,11 +2026,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_INT16_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_INT16_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_INT16_Unmarshal">Tss2_MU_INT16_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_INT16_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_INT16_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_INT32_Marshal">Tss2_MU_INT32_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -1751,11 +2042,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_INT32_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_INT32_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_INT32_Unmarshal">Tss2_MU_INT32_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_INT32_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_INT32_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_INT64_Marshal">Tss2_MU_INT64_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -1763,11 +2058,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_INT64_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_INT64_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_INT64_Unmarshal">Tss2_MU_INT64_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_INT64_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_INT64_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_INT8_Marshal">Tss2_MU_INT8_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -1775,11 +2074,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_INT8_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_INT8_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_INT8_Unmarshal">Tss2_MU_INT8_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_INT8_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_INT8_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2_CC_Marshal">Tss2_MU_TPM2_CC_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -1787,11 +2090,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2_CC_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2_CC_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2_CC_Unmarshal">Tss2_MU_TPM2_CC_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2_CC_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2_CC_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2_HANDLE_Marshal">Tss2_MU_TPM2_HANDLE_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -1799,11 +2106,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2_HANDLE_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2_HANDLE_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2_HANDLE_Unmarshal">Tss2_MU_TPM2_HANDLE_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2_HANDLE_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2_HANDLE_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2_NT_Marshal">Tss2_MU_TPM2_NT_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -1811,11 +2122,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2_NT_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2_NT_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2_NT_Unmarshal">Tss2_MU_TPM2_NT_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2_NT_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2_NT_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2_SE_Marshal">Tss2_MU_TPM2_SE_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -1823,11 +2138,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2_SE_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2_SE_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2_SE_Unmarshal">Tss2_MU_TPM2_SE_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2_SE_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2_SE_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2_ST_Marshal">Tss2_MU_TPM2_ST_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -1835,11 +2154,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2_ST_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2_ST_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2_ST_Unmarshal">Tss2_MU_TPM2_ST_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2_ST_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2_ST_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_ATTEST_Marshal">Tss2_MU_TPM2B_ATTEST_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -1847,11 +2170,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_ATTEST_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_ATTEST_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_ATTEST_Unmarshal">Tss2_MU_TPM2B_ATTEST_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_ATTEST_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_ATTEST_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_AUTH_Marshal">Tss2_MU_TPM2B_AUTH_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -1859,11 +2186,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_AUTH_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_AUTH_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_AUTH_Unmarshal">Tss2_MU_TPM2B_AUTH_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_AUTH_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_AUTH_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_CONTEXT_DATA_Marshal">Tss2_MU_TPM2B_CONTEXT_DATA_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -1871,11 +2202,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_CONTEXT_DATA_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_CONTEXT_DATA_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_CONTEXT_DATA_Unmarshal">Tss2_MU_TPM2B_CONTEXT_DATA_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_CONTEXT_DATA_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_CONTEXT_DATA_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_CONTEXT_SENSITIVE_Marshal">Tss2_MU_TPM2B_CONTEXT_SENSITIVE_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -1883,11 +2218,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_CONTEXT_SENSITIVE_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_CONTEXT_SENSITIVE_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_CONTEXT_SENSITIVE_Unmarshal">Tss2_MU_TPM2B_CONTEXT_SENSITIVE_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_CONTEXT_SENSITIVE_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_CONTEXT_SENSITIVE_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_CREATION_DATA_Marshal">Tss2_MU_TPM2B_CREATION_DATA_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -1895,11 +2234,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_CREATION_DATA_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_CREATION_DATA_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_CREATION_DATA_Unmarshal">Tss2_MU_TPM2B_CREATION_DATA_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_CREATION_DATA_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_CREATION_DATA_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_DATA_Marshal">Tss2_MU_TPM2B_DATA_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -1907,11 +2250,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_DATA_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_DATA_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_DATA_Unmarshal">Tss2_MU_TPM2B_DATA_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_DATA_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_DATA_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_DIGEST_Marshal">Tss2_MU_TPM2B_DIGEST_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -1919,11 +2266,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_DIGEST_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_DIGEST_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_DIGEST_Unmarshal">Tss2_MU_TPM2B_DIGEST_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_DIGEST_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_DIGEST_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_ECC_PARAMETER_Marshal">Tss2_MU_TPM2B_ECC_PARAMETER_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -1931,11 +2282,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_ECC_PARAMETER_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_ECC_PARAMETER_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_ECC_PARAMETER_Unmarshal">Tss2_MU_TPM2B_ECC_PARAMETER_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_ECC_PARAMETER_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_ECC_PARAMETER_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_ECC_POINT_Marshal">Tss2_MU_TPM2B_ECC_POINT_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -1943,11 +2298,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_ECC_POINT_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_ECC_POINT_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_ECC_POINT_Unmarshal">Tss2_MU_TPM2B_ECC_POINT_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_ECC_POINT_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_ECC_POINT_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_ENCRYPTED_SECRET_Marshal">Tss2_MU_TPM2B_ENCRYPTED_SECRET_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -1955,11 +2314,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_ENCRYPTED_SECRET_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_ENCRYPTED_SECRET_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_ENCRYPTED_SECRET_Unmarshal">Tss2_MU_TPM2B_ENCRYPTED_SECRET_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_ENCRYPTED_SECRET_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_ENCRYPTED_SECRET_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_EVENT_Marshal">Tss2_MU_TPM2B_EVENT_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -1967,11 +2330,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_EVENT_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_EVENT_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_EVENT_Unmarshal">Tss2_MU_TPM2B_EVENT_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_EVENT_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_EVENT_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_ID_OBJECT_Marshal">Tss2_MU_TPM2B_ID_OBJECT_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -1979,11 +2346,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_ID_OBJECT_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_ID_OBJECT_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_ID_OBJECT_Unmarshal">Tss2_MU_TPM2B_ID_OBJECT_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_ID_OBJECT_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_ID_OBJECT_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_IV_Marshal">Tss2_MU_TPM2B_IV_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -1991,11 +2362,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_IV_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_IV_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_IV_Unmarshal">Tss2_MU_TPM2B_IV_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_IV_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_IV_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_MAX_BUFFER_Marshal">Tss2_MU_TPM2B_MAX_BUFFER_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2003,11 +2378,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_MAX_BUFFER_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_MAX_BUFFER_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_MAX_BUFFER_Unmarshal">Tss2_MU_TPM2B_MAX_BUFFER_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_MAX_BUFFER_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_MAX_BUFFER_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_MAX_NV_BUFFER_Marshal">Tss2_MU_TPM2B_MAX_NV_BUFFER_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2015,11 +2394,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_MAX_NV_BUFFER_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_MAX_NV_BUFFER_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_MAX_NV_BUFFER_Unmarshal">Tss2_MU_TPM2B_MAX_NV_BUFFER_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_MAX_NV_BUFFER_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_MAX_NV_BUFFER_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_NAME_Marshal">Tss2_MU_TPM2B_NAME_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2027,11 +2410,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_NAME_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_NAME_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_NAME_Unmarshal">Tss2_MU_TPM2B_NAME_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_NAME_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_NAME_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_NONCE_Marshal">Tss2_MU_TPM2B_NONCE_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2039,11 +2426,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_NONCE_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_NONCE_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_NONCE_Unmarshal">Tss2_MU_TPM2B_NONCE_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_NONCE_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_NONCE_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_NV_PUBLIC_Marshal">Tss2_MU_TPM2B_NV_PUBLIC_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2051,11 +2442,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_NV_PUBLIC_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_NV_PUBLIC_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_NV_PUBLIC_Unmarshal">Tss2_MU_TPM2B_NV_PUBLIC_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_NV_PUBLIC_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_NV_PUBLIC_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_OPERAND_Marshal">Tss2_MU_TPM2B_OPERAND_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2063,11 +2458,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_OPERAND_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_OPERAND_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_OPERAND_Unmarshal">Tss2_MU_TPM2B_OPERAND_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_OPERAND_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_OPERAND_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_PRIVATE_KEY_RSA_Marshal">Tss2_MU_TPM2B_PRIVATE_KEY_RSA_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2075,11 +2474,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_PRIVATE_KEY_RSA_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_PRIVATE_KEY_RSA_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_PRIVATE_KEY_RSA_Unmarshal">Tss2_MU_TPM2B_PRIVATE_KEY_RSA_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_PRIVATE_KEY_RSA_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_PRIVATE_KEY_RSA_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_PRIVATE_Marshal">Tss2_MU_TPM2B_PRIVATE_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2087,11 +2490,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_PRIVATE_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_PRIVATE_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_PRIVATE_Unmarshal">Tss2_MU_TPM2B_PRIVATE_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_PRIVATE_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_PRIVATE_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_PUBLIC_KEY_RSA_Marshal">Tss2_MU_TPM2B_PUBLIC_KEY_RSA_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2099,11 +2506,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_PUBLIC_KEY_RSA_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_PUBLIC_KEY_RSA_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_PUBLIC_KEY_RSA_Unmarshal">Tss2_MU_TPM2B_PUBLIC_KEY_RSA_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_PUBLIC_KEY_RSA_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_PUBLIC_KEY_RSA_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_PUBLIC_Marshal">Tss2_MU_TPM2B_PUBLIC_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2111,11 +2522,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_PUBLIC_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_PUBLIC_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_PUBLIC_Unmarshal">Tss2_MU_TPM2B_PUBLIC_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_PUBLIC_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_PUBLIC_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_SENSITIVE_CREATE_Marshal">Tss2_MU_TPM2B_SENSITIVE_CREATE_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2123,11 +2538,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_SENSITIVE_CREATE_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_SENSITIVE_CREATE_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_SENSITIVE_CREATE_Unmarshal">Tss2_MU_TPM2B_SENSITIVE_CREATE_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_SENSITIVE_CREATE_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_SENSITIVE_CREATE_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_SENSITIVE_DATA_Marshal">Tss2_MU_TPM2B_SENSITIVE_DATA_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2135,11 +2554,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_SENSITIVE_DATA_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_SENSITIVE_DATA_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_SENSITIVE_DATA_Unmarshal">Tss2_MU_TPM2B_SENSITIVE_DATA_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_SENSITIVE_DATA_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_SENSITIVE_DATA_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_SENSITIVE_Marshal">Tss2_MU_TPM2B_SENSITIVE_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2147,11 +2570,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_SENSITIVE_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_SENSITIVE_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_SENSITIVE_Unmarshal">Tss2_MU_TPM2B_SENSITIVE_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_SENSITIVE_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_SENSITIVE_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_SYM_KEY_Marshal">Tss2_MU_TPM2B_SYM_KEY_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2159,11 +2586,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_SYM_KEY_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_SYM_KEY_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_SYM_KEY_Unmarshal">Tss2_MU_TPM2B_SYM_KEY_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_SYM_KEY_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_SYM_KEY_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_TEMPLATE_Marshal">Tss2_MU_TPM2B_TEMPLATE_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2171,11 +2602,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_TEMPLATE_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_TEMPLATE_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_TEMPLATE_Unmarshal">Tss2_MU_TPM2B_TEMPLATE_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_TEMPLATE_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_TEMPLATE_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_TIMEOUT_Marshal">Tss2_MU_TPM2B_TIMEOUT_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2183,11 +2618,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_TIMEOUT_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_TIMEOUT_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPM2B_TIMEOUT_Unmarshal">Tss2_MU_TPM2B_TIMEOUT_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPM2B_TIMEOUT_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPM2B_TIMEOUT_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMA_ALGORITHM_Marshal">Tss2_MU_TPMA_ALGORITHM_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2195,11 +2634,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMA_ALGORITHM_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMA_ALGORITHM_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMA_ALGORITHM_Unmarshal">Tss2_MU_TPMA_ALGORITHM_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMA_ALGORITHM_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMA_ALGORITHM_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMA_CC_Marshal">Tss2_MU_TPMA_CC_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2207,11 +2650,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMA_CC_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMA_CC_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMA_CC_Unmarshal">Tss2_MU_TPMA_CC_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMA_CC_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMA_CC_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMA_LOCALITY_Marshal">Tss2_MU_TPMA_LOCALITY_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2219,11 +2666,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMA_LOCALITY_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMA_LOCALITY_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMA_LOCALITY_Unmarshal">Tss2_MU_TPMA_LOCALITY_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMA_LOCALITY_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMA_LOCALITY_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMA_NV_Marshal">Tss2_MU_TPMA_NV_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2231,11 +2682,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMA_NV_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMA_NV_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMA_NV_Unmarshal">Tss2_MU_TPMA_NV_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMA_NV_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMA_NV_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMA_OBJECT_Marshal">Tss2_MU_TPMA_OBJECT_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2243,11 +2698,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMA_OBJECT_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMA_OBJECT_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMA_OBJECT_Unmarshal">Tss2_MU_TPMA_OBJECT_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMA_OBJECT_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMA_OBJECT_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMA_PERMANENT_Marshal">Tss2_MU_TPMA_PERMANENT_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2255,11 +2714,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMA_PERMANENT_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMA_PERMANENT_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMA_PERMANENT_Unmarshal">Tss2_MU_TPMA_PERMANENT_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMA_PERMANENT_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMA_PERMANENT_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMA_SESSION_Marshal">Tss2_MU_TPMA_SESSION_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2267,11 +2730,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMA_SESSION_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMA_SESSION_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMA_SESSION_Unmarshal">Tss2_MU_TPMA_SESSION_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMA_SESSION_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMA_SESSION_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMA_STARTUP_CLEAR_Marshal">Tss2_MU_TPMA_STARTUP_CLEAR_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2279,11 +2746,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMA_STARTUP_CLEAR_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMA_STARTUP_CLEAR_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMA_STARTUP_CLEAR_Unmarshal">Tss2_MU_TPMA_STARTUP_CLEAR_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMA_STARTUP_CLEAR_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMA_STARTUP_CLEAR_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMI_ALG_HASH_Marshal">Tss2_MU_TPMI_ALG_HASH_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2291,11 +2762,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMI_ALG_HASH_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMI_ALG_HASH_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMI_ALG_HASH_Unmarshal">Tss2_MU_TPMI_ALG_HASH_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMI_ALG_HASH_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMI_ALG_HASH_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPML_AC_CAPABILITIES_Marshal">Tss2_MU_TPML_AC_CAPABILITIES_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2303,11 +2778,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPML_AC_CAPABILITIES_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPML_AC_CAPABILITIES_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPML_AC_CAPABILITIES_Unmarshal">Tss2_MU_TPML_AC_CAPABILITIES_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPML_AC_CAPABILITIES_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPML_AC_CAPABILITIES_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPML_ALG_Marshal">Tss2_MU_TPML_ALG_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2315,11 +2794,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPML_ALG_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPML_ALG_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPML_ALG_PROPERTY_Marshal">Tss2_MU_TPML_ALG_PROPERTY_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPML_ALG_PROPERTY_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPML_ALG_PROPERTY_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPML_ALG_PROPERTY_Unmarshal">Tss2_MU_TPML_ALG_PROPERTY_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2327,11 +2810,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPML_ALG_PROPERTY_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPML_ALG_PROPERTY_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPML_ALG_Unmarshal">Tss2_MU_TPML_ALG_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPML_ALG_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPML_ALG_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPML_CC_Marshal">Tss2_MU_TPML_CC_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2339,11 +2826,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPML_CC_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPML_CC_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPML_CC_Unmarshal">Tss2_MU_TPML_CC_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPML_CC_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPML_CC_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPML_CCA_Marshal">Tss2_MU_TPML_CCA_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2351,11 +2842,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPML_CCA_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPML_CCA_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPML_CCA_Unmarshal">Tss2_MU_TPML_CCA_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPML_CCA_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPML_CCA_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPML_DIGEST_Marshal">Tss2_MU_TPML_DIGEST_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2363,11 +2858,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPML_DIGEST_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPML_DIGEST_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPML_DIGEST_Unmarshal">Tss2_MU_TPML_DIGEST_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPML_DIGEST_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPML_DIGEST_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPML_DIGEST_VALUES_Marshal">Tss2_MU_TPML_DIGEST_VALUES_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2375,11 +2874,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPML_DIGEST_VALUES_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPML_DIGEST_VALUES_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPML_DIGEST_VALUES_Unmarshal">Tss2_MU_TPML_DIGEST_VALUES_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPML_DIGEST_VALUES_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPML_DIGEST_VALUES_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPML_ECC_CURVE_Marshal">Tss2_MU_TPML_ECC_CURVE_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2387,11 +2890,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPML_ECC_CURVE_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPML_ECC_CURVE_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPML_ECC_CURVE_Unmarshal">Tss2_MU_TPML_ECC_CURVE_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPML_ECC_CURVE_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPML_ECC_CURVE_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPML_HANDLE_Marshal">Tss2_MU_TPML_HANDLE_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2399,11 +2906,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPML_HANDLE_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPML_HANDLE_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPML_HANDLE_Unmarshal">Tss2_MU_TPML_HANDLE_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPML_HANDLE_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPML_HANDLE_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPML_INTEL_PTT_PROPERTY_Marshal">Tss2_MU_TPML_INTEL_PTT_PROPERTY_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2411,11 +2922,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPML_INTEL_PTT_PROPERTY_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPML_INTEL_PTT_PROPERTY_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPML_INTEL_PTT_PROPERTY_Unmarshal">Tss2_MU_TPML_INTEL_PTT_PROPERTY_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPML_INTEL_PTT_PROPERTY_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPML_INTEL_PTT_PROPERTY_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPML_PCR_SELECTION_Marshal">Tss2_MU_TPML_PCR_SELECTION_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2423,11 +2938,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPML_PCR_SELECTION_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPML_PCR_SELECTION_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPML_PCR_SELECTION_Unmarshal">Tss2_MU_TPML_PCR_SELECTION_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPML_PCR_SELECTION_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPML_PCR_SELECTION_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPML_TAGGED_PCR_PROPERTY_Marshal">Tss2_MU_TPML_TAGGED_PCR_PROPERTY_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2435,11 +2954,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPML_TAGGED_PCR_PROPERTY_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPML_TAGGED_PCR_PROPERTY_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPML_TAGGED_PCR_PROPERTY_Unmarshal">Tss2_MU_TPML_TAGGED_PCR_PROPERTY_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPML_TAGGED_PCR_PROPERTY_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPML_TAGGED_PCR_PROPERTY_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPML_TAGGED_TPM_PROPERTY_Marshal">Tss2_MU_TPML_TAGGED_TPM_PROPERTY_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2447,11 +2970,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPML_TAGGED_TPM_PROPERTY_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPML_TAGGED_TPM_PROPERTY_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPML_TAGGED_TPM_PROPERTY_Unmarshal">Tss2_MU_TPML_TAGGED_TPM_PROPERTY_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPML_TAGGED_TPM_PROPERTY_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPML_TAGGED_TPM_PROPERTY_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_AC_OUTPUT_Marshal">Tss2_MU_TPMS_AC_OUTPUT_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2459,11 +2986,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_AC_OUTPUT_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_AC_OUTPUT_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_AC_OUTPUT_Unmarshal">Tss2_MU_TPMS_AC_OUTPUT_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_AC_OUTPUT_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_AC_OUTPUT_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_ALG_PROPERTY_Marshal">Tss2_MU_TPMS_ALG_PROPERTY_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2471,11 +3002,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_ALG_PROPERTY_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_ALG_PROPERTY_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_ALG_PROPERTY_Unmarshal">Tss2_MU_TPMS_ALG_PROPERTY_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_ALG_PROPERTY_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_ALG_PROPERTY_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_ALGORITHM_DESCRIPTION_Marshal">Tss2_MU_TPMS_ALGORITHM_DESCRIPTION_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2483,11 +3018,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_ALGORITHM_DESCRIPTION_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_ALGORITHM_DESCRIPTION_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_ALGORITHM_DESCRIPTION_Unmarshal">Tss2_MU_TPMS_ALGORITHM_DESCRIPTION_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_ALGORITHM_DESCRIPTION_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_ALGORITHM_DESCRIPTION_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_ALGORITHM_DETAIL_ECC_Marshal">Tss2_MU_TPMS_ALGORITHM_DETAIL_ECC_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2495,11 +3034,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_ALGORITHM_DETAIL_ECC_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_ALGORITHM_DETAIL_ECC_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_ALGORITHM_DETAIL_ECC_Unmarshal">Tss2_MU_TPMS_ALGORITHM_DETAIL_ECC_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_ALGORITHM_DETAIL_ECC_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_ALGORITHM_DETAIL_ECC_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_ATTEST_Marshal">Tss2_MU_TPMS_ATTEST_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2507,11 +3050,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_ATTEST_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_ATTEST_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_ATTEST_Unmarshal">Tss2_MU_TPMS_ATTEST_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_ATTEST_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_ATTEST_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_AUTH_COMMAND_Marshal">Tss2_MU_TPMS_AUTH_COMMAND_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2519,11 +3066,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_AUTH_COMMAND_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_AUTH_COMMAND_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_AUTH_COMMAND_Unmarshal">Tss2_MU_TPMS_AUTH_COMMAND_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_AUTH_COMMAND_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_AUTH_COMMAND_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_AUTH_RESPONSE_Marshal">Tss2_MU_TPMS_AUTH_RESPONSE_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2531,19 +3082,25 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_AUTH_RESPONSE_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_AUTH_RESPONSE_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_AUTH_RESPONSE_Unmarshal">Tss2_MU_TPMS_AUTH_RESPONSE_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_AUTH_RESPONSE_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_AUTH_RESPONSE_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_CAPABILITY_DATA_Marshal">Tss2_MU_TPMS_CAPABILITY_DATA_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_CAPABILITY_DATA_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_CAPABILITY_DATA_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_CAPABILITY_DATA_Unmarshal">Tss2_MU_TPMS_CAPABILITY_DATA_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2551,11 +3108,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_CAPABILITY_DATA_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_CAPABILITY_DATA_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_CERTIFY_INFO_Marshal">Tss2_MU_TPMS_CERTIFY_INFO_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_CERTIFY_INFO_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_CERTIFY_INFO_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_CERTIFY_INFO_Unmarshal">Tss2_MU_TPMS_CERTIFY_INFO_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2563,11 +3124,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_CERTIFY_INFO_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_CERTIFY_INFO_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_CLOCK_INFO_Marshal">Tss2_MU_TPMS_CLOCK_INFO_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_CLOCK_INFO_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_CLOCK_INFO_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_CLOCK_INFO_Unmarshal">Tss2_MU_TPMS_CLOCK_INFO_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2575,11 +3140,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_CLOCK_INFO_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_CLOCK_INFO_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_COMMAND_AUDIT_INFO_Marshal">Tss2_MU_TPMS_COMMAND_AUDIT_INFO_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_COMMAND_AUDIT_INFO_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_COMMAND_AUDIT_INFO_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_COMMAND_AUDIT_INFO_Unmarshal">Tss2_MU_TPMS_COMMAND_AUDIT_INFO_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2587,11 +3156,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_COMMAND_AUDIT_INFO_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_COMMAND_AUDIT_INFO_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_CONTEXT_DATA_Marshal">Tss2_MU_TPMS_CONTEXT_DATA_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_CONTEXT_DATA_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_CONTEXT_DATA_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_CONTEXT_DATA_Unmarshal">Tss2_MU_TPMS_CONTEXT_DATA_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2599,11 +3172,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_CONTEXT_DATA_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_CONTEXT_DATA_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_CONTEXT_Marshal">Tss2_MU_TPMS_CONTEXT_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_CONTEXT_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_CONTEXT_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_CONTEXT_Unmarshal">Tss2_MU_TPMS_CONTEXT_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2611,11 +3188,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_CONTEXT_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_CONTEXT_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_CREATION_DATA_Marshal">Tss2_MU_TPMS_CREATION_DATA_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_CREATION_DATA_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_CREATION_DATA_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_CREATION_DATA_Unmarshal">Tss2_MU_TPMS_CREATION_DATA_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2623,11 +3204,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_CREATION_DATA_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_CREATION_DATA_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_CREATION_INFO_Marshal">Tss2_MU_TPMS_CREATION_INFO_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_CREATION_INFO_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_CREATION_INFO_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_CREATION_INFO_Unmarshal">Tss2_MU_TPMS_CREATION_INFO_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2635,11 +3220,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_CREATION_INFO_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_CREATION_INFO_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_ECC_PARMS_Marshal">Tss2_MU_TPMS_ECC_PARMS_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_ECC_PARMS_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_ECC_PARMS_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_ECC_PARMS_Unmarshal">Tss2_MU_TPMS_ECC_PARMS_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2647,11 +3236,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_ECC_PARMS_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_ECC_PARMS_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_ECC_POINT_Marshal">Tss2_MU_TPMS_ECC_POINT_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_ECC_POINT_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_ECC_POINT_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_ECC_POINT_Unmarshal">Tss2_MU_TPMS_ECC_POINT_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2659,11 +3252,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_ECC_POINT_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_ECC_POINT_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_EMPTY_Marshal">Tss2_MU_TPMS_EMPTY_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_EMPTY_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_EMPTY_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_EMPTY_Unmarshal">Tss2_MU_TPMS_EMPTY_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2671,11 +3268,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_EMPTY_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_EMPTY_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_ID_OBJECT_Marshal">Tss2_MU_TPMS_ID_OBJECT_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_ID_OBJECT_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_ID_OBJECT_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_ID_OBJECT_Unmarshal">Tss2_MU_TPMS_ID_OBJECT_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2683,11 +3284,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_ID_OBJECT_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_ID_OBJECT_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_KEYEDHASH_PARMS_Marshal">Tss2_MU_TPMS_KEYEDHASH_PARMS_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_KEYEDHASH_PARMS_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_KEYEDHASH_PARMS_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_KEYEDHASH_PARMS_Unmarshal">Tss2_MU_TPMS_KEYEDHASH_PARMS_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2695,11 +3300,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_KEYEDHASH_PARMS_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_KEYEDHASH_PARMS_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_NV_CERTIFY_INFO_Marshal">Tss2_MU_TPMS_NV_CERTIFY_INFO_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_NV_CERTIFY_INFO_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_NV_CERTIFY_INFO_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_NV_CERTIFY_INFO_Unmarshal">Tss2_MU_TPMS_NV_CERTIFY_INFO_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2707,11 +3316,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_NV_CERTIFY_INFO_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_NV_CERTIFY_INFO_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_NV_PIN_COUNTER_PARAMETERS_Marshal">Tss2_MU_TPMS_NV_PIN_COUNTER_PARAMETERS_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_NV_PIN_COUNTER_PARAMETERS_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_NV_PIN_COUNTER_PARAMETERS_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_NV_PIN_COUNTER_PARAMETERS_Unmarshal">Tss2_MU_TPMS_NV_PIN_COUNTER_PARAMETERS_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2719,11 +3332,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_NV_PIN_COUNTER_PARAMETERS_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_NV_PIN_COUNTER_PARAMETERS_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_NV_PUBLIC_Marshal">Tss2_MU_TPMS_NV_PUBLIC_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_NV_PUBLIC_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_NV_PUBLIC_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_NV_PUBLIC_Unmarshal">Tss2_MU_TPMS_NV_PUBLIC_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2731,11 +3348,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_NV_PUBLIC_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_NV_PUBLIC_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_PCR_SELECT_Marshal">Tss2_MU_TPMS_PCR_SELECT_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_PCR_SELECT_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_PCR_SELECT_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_PCR_SELECT_Unmarshal">Tss2_MU_TPMS_PCR_SELECT_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2743,11 +3364,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_PCR_SELECT_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_PCR_SELECT_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_PCR_SELECTION_Marshal">Tss2_MU_TPMS_PCR_SELECTION_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_PCR_SELECTION_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_PCR_SELECTION_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_PCR_SELECTION_Unmarshal">Tss2_MU_TPMS_PCR_SELECTION_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2755,11 +3380,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_PCR_SELECTION_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_PCR_SELECTION_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_QUOTE_INFO_Marshal">Tss2_MU_TPMS_QUOTE_INFO_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_QUOTE_INFO_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_QUOTE_INFO_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_QUOTE_INFO_Unmarshal">Tss2_MU_TPMS_QUOTE_INFO_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2767,11 +3396,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_QUOTE_INFO_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_QUOTE_INFO_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_RSA_PARMS_Marshal">Tss2_MU_TPMS_RSA_PARMS_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_RSA_PARMS_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_RSA_PARMS_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_RSA_PARMS_Unmarshal">Tss2_MU_TPMS_RSA_PARMS_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2779,11 +3412,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_RSA_PARMS_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_RSA_PARMS_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_SCHEME_ECDAA_Marshal">Tss2_MU_TPMS_SCHEME_ECDAA_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_SCHEME_ECDAA_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_SCHEME_ECDAA_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_SCHEME_ECDAA_Unmarshal">Tss2_MU_TPMS_SCHEME_ECDAA_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2791,11 +3428,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_SCHEME_ECDAA_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_SCHEME_ECDAA_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_SCHEME_HASH_Marshal">Tss2_MU_TPMS_SCHEME_HASH_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_SCHEME_HASH_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_SCHEME_HASH_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_SCHEME_HASH_Unmarshal">Tss2_MU_TPMS_SCHEME_HASH_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2803,11 +3444,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_SCHEME_HASH_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_SCHEME_HASH_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_SCHEME_XOR_Marshal">Tss2_MU_TPMS_SCHEME_XOR_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_SCHEME_XOR_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_SCHEME_XOR_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_SCHEME_XOR_Unmarshal">Tss2_MU_TPMS_SCHEME_XOR_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2815,11 +3460,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_SCHEME_XOR_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_SCHEME_XOR_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_SENSITIVE_CREATE_Marshal">Tss2_MU_TPMS_SENSITIVE_CREATE_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_SENSITIVE_CREATE_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_SENSITIVE_CREATE_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_SENSITIVE_CREATE_Unmarshal">Tss2_MU_TPMS_SENSITIVE_CREATE_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2827,11 +3476,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_SENSITIVE_CREATE_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_SENSITIVE_CREATE_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_SESSION_AUDIT_INFO_Marshal">Tss2_MU_TPMS_SESSION_AUDIT_INFO_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_SESSION_AUDIT_INFO_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_SESSION_AUDIT_INFO_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_SESSION_AUDIT_INFO_Unmarshal">Tss2_MU_TPMS_SESSION_AUDIT_INFO_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2839,11 +3492,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_SESSION_AUDIT_INFO_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_SESSION_AUDIT_INFO_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_SIGNATURE_ECC_Marshal">Tss2_MU_TPMS_SIGNATURE_ECC_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_SIGNATURE_ECC_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_SIGNATURE_ECC_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_SIGNATURE_ECC_Unmarshal">Tss2_MU_TPMS_SIGNATURE_ECC_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2851,11 +3508,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_SIGNATURE_ECC_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_SIGNATURE_ECC_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_SIGNATURE_RSA_Marshal">Tss2_MU_TPMS_SIGNATURE_RSA_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_SIGNATURE_RSA_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_SIGNATURE_RSA_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_SIGNATURE_RSA_Unmarshal">Tss2_MU_TPMS_SIGNATURE_RSA_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2863,11 +3524,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_SIGNATURE_RSA_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_SIGNATURE_RSA_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_SYMCIPHER_PARMS_Marshal">Tss2_MU_TPMS_SYMCIPHER_PARMS_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_SYMCIPHER_PARMS_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_SYMCIPHER_PARMS_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_SYMCIPHER_PARMS_Unmarshal">Tss2_MU_TPMS_SYMCIPHER_PARMS_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2875,11 +3540,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_SYMCIPHER_PARMS_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_SYMCIPHER_PARMS_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_TAGGED_PCR_SELECT_Marshal">Tss2_MU_TPMS_TAGGED_PCR_SELECT_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_TAGGED_PCR_SELECT_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_TAGGED_PCR_SELECT_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_TAGGED_PCR_SELECT_Unmarshal">Tss2_MU_TPMS_TAGGED_PCR_SELECT_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2887,11 +3556,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_TAGGED_PCR_SELECT_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_TAGGED_PCR_SELECT_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_TAGGED_POLICY_Marshal">Tss2_MU_TPMS_TAGGED_POLICY_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_TAGGED_POLICY_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_TAGGED_POLICY_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_TAGGED_POLICY_Unmarshal">Tss2_MU_TPMS_TAGGED_POLICY_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2899,11 +3572,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_TAGGED_POLICY_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_TAGGED_POLICY_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_TAGGED_PROPERTY_Marshal">Tss2_MU_TPMS_TAGGED_PROPERTY_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_TAGGED_PROPERTY_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_TAGGED_PROPERTY_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_TAGGED_PROPERTY_Unmarshal">Tss2_MU_TPMS_TAGGED_PROPERTY_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2911,11 +3588,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_TAGGED_PROPERTY_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_TAGGED_PROPERTY_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_TIME_ATTEST_INFO_Marshal">Tss2_MU_TPMS_TIME_ATTEST_INFO_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_TIME_ATTEST_INFO_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_TIME_ATTEST_INFO_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_TIME_ATTEST_INFO_Unmarshal">Tss2_MU_TPMS_TIME_ATTEST_INFO_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2923,11 +3604,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_TIME_ATTEST_INFO_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_TIME_ATTEST_INFO_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_TIME_INFO_Marshal">Tss2_MU_TPMS_TIME_INFO_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_TIME_INFO_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_TIME_INFO_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMS_TIME_INFO_Unmarshal">Tss2_MU_TPMS_TIME_INFO_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2935,11 +3620,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMS_TIME_INFO_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMS_TIME_INFO_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_ASYM_SCHEME_Marshal">Tss2_MU_TPMT_ASYM_SCHEME_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_ASYM_SCHEME_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_ASYM_SCHEME_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_ASYM_SCHEME_Unmarshal">Tss2_MU_TPMT_ASYM_SCHEME_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2947,11 +3636,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_ASYM_SCHEME_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_ASYM_SCHEME_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_ECC_SCHEME_Marshal">Tss2_MU_TPMT_ECC_SCHEME_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_ECC_SCHEME_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_ECC_SCHEME_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_ECC_SCHEME_Unmarshal">Tss2_MU_TPMT_ECC_SCHEME_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2959,11 +3652,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_ECC_SCHEME_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_ECC_SCHEME_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_HA_Marshal">Tss2_MU_TPMT_HA_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_HA_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_HA_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_HA_Unmarshal">Tss2_MU_TPMT_HA_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2971,11 +3668,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_HA_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_HA_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_KDF_SCHEME_Marshal">Tss2_MU_TPMT_KDF_SCHEME_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_KDF_SCHEME_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_KDF_SCHEME_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_KDF_SCHEME_Unmarshal">Tss2_MU_TPMT_KDF_SCHEME_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2983,11 +3684,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_KDF_SCHEME_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_KDF_SCHEME_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_KEYEDHASH_SCHEME_Marshal">Tss2_MU_TPMT_KEYEDHASH_SCHEME_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_KEYEDHASH_SCHEME_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_KEYEDHASH_SCHEME_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_KEYEDHASH_SCHEME_Unmarshal">Tss2_MU_TPMT_KEYEDHASH_SCHEME_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -2995,11 +3700,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_KEYEDHASH_SCHEME_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_KEYEDHASH_SCHEME_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_PUBLIC_Marshal">Tss2_MU_TPMT_PUBLIC_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_PUBLIC_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_PUBLIC_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_PUBLIC_PARMS_Marshal">Tss2_MU_TPMT_PUBLIC_PARMS_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3007,11 +3716,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_PUBLIC_PARMS_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_PUBLIC_PARMS_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_PUBLIC_PARMS_Unmarshal">Tss2_MU_TPMT_PUBLIC_PARMS_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_PUBLIC_PARMS_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_PUBLIC_PARMS_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_PUBLIC_Unmarshal">Tss2_MU_TPMT_PUBLIC_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3019,11 +3732,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_PUBLIC_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_PUBLIC_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_RSA_DECRYPT_Marshal">Tss2_MU_TPMT_RSA_DECRYPT_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_RSA_DECRYPT_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_RSA_DECRYPT_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_RSA_DECRYPT_Unmarshal">Tss2_MU_TPMT_RSA_DECRYPT_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3031,11 +3748,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_RSA_DECRYPT_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_RSA_DECRYPT_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_RSA_SCHEME_Marshal">Tss2_MU_TPMT_RSA_SCHEME_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_RSA_SCHEME_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_RSA_SCHEME_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_RSA_SCHEME_Unmarshal">Tss2_MU_TPMT_RSA_SCHEME_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3043,11 +3764,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_RSA_SCHEME_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_RSA_SCHEME_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_SENSITIVE_Marshal">Tss2_MU_TPMT_SENSITIVE_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_SENSITIVE_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_SENSITIVE_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_SENSITIVE_Unmarshal">Tss2_MU_TPMT_SENSITIVE_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3055,11 +3780,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_SENSITIVE_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_SENSITIVE_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_SIG_SCHEME_Marshal">Tss2_MU_TPMT_SIG_SCHEME_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_SIG_SCHEME_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_SIG_SCHEME_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_SIG_SCHEME_Unmarshal">Tss2_MU_TPMT_SIG_SCHEME_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3067,11 +3796,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_SIG_SCHEME_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_SIG_SCHEME_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_SIGNATURE_Marshal">Tss2_MU_TPMT_SIGNATURE_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_SIGNATURE_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_SIGNATURE_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_SIGNATURE_Unmarshal">Tss2_MU_TPMT_SIGNATURE_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3079,11 +3812,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_SIGNATURE_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_SIGNATURE_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_SYM_DEF_Marshal">Tss2_MU_TPMT_SYM_DEF_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_SYM_DEF_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_SYM_DEF_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_SYM_DEF_OBJECT_Marshal">Tss2_MU_TPMT_SYM_DEF_OBJECT_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3091,11 +3828,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_SYM_DEF_OBJECT_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_SYM_DEF_OBJECT_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_SYM_DEF_OBJECT_Unmarshal">Tss2_MU_TPMT_SYM_DEF_OBJECT_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_SYM_DEF_OBJECT_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_SYM_DEF_OBJECT_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_SYM_DEF_Unmarshal">Tss2_MU_TPMT_SYM_DEF_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3103,11 +3844,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_SYM_DEF_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_SYM_DEF_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_TK_AUTH_Marshal">Tss2_MU_TPMT_TK_AUTH_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_TK_AUTH_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_TK_AUTH_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_TK_AUTH_Unmarshal">Tss2_MU_TPMT_TK_AUTH_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3115,11 +3860,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_TK_AUTH_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_TK_AUTH_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_TK_CREATION_Marshal">Tss2_MU_TPMT_TK_CREATION_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_TK_CREATION_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_TK_CREATION_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_TK_CREATION_Unmarshal">Tss2_MU_TPMT_TK_CREATION_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3127,11 +3876,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_TK_CREATION_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_TK_CREATION_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_TK_HASHCHECK_Marshal">Tss2_MU_TPMT_TK_HASHCHECK_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_TK_HASHCHECK_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_TK_HASHCHECK_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_TK_HASHCHECK_Unmarshal">Tss2_MU_TPMT_TK_HASHCHECK_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3139,11 +3892,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_TK_HASHCHECK_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_TK_HASHCHECK_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_TK_VERIFIED_Marshal">Tss2_MU_TPMT_TK_VERIFIED_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_TK_VERIFIED_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_TK_VERIFIED_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMT_TK_VERIFIED_Unmarshal">Tss2_MU_TPMT_TK_VERIFIED_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3151,11 +3908,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMT_TK_VERIFIED_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMT_TK_VERIFIED_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_ASYM_SCHEME_Marshal">Tss2_MU_TPMU_ASYM_SCHEME_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_ASYM_SCHEME_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_ASYM_SCHEME_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_ASYM_SCHEME_Unmarshal">Tss2_MU_TPMU_ASYM_SCHEME_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3163,11 +3924,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_ASYM_SCHEME_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_ASYM_SCHEME_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_ATTEST_Marshal">Tss2_MU_TPMU_ATTEST_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_ATTEST_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_ATTEST_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_ATTEST_Unmarshal">Tss2_MU_TPMU_ATTEST_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3175,11 +3940,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_ATTEST_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_ATTEST_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_CAPABILITIES_Marshal">Tss2_MU_TPMU_CAPABILITIES_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_CAPABILITIES_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_CAPABILITIES_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_CAPABILITIES_Unmarshal">Tss2_MU_TPMU_CAPABILITIES_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3187,11 +3956,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_CAPABILITIES_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_CAPABILITIES_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_ENCRYPTED_SECRET_Marshal">Tss2_MU_TPMU_ENCRYPTED_SECRET_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_ENCRYPTED_SECRET_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_ENCRYPTED_SECRET_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_ENCRYPTED_SECRET_Unmarshal">Tss2_MU_TPMU_ENCRYPTED_SECRET_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3199,11 +3972,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_ENCRYPTED_SECRET_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_ENCRYPTED_SECRET_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_HA_Marshal">Tss2_MU_TPMU_HA_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_HA_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_HA_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_HA_Unmarshal">Tss2_MU_TPMU_HA_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3211,11 +3988,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_HA_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_HA_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_KDF_SCHEME_Marshal">Tss2_MU_TPMU_KDF_SCHEME_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_KDF_SCHEME_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_KDF_SCHEME_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_KDF_SCHEME_Unmarshal">Tss2_MU_TPMU_KDF_SCHEME_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3223,11 +4004,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_KDF_SCHEME_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_KDF_SCHEME_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_NAME_Marshal">Tss2_MU_TPMU_NAME_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_NAME_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_NAME_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_NAME_Unmarshal">Tss2_MU_TPMU_NAME_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3235,11 +4020,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_NAME_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_NAME_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_PUBLIC_ID_Marshal">Tss2_MU_TPMU_PUBLIC_ID_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_PUBLIC_ID_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_PUBLIC_ID_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_PUBLIC_ID_Unmarshal">Tss2_MU_TPMU_PUBLIC_ID_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3247,11 +4036,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_PUBLIC_ID_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_PUBLIC_ID_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_PUBLIC_PARMS_Marshal">Tss2_MU_TPMU_PUBLIC_PARMS_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_PUBLIC_PARMS_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_PUBLIC_PARMS_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_PUBLIC_PARMS_Unmarshal">Tss2_MU_TPMU_PUBLIC_PARMS_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3259,11 +4052,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_PUBLIC_PARMS_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_PUBLIC_PARMS_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_SCHEME_KEYEDHASH_Marshal">Tss2_MU_TPMU_SCHEME_KEYEDHASH_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_SCHEME_KEYEDHASH_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_SCHEME_KEYEDHASH_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_SCHEME_KEYEDHASH_Unmarshal">Tss2_MU_TPMU_SCHEME_KEYEDHASH_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3271,11 +4068,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_SCHEME_KEYEDHASH_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_SCHEME_KEYEDHASH_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_SENSITIVE_COMPOSITE_Marshal">Tss2_MU_TPMU_SENSITIVE_COMPOSITE_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_SENSITIVE_COMPOSITE_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_SENSITIVE_COMPOSITE_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_SENSITIVE_COMPOSITE_Unmarshal">Tss2_MU_TPMU_SENSITIVE_COMPOSITE_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3283,11 +4084,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_SENSITIVE_COMPOSITE_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_SENSITIVE_COMPOSITE_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_SIG_SCHEME_Marshal">Tss2_MU_TPMU_SIG_SCHEME_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_SIG_SCHEME_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_SIG_SCHEME_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_SIG_SCHEME_Unmarshal">Tss2_MU_TPMU_SIG_SCHEME_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3295,11 +4100,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_SIG_SCHEME_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_SIG_SCHEME_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_SIGNATURE_Marshal">Tss2_MU_TPMU_SIGNATURE_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_SIGNATURE_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_SIGNATURE_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_SIGNATURE_Unmarshal">Tss2_MU_TPMU_SIGNATURE_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3307,11 +4116,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_SIGNATURE_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_SIGNATURE_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_SYM_KEY_BITS_Marshal">Tss2_MU_TPMU_SYM_KEY_BITS_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_SYM_KEY_BITS_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_SYM_KEY_BITS_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_SYM_KEY_BITS_Unmarshal">Tss2_MU_TPMU_SYM_KEY_BITS_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3319,11 +4132,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_SYM_KEY_BITS_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_SYM_KEY_BITS_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_SYM_MODE_Marshal">Tss2_MU_TPMU_SYM_MODE_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_SYM_MODE_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_SYM_MODE_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_TPMU_SYM_MODE_Unmarshal">Tss2_MU_TPMU_SYM_MODE_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3331,11 +4148,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_TPMU_SYM_MODE_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_TPMU_SYM_MODE_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_UINT16_Marshal">Tss2_MU_UINT16_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_UINT16_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_UINT16_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_UINT16_Unmarshal">Tss2_MU_UINT16_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3343,11 +4164,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_UINT16_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_UINT16_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_UINT32_Marshal">Tss2_MU_UINT32_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_UINT32_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_UINT32_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_UINT32_Unmarshal">Tss2_MU_UINT32_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3355,11 +4180,15 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_UINT32_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_UINT32_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_UINT64_Marshal">Tss2_MU_UINT64_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_UINT64_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_UINT64_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_UINT64_Unmarshal">Tss2_MU_UINT64_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3367,17 +4196,23 @@
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_UINT64_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_UINT64_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_UINT8_Marshal">Tss2_MU_UINT8_Marshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_UINT8_Marshal">(tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_UINT8_Marshal">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_MU_UINT8_Unmarshal">Tss2_MU_UINT8_Unmarshal() (tpm2_pytss.binding.ESYSBinding method)</a>
 
       <ul>
         <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Tss2_MU_UINT8_Unmarshal">(tpm2_pytss.esys.ESYSContext method)</a>
+</li>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Tss2_MU_UINT8_Unmarshal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
       </ul></li>
       <li><a href="binding.html#tpm2_pytss.binding.ESYSBinding.Tss2_TctiLdr_Initialize_Ex">Tss2_TctiLdr_Initialize_Ex() (tpm2_pytss.binding.ESYSBinding method)</a>
@@ -3401,13 +4236,25 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Unseal">Unseal() (tpm2_pytss.esys.ESYSContext method)</a>
+
+      <ul>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Unseal">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
+      </ul></li>
+      <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Unseal_Async">Unseal_Async() (tpm2_pytss.esys.ESYSContext method)</a>
+
+      <ul>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Unseal_Async">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Unseal_Async">Unseal_Async() (tpm2_pytss.esys.ESYSContext method)</a>
-</li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Unseal_Finish">Unseal_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
+
+      <ul>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.Unseal_Finish">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -3420,13 +4267,45 @@
 </li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.Vendor_TCG_Test_Finish">Vendor_TCG_Test_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
 </li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.VerifyQuote">VerifyQuote() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.VerifyQuote_Async">VerifyQuote_Async() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.VerifyQuote_Finish">VerifyQuote_Finish() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.VerifySignature">VerifySignature() (tpm2_pytss.esys.ESYSContext method)</a>
+
+      <ul>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.VerifySignature">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
+      </ul></li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.VerifySignature_Async">VerifySignature_Async() (tpm2_pytss.esys.ESYSContext method)</a>
+
+      <ul>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.VerifySignature_Async">(tpm2_pytss.fapi.FAPI method)</a>
 </li>
+      </ul></li>
       <li><a href="esys.html#tpm2_pytss.esys.ESYSContext.VerifySignature_Finish">VerifySignature_Finish() (tpm2_pytss.esys.ESYSContext method)</a>
+
+      <ul>
+        <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.VerifySignature_Finish">(tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="W">W</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.WriteAuthorizeNv">WriteAuthorizeNv() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.WriteAuthorizeNv_Async">WriteAuthorizeNv_Async() (tpm2_pytss.fapi.FAPI method)</a>
+</li>
+      <li><a href="fapi.html#tpm2_pytss.fapi.FAPI.WriteAuthorizeNv_Finish">WriteAuthorizeNv_Finish() (tpm2_pytss.fapi.FAPI method)</a>
 </li>
   </ul></td>
 </tr></table>
