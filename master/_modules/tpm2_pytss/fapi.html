@@ -1,0 +1,337 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>tpm2_pytss.fapi &#8212; tpm2-pytss 0.1.3 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for tpm2_pytss.fapi</h1><div class="highlight"><pre>
+<span></span><span class="c1"># SPDX-License-Identifier: MIT</span>
+<span class="c1"># Copyright (c) 2019 Intel Corporation</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">contextlib</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">ByteString</span><span class="p">,</span> <span class="n">NamedTuple</span>
+
+<span class="kn">from</span> <span class="nn">.util.swig</span> <span class="kn">import</span> <span class="n">Wrapper</span>
+<span class="kn">from</span> <span class="nn">.util.retry</span> <span class="kn">import</span> <span class="n">retry_tcti_loop</span><span class="p">,</span> <span class="n">retry_tcti_catch</span>
+<span class="kn">from</span> <span class="nn">.binding</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AuthSessionContext</span><span class="p">,</span>
+    <span class="n">FAPIBinding</span><span class="p">,</span>
+    <span class="n">FlushTRContext</span><span class="p">,</span>
+    <span class="n">NVContext</span><span class="p">,</span>
+    <span class="n">TPML_PCR_SELECTION_PTR</span><span class="p">,</span>
+    <span class="n">TPMT_HA_PTR</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.context</span> <span class="kn">import</span> <span class="n">BaseContextMetaClass</span>
+<span class="kn">from</span> <span class="nn">.config</span> <span class="kn">import</span> <span class="n">SYSCONFDIR</span>
+
+<span class="c1"># Read default values from system wide default FAPI config</span>
+<span class="n">DEFAULT_FAPI_CONFIG_PATH</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">SYSCONFDIR</span><span class="p">,</span> <span class="s2">&quot;tpm2-tss&quot;</span><span class="p">,</span> <span class="s2">&quot;fapi-config.json&quot;</span><span class="p">)</span>
+<span class="n">DEFAULT_FAPI_CONFIG_CONTENTS</span> <span class="o">=</span> <span class="n">DEFAULT_FAPI_CONFIG_PATH</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+<span class="n">DEFAULT_FAPI_CONFIG</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">DEFAULT_FAPI_CONFIG_CONTENTS</span><span class="p">)</span>
+
+
+<span class="c1"># Environment variable containing FAPI config</span>
+<span class="n">ENV_FAPI_CONFIG</span> <span class="o">=</span> <span class="s2">&quot;TSS2_FAPICONF&quot;</span>
+
+
+<span class="n">FAPIConfig</span> <span class="o">=</span> <span class="n">NamedTuple</span><span class="p">(</span>
+    <span class="s2">&quot;FAPIConfig&quot;</span><span class="p">,</span>
+    <span class="p">[</span>
+        <span class="p">(</span><span class="s2">&quot;profile_dir&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;user_dir&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;system_dir&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;log_dir&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;profile_name&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;tcti&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;system_pcrs&quot;</span><span class="p">,</span> <span class="n">TPML_PCR_SELECTION_PTR</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;ek_cert_file&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;ek_cert_less&quot;</span><span class="p">,</span> <span class="nb">bool</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;ek_fingerprint&quot;</span><span class="p">,</span> <span class="n">TPMT_HA_PTR</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">&quot;tcti_retry&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">),</span>
+    <span class="p">],</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">export</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">exported</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_asdict</span><span class="p">()</span>
+    <span class="n">remove</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">exported</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">remove</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">exported</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">exported</span>
+
+
+<span class="nd">@classmethod</span>
+<span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+        <span class="n">profile_dir</span><span class="o">=</span><span class="n">DEFAULT_FAPI_CONFIG</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;profile_dir&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="n">user_dir</span><span class="o">=</span><span class="n">DEFAULT_FAPI_CONFIG</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;user_dir&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="n">system_dir</span><span class="o">=</span><span class="n">DEFAULT_FAPI_CONFIG</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;system_dir&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="n">log_dir</span><span class="o">=</span><span class="n">DEFAULT_FAPI_CONFIG</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;log_dir&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="n">profile_name</span><span class="o">=</span><span class="n">DEFAULT_FAPI_CONFIG</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;profile_name&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="n">tcti</span><span class="o">=</span><span class="n">DEFAULT_FAPI_CONFIG</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tcti&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="n">system_pcrs</span><span class="o">=</span><span class="n">DEFAULT_FAPI_CONFIG</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;system_pcrs&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="n">ek_cert_file</span><span class="o">=</span><span class="n">DEFAULT_FAPI_CONFIG</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ek_cert_file&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="n">ek_cert_less</span><span class="o">=</span><span class="n">DEFAULT_FAPI_CONFIG</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ek_cert_less&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="n">ek_fingerprint</span><span class="o">=</span><span class="n">DEFAULT_FAPI_CONFIG</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ek_fingerprint&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="n">tcti_retry</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="n">FAPIConfig</span><span class="o">.</span><span class="n">export</span> <span class="o">=</span> <span class="n">export</span>
+<span class="n">FAPIConfig</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="n">default</span>
+<span class="n">FAPIDefaultConfig</span> <span class="o">=</span> <span class="n">FAPIConfig</span><span class="o">.</span><span class="n">default</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">InvalidArgumentError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span>  <span class="c1"># pragma: no cov</span>
+
+
+<span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+<span class="k">def</span> <span class="nf">temp_fapi_config</span><span class="p">(</span><span class="n">config</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">yield</span>
+        <span class="k">return</span>
+    <span class="k">with</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fileobj</span><span class="p">:</span>
+        <span class="n">old_fapi_config</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ENV_FAPI_CONFIG</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">exported</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">export</span><span class="p">()</span>
+            <span class="k">del</span> <span class="n">exported</span><span class="p">[</span><span class="s2">&quot;tcti_retry&quot;</span><span class="p">]</span>
+            <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">exported</span><span class="p">,</span> <span class="n">fileobj</span><span class="p">)</span>
+            <span class="n">fileobj</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="n">ENV_FAPI_CONFIG</span><span class="p">]</span> <span class="o">=</span> <span class="n">fileobj</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">yield</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">old_fapi_config</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="n">ENV_FAPI_CONFIG</span><span class="p">]</span> <span class="o">=</span> <span class="n">old_fapi_config</span>
+
+
+<span class="k">class</span> <span class="nc">FAPIMetaClass</span><span class="p">(</span><span class="n">BaseContextMetaClass</span><span class="p">):</span>
+    <span class="n">PREFIX</span> <span class="o">=</span> <span class="s2">&quot;Fapi_&quot;</span>
+    <span class="n">NO_PASS_CTXP</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="s2">&quot;Fapi_Initialize&quot;</span><span class="p">,</span> <span class="s2">&quot;Fapi_Finalize&quot;</span><span class="p">])</span>
+
+
+<div class="viewcode-block" id="FAPI"><a class="viewcode-back" href="../../fapi.html#tpm2_pytss.fapi.FAPI">[docs]</a><span class="k">class</span> <span class="nc">FAPI</span><span class="p">(</span><span class="n">Wrapper</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">FAPIMetaClass</span><span class="p">):</span>
+
+    <span class="n">MODULE</span> <span class="o">=</span> <span class="n">FAPIBinding</span>
+    <span class="c1"># TODO Verify maximum length requested of GetRandom</span>
+    <span class="n">GET_RANDOM_MAX_LENGTH</span> <span class="o">=</span> <span class="mi">64</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">FAPIConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ctxpp</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ctxp</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__qualname__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;__init__(</span><span class="si">%r</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;FAPIContext&quot;</span><span class="p">:</span>
+        <span class="c1"># Create an FAPI_CONTEXT **</span>
+        <span class="n">ctxpp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_fapi_ctx_ptr</span><span class="p">()</span>
+        <span class="c1"># Create an ExitStack</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ctx_stack</span> <span class="o">=</span> <span class="n">contextlib</span><span class="o">.</span><span class="n">ExitStack</span><span class="p">()</span><span class="o">.</span><span class="fm">__enter__</span><span class="p">()</span>
+        <span class="c1"># Set the config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ctx_stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="n">temp_fapi_config</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">))</span>
+        <span class="c1"># Create the FAPI_CONTEXT * and connect to the TPM</span>
+        <span class="k">for</span> <span class="n">retry</span> <span class="ow">in</span> <span class="n">retry_tcti_loop</span><span class="p">(</span><span class="n">max_tries</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">tcti_retry</span><span class="p">):</span>
+            <span class="k">with</span> <span class="n">retry_tcti_catch</span><span class="p">(</span><span class="n">retry</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">Initialize</span><span class="p">(</span><span class="n">ctxpp</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="c1"># Grab the allocated FAPI_CONTEXT *</span>
+        <span class="n">ctxp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fapi_ctx_ptr_value</span><span class="p">(</span><span class="n">ctxpp</span><span class="p">)</span>
+        <span class="c1"># Save references at the end to avoid possible memory leaks</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ctxpp</span> <span class="o">=</span> <span class="n">ctxpp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ctxp</span> <span class="o">=</span> <span class="n">ctxp</span>
+        <span class="c1"># self.logger.debug(&quot;__enter__&quot;)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_exc_type</span><span class="p">,</span> <span class="n">_exc_value</span><span class="p">,</span> <span class="n">_traceback</span><span class="p">):</span>
+        <span class="c1"># Exit the ExitStack</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ctx_stack</span><span class="o">.</span><span class="fm">__exit__</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="c1"># Clean up the FAPI_CONTEXT *</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Finalize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctxpp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delete_fapi_ctx_ptr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctxpp</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ctxpp</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ctxp</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># self.logger.debug(&quot;__exit__&quot;)</span>
+
+    <span class="k">def</span> <span class="nf">_bytearray</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">buf</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Takes any pointer to an array of bytes and that array&#39;s length and</span>
+<span class="sd">        returns a :py:`bytearray` containing those bytes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">buf</span> <span class="o">=</span> <span class="n">FAPIBinding</span><span class="o">.</span><span class="n">ByteArray</span><span class="o">.</span><span class="n">frompointer</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+        <span class="n">array</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+            <span class="n">array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">buf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">array</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">flush_tr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create and return a FAPI_TR_PTR that will be set to FAPI_TR_NONE and</span>
+<span class="sd">        flushed when it&#39;s context exits.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">partial</span><span class="p">(</span><span class="n">FlushTRContext</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">auth_session</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create and return a auth session context.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">partial</span><span class="p">(</span><span class="n">AuthSessionContext</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">nv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create and return a nv context.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">partial</span><span class="p">(</span><span class="n">NVContext</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+
+<div class="viewcode-block" id="FAPI.get_random"><a class="viewcode-back" href="../../fapi.html#tpm2_pytss.fapi.FAPI.get_random">[docs]</a>    <span class="k">def</span> <span class="nf">get_random</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">,)</span> <span class="o">-&gt;</span> <span class="n">ByteString</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fapi_GetRandom</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">GET_RANDOM_MAX_LENGTH</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidArgumentError</span><span class="p">(</span>
+                <span class="s2">&quot;Maximum length is </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GET_RANDOM_MAX_LENGTH</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">TPM2B_DIGEST_PTR_PTR</span><span class="p">()</span> <span class="k">as</span> <span class="n">datapp</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">GetRandom</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">datapp</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bytearray</span><span class="p">(</span><span class="n">datapp</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">datapp</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">buffer</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">tpm2-pytss</a></h1>
+
+
+
+<p class="blurb">TPM 2.0 TSS Bindings for Python</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=tpm2-software&repo=tpm2-pytss&type=watch&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://travis-ci.org/tpm2-software/tpm2-pytss">
+    <img
+        alt="https://secure.travis-ci.org/tpm2-software/tpm2-pytss.svg?branch=master"
+        src="https://secure.travis-ci.org/tpm2-software/tpm2-pytss.svg?branch=master"
+    />
+</a>
+</p>
+
+
+
+
+    
+
+<p>
+<a class="badge" href="https://codecov.io/github/tpm2-software/tpm2-pytss">
+    <img
+    alt="https://codecov.io/github/tpm2-software/tpm2-pytss/coverage.svg?branch=master"
+    src="https://codecov.io/github/tpm2-software/tpm2-pytss/coverage.svg?branch=master"
+    />
+</a>
+</p>
+<h3>Navigation</h3>
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/tpm2-software/tpm2-pytss">GitHub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/index.html">Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../esys.html">ESYS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../fapi.html">FAPI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tcti.html">TCTIs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../binding.html">Esys Bindings</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Intel Corperation.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

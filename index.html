@@ -14,7 +14,7 @@
     <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="ESYS" href="esys.html" />
+    <link rel="next" title="Examples" href="examples/index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -43,13 +43,151 @@ revision of the specification. That’s where you can find details on what each
 functions does.</p>
 <p>The first thing you’ll want to do is read section <code class="docutils literal notranslate"><span class="pre">3.1</span> <span class="pre">Top-Level</span> <span class="pre">ESAPI</span> <span class="pre">Usage</span>
 <span class="pre">Model</span></code> to understand how the API works at a high level.</p>
+<p>Supported versions of Python are</p>
+<ul class="simple">
+<li><p>3.5</p></li>
+<li><p>3.6</p></li>
+<li><p>3.7</p></li>
+<li><p>3.8</p></li>
+</ul>
+<div class="section" id="features">
+<h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
+<p>We support the FAPI, ESAPI, and marshalling library.</p>
+</div>
+<div class="section" id="dependencies">
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
+<p>This has been tested against TPM2 TSS 2.4.0, SWIG 3 and SWIG 4.</p>
+<div class="section" id="tpm2-tss">
+<h3>tpm2-tss<a class="headerlink" href="#tpm2-tss" title="Permalink to this headline">¶</a></h3>
+<p>You need to install tpm2-tss prior to installing this,
+<a class="reference external" href="https://github.com/tpm2-software/tpm2-tss/blob/master/INSTALL.md">INSTALL.md</a>.</p>
+</div>
+<div class="section" id="pkg-config">
+<h3>pkg-config<a class="headerlink" href="#pkg-config" title="Permalink to this headline">¶</a></h3>
+<p>You need to install pkg-config</p>
+</div>
+<div class="section" id="swig">
+<h3>swig<a class="headerlink" href="#swig" title="Permalink to this headline">¶</a></h3>
+<p>You need to install <a class="reference external" href="http://swig.org/">swig</a>.</p>
+<div class="section" id="ubuntu">
+<h4>Ubuntu<a class="headerlink" href="#ubuntu" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> sudo apt-get -y install swig pkg-config
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="ldconfig">
+<h3>ldconfig<a class="headerlink" href="#ldconfig" title="Permalink to this headline">¶</a></h3>
+<p>When you ran <code class="docutils literal notranslate"><span class="pre">./configure</span></code> for tpm2-tss if you didn’t supply a prefix it usually
+defaults to <code class="docutils literal notranslate"><span class="pre">/usr/local/</span></code>. When you ran <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">install</span></code> it then installed the
+libraries under that path. Your pacakge manager usually installs libraries to
+<code class="docutils literal notranslate"><span class="pre">/usr</span></code>. If you properly configure the <code class="docutils literal notranslate"><span class="pre">ldconfig</span></code> tool, it’ll make the libraries
+you just installed available from within <code class="docutils literal notranslate"><span class="pre">/usr/local</span></code> (which means they won’t
+clash with things your package manager installs). If you don’t configure it then
+you might get this error:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="ne">ImportError</span><span class="p">:</span> <span class="n">libtss2</span><span class="o">-</span><span class="n">esys</span><span class="o">.</span><span class="n">so</span><span class="o">.</span><span class="mi">0</span><span class="p">:</span> <span class="n">cannot</span> <span class="nb">open</span> <span class="n">shared</span> <span class="nb">object</span> <span class="n">file</span><span class="p">:</span> <span class="n">No</span> <span class="n">such</span> <span class="n">file</span> <span class="ow">or</span> <span class="n">directory</span>
+</pre></div>
+</div>
+<p>We make a config file that tells <code class="docutils literal notranslate"><span class="pre">ldconfig</span></code> to look in <code class="docutils literal notranslate"><span class="pre">/usr/local/lib</span></code> for
+shared libraries, then we run <code class="docutils literal notranslate"><span class="pre">ldconfig</span></code>.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> sudo mkdir -p /etc/ld.so.conf.d/
+<span class="gp">$</span> <span class="nb">echo</span> <span class="s1">&#39;include /etc/ld.so.conf.d/*.conf&#39;</span> <span class="p">|</span> sudo tee -a /etc/ld.so.conf
+<span class="gp">$</span> <span class="nb">echo</span> <span class="s1">&#39;/usr/local/lib&#39;</span> <span class="p">|</span> sudo tee -a /etc/ld.so.conf.d/libc.conf
+<span class="gp">$</span> sudo ldconfig
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>More info on ldconfig error: <a class="reference external" href="https://stackoverflow.com/a/17653893/3969496">https://stackoverflow.com/a/17653893/3969496</a></p>
+</div>
+</div>
+</div>
+<div class="section" id="install">
+<h2>Install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h2>
+<p>Install from PyPi.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python3 -m pip install tpm2-pytss
+</pre></div>
+</div>
+<p>Or install from the Git repo</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> git clone --depth <span class="m">1</span> --recurse-submodules -b <span class="si">${</span><span class="nv">TPM2_PYTSS_VERSION</span><span class="si">}</span> <span class="se">\</span>
+  https://github.com/tpm2-software/tpm2-pytss
+<span class="gp">$</span> <span class="nb">cd</span> tpm2-pytss
+<span class="gp">$</span> python3 -m pip install -e .
+</pre></div>
+</div>
+</div>
+<div class="section" id="testing">
+<h2>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h2>
+<p>You need to have <code class="docutils literal notranslate"><span class="pre">tpm_server</span></code> installed in your path to run the tests.</p>
+<p>Download the latest version from <a class="reference external" href="https://sourceforge.net/projects/ibmswtpm2/files/">https://sourceforge.net/projects/ibmswtpm2/files/</a>
+and put it somewher in your <code class="docutils literal notranslate"><span class="pre">$PATH</span></code>.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python3 setup.py <span class="nb">test</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="logging">
+<h2>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h2>
+<p>To get traces of all calls into the TSS, use the <code class="docutils literal notranslate"><span class="pre">TPM2_PYTSS_LOG_LEVEL</span></code>
+environment variable.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> <span class="nb">export</span> <span class="nv">TPM2_PYTSS_LOG_LEVEL</span><span class="o">=</span>debug
+</pre></div>
+</div>
+<p>Example logs:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">test_random_length</span> <span class="p">(</span><span class="n">tests</span><span class="o">.</span><span class="n">test_esys_get_random</span><span class="o">.</span><span class="n">TestGetRandom</span><span class="p">)</span> <span class="o">...</span> <span class="n">DEBUG</span><span class="p">:</span><span class="n">asyncio</span><span class="p">:</span><span class="n">Using</span> <span class="n">selector</span><span class="p">:</span> <span class="n">EpollSelector</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">tpm2_pytss</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">swig</span><span class="p">:</span><span class="n">Tss2_TctiLdr_Initialize_Ex</span><span class="p">(</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">mssim</span><span class="p">,</span>
+    <span class="n">conf</span><span class="p">:</span> <span class="n">port</span><span class="o">=</span><span class="mi">63684</span><span class="p">,</span>
+    <span class="n">context</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">Swig</span> <span class="n">Object</span> <span class="n">of</span> <span class="nb">type</span> <span class="s1">&#39;TSS2_TCTI_CONTEXT **&#39;</span> <span class="n">at</span> <span class="mh">0x7f5e63d8ea50</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">tpm2_pytss</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">swig</span><span class="p">:</span><span class="n">new_ctx_ptr</span><span class="p">(</span>
+
+<span class="p">)</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">tpm2_pytss</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">swig</span><span class="p">:</span><span class="n">Esys_Initialize</span><span class="p">(</span>
+    <span class="n">esys_context</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">Swig</span> <span class="n">Object</span> <span class="n">of</span> <span class="nb">type</span> <span class="s1">&#39;ESYS_CONTEXT **&#39;</span> <span class="n">at</span> <span class="mh">0x7f5e63d8e9f0</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="n">tcti</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">Swig</span> <span class="n">Object</span> <span class="n">of</span> <span class="nb">type</span> <span class="s1">&#39;TSS2_TCTI_CONTEXT *&#39;</span> <span class="n">at</span> <span class="mh">0x7f5e63d8e5d0</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="n">abiVersion</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">tpm2_pytss</span><span class="o">.</span><span class="n">binding</span><span class="o">.</span><span class="n">TSS2_ABI_VERSION</span><span class="p">;</span> <span class="n">proxy</span> <span class="n">of</span> <span class="o">&lt;</span><span class="n">Swig</span> <span class="n">Object</span> <span class="n">of</span> <span class="nb">type</span> <span class="s1">&#39;TSS2_ABI_VERSION *&#39;</span> <span class="n">at</span> <span class="mh">0x7f5e6337ab10</span><span class="o">&gt;</span> <span class="o">&gt;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">tpm2_pytss</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">swig</span><span class="p">:</span><span class="n">ctx_ptr_value</span><span class="p">(</span>
+    <span class="n">obj</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">Swig</span> <span class="n">Object</span> <span class="n">of</span> <span class="nb">type</span> <span class="s1">&#39;ESYS_CONTEXT **&#39;</span> <span class="n">at</span> <span class="mh">0x7f5e63d8e9f0</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">tpm2_pytss</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">swig</span><span class="p">:</span><span class="n">Esys_Startup</span><span class="p">(</span>
+    <span class="n">esysContext</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">Swig</span> <span class="n">Object</span> <span class="n">of</span> <span class="nb">type</span> <span class="s1">&#39;ESYS_CONTEXT *&#39;</span> <span class="n">at</span> <span class="mh">0x7f5e63d8e7e0</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="n">startupType</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">tpm2_pytss</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">swig</span><span class="p">:</span><span class="n">Esys_SetTimeout</span><span class="p">(</span>
+    <span class="n">esys_context</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">Swig</span> <span class="n">Object</span> <span class="n">of</span> <span class="nb">type</span> <span class="s1">&#39;ESYS_CONTEXT *&#39;</span> <span class="n">at</span> <span class="mh">0x7f5e63d8e7e0</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">tpm2_pytss</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">swig</span><span class="p">:</span><span class="n">Esys_GetRandom</span><span class="p">(</span>
+    <span class="n">esysContext</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">Swig</span> <span class="n">Object</span> <span class="n">of</span> <span class="nb">type</span> <span class="s1">&#39;ESYS_CONTEXT *&#39;</span> <span class="n">at</span> <span class="mh">0x7f5e63d8e7e0</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="n">shandle1</span><span class="p">:</span> <span class="mi">4095</span><span class="p">,</span>
+    <span class="n">shandle2</span><span class="p">:</span> <span class="mi">4095</span><span class="p">,</span>
+    <span class="n">shandle3</span><span class="p">:</span> <span class="mi">4095</span><span class="p">,</span>
+    <span class="n">bytesRequested</span><span class="p">:</span> <span class="mi">11</span><span class="p">,</span>
+    <span class="n">randomBytes</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">Swig</span> <span class="n">Object</span> <span class="n">of</span> <span class="nb">type</span> <span class="s1">&#39;TPM2B_NONCE **&#39;</span> <span class="n">at</span> <span class="mh">0x7f5e63d8e8d0</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">tpm2_pytss</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">swig</span><span class="p">:</span><span class="n">Esys_Finalize</span><span class="p">(</span>
+    <span class="n">context</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">Swig</span> <span class="n">Object</span> <span class="n">of</span> <span class="nb">type</span> <span class="s1">&#39;ESYS_CONTEXT **&#39;</span> <span class="n">at</span> <span class="mh">0x7f5e63d8e9f0</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">DEBUG</span><span class="p">:</span><span class="n">tpm2_pytss</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">swig</span><span class="p">:</span><span class="n">delete_ctx_ptr</span><span class="p">(</span>
+    <span class="n">obj</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">Swig</span> <span class="n">Object</span> <span class="n">of</span> <span class="nb">type</span> <span class="s1">&#39;ESYS_CONTEXT **&#39;</span> <span class="n">at</span> <span class="mh">0x7f5e63d8e9f0</span><span class="o">&gt;</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/tpm2-software/tpm2-pytss">GitHub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/fapi.html">FAPI</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="esys.html">ESYS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fapi.html">FAPI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tcti.html">TCTIs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="binding.html">Esys Bindings</a></li>
 </ul>
+</div>
 </div>
 </div>
 
@@ -105,7 +243,10 @@ functions does.</p>
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/tpm2-software/tpm2-pytss">GitHub</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="esys.html">ESYS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fapi.html">FAPI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tcti.html">TCTIs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="binding.html">Esys Bindings</a></li>
 </ul>
@@ -114,7 +255,7 @@ functions does.</p>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="#">Documentation overview</a><ul>
-      <li>Next: <a href="esys.html" title="next chapter">ESYS</a></li>
+      <li>Next: <a href="examples/index.html" title="next chapter">Examples</a></li>
   </ul></li>
 </ul>
 </div>
