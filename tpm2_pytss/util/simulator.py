@@ -124,6 +124,13 @@ class Simulator:
             self.proc.wait()
             self.proc = None
 
+    def __enter__(self):
+        self.start()
+        return self
+
+    def __exit__(self, _exc_type, _exc_value, _traceback):
+        self.stop()
+
 
 class SimulatorTest:
     """
