@@ -19,6 +19,7 @@ Model`` to understand how the API works at a high level.
     :maxdepth: 2
     :caption: Contents:
 
+    examples/index
     esys
     tcti
     binding
