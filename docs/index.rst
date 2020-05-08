@@ -179,5 +179,6 @@ Example logs:
     GitHub <https://github.com/tpm2-software/tpm2-pytss>
     examples/index
     esys
+    fapi
     tcti
     binding
