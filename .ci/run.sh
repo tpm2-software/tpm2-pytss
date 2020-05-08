@@ -99,6 +99,8 @@ function run_docs() {
   git clean -fdx
   git reset --hard HEAD
 
+  patch -p1 < .ci/config.json.patch
+
   docker run --rm \
     -u $(id -u):$(id -g) \
     -v "${PWD}:/workspace/tpm2-pytss" \
