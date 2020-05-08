@@ -10,6 +10,7 @@ from functools import partial
 from typing import Optional, ByteString, NamedTuple
 
 from .util.swig import Wrapper
+from .util.retry import retry_tcti_loop, retry_tcti_catch
 from .binding import (
     AuthSessionContext,
     FAPIBinding,
@@ -44,6 +45,7 @@ FAPIConfig = NamedTuple(
         ("ek_cert_file", str),
         ("ek_cert_less", bool),
         ("ek_fingerprint", TPMT_HA_PTR),
+        ("tcti_retry", int),
     ],
 )
 
@@ -69,11 +71,13 @@ def default(cls, **kwargs):
         ek_cert_file=DEFAULT_FAPI_CONFIG.get("ek_cert_file", None),
         ek_cert_less=DEFAULT_FAPI_CONFIG.get("ek_cert_less", None),
         ek_fingerprint=DEFAULT_FAPI_CONFIG.get("ek_fingerprint", None),
+        tcti_retry=1,
     )
 
 
 FAPIConfig.export = export
 FAPIConfig.default = default
+FAPIDefaultConfig = FAPIConfig.default()
 
 
 class InvalidArgumentError(Exception):
@@ -88,7 +92,9 @@ def temp_fapi_config(config):
     with tempfile.NamedTemporaryFile(mode="w") as fileobj:
         old_fapi_config = os.environ.get(ENV_FAPI_CONFIG, None)
         try:
-            json.dump(config.export(), fileobj)
+            exported = config.export()
+            del exported["tcti_retry"]
+            json.dump(exported, fileobj)
             fileobj.seek(0)
             os.environ[ENV_FAPI_CONFIG] = fileobj.name
             yield
@@ -123,7 +129,9 @@ class FAPI(Wrapper, metaclass=FAPIMetaClass):
         # Set the config
         self.ctx_stack.enter_context(temp_fapi_config(self.config))
         # Create the FAPI_CONTEXT * and connect to the TPM
-        self.Initialize(ctxpp, None)
+        for retry in retry_tcti_loop(max_tries=self.config.tcti_retry):
+            with retry_tcti_catch(retry):
+                self.Initialize(ctxpp, None)
         # Grab the allocated FAPI_CONTEXT *
         ctxp = self.fapi_ctx_ptr_value(ctxpp)
         # Save references at the end to avoid possible memory leaks

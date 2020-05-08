@@ -4,8 +4,7 @@ import unittest.mock
 
 from tpm2_pytss import tcti
 from tpm2_pytss.exceptions import TPM2Error
-
-from .base_esys import retry_tcti_loop, retry_tcti_catch, TCTI_RETRY_TRIES
+from tpm2_pytss.util.retry import retry_tcti_loop, retry_tcti_catch, TCTI_RETRY_TRIES
 
 
 class TestTCTIRetry(unittest.TestCase):

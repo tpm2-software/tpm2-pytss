@@ -1,6 +1,7 @@
 from typing import Optional
 
 from .binding import ESYSBinding
+from .util.retry import retry_tcti_loop, retry_tcti_catch
 
 
 class TCTIContext:
@@ -16,9 +17,10 @@ class TCTIContext:
     ...     esys.Esys_Initialize(ctxp, tctx.ctxp, v)
     """
 
-    def __init__(self, parent, config: str):
+    def __init__(self, parent, config: str, retry: int = 1):
         self.parent = parent
         self.config = config
+        self.retry = retry
         # Context pointer and context pointer pointer
         self.ctxp = None
         self.ctxpp = None
@@ -26,7 +28,12 @@ class TCTIContext:
     def __enter__(self):
         ctxpp = ESYSBinding.tcti_ctx_ptr_ptr()
         ctxpp.__enter__()
-        ESYSBinding.Tss2_TctiLdr_Initialize_Ex(self.NAME, self.config, ctxpp.ptr)
+        # Attempt TCTI connection
+        for retry in retry_tcti_loop(max_tries=self.retry):
+            with retry_tcti_catch(retry):
+                ESYSBinding.Tss2_TctiLdr_Initialize_Ex(
+                    self.NAME, self.config, ctxpp.ptr
+                )
         # Don't set property until after init succeeds to avoid memory leaks (gc
         # should cleanup if no other references exists when exception is thrown)
         self.ctxp = ctxpp.value
@@ -43,8 +50,10 @@ class TCTI:
 
     CONTEXT = TCTIContext
 
-    def __call__(self, *, config: Optional[str] = None) -> "TCTIContext":
-        return self.CONTEXT(self, config)
+    def __call__(
+        self, *, config: Optional[str] = None, retry: Optional[int] = 1
+    ) -> "TCTIContext":
+        return self.CONTEXT(self, config, retry)
 
     @classmethod
     def _load(cls, name):
