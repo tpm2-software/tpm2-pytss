@@ -1,3 +1,4 @@
+import os
 import ast
 import sys
 import pathlib
@@ -5,8 +6,15 @@ import unittest
 import subprocess
 
 
+# Top of the git repo
+ROOT = pathlib.Path(__file__).parent.parent
+
+ENV = os.environ.copy()
+ENV["PYTHONPATH"] = str(ROOT)
+
+
 def filepath(filename):
-    return pathlib.Path(__file__).parent.parent / "examples" / filename
+    return ROOT / "examples" / filename
 
 
 class TestExamples(unittest.TestCase):
@@ -14,7 +22,7 @@ class TestExamples(unittest.TestCase):
         # Capture output
         stdout = (
             subprocess.check_output(
-                [sys.executable, str(filepath("fapi_get_random.py"))]
+                [sys.executable, str(filepath("fapi_get_random.py"))], env=ENV,
             )
             .decode()
             .strip()
