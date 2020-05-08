@@ -1,6 +1,5 @@
 from tpm2_pytss.binding import *
-
-from .base_esys import BaseTestESYS
+from tpm2_pytss.util.testing import BaseTestESYS
 
 
 class TestGetCapability(BaseTestESYS):

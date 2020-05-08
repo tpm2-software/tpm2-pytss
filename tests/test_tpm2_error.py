@@ -1,7 +1,7 @@
 from contextlib import ExitStack
 from tpm2_pytss.binding import *
 from tpm2_pytss.exceptions import TPM2Error
-from .base_esys import BaseTestESYS
+from tpm2_pytss.util.testing import BaseTestESYS
 
 
 class TestTPM2RC(BaseTestESYS):

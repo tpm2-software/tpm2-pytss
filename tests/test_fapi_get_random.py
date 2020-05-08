@@ -2,8 +2,7 @@ import random
 from contextlib import ExitStack
 
 from tpm2_pytss.binding import *
-
-from .base_esys import BaseTestFAPI
+from tpm2_pytss.util.testing import BaseTestFAPI
 
 
 class TestGetRandom(BaseTestFAPI):

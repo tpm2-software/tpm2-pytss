@@ -5,8 +5,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric import rsa
 
 from tpm2_pytss.binding import *
-
-from .base_esys import BaseTestESYS
+from tpm2_pytss.util.testing import BaseTestESYS
 
 
 class TestLoadExternal(BaseTestESYS):
