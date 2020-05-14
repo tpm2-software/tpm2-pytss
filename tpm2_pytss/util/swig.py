@@ -159,11 +159,13 @@ class WrapperMetaClass(type, Wrapper):
                     if modifed is not None:
                         args[i] = modifed
             LOGGER.debug(
-                ("%s(\n    " % (func.__name__,))
+                ("%s(" % (func.__name__,))
+                + ("\n    " if args else "")
                 + "\n    ".join(
                     map(lambda x: "%s: %s," % (x[0].name, x[1]), zip(parameters, args))
                 )
-                + "\n)"
+                + ("\n" if args else "")
+                + ")"
             )
             return func(*args, **kwargs)
 
