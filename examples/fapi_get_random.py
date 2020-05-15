@@ -24,6 +24,7 @@ def main():
                 log_dir=log_dir,
                 tcti="mssim:port=%d" % (simulator.port,),
                 tcti_retry=100,
+                ek_cert_less=1,
             )
         )
         # Enter the context, create TCTI connection
