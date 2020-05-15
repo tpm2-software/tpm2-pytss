@@ -67,6 +67,7 @@ class BaseTestFAPI(SimulatorTest, unittest.TestCase):
                 log_dir=self.log_dir,
                 tcti="mssim:port=%d" % (self.simulator.port,),
                 tcti_retry=TCTI_RETRY_TRIES,
+                ek_cert_less=1,
             )
         )
         # Enter the context
