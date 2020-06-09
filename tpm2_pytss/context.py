@@ -1,11 +1,20 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2019 Intel Corporation
+import json
+import inspect
+import contextlib
 from functools import partial, wraps
 from typing import Optional, ByteString
 
 from .tcti import TCTIContext
 from .util.swig import Wrapper
-from .binding import AuthSessionContext, ESYSBinding, FlushTRContext, NVContext
+from .binding import (
+    AuthSessionContext,
+    ESYSBinding,
+    FlushTRContext,
+    NVContext,
+    to_bytearray,
+)
 
 
 class InvalidArgumentError(Exception):
@@ -29,9 +38,9 @@ class BaseContextMetaClass(type):
             # function a method in our new class
             elif key.startswith(cls.PREFIX):
                 if key in cls.NO_PASS_CTXP:
-                    func = cls.wrap_no_pass_ctxp(func)
+                    func = cls._wrap_no_pass_ctxp(func)
                 else:
-                    func = cls.wrap_pass_ctxp(func)
+                    func = cls._wrap_pass_ctxp(func)
             # Remove Esys_ from function names since they will be called from
             # the ESYSContext and that's redundant
             if key.startswith(cls.PREFIX):
@@ -40,26 +49,107 @@ class BaseContextMetaClass(type):
         return cls
 
     @classmethod
-    def wrap_no_pass_ctxp(cls, func):
+    def _wrap_no_pass_ctxp(cls, func):
         @wraps(func)
         def wrapper(_self, *args, **kwds):
             """
             wrapper will be assigned to the ESYSContext class as a method. As
             such the first argument, self, is an instance of ESYSContext.
             """
+            # Check if a custom wrapper has been defined
+            custom_wrap = getattr(cls, "wrap_no_pass_ctxp", None)
+            if custom_wrap is not None:
+                return custom_wrap(func)(*args, **kwds)
             return func(*args, **kwds)
 
         return wrapper
 
     @classmethod
-    def wrap_pass_ctxp(cls, func):
+    def _wrap_pass_ctxp(cls, func):
         @wraps(func)
         def wrapper(self, *args, **kwds):
             """
             wrapper will be assigned to the ESYSContext class as a method. As
             such the first argument, self, is an instance of ESYSContext.
             """
+            # Check if a custom wrapper has been defined
+            custom_wrap = getattr(cls, "wrap_pass_ctxp", None)
+            if custom_wrap is not None:
+                return custom_wrap(func)(self.ctxp, *args, **kwds)
             return func(self.ctxp, *args, **kwds)
+
+        return wrapper
+
+    @classmethod
+    def wrap_pass_ctxp(cls, func):
+        """
+        Take out pointers and make them tuple return values
+        """
+
+        @wraps(func)
+        def wrapper(self, *args, **kwds):
+            sig = inspect.signature(func.orig)
+            parameters = list(sig.parameters.values())
+
+            docstring_arguments = func.orig.__doc__.split("(")[1].split(")")[0]
+            # Remove FAPI/ESAPI context pointer
+            docstring_arguments = docstring_arguments.split(",")[1:]
+            docstring_arguments = map(lambda i: i.strip(), docstring_arguments)
+            docstring_arguments = list(docstring_arguments)
+
+            # First missing argument should not be const
+            if (
+                len(args) < len(docstring_arguments)
+                and "const" in docstring_arguments[len(args) :][0].split()
+            ):
+                for i, docstring in enumerate(docstring_arguments[len(args) :]):
+                    # Ensure that all these are arguments that need
+                    # allocating
+                    if not "**" in docstring:
+                        break
+                    print(docstring)
+
+            result = func(self, *args, **kwds)
+
+            return_value = []
+
+            skip = False
+            for i, (value, docstring) in enumerate(zip(args, docstring_arguments)):
+                if skip:
+                    skip = False
+                    continue
+                if not "const" in docstring.split() and "*" in docstring:
+                    # char ** arguments are always guaranteed to be NULL
+                    # terminated
+                    if docstring.startswith("char") and "**" in docstring.split():
+                        if any(map(value.value.startswith, ["[", "{"])):
+                            try:
+                                return_value.append(json.loads(value.value))
+                            except json.decoder.JSONDecodeError:
+                                return_value.append(value.value)
+                    elif "**" in docstring.split():
+                        if (i + 1) < len(docstring_arguments):
+                            next_docstring = docstring_arguments[i + 1]
+                            next_docstring = next_docstring.split()
+                            if (
+                                "size_t" in next_docstring
+                                and "*" in next_docstring
+                                and "uint8_t" in docstring.split()
+                            ):
+                                return_value.append(
+                                    to_bytearray(value.value, args[i + 1].value)
+                                )
+                                skip = True
+                                continue
+                        return_value.append(value.value)
+                    else:
+                        return_value.append(value)
+
+            if len(return_value) > 1:
+                return return_value
+            elif len(return_value) == 1:
+                return return_value[0]
+            return result
 
         return wrapper
 

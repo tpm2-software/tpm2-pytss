@@ -114,8 +114,11 @@ class WrapperMetaClass(type, Wrapper):
         # Go through all the functions in the module
         for key, func in module.__dict__.items():
             if not key.startswith("_") and inspect.isfunction(func):
+                orig = func
                 func = cls.wrap(func)
-                setattr(cls, key, partial(func))
+                func = partial(func)
+                func.orig = orig
+                setattr(cls, key, func)
         return cls
 
     def __getattribute__(cls, name):

@@ -6,7 +6,7 @@ import pathlib
 import logging
 import tempfile
 import contextlib
-from functools import partial
+from functools import partial, wraps
 from typing import Optional, ByteString, NamedTuple
 
 from .util.swig import Wrapper
