@@ -105,7 +105,7 @@ def temp_fapi_config(config):
 
 class FAPIMetaClass(BaseContextMetaClass):
     PREFIX = "Fapi_"
-    NO_PASS_CTXP = set(["Fapi_Initialize", "Fapi_Finalize"])
+    NO_PASS_CTXP = set(["Fapi_Initialize", "Fapi_Finalize", "Fapi_Free"])
 
 
 class FAPI(Wrapper, metaclass=FAPIMetaClass):
