@@ -4,7 +4,8 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>FAPI &#8212; tpm2-pytss 0.1.6 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAPI &#8212; tpm2-pytss 0.1.7 documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
@@ -74,10 +75,8 @@
         <span class="n">fapi_ctx</span><span class="o">.</span><span class="n">Provision</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="c1"># Create a pointer to the byte array we&#39;ll get back from GetRandom</span>
         <span class="n">array</span> <span class="o">=</span> <span class="n">ctx_stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="n">UINT8_PTR_PTR</span><span class="p">())</span>
-        <span class="c1"># Call GetRandom</span>
-        <span class="n">fapi_ctx</span><span class="o">.</span><span class="n">GetRandom</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">array</span><span class="p">)</span>
-        <span class="c1"># Convert the resulting array to a Python bytearray</span>
-        <span class="n">value</span> <span class="o">=</span> <span class="n">to_bytearray</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">array</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+        <span class="c1"># Call GetRandom and convert the resulting array to a Python bytearray</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">to_bytearray</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">fapi_ctx</span><span class="o">.</span><span class="n">GetRandom</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">array</span><span class="p">))</span>
         <span class="c1"># Ensure we got the correct number of bytes</span>
         <span class="k">if</span> <span class="n">length</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s2">&quot;Requested </span><span class="si">%d</span><span class="s2"> bytes, got </span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
@@ -102,17 +101,21 @@ for you and ready to use.</p>
 
 
 <span class="k">class</span> <span class="nc">TestGetRandom</span><span class="p">(</span><span class="n">BaseTestFAPI</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">test_get_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fapi_ctx</span><span class="o">.</span><span class="n">Provision</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">CHAR_PTR_PTR</span><span class="p">()</span> <span class="k">as</span> <span class="n">array</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fapi_ctx</span><span class="o">.</span><span class="n">GetInfo</span><span class="p">(</span><span class="n">array</span><span class="p">)),</span> <span class="nb">dict</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">test_random_length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">length</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">fapi_ctx</span><span class="o">.</span><span class="n">Provision</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
-        <span class="n">array</span> <span class="o">=</span> <span class="n">UINT8_PTR_PTR</span><span class="p">()</span>
+        <span class="k">with</span> <span class="n">UINT8_PTR_PTR</span><span class="p">()</span> <span class="k">as</span> <span class="n">array</span><span class="p">:</span>
+            <span class="n">array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fapi_ctx</span><span class="o">.</span><span class="n">GetRandom</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">array</span><span class="p">)</span>
 
-        <span class="k">with</span> <span class="n">array</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">fapi_ctx</span><span class="o">.</span><span class="n">GetRandom</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">array</span><span class="p">)</span>
-
-            <span class="n">value</span> <span class="o">=</span> <span class="n">to_bytearray</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">array</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">to_bytearray</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">array</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
 </pre></div>
@@ -221,7 +224,7 @@ for you and ready to use.</p>
       &copy;2019, Intel Corperation.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

@@ -4,7 +4,8 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>FAPI &#8212; tpm2-pytss 0.1.6 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAPI &#8212; tpm2-pytss 0.1.7 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -247,6 +248,31 @@ of the given arguments and keywords.</p>
 <dd><p>partial(func, <a href="#id117"><span class="problematic" id="id118">*</span></a>args, <a href="#id119"><span class="problematic" id="id120">**</span></a>keywords) - new function with partial application
 of the given arguments and keywords.</p>
 </dd></dl>
+
+<dl class="py method">
+<dt id="tpm2_pytss.fapi.FAPI.FAPI_POLL_HANDLE_ARRAY_frompointer">
+<code class="sig-name descname">FAPI_POLL_HANDLE_ARRAY_frompointer</code><span class="sig-paren">(</span><em class="sig-param">FAPI_POLL_HANDLE * t</em><span class="sig-paren">)</span> &#x2192; FAPI_POLL_HANDLE_ARRAY<a class="headerlink" href="#tpm2_pytss.fapi.FAPI.FAPI_POLL_HANDLE_ARRAY_frompointer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="tpm2_pytss.fapi.FAPI.FAPI_POLL_HANDLE_PTR_PTR_assign">
+<code class="sig-name descname">FAPI_POLL_HANDLE_PTR_PTR_assign</code><span class="sig-paren">(</span><em class="sig-param">FAPI_POLL_HANDLE ** obj</em>, <em class="sig-param">FAPI_POLL_HANDLE * value</em><span class="sig-paren">)</span><a class="headerlink" href="#tpm2_pytss.fapi.FAPI.FAPI_POLL_HANDLE_PTR_PTR_assign" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="tpm2_pytss.fapi.FAPI.FAPI_POLL_HANDLE_PTR_PTR_value">
+<code class="sig-name descname">FAPI_POLL_HANDLE_PTR_PTR_value</code><span class="sig-paren">(</span><em class="sig-param">FAPI_POLL_HANDLE ** obj</em><span class="sig-paren">)</span> &#x2192; FAPI_POLL_HANDLE *<a class="headerlink" href="#tpm2_pytss.fapi.FAPI.FAPI_POLL_HANDLE_PTR_PTR_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="tpm2_pytss.fapi.FAPI.FAPI_POLL_HANDLE_PTR_assign">
+<code class="sig-name descname">FAPI_POLL_HANDLE_PTR_assign</code><span class="sig-paren">(</span><em class="sig-param">FAPI_POLL_HANDLE * obj</em>, <em class="sig-param">FAPI_POLL_HANDLE value</em><span class="sig-paren">)</span><a class="headerlink" href="#tpm2_pytss.fapi.FAPI.FAPI_POLL_HANDLE_PTR_assign" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="tpm2_pytss.fapi.FAPI.FAPI_POLL_HANDLE_PTR_value">
+<code class="sig-name descname">FAPI_POLL_HANDLE_PTR_value</code><span class="sig-paren">(</span><em class="sig-param">FAPI_POLL_HANDLE * obj</em><span class="sig-paren">)</span> &#x2192; FAPI_POLL_HANDLE<a class="headerlink" href="#tpm2_pytss.fapi.FAPI.FAPI_POLL_HANDLE_PTR_value" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt id="tpm2_pytss.fapi.FAPI.Finalize">
@@ -2268,8 +2294,28 @@ of the given arguments and keywords.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="tpm2_pytss.fapi.FAPI.copy_FAPI_POLL_HANDLE_PTR">
+<code class="sig-name descname">copy_FAPI_POLL_HANDLE_PTR</code><span class="sig-paren">(</span><em class="sig-param">FAPI_POLL_HANDLE value</em><span class="sig-paren">)</span> &#x2192; FAPI_POLL_HANDLE *<a class="headerlink" href="#tpm2_pytss.fapi.FAPI.copy_FAPI_POLL_HANDLE_PTR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="tpm2_pytss.fapi.FAPI.copy_FAPI_POLL_HANDLE_PTR_PTR">
+<code class="sig-name descname">copy_FAPI_POLL_HANDLE_PTR_PTR</code><span class="sig-paren">(</span><em class="sig-param">FAPI_POLL_HANDLE * value</em><span class="sig-paren">)</span> &#x2192; FAPI_POLL_HANDLE **<a class="headerlink" href="#tpm2_pytss.fapi.FAPI.copy_FAPI_POLL_HANDLE_PTR_PTR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt id="tpm2_pytss.fapi.FAPI.copy_fapi_ctx_ptr">
 <code class="sig-name descname">copy_fapi_ctx_ptr</code><span class="sig-paren">(</span><em class="sig-param">struct FAPI_CONTEXT * value</em><span class="sig-paren">)</span> &#x2192; struct FAPI_CONTEXT **<a class="headerlink" href="#tpm2_pytss.fapi.FAPI.copy_fapi_ctx_ptr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="tpm2_pytss.fapi.FAPI.delete_FAPI_POLL_HANDLE_PTR">
+<code class="sig-name descname">delete_FAPI_POLL_HANDLE_PTR</code><span class="sig-paren">(</span><em class="sig-param">FAPI_POLL_HANDLE * obj</em><span class="sig-paren">)</span><a class="headerlink" href="#tpm2_pytss.fapi.FAPI.delete_FAPI_POLL_HANDLE_PTR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="tpm2_pytss.fapi.FAPI.delete_FAPI_POLL_HANDLE_PTR_PTR">
+<code class="sig-name descname">delete_FAPI_POLL_HANDLE_PTR_PTR</code><span class="sig-paren">(</span><em class="sig-param">FAPI_POLL_HANDLE ** obj</em><span class="sig-paren">)</span><a class="headerlink" href="#tpm2_pytss.fapi.FAPI.delete_FAPI_POLL_HANDLE_PTR_PTR" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -2299,6 +2345,16 @@ flushed when it’s context exits.</p>
 <code class="sig-name descname">get_random</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">length</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></span></em><span class="sig-paren">)</span> &#x2192; ByteString<a class="reference internal" href="_modules/tpm2_pytss/fapi.html#FAPI.get_random"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tpm2_pytss.fapi.FAPI.get_random" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fapi_GetRandom</p>
 </dd></dl>
+
+<dl class="py method">
+<dt id="tpm2_pytss.fapi.FAPI.new_FAPI_POLL_HANDLE_PTR">
+<code class="sig-name descname">new_FAPI_POLL_HANDLE_PTR</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; FAPI_POLL_HANDLE *<a class="headerlink" href="#tpm2_pytss.fapi.FAPI.new_FAPI_POLL_HANDLE_PTR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="tpm2_pytss.fapi.FAPI.new_FAPI_POLL_HANDLE_PTR_PTR">
+<code class="sig-name descname">new_FAPI_POLL_HANDLE_PTR_PTR</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; FAPI_POLL_HANDLE **<a class="headerlink" href="#tpm2_pytss.fapi.FAPI.new_FAPI_POLL_HANDLE_PTR_PTR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt id="tpm2_pytss.fapi.FAPI.new_fapi_ctx_ptr">
@@ -2410,7 +2466,7 @@ flushed when it’s context exits.</p>
       &copy;2019, Intel Corperation.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.0.3</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
