@@ -7,6 +7,20 @@ submodule.
 $ git clone --recursive https://github.com/tpm2-software/tpm2-pytss
 ```
 
+# Style
+
+Install `black` version `19.10b0`
+
+```
+$ pip install -U black==19.10b0
+```
+
+From the root of the repo
+
+```
+$ black .
+```
+
 # Testing
 
 ## Running
