@@ -4,8 +4,8 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>tpm2_pytss.context &#8212; tpm2-pytss 0.1.7 documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tpm2_pytss.context &#8212; tpm2-pytss 0.1.8 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -156,11 +156,15 @@
                     <span class="c1"># char ** arguments are always guaranteed to be NULL</span>
                     <span class="c1"># terminated</span>
                     <span class="k">if</span> <span class="n">docstring</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;char&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;**&quot;</span> <span class="ow">in</span> <span class="n">docstring</span><span class="o">.</span><span class="n">split</span><span class="p">():</span>
-                        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">startswith</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;[&quot;</span><span class="p">,</span> <span class="s2">&quot;{&quot;</span><span class="p">])):</span>
+                        <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">return_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+                        <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">startswith</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;[&quot;</span><span class="p">,</span> <span class="s2">&quot;{&quot;</span><span class="p">])):</span>
                             <span class="k">try</span><span class="p">:</span>
                                 <span class="n">return_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
                             <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
                                 <span class="n">return_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">return_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
                     <span class="k">elif</span> <span class="s2">&quot;**&quot;</span> <span class="ow">in</span> <span class="n">docstring</span><span class="o">.</span><span class="n">split</span><span class="p">():</span>
                         <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">docstring_arguments</span><span class="p">):</span>
                             <span class="n">next_docstring</span> <span class="o">=</span> <span class="n">docstring_arguments</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
@@ -404,7 +408,7 @@
       &copy;2019, Intel Corperation.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
