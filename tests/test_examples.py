@@ -19,17 +19,11 @@ def filepath(filename):
 
 class TestExamples(unittest.TestCase):
     def test_fapi_get_random(self):
+        # Length of random bytes to get
+        length = 32
         # Capture output
-        stdout = (
-            subprocess.check_output(
-                [sys.executable, str(filepath("fapi_get_random.py"))], env=ENV,
-            )
-            .decode()
-            .strip()
+        stdout = subprocess.check_output(
+            [sys.executable, str(filepath("fapi_get_random.py")), str(length)], env=ENV,
         )
-        # Parse the length
-        length = int(ast.literal_eval(stdout.split(")")[0].split("(")[-1]))
-        # Parse the value of the bytearray
-        array = bytearray(ast.literal_eval(stdout.split("(")[-1].replace(")", "")))
-        # Ensure the bytearray makes sense
-        self.assertEqual(length, len(array))
+        # Ensure the output is of the correct length
+        self.assertEqual(length, len(stdout))

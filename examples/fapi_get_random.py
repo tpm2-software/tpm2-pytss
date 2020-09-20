@@ -1,3 +1,4 @@
+import sys
 import random
 import tempfile
 import contextlib
@@ -8,6 +9,17 @@ from tpm2_pytss.util.simulator import Simulator
 
 
 def main():
+    # Usage information
+    if not len(sys.argv) == 2:
+        print(f"Ouput N random bytes to stdout", file=sys.stderr)
+        print(f"", file=sys.stderr)
+        print(f"Usage: {sys.argv[0]} length(between 8 and 32)", file=sys.stderr)
+        sys.exit(1)
+    # Number of random bytes to get (between 8 and 32)
+    length = int(sys.argv[1])
+    # Input validation
+    if length < 8 or length > 32:
+        raise ValueError("length must be between 8 and 32")
     # Create a context stack
     with contextlib.ExitStack() as ctx_stack:
         # Create a simulator
@@ -29,8 +41,6 @@ def main():
         )
         # Enter the context, create TCTI connection
         fapi_ctx = ctx_stack.enter_context(fapi)
-        # Number of random bytes to get
-        length = random.randint(8, 32)
         # Call Fapi_Provision
         fapi_ctx.Provision(None, None, None)
         # Create a pointer to the byte array we'll get back from GetRandom
@@ -41,7 +51,7 @@ def main():
         if length != len(value):
             raise AssertionError("Requested %d bytes, got %d" % (length, len(value)))
         # Print bytes to stdout
-        print("GetRandom(%d):" % (length,), value)
+        sys.stdout.buffer.write(value)
 
 
 if __name__ == "__main__":
