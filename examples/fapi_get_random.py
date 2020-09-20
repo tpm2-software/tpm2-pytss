@@ -10,7 +10,7 @@ from tpm2_pytss.util.simulator import Simulator
 
 def main():
     # Usage information
-    if not len(sys.argv) == 2:
+    if len(sys.argv) != 2:
         print(f"Ouput N random bytes to stdout", file=sys.stderr)
         print(f"", file=sys.stderr)
         print(f"Usage: {sys.argv[0]} length(between 8 and 32)", file=sys.stderr)
