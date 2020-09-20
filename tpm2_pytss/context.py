@@ -122,11 +122,15 @@ class BaseContextMetaClass(type):
                     # char ** arguments are always guaranteed to be NULL
                     # terminated
                     if docstring.startswith("char") and "**" in docstring.split():
-                        if any(map(value.value.startswith, ["[", "{"])):
+                        if value.value is None:
+                            return_value.append(None)
+                        elif any(map(value.value.startswith, ["[", "{"])):
                             try:
                                 return_value.append(json.loads(value.value))
                             except json.decoder.JSONDecodeError:
                                 return_value.append(value.value)
+                        else:
+                            return_value.append(value.value)
                     elif "**" in docstring.split():
                         if (i + 1) < len(docstring_arguments):
                             next_docstring = docstring_arguments[i + 1]
