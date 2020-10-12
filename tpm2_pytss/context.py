@@ -141,7 +141,7 @@ class BaseContextMetaClass(type):
                                 and "uint8_t" in docstring.split()
                             ):
                                 return_value.append(
-                                    to_bytearray(value.value, args[i + 1].value)
+                                    to_bytearray(args[i + 1].value, value.value)
                                 )
                                 skip = True
                                 continue
