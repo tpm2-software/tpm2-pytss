@@ -7,7 +7,7 @@ from contextlib import contextmanager, _GeneratorContextManager
 from typing import Any, Callable, Optional, List
 
 from . import exceptions
-from .util.swig import WrapperMetaClass, pointer_class, ContextManagedPointerClass
+from .util.swig import WrapperMetaClass, pointer_class, PointerClass
 from .util.calculate import calculate
 from .esys_binding import *
 from .fapi_binding import *
@@ -423,13 +423,13 @@ class UsedWithoutEnteringContext(Exception):
 def call_mod_context_managed_pointer_class(name, annotation, value):
     if isinstance(value, _GeneratorContextManager):
         raise UsedWithoutEnteringContext(name)
-    if isinstance(value, ContextManagedPointerClass):
+    if isinstance(value, PointerClass):
         if value.ptr is None:
             raise UsedWithoutEnteringContext(name)
         return WrapperMetaClass.call_mod_ptr_or_value(annotation, value)
 
 
-# Create all the ContextManagedPointerClasses to be used for the
+# Create all the PointerClasses to be used for the
 # pointer_functions
 for module in [esys_binding, fapi_binding]:
     for name, func in inspect.getmembers(module):

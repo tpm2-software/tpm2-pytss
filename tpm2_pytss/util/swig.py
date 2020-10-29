@@ -10,20 +10,14 @@ logging.basicConfig(
 LOGGER = logging.getLogger(__name__)
 
 
-class PointerAlreadyInUse(Exception):
-    pass  # pragma: no cov
-
-
-class ContextManagedPointerClass:
-    """
-    By forcing context management we ensure users of the bindings are explicit
-    about their usage and freeing of allocated resources. Rather than relying on
-    the garbage collector. This makes it harder for them to leave assets lying
-    around.
-    """
-
+class PointerClass:
     def __init__(self, value: Any = None):
-        self._init_value = value
+        self.ptr = self._new()
+        if value is not None:
+            self.value = value
+
+    def __del__(self) -> None:
+        self._delete(self.ptr)
         self.ptr = None
 
     @property
@@ -33,22 +27,6 @@ class ContextManagedPointerClass:
     @value.setter
     def value(self, value) -> None:
         self._assign(self.ptr, value)
-
-    @classmethod
-    def frompointer(cls, ptr: Any) -> "ContextManagedPointerClass":
-        return cls(ptr)
-
-    def __enter__(self):
-        if self.ptr is not None:
-            raise PointerAlreadyInUse()
-        self.ptr = self._new()
-        if self._init_value is not None:
-            self.value = self._init_value
-        return self
-
-    def __exit__(self, _exc_type, _exc_value, _traceback):
-        self._delete(self.ptr)
-        self.ptr = None
 
 
 def pointer_class(name, *, module=None):
@@ -71,7 +49,7 @@ def pointer_class(name, *, module=None):
     # Ensure we don't pass self to the functions
     for key, value in check.items():
         check[key] = partial(value)
-    return type(name, (ContextManagedPointerClass,), check)
+    return type(name, (PointerClass,), check)
 
 
 class Wrapper:
@@ -192,5 +170,5 @@ class WrapperMetaClass(type, Wrapper):
 
 @WrapperMetaClass.register_call_mod
 def call_mod_context_managed_pointer_class(name, annotation, value):
-    if isinstance(value, ContextManagedPointerClass):
+    if isinstance(value, PointerClass):
         return WrapperMetaClass.call_mod_ptr_or_value(annotation, value)
