@@ -77,6 +77,14 @@ class BaseContextMetaClass(type):
         return wrapper
 
 
+def ctx_func_docstring_arguments(func):
+    docstring_arguments = func.__doc__.split("(")[1].split(")")[0]
+    # Remove FAPI/ESAPI context pointer
+    docstring_arguments = docstring_arguments.split(",")[1:]
+    docstring_arguments = map(lambda i: i.strip(), docstring_arguments)
+    return list(docstring_arguments)
+
+
 def wrap_pass_ctxp(ctx, func):
     """
     Take out pointers and make them tuple return values
@@ -87,23 +95,42 @@ def wrap_pass_ctxp(ctx, func):
         sig = inspect.signature(func.orig)
         parameters = list(sig.parameters.values())
 
-        docstring_arguments = func.orig.__doc__.split("(")[1].split(")")[0]
-        # Remove FAPI/ESAPI context pointer
-        docstring_arguments = docstring_arguments.split(",")[1:]
-        docstring_arguments = map(lambda i: i.strip(), docstring_arguments)
-        docstring_arguments = list(docstring_arguments)
+        docstring_arguments = ctx_func_docstring_arguments(func.orig)
 
         args = list(given_args)
 
+        # Diff argument lists to see which arguments are return values
+        async_func = getattr(ctx.MODULE, func.orig.__name__ + "_Async", None)
+
         # First missing argument should be ** to be allocated
-        if len(args) < len(docstring_arguments) and all(
-            map(lambda docstring: "**" in docstring, docstring_arguments[len(args) :],)
-        ):
-            for i, docstring in enumerate(docstring_arguments[len(args) :]):
-                cls_name = docstring.split()[0] + "_PTR_PTR"
-                arg_cls = getattr(ctx.MODULE, cls_name)
-                arg = arg_cls()
-                args.append(arg)
+        if async_func:
+            async_func_docstring_arguments = ctx_func_docstring_arguments(async_func)
+            if len(args) >= len(async_func_docstring_arguments) and len(args) < len(
+                docstring_arguments
+            ):
+                for i, docstring in enumerate(docstring_arguments[len(args) :]):
+                    cls_name = (
+                        docstring.split()[0]
+                        + "_"
+                        + "_".join(["PTR"] * docstring.count("*"))
+                    )
+                    arg_cls = getattr(ctx.MODULE, cls_name)
+                    arg = arg_cls()
+                    args.append(arg)
+
+        # CHeck if any of the arguments we were given are values that need to be
+        # made into pointers
+        # First missing argument should be ** to be allocated
+        if len(args) == len(docstring_arguments):
+            for i, docstring in enumerate(docstring_arguments):
+                arg = args[i]
+                if "**" in docstring and not arg.__class__.__qualname__.endswith(
+                    "_PTR_PTR"
+                ):
+                    cls_name = docstring.split()[0] + "_PTR_PTR"
+                    arg_cls = getattr(ctx.MODULE, cls_name)
+                    ptr = arg_cls(arg)
+                    args[i] = ptr
 
         result = func(ctxp, *args, **kwds)
 
@@ -145,14 +172,14 @@ def wrap_pass_ctxp(ctx, func):
                 else:
                     return_value.append(value)
 
+        # If the user disn't pass in arguments because we allocated those
+        # arguments (**) for the user, then only return those arguments we
+        # allocated.
+        if len(given_args) != len(args):
+            return_value = return_value[-(len(args) - len(given_args)) :]
+
         if len(return_value) > 1:
-            # If the user disn't pass in arguments because we allocated those
-            # arguments (**) for the user, then only return those arguments we
-            # allocated.
-            if len(given_args) != len(args):
-                return return_value[-(len(args) - len(given_args)) :]
-            else:
-                return return_value
+            return return_value
         elif len(return_value) == 1:
             return return_value[0]
         return result
