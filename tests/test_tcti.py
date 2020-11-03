@@ -18,5 +18,5 @@ class TestTCTI(unittest.TestCase):
 class TestTCTIContext(SimulatorTest, unittest.TestCase):
     def test_create_context(self):
         tcti = TCTI.load("mssim")
-        with tcti(f"port={self.simulator.port}") as ctx:
+        with tcti(config=f"port={self.simulator.port}") as ctx:
             pass
