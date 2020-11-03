@@ -4,6 +4,12 @@ from .binding import ESYSBinding
 from .util.retry import retry_tcti_loop, retry_tcti_catch
 
 
+class TCTIContextNotReentrant(Exception):
+    """
+    Raised when a connection has already been created
+    """
+
+
 class TCTIContext:
     """
     >>> v = esys.TSS2_ABI_VERSION()
@@ -17,43 +23,39 @@ class TCTIContext:
     ...     esys.Esys_Initialize(ctxp, tctx.ctxp, v)
     """
 
-    def __init__(self, parent, config: str, retry: int = 1):
+    def __init__(self, parent, config: str, retry: int = 50):
         self.parent = parent
         self.config = config
         self.retry = retry
         # Context pointer and context pointer pointer
-        self.ctxp = None
         self.ctxpp = None
 
     def __enter__(self):
-        ctxpp = ESYSBinding.tcti_ctx_ptr_ptr()
-        ctxpp.__enter__()
+        if self.ctxpp is not None:
+            raise TCTIContextNotReentrant("Already entered")
+        self.ctxpp = ESYSBinding.tcti_ctx_ptr_ptr()
         # Attempt TCTI connection
         for retry in retry_tcti_loop(max_tries=self.retry):
             with retry_tcti_catch(retry):
                 ESYSBinding.Tss2_TctiLdr_Initialize_Ex(
-                    self.NAME, self.config, ctxpp.ptr
+                    self.NAME, self.config, self.ctxpp.ptr
                 )
-        # Don't set property until after init succeeds to avoid memory leaks (gc
-        # should cleanup if no other references exists when exception is thrown)
-        self.ctxp = ctxpp.value
-        self.ctxpp = ctxpp
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.ctxpp.__exit__(exc_type, exc_value, traceback)
         self.ctxpp = None
-        self.ctxp = None
+
+    @property
+    def ctxp(self):
+        return self.ctxpp.value
 
 
 class TCTI:
 
     CONTEXT = TCTIContext
 
-    def __call__(
-        self, *, config: Optional[str] = None, retry: Optional[int] = 1
-    ) -> "TCTIContext":
-        return self.CONTEXT(self, config, retry)
+    def __call__(self, *, config: str, retry: Optional[int] = 50) -> "TCTIContext":
+        return self.CONTEXT(self, config, retry=retry)
 
     @classmethod
     def _load(cls, name):
@@ -62,12 +64,12 @@ class TCTI:
         TCTI.
         """
         return type(
-            "{}TCTI".format(name.upper()),
+            "{}TCTI".format(name.title()),
             (cls,),
             {
                 "NAME": name,
                 "CONTEXT": type(
-                    "{}TCTIContext".format(name.upper()), (cls.CONTEXT,), {"NAME": name}
+                    "{}TCTIContext".format(name.title()), (cls.CONTEXT,), {"NAME": name}
                 ),
             },
         )
