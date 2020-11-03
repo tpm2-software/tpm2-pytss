@@ -6,8 +6,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>tpm2_pytss.tcti &#8212; tpm2-pytss 0.1.9 documentation</title>
-    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
@@ -38,6 +38,12 @@
 <span class="kn">from</span> <span class="nn">.util.retry</span> <span class="kn">import</span> <span class="n">retry_tcti_loop</span><span class="p">,</span> <span class="n">retry_tcti_catch</span>
 
 
+<span class="k">class</span> <span class="nc">TCTIContextNotReentrant</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Raised when a connection has already been created</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+
 <div class="viewcode-block" id="TCTIContext"><a class="viewcode-back" href="../../tcti.html#tpm2_pytss.tcti.TCTIContext">[docs]</a><span class="k">class</span> <span class="nc">TCTIContext</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    &gt;&gt;&gt; v = esys.TSS2_ABI_VERSION()</span>
@@ -51,43 +57,39 @@
 <span class="sd">    ...     esys.Esys_Initialize(ctxp, tctx.ctxp, v)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">retry</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">retry</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">retry</span> <span class="o">=</span> <span class="n">retry</span>
         <span class="c1"># Context pointer and context pointer pointer</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ctxp</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ctxpp</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">ctxpp</span> <span class="o">=</span> <span class="n">ESYSBinding</span><span class="o">.</span><span class="n">tcti_ctx_ptr_ptr</span><span class="p">()</span>
-        <span class="n">ctxpp</span><span class="o">.</span><span class="fm">__enter__</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ctxpp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">TCTIContextNotReentrant</span><span class="p">(</span><span class="s2">&quot;Already entered&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ctxpp</span> <span class="o">=</span> <span class="n">ESYSBinding</span><span class="o">.</span><span class="n">tcti_ctx_ptr_ptr</span><span class="p">()</span>
         <span class="c1"># Attempt TCTI connection</span>
         <span class="k">for</span> <span class="n">retry</span> <span class="ow">in</span> <span class="n">retry_tcti_loop</span><span class="p">(</span><span class="n">max_tries</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">retry</span><span class="p">):</span>
             <span class="k">with</span> <span class="n">retry_tcti_catch</span><span class="p">(</span><span class="n">retry</span><span class="p">):</span>
                 <span class="n">ESYSBinding</span><span class="o">.</span><span class="n">Tss2_TctiLdr_Initialize_Ex</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">NAME</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="n">ctxpp</span><span class="o">.</span><span class="n">ptr</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">NAME</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ctxpp</span><span class="o">.</span><span class="n">ptr</span>
                 <span class="p">)</span>
-        <span class="c1"># Don&#39;t set property until after init succeeds to avoid memory leaks (gc</span>
-        <span class="c1"># should cleanup if no other references exists when exception is thrown)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ctxp</span> <span class="o">=</span> <span class="n">ctxpp</span><span class="o">.</span><span class="n">value</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ctxpp</span> <span class="o">=</span> <span class="n">ctxpp</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ctxpp</span><span class="o">.</span><span class="fm">__exit__</span><span class="p">(</span><span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ctxpp</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ctxp</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ctxp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ctxpp</span><span class="o">.</span><span class="n">value</span></div>
 
 
 <div class="viewcode-block" id="TCTI"><a class="viewcode-back" href="../../tcti.html#tpm2_pytss.tcti.TCTI">[docs]</a><span class="k">class</span> <span class="nc">TCTI</span><span class="p">:</span>
 
     <span class="n">CONTEXT</span> <span class="o">=</span> <span class="n">TCTIContext</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">retry</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;TCTIContext&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">CONTEXT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">retry</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">retry</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">50</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;TCTIContext&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">CONTEXT</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">retry</span><span class="o">=</span><span class="n">retry</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">_load</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
@@ -96,12 +98,12 @@
 <span class="sd">        TCTI.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span>
-            <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">TCTI&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()),</span>
+            <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">TCTI&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">title</span><span class="p">()),</span>
             <span class="p">(</span><span class="bp">cls</span><span class="p">,),</span>
             <span class="p">{</span>
                 <span class="s2">&quot;NAME&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
                 <span class="s2">&quot;CONTEXT&quot;</span><span class="p">:</span> <span class="nb">type</span><span class="p">(</span>
-                    <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">TCTIContext&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()),</span> <span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">CONTEXT</span><span class="p">,),</span> <span class="p">{</span><span class="s2">&quot;NAME&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span>
+                    <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">TCTIContext&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">title</span><span class="p">()),</span> <span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">CONTEXT</span><span class="p">,),</span> <span class="p">{</span><span class="s2">&quot;NAME&quot;</span><span class="p">:</span> <span class="n">name</span><span class="p">}</span>
                 <span class="p">),</span>
             <span class="p">},</span>
         <span class="p">)</span>
@@ -209,7 +211,7 @@
       &copy;2019, Intel Corperation.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

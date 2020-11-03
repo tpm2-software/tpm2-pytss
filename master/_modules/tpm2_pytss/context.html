@@ -6,8 +6,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>tpm2_pytss.context &#8212; tpm2-pytss 0.1.9 documentation</title>
-    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
@@ -106,90 +106,119 @@
 <span class="sd">            wrapper will be assigned to the ESYSContext class as a method. As</span>
 <span class="sd">            such the first argument, self, is an instance of ESYSContext.</span>
 <span class="sd">            &quot;&quot;&quot;</span>
-            <span class="c1"># Check if a custom wrapper has been defined</span>
-            <span class="n">custom_wrap</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;wrap_pass_ctxp&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">custom_wrap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">custom_wrap</span><span class="p">(</span><span class="n">func</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctxp</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctxp</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">wrap_pass_ctxp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctxp</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">wrapper</span>
 
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">wrap_pass_ctxp</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Take out pointers and make them tuple return values</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-        <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
-            <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">orig</span><span class="p">)</span>
-            <span class="n">parameters</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+<span class="k">def</span> <span class="nf">ctx_func_docstring_arguments</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="n">docstring_arguments</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="vm">__doc__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;(&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;)&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c1"># Remove FAPI/ESAPI context pointer</span>
+    <span class="n">docstring_arguments</span> <span class="o">=</span> <span class="n">docstring_arguments</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="n">docstring_arguments</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">i</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">docstring_arguments</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">docstring_arguments</span><span class="p">)</span>
 
-            <span class="n">docstring_arguments</span> <span class="o">=</span> <span class="n">func</span><span class="o">.</span><span class="n">orig</span><span class="o">.</span><span class="vm">__doc__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;(&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;)&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="c1"># Remove FAPI/ESAPI context pointer</span>
-            <span class="n">docstring_arguments</span> <span class="o">=</span> <span class="n">docstring_arguments</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
-            <span class="n">docstring_arguments</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">i</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="n">docstring_arguments</span><span class="p">)</span>
-            <span class="n">docstring_arguments</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">docstring_arguments</span><span class="p">)</span>
 
-            <span class="c1"># First missing argument should not be const</span>
-            <span class="k">if</span> <span class="p">(</span>
-                <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">docstring_arguments</span><span class="p">)</span>
-                <span class="ow">and</span> <span class="s2">&quot;const&quot;</span> <span class="ow">in</span> <span class="n">docstring_arguments</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="p">:][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">wrap_pass_ctxp</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Take out pointers and make them tuple return values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="n">ctxp</span><span class="p">,</span> <span class="o">*</span><span class="n">given_args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+        <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">orig</span><span class="p">)</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+        <span class="n">docstring_arguments</span> <span class="o">=</span> <span class="n">ctx_func_docstring_arguments</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">orig</span><span class="p">)</span>
+
+        <span class="n">args</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">given_args</span><span class="p">)</span>
+
+        <span class="c1"># Diff argument lists to see which arguments are return values</span>
+        <span class="n">async_func</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">MODULE</span><span class="p">,</span> <span class="n">func</span><span class="o">.</span><span class="n">orig</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s2">&quot;_Async&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="c1"># First missing argument should be ** to be allocated</span>
+        <span class="k">if</span> <span class="n">async_func</span><span class="p">:</span>
+            <span class="n">async_func_docstring_arguments</span> <span class="o">=</span> <span class="n">ctx_func_docstring_arguments</span><span class="p">(</span><span class="n">async_func</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">async_func_docstring_arguments</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span>
+                <span class="n">docstring_arguments</span>
             <span class="p">):</span>
                 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">docstring</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">docstring_arguments</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="p">:]):</span>
-                    <span class="c1"># Ensure that all these are arguments that need</span>
-                    <span class="c1"># allocating</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="s2">&quot;**&quot;</span> <span class="ow">in</span> <span class="n">docstring</span><span class="p">:</span>
-                        <span class="k">break</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="n">docstring</span><span class="p">)</span>
+                    <span class="n">cls_name</span> <span class="o">=</span> <span class="n">docstring</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="c1"># Handle uintN_t</span>
+                    <span class="k">if</span> <span class="n">cls_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_t&quot;</span><span class="p">):</span>
+                        <span class="n">cls_name</span> <span class="o">=</span> <span class="n">cls_name</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+                    <span class="n">cls_name</span> <span class="o">=</span> <span class="n">cls_name</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;PTR&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">docstring</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">))</span>
+                    <span class="n">arg_cls</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">MODULE</span><span class="p">,</span> <span class="n">cls_name</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+                    <span class="n">arg</span> <span class="o">=</span> <span class="n">arg_cls</span><span class="p">()</span>
+                    <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
 
-            <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+        <span class="c1"># CHeck if any of the arguments we were given are values that need to be</span>
+        <span class="c1"># made into pointers</span>
+        <span class="c1"># First missing argument should be ** to be allocated</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">docstring_arguments</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">docstring</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">docstring_arguments</span><span class="p">):</span>
+                <span class="n">arg</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="k">if</span> <span class="s2">&quot;**&quot;</span> <span class="ow">in</span> <span class="n">docstring</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">arg</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__qualname__</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span>
+                    <span class="s2">&quot;_PTR_PTR&quot;</span>
+                <span class="p">):</span>
+                    <span class="n">cls_name</span> <span class="o">=</span> <span class="n">docstring</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_PTR_PTR&quot;</span>
+                    <span class="n">arg_cls</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">MODULE</span><span class="p">,</span> <span class="n">cls_name</span><span class="p">)</span>
+                    <span class="n">ptr</span> <span class="o">=</span> <span class="n">arg_cls</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+                    <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ptr</span>
 
-            <span class="n">return_value</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">ctxp</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
 
-            <span class="n">skip</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">docstring</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">docstring_arguments</span><span class="p">)):</span>
-                <span class="k">if</span> <span class="n">skip</span><span class="p">:</span>
-                    <span class="n">skip</span> <span class="o">=</span> <span class="kc">False</span>
-                    <span class="k">continue</span>
-                <span class="k">if</span> <span class="ow">not</span> <span class="s2">&quot;const&quot;</span> <span class="ow">in</span> <span class="n">docstring</span><span class="o">.</span><span class="n">split</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">&quot;*&quot;</span> <span class="ow">in</span> <span class="n">docstring</span><span class="p">:</span>
-                    <span class="c1"># char ** arguments are always guaranteed to be NULL</span>
-                    <span class="c1"># terminated</span>
-                    <span class="k">if</span> <span class="n">docstring</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;char&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;**&quot;</span> <span class="ow">in</span> <span class="n">docstring</span><span class="o">.</span><span class="n">split</span><span class="p">():</span>
-                        <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                            <span class="n">return_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
-                        <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">startswith</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;[&quot;</span><span class="p">,</span> <span class="s2">&quot;{&quot;</span><span class="p">])):</span>
-                            <span class="k">try</span><span class="p">:</span>
-                                <span class="n">return_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
-                            <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
-                                <span class="n">return_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-                        <span class="k">else</span><span class="p">:</span>
+        <span class="n">return_value</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">skip</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">docstring</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">docstring_arguments</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">skip</span><span class="p">:</span>
+                <span class="n">skip</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="s2">&quot;const&quot;</span> <span class="ow">in</span> <span class="n">docstring</span><span class="o">.</span><span class="n">split</span><span class="p">()</span> <span class="ow">and</span> <span class="s2">&quot;*&quot;</span> <span class="ow">in</span> <span class="n">docstring</span><span class="p">:</span>
+                <span class="c1"># char ** arguments are always guaranteed to be NULL</span>
+                <span class="c1"># terminated</span>
+                <span class="k">if</span> <span class="n">docstring</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;char&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;**&quot;</span> <span class="ow">in</span> <span class="n">docstring</span><span class="o">.</span><span class="n">split</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">return_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="nb">any</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">startswith</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;[&quot;</span><span class="p">,</span> <span class="s2">&quot;{&quot;</span><span class="p">])):</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">return_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+                        <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
                             <span class="n">return_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-                    <span class="k">elif</span> <span class="s2">&quot;**&quot;</span> <span class="ow">in</span> <span class="n">docstring</span><span class="o">.</span><span class="n">split</span><span class="p">():</span>
-                        <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">docstring_arguments</span><span class="p">):</span>
-                            <span class="n">next_docstring</span> <span class="o">=</span> <span class="n">docstring_arguments</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-                            <span class="n">next_docstring</span> <span class="o">=</span> <span class="n">next_docstring</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
-                            <span class="k">if</span> <span class="p">(</span>
-                                <span class="s2">&quot;size_t&quot;</span> <span class="ow">in</span> <span class="n">next_docstring</span>
-                                <span class="ow">and</span> <span class="s2">&quot;*&quot;</span> <span class="ow">in</span> <span class="n">next_docstring</span>
-                                <span class="ow">and</span> <span class="s2">&quot;uint8_t&quot;</span> <span class="ow">in</span> <span class="n">docstring</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
-                            <span class="p">):</span>
-                                <span class="n">return_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                                    <span class="n">to_bytearray</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-                                <span class="p">)</span>
-                                <span class="n">skip</span> <span class="o">=</span> <span class="kc">True</span>
-                                <span class="k">continue</span>
-                        <span class="n">return_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">return_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                        <span class="n">return_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="s2">&quot;**&quot;</span> <span class="ow">in</span> <span class="n">docstring</span><span class="o">.</span><span class="n">split</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">docstring_arguments</span><span class="p">):</span>
+                        <span class="n">next_docstring</span> <span class="o">=</span> <span class="n">docstring_arguments</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+                        <span class="n">next_docstring</span> <span class="o">=</span> <span class="n">next_docstring</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="p">(</span>
+                            <span class="s2">&quot;size_t&quot;</span> <span class="ow">in</span> <span class="n">next_docstring</span>
+                            <span class="ow">and</span> <span class="s2">&quot;*&quot;</span> <span class="ow">in</span> <span class="n">next_docstring</span>
+                            <span class="ow">and</span> <span class="s2">&quot;uint8_t&quot;</span> <span class="ow">in</span> <span class="n">docstring</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                        <span class="p">):</span>
+                            <span class="n">return_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                                <span class="n">to_bytearray</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                            <span class="p">)</span>
+                            <span class="n">skip</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">continue</span>
+                    <span class="n">return_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">return_value</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">return_value</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">return_value</span>
-            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">return_value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">return_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">return</span> <span class="n">result</span>
+        <span class="c1"># If the user disn&#39;t pass in arguments because we allocated those</span>
+        <span class="c1"># arguments (**) for the user, then only return those arguments we</span>
+        <span class="c1"># allocated.</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">given_args</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+            <span class="n">return_value</span> <span class="o">=</span> <span class="n">return_value</span><span class="p">[</span><span class="o">-</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">given_args</span><span class="p">))</span> <span class="p">:]</span>
 
-        <span class="k">return</span> <span class="n">wrapper</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">return_value</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">return_value</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">return_value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">return_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">return</span> <span class="n">wrapper</span>
 
 
 <span class="k">class</span> <span class="nc">ESYSContextMetaClass</span><span class="p">(</span><span class="n">BaseContextMetaClass</span><span class="p">):</span>
@@ -408,7 +437,7 @@
       &copy;2019, Intel Corperation.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>

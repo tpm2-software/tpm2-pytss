@@ -6,8 +6,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ESYS &#8212; tpm2-pytss 0.1.9 documentation</title>
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
@@ -44,6 +44,7 @@ for you and ready to use.</p>
 
 <span class="kn">from</span> <span class="nn">tpm2_pytss.binding</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">tpm2_pytss.util.testing</span> <span class="kn">import</span> <span class="n">BaseTestESYS</span>
+<span class="kn">from</span> <span class="nn">tpm2_pytss.exceptions</span> <span class="kn">import</span> <span class="n">TPM2Error</span>
 
 
 <span class="k">class</span> <span class="nc">TestGetTime</span><span class="p">(</span><span class="n">BaseTestESYS</span><span class="p">):</span>
@@ -103,68 +104,51 @@ for you and ready to use.</p>
 
             <span class="n">creationPCR</span> <span class="o">=</span> <span class="n">TPML_PCR_SELECTION</span><span class="p">(</span><span class="n">count</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-            <span class="n">authValue_ptr</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="n">authValue</span><span class="o">.</span><span class="n">ptr</span><span class="p">())</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">esys_ctx</span><span class="o">.</span><span class="n">TR_SetAuth</span><span class="p">(</span><span class="n">ESYS_TR_RH_OWNER</span><span class="p">,</span> <span class="n">authValue_ptr</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">esys_ctx</span><span class="o">.</span><span class="n">TR_SetAuth</span><span class="p">(</span><span class="n">ESYS_TR_RH_OWNER</span><span class="p">,</span> <span class="n">authValue</span><span class="p">)</span>
 
             <span class="n">signHandle</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">esys_ctx</span><span class="o">.</span><span class="n">flush_tr</span><span class="p">())</span>
 
-            <span class="n">inSensitivePrimary_ptr</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="n">inSensitivePrimary</span><span class="o">.</span><span class="n">ptr</span><span class="p">())</span>
-            <span class="n">inPublic_ptr</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="n">inPublic</span><span class="o">.</span><span class="n">ptr</span><span class="p">())</span>
-            <span class="n">outsideInfo_ptr</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="n">outsideInfo</span><span class="o">.</span><span class="n">ptr</span><span class="p">())</span>
-            <span class="n">creationPCR_ptr</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="n">creationPCR</span><span class="o">.</span><span class="n">ptr</span><span class="p">())</span>
-            <span class="n">primaryHandle_node_ptr_ptr</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="n">ESYS_TR_PTR_PTR</span><span class="p">())</span>
-            <span class="n">outPublic_ptr_ptr</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="n">TPM2B_PUBLIC_PTR_PTR</span><span class="p">())</span>
-            <span class="n">creationData_ptr_ptr</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="n">TPM2B_CREATION_DATA_PTR_PTR</span><span class="p">())</span>
-            <span class="n">creationHash_ptr_ptr</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="n">TPM2B_DIGEST_PTR_PTR</span><span class="p">())</span>
-            <span class="n">creationTicket_ptr_ptr</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="n">TPMT_TK_CREATION_PTR_PTR</span><span class="p">())</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">esys_ctx</span><span class="o">.</span><span class="n">CreatePrimary</span><span class="p">(</span>
-                <span class="n">ESYS_TR_RH_OWNER</span><span class="p">,</span>
-                <span class="n">ESYS_TR_PASSWORD</span><span class="p">,</span>
-                <span class="n">ESYS_TR_NONE</span><span class="p">,</span>
-                <span class="n">ESYS_TR_NONE</span><span class="p">,</span>
-                <span class="n">inSensitivePrimary_ptr</span><span class="p">,</span>
-                <span class="n">inPublic_ptr</span><span class="p">,</span>
-                <span class="n">outsideInfo_ptr</span><span class="p">,</span>
-                <span class="n">creationPCR_ptr</span><span class="p">,</span>
-                <span class="n">signHandle</span><span class="p">,</span>
+            <span class="p">(</span>
                 <span class="n">outPublic_ptr_ptr</span><span class="p">,</span>
                 <span class="n">creationData_ptr_ptr</span><span class="p">,</span>
                 <span class="n">creationHash_ptr_ptr</span><span class="p">,</span>
                 <span class="n">creationTicket_ptr_ptr</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">esys_ctx</span><span class="o">.</span><span class="n">CreatePrimary</span><span class="p">(</span>
+                <span class="n">ESYS_TR_RH_OWNER</span><span class="p">,</span>
+                <span class="n">ESYS_TR_PASSWORD</span><span class="p">,</span>
+                <span class="n">ESYS_TR_NONE</span><span class="p">,</span>
+                <span class="n">ESYS_TR_NONE</span><span class="p">,</span>
+                <span class="n">inSensitivePrimary</span><span class="p">,</span>
+                <span class="n">inPublic</span><span class="p">,</span>
+                <span class="n">outsideInfo</span><span class="p">,</span>
+                <span class="n">creationPCR</span><span class="p">,</span>
+                <span class="n">signHandle</span><span class="p">,</span>
             <span class="p">)</span>
 
-            <span class="n">authValuePrimary_ptr</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="n">authValuePrimary</span><span class="o">.</span><span class="n">ptr</span><span class="p">())</span>
-
-            <span class="bp">self</span><span class="o">.</span><span class="n">esys_ctx</span><span class="o">.</span><span class="n">TR_SetAuth</span><span class="p">(</span><span class="n">signHandle</span><span class="p">,</span> <span class="n">authValuePrimary_ptr</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">esys_ctx</span><span class="o">.</span><span class="n">TR_SetAuth</span><span class="p">(</span><span class="n">signHandle</span><span class="p">,</span> <span class="n">authValuePrimary</span><span class="p">)</span>
 
             <span class="n">privacyAdminHandle</span> <span class="o">=</span> <span class="n">ESYS_TR_RH_ENDORSEMENT</span>
             <span class="n">inScheme</span> <span class="o">=</span> <span class="n">TPMT_SIG_SCHEME</span><span class="p">(</span><span class="n">scheme</span><span class="o">=</span><span class="n">TPM2_ALG_NULL</span><span class="p">)</span>
             <span class="n">qualifyingData</span> <span class="o">=</span> <span class="n">TPM2B_DATA</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">buffer</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
-            <span class="n">qualifyingData_ptr</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="n">qualifyingData</span><span class="o">.</span><span class="n">ptr</span><span class="p">())</span>
-            <span class="n">inScheme_ptr</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="n">inScheme</span><span class="o">.</span><span class="n">ptr</span><span class="p">())</span>
-            <span class="n">timeInfo_ptr_ptr</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="n">TPM2B_ATTEST_PTR_PTR</span><span class="p">())</span>
-            <span class="n">signature_ptr_ptr</span> <span class="o">=</span> <span class="n">stack</span><span class="o">.</span><span class="n">enter_context</span><span class="p">(</span><span class="n">TPMT_SIGNATURE_PTR_PTR</span><span class="p">())</span>
-
-            <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">esys_ctx</span><span class="o">.</span><span class="n">GetTime</span><span class="p">(</span>
-                <span class="n">privacyAdminHandle</span><span class="p">,</span>
-                <span class="n">signHandle</span><span class="p">,</span>
-                <span class="n">ESYS_TR_PASSWORD</span><span class="p">,</span>
-                <span class="n">ESYS_TR_PASSWORD</span><span class="p">,</span>
-                <span class="n">ESYS_TR_NONE</span><span class="p">,</span>
-                <span class="n">qualifyingData_ptr</span><span class="p">,</span>
-                <span class="n">inScheme_ptr</span><span class="p">,</span>
-                <span class="n">timeInfo_ptr_ptr</span><span class="p">,</span>
-                <span class="n">signature_ptr_ptr</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="k">if</span> <span class="p">(</span>
-                <span class="p">(</span><span class="n">r</span> <span class="o">==</span> <span class="n">TPM2_RC_COMMAND_CODE</span><span class="p">)</span>
-                <span class="ow">or</span> <span class="p">(</span><span class="n">r</span> <span class="o">==</span> <span class="p">(</span><span class="n">TPM2_RC_COMMAND_CODE</span> <span class="o">|</span> <span class="n">TSS2_RESMGR_RC_LAYER</span><span class="p">))</span>
-                <span class="ow">or</span> <span class="p">(</span><span class="n">r</span> <span class="o">==</span> <span class="p">(</span><span class="n">TPM2_RC_COMMAND_CODE</span> <span class="o">|</span> <span class="n">TSS2_RESMGR_TPM_RC_LAYER</span><span class="p">))</span>
-            <span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">skipTest</span><span class="p">(</span><span class="s2">&quot;Command TPM2_GetTime not supported by TPM&quot;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="p">(</span><span class="n">timeInfo_ptr_ptr</span><span class="p">,</span> <span class="n">signature_ptr_ptr</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">esys_ctx</span><span class="o">.</span><span class="n">GetTime</span><span class="p">(</span>
+                    <span class="n">privacyAdminHandle</span><span class="p">,</span>
+                    <span class="n">signHandle</span><span class="p">,</span>
+                    <span class="n">ESYS_TR_PASSWORD</span><span class="p">,</span>
+                    <span class="n">ESYS_TR_PASSWORD</span><span class="p">,</span>
+                    <span class="n">ESYS_TR_NONE</span><span class="p">,</span>
+                    <span class="n">qualifyingData</span><span class="p">,</span>
+                    <span class="n">inScheme</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">except</span> <span class="n">TPM2Error</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="p">(</span><span class="n">error</span><span class="o">.</span><span class="n">rc</span> <span class="o">==</span> <span class="n">TPM2_RC_COMMAND_CODE</span><span class="p">)</span>
+                    <span class="ow">or</span> <span class="p">(</span><span class="n">error</span><span class="o">.</span><span class="n">rc</span> <span class="o">==</span> <span class="p">(</span><span class="n">TPM2_RC_COMMAND_CODE</span> <span class="o">|</span> <span class="n">TSS2_RESMGR_RC_LAYER</span><span class="p">))</span>
+                    <span class="ow">or</span> <span class="p">(</span><span class="n">error</span><span class="o">.</span><span class="n">rc</span> <span class="o">==</span> <span class="p">(</span><span class="n">TPM2_RC_COMMAND_CODE</span> <span class="o">|</span> <span class="n">TSS2_RESMGR_TPM_RC_LAYER</span><span class="p">))</span>
+                <span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">skipTest</span><span class="p">(</span><span class="s2">&quot;Command TPM2_GetTime not supported by TPM&quot;</span><span class="p">)</span>
+                <span class="k">raise</span>
 </pre></div>
 </div>
 </div>
@@ -271,7 +255,7 @@ for you and ready to use.</p>
       &copy;2019, Intel Corperation.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

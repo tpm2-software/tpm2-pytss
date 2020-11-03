@@ -6,8 +6,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TCTIs &#8212; tpm2-pytss 0.1.9 documentation</title>
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
@@ -81,7 +81,7 @@ instantiation of a subclass of TCTI.</p>
 
 <dl class="py class">
 <dt id="tpm2_pytss.tcti.TCTIContext">
-<em class="property">class </em><code class="sig-prename descclassname">tpm2_pytss.tcti.</code><code class="sig-name descname">TCTIContext</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span></em>, <em class="sig-param"><span class="n">retry</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span> <span class="o">=</span> <span class="default_value">1</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tpm2_pytss/tcti.html#TCTIContext"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tpm2_pytss.tcti.TCTIContext" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">tpm2_pytss.tcti.</code><code class="sig-name descname">TCTIContext</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent</span></em>, <em class="sig-param"><span class="n">config</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></span></em>, <em class="sig-param"><span class="n">retry</span><span class="p">:</span> <span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></span> <span class="o">=</span> <span class="default_value">50</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tpm2_pytss/tcti.html#TCTIContext"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tpm2_pytss.tcti.TCTIContext" title="Permalink to this definition">¶</a></dt>
 <dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">v</span> <span class="o">=</span> <span class="n">esys</span><span class="o">.</span><span class="n">TSS2_ABI_VERSION</span><span class="p">()</span>
 <span class="n">v</span><span class="o">.</span><span class="n">tssCreator</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="n">v</span><span class="o">.</span><span class="n">tssFamily</span> <span class="o">=</span> <span class="mi">2</span>
@@ -93,6 +93,11 @@ instantiation of a subclass of TCTI.</p>
 <span class="gp">... </span>    <span class="n">esys</span><span class="o">.</span><span class="n">Esys_Initialize</span><span class="p">(</span><span class="n">ctxp</span><span class="p">,</span> <span class="n">tctx</span><span class="o">.</span><span class="n">ctxp</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
 </pre></div>
 </div>
+<dl class="py method">
+<dt id="tpm2_pytss.tcti.TCTIContext.ctxp">
+<em class="property">property </em><code class="sig-name descname">ctxp</code><a class="headerlink" href="#tpm2_pytss.tcti.TCTIContext.ctxp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </div>
@@ -192,7 +197,7 @@ instantiation of a subclass of TCTI.</p>
       &copy;2019, Intel Corperation.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |

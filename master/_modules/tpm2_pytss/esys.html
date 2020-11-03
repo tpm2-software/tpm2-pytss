@@ -6,8 +6,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>tpm2_pytss.esys &#8212; tpm2-pytss 0.1.9 documentation</title>
-    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
@@ -132,10 +132,9 @@
                 <span class="s2">&quot;Maximum length is </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">GET_RANDOM_MAX_LENGTH</span><span class="p">)</span>
             <span class="p">)</span>
 
-        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">TPM2B_DIGEST_PTR_PTR</span><span class="p">()</span> <span class="k">as</span> <span class="n">datapp</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">GetRandom</span><span class="p">(</span><span class="n">shandle1</span><span class="p">,</span> <span class="n">shandle2</span><span class="p">,</span> <span class="n">shandle3</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">datapp</span><span class="p">)</span>
+        <span class="n">datapp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetRandom</span><span class="p">(</span><span class="n">shandle1</span><span class="p">,</span> <span class="n">shandle2</span><span class="p">,</span> <span class="n">shandle3</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>
 
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bytearray</span><span class="p">(</span><span class="n">datapp</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">datapp</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">buffer</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bytearray</span><span class="p">(</span><span class="n">datapp</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="n">datapp</span><span class="o">.</span><span class="n">buffer</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="ESYS"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.esys.ESYS">[docs]</a><span class="k">class</span> <span class="nc">ESYS</span><span class="p">(</span><span class="n">Wrapper</span><span class="p">):</span>
@@ -263,7 +262,7 @@
       &copy;2019, Intel Corperation.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.2.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.0</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
