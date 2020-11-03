@@ -27,8 +27,6 @@ class TestGetRandom(BaseTestESYS):
                 mode=TPMU_SYM_MODE(aes=TPM2_ALG_CFB),
             )
 
-            symmetric_ptr = stack.enter_context(symmetric.ptr())
-
             session = stack.enter_context(
                 self.esys_ctx.auth_session(
                     ESYS_TR_NONE,
@@ -38,7 +36,7 @@ class TestGetRandom(BaseTestESYS):
                     ESYS_TR_NONE,
                     None,
                     TPM2_SE_HMAC,
-                    symmetric_ptr,
+                    symmetric,
                     TPM2_ALG_SHA1,
                 )
             )
