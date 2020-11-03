@@ -68,7 +68,6 @@ class TestLoadExternal(BaseTestESYS):
                 ),
             )
 
-            in_public_ptr = stack.enter_context(in_public.ptr())
             object_handle = stack.enter_context(self.esys_ctx.flush_tr())
 
             self.esys_ctx.LoadExternal(
@@ -76,7 +75,7 @@ class TestLoadExternal(BaseTestESYS):
                 ESYS_TR_NONE,
                 ESYS_TR_NONE,
                 None,
-                in_public_ptr,
+                in_public,
                 TPM2_RH_OWNER,
                 object_handle,
             )
