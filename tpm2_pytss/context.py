@@ -72,90 +72,92 @@ class BaseContextMetaClass(type):
             wrapper will be assigned to the ESYSContext class as a method. As
             such the first argument, self, is an instance of ESYSContext.
             """
-            # Check if a custom wrapper has been defined
-            custom_wrap = getattr(cls, "wrap_pass_ctxp", None)
-            if custom_wrap is not None:
-                return custom_wrap(func)(self.ctxp, *args, **kwds)
-            return func(self.ctxp, *args, **kwds)
+            return wrap_pass_ctxp(self, func)(self.ctxp, *args, **kwds)
 
         return wrapper
 
-    @classmethod
-    def wrap_pass_ctxp(cls, func):
-        """
-        Take out pointers and make them tuple return values
-        """
 
-        @wraps(func)
-        def wrapper(self, *args, **kwds):
-            sig = inspect.signature(func.orig)
-            parameters = list(sig.parameters.values())
+def wrap_pass_ctxp(ctx, func):
+    """
+    Take out pointers and make them tuple return values
+    """
 
-            docstring_arguments = func.orig.__doc__.split("(")[1].split(")")[0]
-            # Remove FAPI/ESAPI context pointer
-            docstring_arguments = docstring_arguments.split(",")[1:]
-            docstring_arguments = map(lambda i: i.strip(), docstring_arguments)
-            docstring_arguments = list(docstring_arguments)
+    @wraps(func)
+    def wrapper(ctxp, *given_args, **kwds):
+        sig = inspect.signature(func.orig)
+        parameters = list(sig.parameters.values())
 
-            # First missing argument should not be const
-            if (
-                len(args) < len(docstring_arguments)
-                and "const" in docstring_arguments[len(args) :][0].split()
-            ):
-                for i, docstring in enumerate(docstring_arguments[len(args) :]):
-                    # Ensure that all these are arguments that need
-                    # allocating
-                    if not "**" in docstring:
-                        break
-                    print(docstring)
+        docstring_arguments = func.orig.__doc__.split("(")[1].split(")")[0]
+        # Remove FAPI/ESAPI context pointer
+        docstring_arguments = docstring_arguments.split(",")[1:]
+        docstring_arguments = map(lambda i: i.strip(), docstring_arguments)
+        docstring_arguments = list(docstring_arguments)
 
-            result = func(self, *args, **kwds)
+        args = list(given_args)
 
-            return_value = []
+        # First missing argument should be ** to be allocated
+        if len(args) < len(docstring_arguments) and all(
+            map(lambda docstring: "**" in docstring, docstring_arguments[len(args) :],)
+        ):
+            for i, docstring in enumerate(docstring_arguments[len(args) :]):
+                cls_name = docstring.split()[0] + "_PTR_PTR"
+                arg_cls = getattr(ctx.MODULE, cls_name)
+                arg = arg_cls()
+                args.append(arg)
 
-            skip = False
-            for i, (value, docstring) in enumerate(zip(args, docstring_arguments)):
-                if skip:
-                    skip = False
-                    continue
-                if not "const" in docstring.split() and "*" in docstring:
-                    # char ** arguments are always guaranteed to be NULL
-                    # terminated
-                    if docstring.startswith("char") and "**" in docstring.split():
-                        if value.value is None:
-                            return_value.append(None)
-                        elif any(map(value.value.startswith, ["[", "{"])):
-                            try:
-                                return_value.append(json.loads(value.value))
-                            except json.decoder.JSONDecodeError:
-                                return_value.append(value.value)
-                        else:
+        result = func(ctxp, *args, **kwds)
+
+        return_value = []
+
+        skip = False
+        for i, (value, docstring) in enumerate(zip(args, docstring_arguments)):
+            if skip:
+                skip = False
+                continue
+            if not "const" in docstring.split() and "*" in docstring:
+                # char ** arguments are always guaranteed to be NULL
+                # terminated
+                if docstring.startswith("char") and "**" in docstring.split():
+                    if value.value is None:
+                        return_value.append(None)
+                    elif any(map(value.value.startswith, ["[", "{"])):
+                        try:
+                            return_value.append(json.loads(value.value))
+                        except json.decoder.JSONDecodeError:
                             return_value.append(value.value)
-                    elif "**" in docstring.split():
-                        if (i + 1) < len(docstring_arguments):
-                            next_docstring = docstring_arguments[i + 1]
-                            next_docstring = next_docstring.split()
-                            if (
-                                "size_t" in next_docstring
-                                and "*" in next_docstring
-                                and "uint8_t" in docstring.split()
-                            ):
-                                return_value.append(
-                                    to_bytearray(args[i + 1].value, value.value)
-                                )
-                                skip = True
-                                continue
-                        return_value.append(value.value)
                     else:
-                        return_value.append(value)
+                        return_value.append(value.value)
+                elif "**" in docstring.split():
+                    if (i + 1) < len(docstring_arguments):
+                        next_docstring = docstring_arguments[i + 1]
+                        next_docstring = next_docstring.split()
+                        if (
+                            "size_t" in next_docstring
+                            and "*" in next_docstring
+                            and "uint8_t" in docstring.split()
+                        ):
+                            return_value.append(
+                                to_bytearray(value.value, args[i + 1].value)
+                            )
+                            skip = True
+                            continue
+                    return_value.append(value.value)
+                else:
+                    return_value.append(value)
 
-            if len(return_value) > 1:
+        if len(return_value) > 1:
+            # If the user disn't pass in arguments because we allocated those
+            # arguments (**) for the user, then only return those arguments we
+            # allocated.
+            if len(given_args) != len(args):
+                return return_value[-(len(args) - len(given_args)) :]
+            else:
                 return return_value
-            elif len(return_value) == 1:
-                return return_value[0]
-            return result
+        elif len(return_value) == 1:
+            return return_value[0]
+        return result
 
-        return wrapper
+    return wrapper
 
 
 class ESYSContextMetaClass(BaseContextMetaClass):
