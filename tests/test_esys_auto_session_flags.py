@@ -40,9 +40,6 @@ class TestAutoSessionFlags(BaseTestESYS):
                 ],
             )
 
-            symmetric_ptr = stack.enter_context(symmetric.ptr())
-            nonceCaller_ptr = stack.enter_context(nonceCaller.ptr())
-
             # Auth session
             session_auth = stack.enter_context(
                 self.esys_ctx.auth_session(
@@ -51,9 +48,9 @@ class TestAutoSessionFlags(BaseTestESYS):
                     ESYS_TR_NONE,
                     ESYS_TR_NONE,
                     ESYS_TR_NONE,
-                    nonceCaller_ptr,
+                    nonceCaller,
                     TPM2_SE_HMAC,
-                    symmetric_ptr,
+                    symmetric,
                     TPM2_ALG_SHA1,
                 )
             )
@@ -66,9 +63,9 @@ class TestAutoSessionFlags(BaseTestESYS):
                     ESYS_TR_NONE,
                     ESYS_TR_NONE,
                     ESYS_TR_NONE,
-                    nonceCaller_ptr,
+                    nonceCaller,
                     TPM2_SE_HMAC,
-                    symmetric_ptr,
+                    symmetric,
                     TPM2_ALG_SHA1,
                 )
             )
@@ -131,15 +128,12 @@ class TestAutoSessionFlags(BaseTestESYS):
                 ),
             )
 
-            auth_ptr = stack.enter_context(auth.ptr())
-            publicInfo_ptr = stack.enter_context(publicInfo.ptr())
-
             nvHandle = stack.enter_context(
                 self.esys_ctx.nv(
                     authHandle=ESYS_TR_RH_OWNER,
                     shandle1=session_auth,
-                    auth=auth_ptr,
-                    publicInfo=publicInfo_ptr,
+                    auth=auth,
+                    publicInfo=publicInfo,
                 )
             )
 
@@ -147,7 +141,6 @@ class TestAutoSessionFlags(BaseTestESYS):
                 size=20,
                 buffer=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
             )
-            nv_test_data_ptr = stack.enter_context(nv_test_data.ptr())
 
             # NV_Write cmd does not support TPMA_SESSION_ENCRYPT - the flag
             # should be auto cleared by ESYS
@@ -157,44 +150,31 @@ class TestAutoSessionFlags(BaseTestESYS):
                 session_enc,
                 ESYS_TR_NONE,
                 ESYS_TR_NONE,
-                nv_test_data_ptr,
+                nv_test_data,
                 0,
             )
 
             # Verify that the same session flags are still set after the test
-            sessionAttributesVerify_ptr = stack.enter_context(TPMA_SESSION_PTR())
-            r = self.esys_ctx.TRSess_GetAttributes(
-                session_enc, sessionAttributesVerify_ptr
-            )
+            sessionAttributesVerify = TPMA_SESSION_PTR()
+            r = self.esys_ctx.TRSess_GetAttributes(session_enc, sessionAttributesVerify)
 
-            if sessionAttributes != sessionAttributesVerify_ptr.value:
+            if sessionAttributes != sessionAttributesVerify.value:
                 raise Exception(
                     "Session flags not equal after write %x, %x"
-                    % (sessionAttributes, sessionAttributesVerify_ptr.value)
+                    % (sessionAttributes, sessionAttributesVerify.value)
                 )
-
-            data_ptr_ptr = stack.enter_context(TPM2B_MAX_NV_BUFFER_PTR_PTR())
 
             # NV_Read cmd does not support TPMA_SESSION_DECRYPT - the flags
             # should be auto cleared by ESYS
-            r = self.esys_ctx.NV_Read(
-                nvHandle,
-                nvHandle,
-                session_enc,
-                ESYS_TR_NONE,
-                ESYS_TR_NONE,
-                20,
-                0,
-                data_ptr_ptr,
+            data_ptr_ptr = self.esys_ctx.NV_Read(
+                nvHandle, nvHandle, session_enc, ESYS_TR_NONE, ESYS_TR_NONE, 20, 0,
             )
-            # TODO free data_ptr_ptr ?
-            # free(data);
 
             # Verify that the same session flags are still set after the test
-            self.esys_ctx.TRSess_GetAttributes(session_enc, sessionAttributesVerify_ptr)
+            self.esys_ctx.TRSess_GetAttributes(session_enc, sessionAttributesVerify)
 
-            if sessionAttributes != sessionAttributesVerify_ptr.value:
+            if sessionAttributes != sessionAttributesVerify.value:
                 raise Exception(
                     "Session flags not equal after read %x, %x"
-                    % (sessionAttributes, sessionAttributesVerify_ptr.value)
+                    % (sessionAttributes, sessionAttributesVerify.value)
                 )
