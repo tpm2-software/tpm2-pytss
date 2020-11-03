@@ -43,10 +43,8 @@ def main():
         fapi_ctx = ctx_stack.enter_context(fapi)
         # Call Fapi_Provision
         fapi_ctx.Provision(None, None, None)
-        # Create a pointer to the byte array we'll get back from GetRandom
-        array = ctx_stack.enter_context(UINT8_PTR_PTR())
         # Call GetRandom and convert the resulting array to a Python bytearray
-        value = to_bytearray(length, fapi_ctx.GetRandom(length, array))
+        value = to_bytearray(length, fapi_ctx.GetRandom(length))
         # Ensure we got the correct number of bytes
         if length != len(value):
             raise AssertionError("Requested %d bytes, got %d" % (length, len(value)))
