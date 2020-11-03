@@ -98,10 +98,9 @@ class ESYSContext(Wrapper, metaclass=ESYSContextMetaClass):
                 "Maximum length is {}".format(self.GET_RANDOM_MAX_LENGTH)
             )
 
-        with self.TPM2B_DIGEST_PTR_PTR() as datapp:
-            self.GetRandom(shandle1, shandle2, shandle3, length, datapp)
+        datapp = self.GetRandom(shandle1, shandle2, shandle3, length)
 
-            return self._bytearray(datapp.value.size, datapp.value.buffer)
+        return self._bytearray(datapp.size, datapp.buffer)
 
 
 class ESYS(Wrapper):
