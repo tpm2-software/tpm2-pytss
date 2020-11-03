@@ -2,6 +2,7 @@ from contextlib import ExitStack
 
 from tpm2_pytss.binding import *
 from tpm2_pytss.util.testing import BaseTestESYS
+from tpm2_pytss.exceptions import TPM2Error
 
 
 class TestGetTime(BaseTestESYS):
@@ -61,65 +62,48 @@ class TestGetTime(BaseTestESYS):
 
             creationPCR = TPML_PCR_SELECTION(count=0)
 
-            authValue_ptr = stack.enter_context(authValue.ptr())
-
-            self.esys_ctx.TR_SetAuth(ESYS_TR_RH_OWNER, authValue_ptr)
+            self.esys_ctx.TR_SetAuth(ESYS_TR_RH_OWNER, authValue)
 
             signHandle = stack.enter_context(self.esys_ctx.flush_tr())
 
-            inSensitivePrimary_ptr = stack.enter_context(inSensitivePrimary.ptr())
-            inPublic_ptr = stack.enter_context(inPublic.ptr())
-            outsideInfo_ptr = stack.enter_context(outsideInfo.ptr())
-            creationPCR_ptr = stack.enter_context(creationPCR.ptr())
-            primaryHandle_node_ptr_ptr = stack.enter_context(ESYS_TR_PTR_PTR())
-            outPublic_ptr_ptr = stack.enter_context(TPM2B_PUBLIC_PTR_PTR())
-            creationData_ptr_ptr = stack.enter_context(TPM2B_CREATION_DATA_PTR_PTR())
-            creationHash_ptr_ptr = stack.enter_context(TPM2B_DIGEST_PTR_PTR())
-            creationTicket_ptr_ptr = stack.enter_context(TPMT_TK_CREATION_PTR_PTR())
-
-            self.esys_ctx.CreatePrimary(
-                ESYS_TR_RH_OWNER,
-                ESYS_TR_PASSWORD,
-                ESYS_TR_NONE,
-                ESYS_TR_NONE,
-                inSensitivePrimary_ptr,
-                inPublic_ptr,
-                outsideInfo_ptr,
-                creationPCR_ptr,
-                signHandle,
+            (
                 outPublic_ptr_ptr,
                 creationData_ptr_ptr,
                 creationHash_ptr_ptr,
                 creationTicket_ptr_ptr,
+            ) = self.esys_ctx.CreatePrimary(
+                ESYS_TR_RH_OWNER,
+                ESYS_TR_PASSWORD,
+                ESYS_TR_NONE,
+                ESYS_TR_NONE,
+                inSensitivePrimary,
+                inPublic,
+                outsideInfo,
+                creationPCR,
+                signHandle,
             )
 
-            authValuePrimary_ptr = stack.enter_context(authValuePrimary.ptr())
-
-            self.esys_ctx.TR_SetAuth(signHandle, authValuePrimary_ptr)
+            self.esys_ctx.TR_SetAuth(signHandle, authValuePrimary)
 
             privacyAdminHandle = ESYS_TR_RH_ENDORSEMENT
             inScheme = TPMT_SIG_SCHEME(scheme=TPM2_ALG_NULL)
             qualifyingData = TPM2B_DATA(size=0, buffer=[0])
 
-            qualifyingData_ptr = stack.enter_context(qualifyingData.ptr())
-            inScheme_ptr = stack.enter_context(inScheme.ptr())
-            timeInfo_ptr_ptr = stack.enter_context(TPM2B_ATTEST_PTR_PTR())
-            signature_ptr_ptr = stack.enter_context(TPMT_SIGNATURE_PTR_PTR())
-
-            r = self.esys_ctx.GetTime(
-                privacyAdminHandle,
-                signHandle,
-                ESYS_TR_PASSWORD,
-                ESYS_TR_PASSWORD,
-                ESYS_TR_NONE,
-                qualifyingData_ptr,
-                inScheme_ptr,
-                timeInfo_ptr_ptr,
-                signature_ptr_ptr,
-            )
-            if (
-                (r == TPM2_RC_COMMAND_CODE)
-                or (r == (TPM2_RC_COMMAND_CODE | TSS2_RESMGR_RC_LAYER))
-                or (r == (TPM2_RC_COMMAND_CODE | TSS2_RESMGR_TPM_RC_LAYER))
-            ):
-                self.skipTest("Command TPM2_GetTime not supported by TPM")
+            try:
+                (timeInfo_ptr_ptr, signature_ptr_ptr) = self.esys_ctx.GetTime(
+                    privacyAdminHandle,
+                    signHandle,
+                    ESYS_TR_PASSWORD,
+                    ESYS_TR_PASSWORD,
+                    ESYS_TR_NONE,
+                    qualifyingData,
+                    inScheme,
+                )
+            except TPM2Error as error:
+                if (
+                    (error.rc == TPM2_RC_COMMAND_CODE)
+                    or (error.rc == (TPM2_RC_COMMAND_CODE | TSS2_RESMGR_RC_LAYER))
+                    or (error.rc == (TPM2_RC_COMMAND_CODE | TSS2_RESMGR_TPM_RC_LAYER))
+                ):
+                    self.skipTest("Command TPM2_GetTime not supported by TPM")
+                raise
