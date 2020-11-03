@@ -9,8 +9,7 @@ class TestGetRandom(BaseTestFAPI):
     def test_get_info(self):
         self.fapi_ctx.Provision(None, None, None)
 
-        with CHAR_PTR_PTR() as array:
-            self.assertEqual(type(self.fapi_ctx.GetInfo(array)), dict)
+        self.assertEqual(type(self.fapi_ctx.GetInfo()), dict)
 
     def test_random_length(self):
         length = random.randint(8, 32)
