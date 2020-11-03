@@ -150,6 +150,7 @@ class TestAudit(BaseTestESYS):
                     self.skipTest(
                         "Command TPM2_GetCommandAuditDigest not supported by TPM."
                     )
+                raise
 
             self.esys_ctx.GetSessionAuditDigest(
                 privacyHandle,
@@ -182,3 +183,4 @@ class TestAudit(BaseTestESYS):
                 if (error.rc & ~TPM2_RC_N_MASK) == TPM2_RC_BAD_AUTH:
                     # Platform authorization not possible test will be skipped
                     self.skipTest("Platform authorization not possible.")
+                raise
