@@ -23,14 +23,14 @@ See [HACKING](HACKING.md)
 ## Help
 
 - Ask a question via an [issue](https://github.com/tpm2-software/tpm2-pytss/issues/new)
-- Send an email to dffml-users@lists.01.org
+- Send an email to tpm2@lists.01.org
   - You can subscribe to the users mailing list here
     https://lists.01.org/postorius/lists/tpm2.lists.01.org/
 - Ask a question on the [Gitter chat](https://gitter.im/tpm2-software/community)
 
 ## License
 
-tpm2-pytss is distributed under the [BSD 2 Cluase License](LICENSE).
+tpm2-pytss is distributed under the [BSD 2 Clause License](LICENSE).
 
 ## TODOs
 
