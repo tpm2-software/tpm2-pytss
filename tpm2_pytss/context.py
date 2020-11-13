@@ -164,9 +164,12 @@ def wrap_pass_ctxp(ctx, func):
                             and "*" in next_docstring
                             and "uint8_t" in docstring.split()
                         ):
-                            return_value.append(
-                                to_bytearray(value.value, args[i + 1].value)
-                            )
+                            if value and value.value:
+                                return_value.append(
+                                    to_bytearray(args[i + 1].value, value.value)
+                                )
+                            else:
+                                return_value.append(None)
                             skip = True
                             continue
                     return_value.append(value.value)
