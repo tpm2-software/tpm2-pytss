@@ -1,5 +1,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2019 Intel Corporation
+import re
 import json
 import inspect
 import contextlib
@@ -111,7 +112,7 @@ def wrap_pass_ctxp(ctx, func):
                 for i, docstring in enumerate(docstring_arguments[len(args) :]):
                     cls_name = docstring.split()[0]
                     # Handle uintN_t
-                    if cls_name.endswith("_t"):
+                    if re.search("\d+_t", cls_name):
                         cls_name = cls_name[:-2]
                     cls_name = cls_name + "_" + "_".join(["PTR"] * docstring.count("*"))
                     arg_cls = getattr(ctx.MODULE, cls_name.upper())
