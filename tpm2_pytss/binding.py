@@ -148,7 +148,7 @@ class ByteArrayHelper:
                 # Skip if not a python type
                 if not isinstance(kwargs[buffer_prop], (tuple, list, bytes, bytearray)):
                     continue
-                if buffer_prop == "pcrSelections":
+                if buffer_prop in ["pcrSelections", "digests"]:
                     continue
                 # Add to buffers to be converted
                 convert_buffer[buffer_prop] = kwargs[buffer_prop]
