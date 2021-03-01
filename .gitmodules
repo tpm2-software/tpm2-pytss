@@ -1,3 +1,0 @@
-[submodule "tpm2_pytss/swig"]
-	path = tpm2_pytss/swig
-	url = https://github.com/tpm2-software/tpm2-swig
