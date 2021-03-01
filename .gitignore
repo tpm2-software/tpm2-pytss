@@ -34,3 +34,4 @@ dist/
 docs/build/
 pages/
 public/
+*.h
