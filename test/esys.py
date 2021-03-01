@@ -78,12 +78,12 @@ class TestPyEsys(unittest.TestCase):
         inPublic.publicArea.parameters.eccDetail.kdf.scheme = TPM2_ALG.NULL
         inPublic.publicArea.parameters.eccDetail.curveID = TPM2_ECC.NIST_P256
 
-        self.ectx.tr.OWNER.setAuth("")
+        self.ectx.setAuth(ESYS_TR.OWNER, "")
 
-        x, _, _, _, _ = self.ectx.CreatePrimary(self.ectx.tr.OWNER,
+        x, _, _, _, _ = self.ectx.CreatePrimary(ESYS_TR.OWNER,
                         inSensitive, inPublic, outsideInfo, creationPCR,
-                        session1=self.ectx.tr.PASSWORD)
-        print(x)
+                        session1=ESYS_TR.PASSWORD)
+        self.assertTrue(x is not None)
 
 if __name__ == "__main__":
     unittest.main()
