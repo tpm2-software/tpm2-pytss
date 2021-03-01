@@ -2,7 +2,7 @@
 SPDX-License-Identifier: BSD-3
 """
 
-from ._libesys import ffi,lib
+from ._libesys import ffi
 
 def _chkrc(rc):
     if rc != 0:
