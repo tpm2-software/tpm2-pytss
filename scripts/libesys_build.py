@@ -39,7 +39,7 @@ prepare(found_dir, 'libesys.h')
 ffibuilder.cdef(open('libesys.h').read())
 
 # so it is often just the "#include".
-ffibuilder.set_source('tpm2_pytss._libesys',
+ffibuilder.set_source('tpm2_pytss.pyesys._libesys',
 """
      /* the C header of the library */
      #include <tss2/tss2_esys.h>
