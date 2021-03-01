@@ -5,6 +5,8 @@ SPDX-License-Identifier: BSD-3
 from ._libesys import ffi,lib
 from cffi import FFI
 
+from .ESYS_TR import *
+
 ### internal ###
 
 def _chkrc(rc):
@@ -24,39 +26,6 @@ def TPM2B_pack(x, t='DIGEST'):
     ffi.memmove(r.buffer, x, len(x))
     return r
 
-#### ESYS_TR classes ####
-
-class EsysTr:
-    def __init__(self, ctx, handle):
-        self.ctx = ctx
-        self.handle = handle
-        if ctx:
-            self.active = True
-        else:
-            self.active = False
-
-    def __del__(self):
-        # TODO: Rethink the lifecycle of this object, because if the ectx is killed
-        # before associated ESYS_TRs, doom occurs.
-        pass
-        #if self.active:
-        #    lib.Esys_FlushContext(self.ctx.ctx, self.handle)
-        # super().__del__(self)
-
-    def setAuth(self, auth):
-        if type(auth) is str:
-            auth = auth.encode()
-
-        auth_p = TPM2B_pack(auth, 'TPM2B_AUTH')
-        _chkrc(lib.Esys_TR_SetAuth(self.ctx.ctx, self.handle, auth_p))
-
-class EsysTrSess(EsysTr):
-    def __init__(self, ctx, handle):
-        super().__init__(self, ctx, handle)
-        lib.Esys_TRSess_SetAttributes(self.ctx.ctx,
-            lib.TPMA_SESSION_CONTINUESESSION,
-            lib.TPMA_SESSION_CONTINUESESSION)
-
 #### All EsysContext functions ####
 
 class EsysContext:
@@ -68,8 +37,6 @@ class EsysContext:
         _chkrc(lib.Esys_Initialize(self.ctx_pp, ffi.NULL, ffi.NULL))
         self.ctx = self.ctx_pp[0]
 
-        self.tr = ESYS_TR(self)
-
     def __enter__(self):
         return self
 
@@ -80,33 +47,35 @@ class EsysContext:
         lib.Esys_Finalize(self.ctx_pp)
         self.ctx = ffi.NULL
 
+    def setAuth(self, esys_tr, auth):
+
+        if type(auth) is str:
+            auth = auth.encode()
+
+        auth_p = TPM2B_pack(auth, 'TPM2B_AUTH')
+        _chkrc(lib.Esys_TR_SetAuth(self.ctx, esys_tr, auth_p))
+        
     def Startup(self, startupType):
         _chkrc(lib.Esys_Startup(self.ctx,
          startupType))
 
     def Shutdown(self, shutdownType,
-        session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+        session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_Shutdown(self.ctx,
                                   session1, session2, session3,
                                   shutdownType))
 
     def SelfTest(self, fullTest,
-                 session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                 session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_SelfTest(self.ctx,
                                   session1, session2, session3,
                                   fullTest))
 
     def IncrementalSelfTest(self, toTest,
-                            session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                            session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         toDoList = ffi.new('TPML_ALG **')
         _chkrc(lib.Esys_IncrementalSelfTest(self.ctx,
                                              session1, session2, session3,
@@ -115,10 +84,8 @@ class EsysContext:
         return(toDoList[0])
 
     def GetTestResult(self,
-                      session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                      session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         outData = ffi.new('TPM2B_MAX_BUFFER **')
         testResult = ffi.new('TPM2_RC *')
         _chkrc(lib.Esys_GetTestResult(self.ctx,
@@ -129,44 +96,38 @@ class EsysContext:
 
     def StartAuthSession(self, tpmKey, bind,
                          nonceCaller, sessionType, symmetric, authHash,
-                         session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                         session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         sessionHandle = ffi.new('ESYS_TR *')
         _chkrc(lib.Esys_StartAuthSession(self.ctx,
-                                          tpmKey.handle,
-                                          bind.handle,
+                                          tpmKey,
+                                          bind,
                                           session1, session2, session3,
                                           nonceCaller,
                                           sessionType,
                                           symmetric,
                                           authHash,
                                           sessionHandle))
-        sessionHandleObject = EsysTr(self, sessionHandle[0])
+        sessionHandleObject = sessionHandle[0]
         return(sessionHandleObject)
 
     def PolicyRestart(self,sessionHandle,
-                      session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                      session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_PolicyRestart(self.ctx,
-                                       sessionHandle.handle,
+                                       sessionHandle,
                                        session1, session2, session3))
 
     def Create(self,parentHandle, inSensitive, inPublic, outsideInfo, creationPCR,
-               session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+               session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         outPrivate = ffi.new('TPM2B_PRIVATE **')
         outPublic = ffi.new('TPM2B_PUBLIC **')
         creationData = ffi.new('TPM2B_CREATION_DATA **')
         creationHash = ffi.new('TPM2B_DIGEST **')
         creationTicket = ffi.new('TPMT_TK_CREATION **')
         _chkrc(lib.Esys_Create(self.ctx,
-                                parentHandle.handle,
+                                parentHandle,
                                 session1, session2, session3,
                                 inSensitive,
                                 inPublic,
@@ -180,25 +141,21 @@ class EsysContext:
         return(outPrivate[0], outPublic[0], creationData[0], creationHash[0], creationTicket[0])
 
     def Load(self,parentHandle, inPrivate, inPublic,
-             session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+             session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         objectHandle = ffi.new('ESYS_TR *')
         _chkrc(lib.Esys_Load(self.ctx,
-                              parentHandle.handle,
+                              parentHandle,
                               session1, session2, session3,
                               inPrivate,
                               inPublic,
                               objectHandle))
-        objectHandleObject = EsysTr(self, objectHandle[0])
+        objectHandleObject = objectHandle
         return(objectHandleObject)
 
     def LoadExternal(self, inPrivate, inPublic, hierarchy,
-                     session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                     session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         objectHandle = ffi.new('ESYS_TR *')
         _chkrc(lib.Esys_LoadExternal(self.ctx,
                                       session1, session2, session3,
@@ -206,19 +163,17 @@ class EsysContext:
                                       inPublic,
                                       hierarchy,
                                       objectHandle))
-        objectHandleObject = EsysTr(self, objectHandle[0])
+        objectHandleObject = objectHandle[0]
         return(objectHandleObject)
 
     def ReadPublic(self,objectHandle,
-                   session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                   session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         outPublic = ffi.new('TPM2B_PUBLIC **')
         name = ffi.new('TPM2B_NAME **')
         qualifiedName = ffi.new('TPM2B_NAME **')
         _chkrc(lib.Esys_ReadPublic(self.ctx,
-                                    objectHandle.handle,
+                                    objectHandle,
                                     session1, session2, session3,
                                     outPublic,
                                     name,
@@ -226,14 +181,12 @@ class EsysContext:
         return(outPublic[0], name[0], qualifiedName[0])
 
     def ActivateCredential(self,activateHandle,keyHandle, credentialBlob, secret,
-                           session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                           session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         certInfo = ffi.new('TPM2B_DIGEST **')
         _chkrc(lib.Esys_ActivateCredential(self.ctx,
-                                            activateHandle.handle,
-                                            keyHandle.handle,
+                                            activateHandle,
+                                            keyHandle,
                                             session1, session2, session3,
                                             credentialBlob,
                                             secret,
@@ -241,14 +194,12 @@ class EsysContext:
         return(certInfo[0])
 
     def MakeCredential(self,handle, credential, objectName,
-                       session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                       session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         credentialBlob = ffi.new('TPM2B_ID_OBJECT **')
         secret = ffi.new('TPM2B_ENCRYPTED_SECRET **')
         _chkrc(lib.Esys_MakeCredential(self.ctx,
-                                        handle.handle,
+                                        handle,
                                         session1, session2, session3,
                                         credential,
                                         objectName,
@@ -257,61 +208,53 @@ class EsysContext:
         return(credentialBlob[0], secret[0])
 
     def Unseal(self,itemHandle,
-               session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+               session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         outData = ffi.new('TPM2B_SENSITIVE_DATA **')
         _chkrc(lib.Esys_Unseal(self.ctx,
-                                itemHandle.handle,
+                                itemHandle,
                                 session1, session2, session3,
                                 outData))
         return(outData[0])
 
     def ObjectChangeAuth(self,objectHandle,parentHandle, newAuth,
-                         session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                         session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         outPrivate = ffi.new('TPM2B_PRIVATE **')
         _chkrc(lib.Esys_ObjectChangeAuth(self.ctx,
-                                          objectHandle.handle,
-                                          parentHandle.handle,
+                                          objectHandle,
+                                          parentHandle,
                                           session1, session2, session3,
                                           newAuth,
                                           outPrivate))
         return(outPrivate[0])
 
     def CreateLoaded(self,parentHandle, inSensitive, inPublic,
-                     session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                     session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         objectHandle = ffi.new('ESYS_TR *')
         outPrivate = ffi.new('TPM2B_PRIVATE **')
         outPublic = ffi.new('TPM2B_PUBLIC **')
         _chkrc(lib.Esys_CreateLoaded(self.ctx,
-                                      parentHandle.handle,
+                                      parentHandle,
                                       session1, session2, session3,
                                       inSensitive,
                                       inPublic,
                                       objectHandle,
                                       outPrivate,
                                       outPublic))
-        objectHandleObject = EsysTr(self, objectHandle[0])
+        objectHandleObject = objectHandle[0]
         return(objectHandleObject, outPrivate[0], outPublic[0])
 
     def Duplicate(self,objectHandle,newParentHandle, encryptionKeyIn, symmetricAlg,
-                  session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                  session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         encryptionKeyOut = ffi.new('TPM2B_DATA **')
         duplicate = ffi.new('TPM2B_PRIVATE **')
         outSymSeed = ffi.new('TPM2B_ENCRYPTED_SECRET **')
         _chkrc(lib.Esys_Duplicate(self.ctx,
-                                   objectHandle.handle,
-                                   newParentHandle.handle,
+                                   objectHandle,
+                                   newParentHandle,
                                    session1, session2, session3,
                                    encryptionKeyIn,
                                    symmetricAlg,
@@ -321,15 +264,13 @@ class EsysContext:
         return(encryptionKeyOut[0], duplicate[0], outSymSeed[0])
 
     def Rewrap(self,oldParent,newParent, inDuplicate, name, inSymSeed,
-               session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+               session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         outDuplicate = ffi.new('TPM2B_PRIVATE **')
         outSymSeed = ffi.new('TPM2B_ENCRYPTED_SECRET **')
         _chkrc(lib.Esys_Rewrap(self.ctx,
-                                oldParent.handle,
-                                newParent.handle,
+                                oldParent,
+                                newParent,
                                 session1, session2, session3,
                                 inDuplicate,
                                 name,
@@ -339,13 +280,11 @@ class EsysContext:
         return(outDuplicate[0], outSymSeed[0])
 
     def Import(self,parentHandle, encryptionKey, objectPublic, duplicate, inSymSeed, symmetricAlg,
-               session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+               session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         outPrivate = ffi.new('TPM2B_PRIVATE **')
         _chkrc(lib.Esys_Import(self.ctx,
-                                parentHandle.handle,
+                                parentHandle,
                                 session1, session2, session3,
                                 encryptionKey,
                                 objectPublic,
@@ -356,13 +295,11 @@ class EsysContext:
         return(outPrivate[0])
 
     def RSA_Encrypt(self,keyHandle, message, inScheme, label,
-                    session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                    session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         outData = ffi.new('TPM2B_PUBLIC_KEY_RSA **')
         _chkrc(lib.Esys_RSA_Encrypt(self.ctx,
-                                     keyHandle.handle,
+                                     keyHandle,
                                      session1, session2, session3,
                                      message,
                                      inScheme,
@@ -371,13 +308,11 @@ class EsysContext:
         return(outData[0])
 
     def RSA_Decrypt(self,keyHandle, cipherText, inScheme, label,
-                    session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                    session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         message = ffi.new('TPM2B_PUBLIC_KEY_RSA **')
         _chkrc(lib.Esys_RSA_Decrypt(self.ctx,
-                                     keyHandle.handle,
+                                     keyHandle,
                                      session1, session2, session3,
                                      cipherText,
                                      inScheme,
@@ -386,37 +321,31 @@ class EsysContext:
         return(message[0])
 
     def ECDH_KeyGen(self,keyHandle,
-                    session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                    session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         zPoint = ffi.new('TPM2B_ECC_POINT **')
         pubPoint = ffi.new('TPM2B_ECC_POINT **')
         _chkrc(lib.Esys_ECDH_KeyGen(self.ctx,
-                                     keyHandle.handle,
+                                     keyHandle,
                                      session1, session2, session3,
                                      zPoint,
                                      pubPoint))
         return(zPoint[0], pubPoint[0])
 
     def ECDH_ZGen(self,keyHandle, inPoint,
-                  session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                  session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         outPoint = ffi.new('TPM2B_ECC_POINT **')
         _chkrc(lib.Esys_ECDH_ZGen(self.ctx,
-                                   keyHandle.handle,
+                                   keyHandle,
                                    session1, session2, session3,
                                    inPoint,
                                    outPoint))
         return(outPoint[0])
 
     def ECC_Parameters(self, curveID,
-                       session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                       session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         parameters = ffi.new('TPMS_ALGORITHM_DETAIL_ECC **')
         _chkrc(lib.Esys_ECC_Parameters(self.ctx,
                                         session1, session2, session3,
@@ -425,14 +354,12 @@ class EsysContext:
         return(parameters[0])
 
     def ZGen_2Phase(self,keyA, inQsB, inQeB, inScheme, counter,
-                    session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                    session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         outZ1 = ffi.new('TPM2B_ECC_POINT **')
         outZ2 = ffi.new('TPM2B_ECC_POINT **')
         _chkrc(lib.Esys_ZGen_2Phase(self.ctx,
-                                     keyA.handle,
+                                     keyA,
                                      session1, session2, session3,
                                      inQsB,
                                      inQeB,
@@ -443,14 +370,12 @@ class EsysContext:
         return(outZ1[0], outZ2[0])
 
     def EncryptDecrypt(self,keyHandle, decrypt, mode, ivIn, inData,
-                       session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                       session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         outData = ffi.new('TPM2B_MAX_BUFFER **')
         ivOut = ffi.new('TPM2B_IV **')
         _chkrc(lib.Esys_EncryptDecrypt(self.ctx,
-                                        keyHandle.handle,
+                                        keyHandle,
                                         session1, session2, session3,
                                         decrypt,
                                         mode,
@@ -461,14 +386,12 @@ class EsysContext:
         return(outData[0], ivOut[0])
 
     def EncryptDecrypt2(self,keyHandle, inData, decrypt, mode, ivIn,
-                        session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                        session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         outData = ffi.new('TPM2B_MAX_BUFFER **')
         ivOut = ffi.new('TPM2B_IV **')
         _chkrc(lib.Esys_EncryptDecrypt2(self.ctx,
-                                         keyHandle.handle,
+                                         keyHandle,
                                          session1, session2, session3,
                                          inData,
                                          decrypt,
@@ -479,10 +402,8 @@ class EsysContext:
         return(outData[0], ivOut[0])
 
     def Hash(self, data, hashAlg, hierarchy,
-             session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+             session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         outHash = ffi.new('TPM2B_DIGEST **')
         validation = ffi.new('TPMT_TK_HASHCHECK **')
         _chkrc(lib.Esys_Hash(self.ctx,
@@ -495,13 +416,11 @@ class EsysContext:
         return(outHash[0], validation[0])
 
     def HMAC(self,handle, buffer, hashAlg,
-             session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+             session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         outHMAC = ffi.new('TPM2B_DIGEST **')
         _chkrc(lib.Esys_HMAC(self.ctx,
-                              handle.handle,
+                              handle,
                               session1, session2, session3,
                               buffer,
                               hashAlg,
@@ -509,10 +428,8 @@ class EsysContext:
         return(outHMAC[0])
 
     def GetRandom(self, bytesRequested,
-                  session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                  session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         randomBytes = ffi.new('TPM2B_DIGEST **')
         _chkrc(lib.Esys_GetRandom(self.ctx,
                                    session1, session2, session3,
@@ -522,62 +439,52 @@ class EsysContext:
         return TPM2B_unpack(randomBytes[0])
 
     def StirRandom(self, inData,
-                   session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                   session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_StirRandom(self.ctx,
                                     session1, session2, session3,
                                     inData))
 
     def HMAC_Start(self,handle, auth, hashAlg,
-                   session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                   session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         sequenceHandle = ffi.new('ESYS_TR *')
         _chkrc(lib.Esys_HMAC_Start(self.ctx,
-                                    handle.handle,
+                                    handle,
                                     session1, session2, session3,
                                     auth,
                                     hashAlg,
                                     sequenceHandle))
-        sequenceHandleObject = EsysTr(self, sequenceHandle[0])
+        sequenceHandleObject = sequenceHandle[0]
         return(sequenceHandleObject)
 
     def HashSequenceStart(self, auth, hashAlg,
-                          session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                          session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         sequenceHandle = ffi.new('ESYS_TR *')
         _chkrc(lib.Esys_HashSequenceStart(self.ctx,
                                            session1, session2, session3,
                                            auth,
                                            hashAlg,
                                            sequenceHandle))
-        sequenceHandleObject = EsysTr(self, sequenceHandle[0])
+        sequenceHandleObject = sequenceHandle[0]
         return(sequenceHandleObject)
 
     def SequenceUpdate(self,sequenceHandle, buffer,
-                       session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                       session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_SequenceUpdate(self.ctx,
-                                        sequenceHandle.handle,
+                                        sequenceHandle,
                                         session1, session2, session3,
                                         buffer))
 
     def SequenceComplete(self,sequenceHandle, buffer, hierarchy,
-                         session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                         session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         result = ffi.new('TPM2B_DIGEST **')
         validation = ffi.new('TPMT_TK_HASHCHECK **')
         _chkrc(lib.Esys_SequenceComplete(self.ctx,
-                                          sequenceHandle.handle,
+                                          sequenceHandle,
                                           session1, session2, session3,
                                           buffer,
                                           hierarchy,
@@ -586,29 +493,25 @@ class EsysContext:
         return(result[0], validation[0])
 
     def EventSequenceComplete(self,pcrHandle,sequenceHandle, buffer,
-                              session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                              session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         results = ffi.new('TPML_DIGEST_VALUES **')
         _chkrc(lib.Esys_EventSequenceComplete(self.ctx,
-                                               pcrHandle.handle,
-                                               sequenceHandle.handle,
+                                               pcrHandle,
+                                               sequenceHandle,
                                                session1, session2, session3,
                                                buffer,
                                                results))
         return(results[0])
 
     def Certify(self,objectHandle,signHandle, qualifyingData, inScheme,
-                session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         certifyInfo = ffi.new('TPM2B_ATTEST **')
         signature = ffi.new('TPMT_SIGNATURE **')
         _chkrc(lib.Esys_Certify(self.ctx,
-                                 objectHandle.handle,
-                                 signHandle.handle,
+                                 objectHandle,
+                                 signHandle,
                                  session1, session2, session3,
                                  qualifyingData,
                                  inScheme,
@@ -617,15 +520,13 @@ class EsysContext:
         return(certifyInfo[0], signature[0])
 
     def CertifyCreation(self,signHandle,objectHandle, qualifyingData, creationHash, inScheme, creationTicket,
-                        session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                        session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         certifyInfo = ffi.new('TPM2B_ATTEST **')
         signature = ffi.new('TPMT_SIGNATURE **')
         _chkrc(lib.Esys_CertifyCreation(self.ctx,
-                                         signHandle.handle,
-                                         objectHandle.handle,
+                                         signHandle,
+                                         objectHandle,
                                          session1, session2, session3,
                                          qualifyingData,
                                          creationHash,
@@ -636,14 +537,12 @@ class EsysContext:
         return(certifyInfo[0], signature[0])
 
     def Quote(self,signHandle, qualifyingData, inScheme, PCRselect,
-              session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+              session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         quoted = ffi.new('TPM2B_ATTEST **')
         signature = ffi.new('TPMT_SIGNATURE **')
         _chkrc(lib.Esys_Quote(self.ctx,
-                               signHandle.handle,
+                               signHandle,
                                session1, session2, session3,
                                qualifyingData,
                                inScheme,
@@ -653,16 +552,14 @@ class EsysContext:
         return(quoted[0], signature[0])
 
     def GetSessionAuditDigest(self,privacyAdminHandle,signHandle,sessionHandle, qualifyingData, inScheme,
-                              session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                              session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         auditInfo = ffi.new('TPM2B_ATTEST **')
         signature = ffi.new('TPMT_SIGNATURE **')
         _chkrc(lib.Esys_GetSessionAuditDigest(self.ctx,
-                                               privacyAdminHandle.handle,
-                                               signHandle.handle,
-                                               sessionHandle.handle,
+                                               privacyAdminHandle,
+                                               signHandle,
+                                               sessionHandle,
                                                session1, session2, session3,
                                                qualifyingData,
                                                inScheme,
@@ -671,15 +568,13 @@ class EsysContext:
         return(auditInfo[0], signature[0])
 
     def GetCommandAuditDigest(self,privacyHandle,signHandle, qualifyingData, inScheme,
-                              session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                              session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         auditInfo = ffi.new('TPM2B_ATTEST **')
         signature = ffi.new('TPMT_SIGNATURE **')
         _chkrc(lib.Esys_GetCommandAuditDigest(self.ctx,
-                                               privacyHandle.handle,
-                                               signHandle.handle,
+                                               privacyHandle,
+                                               signHandle,
                                                session1, session2, session3,
                                                qualifyingData,
                                                inScheme,
@@ -688,15 +583,13 @@ class EsysContext:
         return(auditInfo[0], signature[0])
 
     def GetTime(self,privacyAdminHandle,signHandle, qualifyingData, inScheme,
-                session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         timeInfo = ffi.new('TPM2B_ATTEST **')
         signature = ffi.new('TPMT_SIGNATURE **')
         _chkrc(lib.Esys_GetTime(self.ctx,
-                                 privacyAdminHandle.handle,
-                                 signHandle.handle,
+                                 privacyAdminHandle,
+                                 signHandle,
                                  session1, session2, session3,
                                  qualifyingData,
                                  inScheme,
@@ -705,16 +598,14 @@ class EsysContext:
         return(timeInfo[0], signature[0])
 
     def Commit(self,signHandle, P1, s2, y2,
-               session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+               session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         K = ffi.new('TPM2B_ECC_POINT **')
         L = ffi.new('TPM2B_ECC_POINT **')
         E = ffi.new('TPM2B_ECC_POINT **')
         counter = ffi.new('UINT16 *')
         _chkrc(lib.Esys_Commit(self.ctx,
-                                signHandle.handle,
+                                signHandle,
                                 session1, session2, session3,
                                 P1,
                                 s2,
@@ -726,10 +617,8 @@ class EsysContext:
         return(K[0], L[0], E[0], counter[0])
 
     def EC_Ephemeral(self, curveID,
-                     session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                     session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         Q = ffi.new('TPM2B_ECC_POINT **')
         counter = ffi.new('UINT16 *')
         _chkrc(lib.Esys_EC_Ephemeral(self.ctx,
@@ -740,13 +629,11 @@ class EsysContext:
         return(Q[0], counter[0])
 
     def VerifySignature(self,keyHandle, digest, signature,
-                        session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                        session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         validation = ffi.new('TPMT_TK_VERIFIED **')
         _chkrc(lib.Esys_VerifySignature(self.ctx,
-                                         keyHandle.handle,
+                                         keyHandle,
                                          session1, session2, session3,
                                          digest,
                                          signature,
@@ -754,13 +641,11 @@ class EsysContext:
         return(validation[0])
 
     def Sign(self,keyHandle, digest, inScheme, validation,
-             session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+             session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         signature = ffi.new('TPMT_SIGNATURE **')
         _chkrc(lib.Esys_Sign(self.ctx,
-                              keyHandle.handle,
+                              keyHandle,
                               session1, session2, session3,
                               digest,
                               inScheme,
@@ -769,45 +654,37 @@ class EsysContext:
         return(signature[0])
 
     def SetCommandCodeAuditStatus(self,auth, auditAlg, setList, clearList,
-                                  session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                                  session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_SetCommandCodeAuditStatus(self.ctx,
-                                                   auth.handle,
+                                                   auth,
                                                    session1, session2, session3,
                                                    auditAlg,
                                                    setList,
                                                    clearList))
 
     def PCR_Extend(self,pcrHandle, digests,
-                   session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                   session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_PCR_Extend(self.ctx,
-                                    pcrHandle.handle,
+                                    pcrHandle,
                                     session1, session2, session3,
                                     digests))
 
     def PCR_Event(self,pcrHandle, eventData,
-                  session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                  session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         digests = ffi.new('TPML_DIGEST_VALUES **')
         _chkrc(lib.Esys_PCR_Event(self.ctx,
-                                   pcrHandle.handle,
+                                   pcrHandle,
                                    session1, session2, session3,
                                    eventData,
                                    digests))
         return(digests[0])
 
     def PCR_Read(self, pcrSelectionIn,
-                 session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                 session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         pcrUpdateCounter = ffi.new('UINT32 *')
         pcrSelectionOut = ffi.new('TPML_PCR_SELECTION **')
         pcrValues = ffi.new('TPML_DIGEST **')
@@ -820,16 +697,14 @@ class EsysContext:
         return(pcrUpdateCounter[0], pcrSelectionOut[0], pcrValues[0])
 
     def PCR_Allocate(self,authHandle, pcrAllocation,
-                     session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                     session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         allocationSuccess = ffi.new('TPMI_YES_NO *')
         maxPCR = ffi.new('UINT32 *')
         sizeNeeded = ffi.new('UINT32 *')
         sizeAvailable = ffi.new('UINT32 *')
         _chkrc(lib.Esys_PCR_Allocate(self.ctx,
-                                      authHandle.handle,
+                                      authHandle,
                                       session1, session2, session3,
                                       pcrAllocation,
                                       allocationSuccess,
@@ -839,46 +714,38 @@ class EsysContext:
         return(allocationSuccess[0], maxPCR[0], sizeNeeded[0], sizeAvailable[0])
 
     def PCR_SetAuthPolicy(self,authHandle, authPolicy, hashAlg, pcrNum,
-                          session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                          session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_PCR_SetAuthPolicy(self.ctx,
-                                           authHandle.handle,
+                                           authHandle,
                                            session1, session2, session3,
                                            authPolicy,
                                            hashAlg,
                                            pcrNum))
 
     def PCR_SetAuthValue(self,pcrHandle, auth,
-                         session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                         session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_PCR_SetAuthValue(self.ctx,
-                                          pcrHandle.handle,
+                                          pcrHandle,
                                           session1, session2, session3,
                                           auth))
 
     def PCR_Reset(self,pcrHandle,
-                  session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                  session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_PCR_Reset(self.ctx,
-                                   pcrHandle.handle,
+                                   pcrHandle,
                                    session1, session2, session3))
 
     def PolicySigned(self,authObject,policySession, nonceTPM, cpHashA, policyRef, expiration, auth,
-                     session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                     session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         timeout = ffi.new('TPM2B_TIMEOUT **')
         policyTicket = ffi.new('TPMT_TK_AUTH **')
         _chkrc(lib.Esys_PolicySigned(self.ctx,
-                                      authObject.handle,
-                                      policySession.handle,
+                                      authObject,
+                                      policySession,
                                       session1, session2, session3,
                                       nonceTPM,
                                       cpHashA,
@@ -890,15 +757,13 @@ class EsysContext:
         return(timeout[0], policyTicket[0])
 
     def PolicySecret(self,authHandle,policySession, nonceTPM, cpHashA, policyRef, expiration,
-                     session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                     session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         timeout = ffi.new('TPM2B_TIMEOUT **')
         policyTicket = ffi.new('TPMT_TK_AUTH **')
         _chkrc(lib.Esys_PolicySecret(self.ctx,
-                                      authHandle.handle,
-                                      policySession.handle,
+                                      authHandle,
+                                      policySession,
                                       session1, session2, session3,
                                       nonceTPM,
                                       cpHashA,
@@ -909,12 +774,10 @@ class EsysContext:
         return(timeout[0], policyTicket[0])
 
     def PolicyTicket(self,policySession, timeout, cpHashA, policyRef, authName, ticket,
-                     session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                     session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_PolicyTicket(self.ctx,
-                                      policySession.handle,
+                                      policySession,
                                       session1, session2, session3,
                                       timeout,
                                       cpHashA,
@@ -923,120 +786,98 @@ class EsysContext:
                                       ticket))
 
     def PolicyOR(self,policySession, pHashList,
-                 session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                 session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_PolicyOR(self.ctx,
-                                  policySession.handle,
+                                  policySession,
                                   session1, session2, session3,
                                   pHashList))
 
     def PolicyPCR(self,policySession, pcrDigest, pcrs,
-                  session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                  session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_PolicyPCR(self.ctx,
-                                   policySession.handle,
+                                   policySession,
                                    session1, session2, session3,
                                    pcrDigest,
                                    pcrs))
 
     def PolicyLocality(self,policySession, locality,
-                       session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                       session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_PolicyLocality(self.ctx,
-                                        policySession.handle,
+                                        policySession,
                                         session1, session2, session3,
                                         locality))
 
     def PolicyNV(self,authHandle,nvIndex,policySession, operandB, offset, operation,
-                 session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                 session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_PolicyNV(self.ctx,
-                                  authHandle.handle,
-                                  nvIndex.handle,
-                                  policySession.handle,
+                                  authHandle,
+                                  nvIndex,
+                                  policySession,
                                   session1, session2, session3,
                                   operandB,
                                   offset,
                                   operation))
 
     def PolicyCounterTimer(self,policySession, operandB, offset, operation,
-                           session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                           session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_PolicyCounterTimer(self.ctx,
-                                            policySession.handle,
+                                            policySession,
                                             session1, session2, session3,
                                             operandB,
                                             offset,
                                             operation))
 
     def PolicyCommandCode(self,policySession, code,
-                          session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                          session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_PolicyCommandCode(self.ctx,
-                                           policySession.handle,
+                                           policySession,
                                            session1, session2, session3,
                                            code))
 
     def PolicyPhysicalPresence(self,policySession,
-                               session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                               session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_PolicyPhysicalPresence(self.ctx,
-                                                policySession.handle,
+                                                policySession,
                                                 session1, session2, session3))
 
     def PolicyCpHash(self,policySession, cpHashA,
-                     session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                     session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_PolicyCpHash(self.ctx,
-                                      policySession.handle,
+                                      policySession,
                                       session1, session2, session3,
                                       cpHashA))
 
     def PolicyNameHash(self,policySession, nameHash,
-                       session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                       session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_PolicyNameHash(self.ctx,
-                                        policySession.handle,
+                                        policySession,
                                         session1, session2, session3,
                                         nameHash))
 
     def PolicyDuplicationSelect(self,policySession, objectName, newParentName, includeObject,
-                                session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                                session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_PolicyDuplicationSelect(self.ctx,
-                                                 policySession.handle,
+                                                 policySession,
                                                  session1, session2, session3,
                                                  objectName,
                                                  newParentName,
                                                  includeObject))
 
     def PolicyAuthorize(self,policySession, approvedPolicy, policyRef, keySign, checkTicket,
-                        session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                        session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_PolicyAuthorize(self.ctx,
-                                         policySession.handle,
+                                         policySession,
                                          session1, session2, session3,
                                          approvedPolicy,
                                          policyRef,
@@ -1044,78 +885,63 @@ class EsysContext:
                                          checkTicket))
 
     def PolicyAuthValue(self,policySession,
-                        session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                        session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_PolicyAuthValue(self.ctx,
-                                         policySession.handle,
+                                         policySession,
                                          session1, session2, session3))
 
     def PolicyPassword(self,policySession,
-                       session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                       session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_PolicyPassword(self.ctx,
-                                        policySession.handle,
+                                        policySession,
                                         session1, session2, session3))
 
     def PolicyGetDigest(self,policySession,
-                        session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                        session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         policyDigest = ffi.new('TPM2B_DIGEST **')
         _chkrc(lib.Esys_PolicyGetDigest(self.ctx,
-                                         policySession.handle,
+                                         policySession,
                                          session1, session2, session3,
                                          policyDigest))
         return(policyDigest[0])
 
     def PolicyNvWritten(self,policySession, writtenSet,
-                        session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                        session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_PolicyNvWritten(self.ctx,
-                                         policySession.handle,
+                                         policySession,
                                          session1, session2, session3,
                                          writtenSet))
 
     def PolicyTemplate(self,policySession, templateHash,
-                       session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                       session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_PolicyTemplate(self.ctx,
-                                        policySession.handle,
+                                        policySession,
                                         session1, session2, session3,
                                         templateHash))
 
     def PolicyAuthorizeNV(self,authHandle,nvIndex,policySession,
-                          session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                          session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_PolicyAuthorizeNV(self.ctx,
-                                           authHandle.handle,
-                                           nvIndex.handle,
-                                           policySession.handle,
+                                           authHandle,
+                                           nvIndex,
+                                           policySession,
                                            session1, session2, session3))
 
     def CreatePrimary(self,primaryHandle, inSensitive, inPublic, outsideInfo, creationPCR,
-                      session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                      session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
         objectHandle = ffi.new('ESYS_TR *')
         outPublic = ffi.new('TPM2B_PUBLIC **')
         creationData = ffi.new('TPM2B_CREATION_DATA **')
         creationHash = ffi.new('TPM2B_DIGEST **')
         creationTicket = ffi.new('TPMT_TK_CREATION **')
         _chkrc(lib.Esys_CreatePrimary(self.ctx,
-                                       primaryHandle.handle,
+                                       primaryHandle,
                                        session1, session2, session3,
                                        inSensitive,
                                        inPublic,
@@ -1126,137 +952,111 @@ class EsysContext:
                                        creationData,
                                        creationHash,
                                        creationTicket))
-        objectHandleObject = EsysTr(self, objectHandle[0])
+        objectHandleObject = objectHandle[0]
         return(objectHandleObject, outPublic[0], creationData[0], creationHash[0], creationTicket[0])
 
     def HierarchyControl(self,authHandle, enable, state,
-                         session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                         session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_HierarchyControl(self.ctx,
-                                          authHandle.handle,
+                                          authHandle,
                                           session1, session2, session3,
                                           enable,
                                           state))
 
     def SetPrimaryPolicy(self,authHandle, authPolicy, hashAlg,
-                         session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                         session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_SetPrimaryPolicy(self.ctx,
-                                          authHandle.handle,
+                                          authHandle,
                                           session1, session2, session3,
                                           authPolicy,
                                           hashAlg))
 
     def ChangePPS(self,authHandle,
-                  session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                  session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_ChangePPS(self.ctx,
-                                   authHandle.handle,
+                                   authHandle,
                                    session1, session2, session3))
 
     def ChangeEPS(self,authHandle,
-                  session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                  session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_ChangeEPS(self.ctx,
-                                   authHandle.handle,
+                                   authHandle,
                                    session1, session2, session3))
 
     def Clear(self,authHandle,
-              session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+              session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_Clear(self.ctx,
-                               authHandle.handle,
+                               authHandle,
                                session1, session2, session3))
 
     def ClearControl(self,auth, disable,
-                     session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                     session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_ClearControl(self.ctx,
-                                      auth.handle,
+                                      auth,
                                       session1, session2, session3,
                                       disable))
 
     def HierarchyChangeAuth(self,authHandle, newAuth,
-                            session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                            session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_HierarchyChangeAuth(self.ctx,
-                                             authHandle.handle,
+                                             authHandle,
                                              session1, session2, session3,
                                              newAuth))
 
     def DictionaryAttackLockReset(self,lockHandle,
-                                  session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                                  session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_DictionaryAttackLockReset(self.ctx,
-                                                   lockHandle.handle,
+                                                   lockHandle,
                                                    session1, session2, session3))
 
     def DictionaryAttackParameters(self,lockHandle, newMaxTries, newRecoveryTime, lockoutRecovery,
-                                   session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                                   session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_DictionaryAttackParameters(self.ctx,
-                                                    lockHandle.handle,
+                                                    lockHandle,
                                                     session1, session2, session3,
                                                     newMaxTries,
                                                     newRecoveryTime,
                                                     lockoutRecovery))
 
     def PP_Commands(self,auth, setList, clearList,
-                    session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                    session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_PP_Commands(self.ctx,
-                                     auth.handle,
+                                     auth,
                                      session1, session2, session3,
                                      setList,
                                      clearList))
 
     def SetAlgorithmSet(self,authHandle, algorithmSet,
-                        session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                        session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_SetAlgorithmSet(self.ctx,
-                                         authHandle.handle,
+                                         authHandle,
                                          session1, session2, session3,
                                          algorithmSet))
 
     def FieldUpgradeStart(self,authorization,keyHandle, fuDigest, manifestSignature,
-                          session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                          session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_FieldUpgradeStart(self.ctx,
-                                           authorization.handle,
-                                           keyHandle.handle,
+                                           authorization,
+                                           keyHandle,
                                            session1, session2, session3,
                                            fuDigest,
                                            manifestSignature))
 
     def FieldUpgradeData(self, fuData,
-                         session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                         session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         nextDigest = ffi.new('TPMT_HA **')
         firstDigest = ffi.new('TPMT_HA **')
         _chkrc(lib.Esys_FieldUpgradeData(self.ctx,
@@ -1267,10 +1067,8 @@ class EsysContext:
         return(nextDigest[0], firstDigest[0])
 
     def FirmwareRead(self, sequenceNumber,
-                     session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                     session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         fuData = ffi.new('TPM2B_MAX_BUFFER **')
         _chkrc(lib.Esys_FirmwareRead(self.ctx,
                                       session1, session2, session3,
@@ -1281,7 +1079,7 @@ class EsysContext:
     def ContextSave(self,saveHandle):
         context = ffi.new('TPMS_CONTEXT **')
         _chkrc(lib.Esys_ContextSave(self.ctx,
-                                     saveHandle.handle,
+                                     saveHandle,
                                      context))
         return(context[0])
 
@@ -1290,33 +1088,29 @@ class EsysContext:
         _chkrc(lib.Esys_ContextLoad(self.ctx,
                                      context,
                                      loadedHandle))
-        loadedHandleObject = EsysTr(self, loadedHandle[0])
+        loadedHandleObject = loadedHandle[0]
         return(loadedHandleObject)
 
     def FlushContext(self,flushHandle):
         _chkrc(lib.Esys_FlushContext(self.ctx,
-                                      flushHandle.handle))
+                                      flushHandle))
 
     def EvictControl(self,auth,objectHandle, persistentHandle,
-                     session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                     session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         newObjectHandle = ffi.new('ESYS_TR *')
         _chkrc(lib.Esys_EvictControl(self.ctx,
-                                      auth.handle,
-                                      objectHandle.handle,
+                                      auth,
+                                      objectHandle,
                                       session1, session2, session3,
                                       persistentHandle,
                                       newObjectHandle))
-        newObjectHandleObject = EsysTr(self, newObjectHandle[0])
+        newObjectHandleObject = newObjectHandle[0]
         return(newObjectHandleObject)
 
     def ReadClock(self,
-                  session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                  session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         currentTime = ffi.new('TPMS_TIME_INFO **')
         _chkrc(lib.Esys_ReadClock(self.ctx,
                                    session1, session2, session3,
@@ -1324,30 +1118,24 @@ class EsysContext:
         return(currentTime[0])
 
     def ClockSet(self,auth, newTime,
-                 session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                 session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_ClockSet(self.ctx,
-                                  auth.handle,
+                                  auth,
                                   session1, session2, session3,
                                   newTime))
 
     def ClockRateAdjust(self,auth, rateAdjust,
-                        session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                        session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_ClockRateAdjust(self.ctx,
-                                         auth.handle,
+                                         auth,
                                          session1, session2, session3,
                                          rateAdjust))
 
     def GetCapability(self, capability, prop, propertyCount,
-                      session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                      session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         moreData = ffi.new('TPMI_YES_NO *')
         capabilityData = ffi.new('TPMS_CAPABILITY_DATA **')
         _chkrc(lib.Esys_GetCapability(self.ctx,
@@ -1360,135 +1148,111 @@ class EsysContext:
         return(moreData[0], capabilityData[0])
 
     def TestParms(self, parameters,
-                  session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                  session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_TestParms(self.ctx,
                                    session1, session2, session3,
                                    parameters))
 
     def NV_DefineSpace(self,authHandle, auth, publicInfo,
-                       session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                       session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         nvHandle = ffi.new('ESYS_TR *')
         _chkrc(lib.Esys_NV_DefineSpace(self.ctx,
-                                        authHandle.handle,
+                                        authHandle,
                                         session1, session2, session3,
                                         auth,
                                         publicInfo,
                                         nvHandle))
-        nvHandleObject = EsysTr(self, nvHandle[0])
+        nvHandleObject = nvHandle[0]
         return(nvHandleObject)
 
     def NV_UndefineSpace(self,authHandle,nvIndex,
-                         session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                         session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_NV_UndefineSpace(self.ctx,
-                                          authHandle.handle,
-                                          nvIndex.handle,
+                                          authHandle,
+                                          nvIndex,
                                           session1, session2, session3))
 
     def NV_UndefineSpaceSpecial(self,nvIndex,platform,
-                                session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                                session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_NV_UndefineSpaceSpecial(self.ctx,
-                                                 nvIndex.handle,
-                                                 platform.handle,
+                                                 nvIndex,
+                                                 platform,
                                                  session1, session2, session3))
 
     def NV_ReadPublic(self,nvIndex,
-                      session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                      session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         nvPublic = ffi.new('TPM2B_NV_PUBLIC **')
         nvName = ffi.new('TPM2B_NAME **')
         _chkrc(lib.Esys_NV_ReadPublic(self.ctx,
-                                       nvIndex.handle,
+                                       nvIndex,
                                        session1, session2, session3,
                                        nvPublic,
                                        nvName))
         return(nvPublic[0], nvName[0])
 
     def NV_Write(self,authHandle,nvIndex, data, offset,
-                 session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                 session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_NV_Write(self.ctx,
-                                  authHandle.handle,
-                                  nvIndex.handle,
+                                  authHandle,
+                                  nvIndex,
                                   session1, session2, session3,
                                   data,
                                   offset))
 
     def NV_Increment(self,authHandle,nvIndex,
-                     session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                     session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_NV_Increment(self.ctx,
-                                      authHandle.handle,
-                                      nvIndex.handle,
+                                      authHandle,
+                                      nvIndex,
                                       session1, session2, session3))
 
     def NV_Extend(self,authHandle,nvIndex, data,
-                  session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                  session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_NV_Extend(self.ctx,
-                                   authHandle.handle,
-                                   nvIndex.handle,
+                                   authHandle,
+                                   nvIndex,
                                    session1, session2, session3,
                                    data))
 
     def NV_SetBits(self,authHandle,nvIndex, bits,
-                   session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                   session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_NV_SetBits(self.ctx,
-                                    authHandle.handle,
-                                    nvIndex.handle,
+                                    authHandle,
+                                    nvIndex,
                                     session1, session2, session3,
                                     bits))
 
     def NV_WriteLock(self,authHandle,nvIndex,
-                     session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                     session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_NV_WriteLock(self.ctx,
-                                      authHandle.handle,
-                                      nvIndex.handle,
+                                      authHandle,
+                                      nvIndex,
                                       session1, session2, session3))
 
     def NV_GlobalWriteLock(self,authHandle,
-                           session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                           session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_NV_GlobalWriteLock(self.ctx,
-                                            authHandle.handle,
+                                            authHandle,
                                             session1, session2, session3))
 
     def NV_Read(self,authHandle,nvIndex, size, offset,
-                session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         data = ffi.new('TPM2B_MAX_NV_BUFFER **')
         _chkrc(lib.Esys_NV_Read(self.ctx,
-                                 authHandle.handle,
-                                 nvIndex.handle,
+                                 authHandle,
+                                 nvIndex,
                                  session1, session2, session3,
                                  size,
                                  offset,
@@ -1496,36 +1260,30 @@ class EsysContext:
         return(data[0])
 
     def NV_ReadLock(self,authHandle,nvIndex,
-                    session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                    session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_NV_ReadLock(self.ctx,
-                                     authHandle.handle,
-                                     nvIndex.handle,
+                                     authHandle,
+                                     nvIndex,
                                      session1, session2, session3))
 
     def NV_ChangeAuth(self,nvIndex, newAuth,
-                      session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                      session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         _chkrc(lib.Esys_NV_ChangeAuth(self.ctx,
-                                       nvIndex.handle,
+                                       nvIndex,
                                        session1, session2, session3,
                                        newAuth))
 
     def NV_Certify(self,signHandle,authHandle,nvIndex, qualifyingData, inScheme, size, offset,
-                   session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                   session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         certifyInfo = ffi.new('TPM2B_ATTEST **')
         signature = ffi.new('TPMT_SIGNATURE **')
         _chkrc(lib.Esys_NV_Certify(self.ctx,
-                                    signHandle.handle,
-                                    authHandle.handle,
-                                    nvIndex.handle,
+                                    signHandle,
+                                    authHandle,
+                                    nvIndex,
                                     session1, session2, session3,
                                     qualifyingData,
                                     inScheme,
@@ -1536,10 +1294,8 @@ class EsysContext:
         return(certifyInfo[0], signature[0])
 
     def Vendor_TCG_Test(self, inputData,
-                        session1=None, session2=None, session3=None):
-        session1 = session1.handle if session1 else lib.ESYS_TR_NONE
-        session2 = session2.handle if session2 else lib.ESYS_TR_NONE
-        session3 = session3.handle if session3 else lib.ESYS_TR_NONE
+                        session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE):
+        
         outputData = ffi.new('TPM2B_DATA **')
         _chkrc(lib.Esys_Vendor_TCG_Test(self.ctx,
                                          session1, session2, session3,
@@ -1547,58 +1303,6 @@ class EsysContext:
                                          outputData))
         return(outputData[0])
 
-
-#### Static ESYS_TR defines ####
-
-class ESYS_TR:
-    NONE = EsysTr(None, lib.ESYS_TR_NONE)
-    PASSWORD = EsysTr(None, lib.ESYS_TR_PASSWORD)
-    """ Access via e=ESYS_CONTEXT() => e.tr.NONE or similar """
-    def __init__(self, ctx):
-        self.PCR0 = EsysTr (ctx, lib.ESYS_TR_PCR0)
-        self.PCR1 = EsysTr (ctx, lib.ESYS_TR_PCR1)
-        self.PCR2 = EsysTr (ctx, lib.ESYS_TR_PCR2)
-        self.PCR3 = EsysTr (ctx, lib.ESYS_TR_PCR3)
-        self.PCR4 = EsysTr (ctx, lib.ESYS_TR_PCR4)
-        self.PCR5 = EsysTr (ctx, lib.ESYS_TR_PCR5)
-        self.PCR6 = EsysTr (ctx, lib.ESYS_TR_PCR6)
-        self.PCR7 = EsysTr (ctx, lib.ESYS_TR_PCR7)
-        self.PCR8 = EsysTr (ctx, lib.ESYS_TR_PCR8)
-        self.PCR9 = EsysTr (ctx, lib.ESYS_TR_PCR9)
-        self.PCR10 = EsysTr (ctx, lib.ESYS_TR_PCR10)
-        self.PCR11 = EsysTr (ctx, lib.ESYS_TR_PCR11)
-        self.PCR12 = EsysTr (ctx, lib.ESYS_TR_PCR12)
-        self.PCR13 = EsysTr (ctx, lib.ESYS_TR_PCR13)
-        self.PCR14 = EsysTr (ctx, lib.ESYS_TR_PCR14)
-        self.PCR15 = EsysTr (ctx, lib.ESYS_TR_PCR15)
-        self.PCR16 = EsysTr (ctx, lib.ESYS_TR_PCR16)
-        self.PCR17 = EsysTr (ctx, lib.ESYS_TR_PCR17)
-        self.PCR18 = EsysTr (ctx, lib.ESYS_TR_PCR18)
-        self.PCR19 = EsysTr (ctx, lib.ESYS_TR_PCR19)
-        self.PCR20 = EsysTr (ctx, lib.ESYS_TR_PCR20)
-        self.PCR21 = EsysTr (ctx, lib.ESYS_TR_PCR21)
-        self.PCR22 = EsysTr (ctx, lib.ESYS_TR_PCR22)
-        self.PCR23 = EsysTr (ctx, lib.ESYS_TR_PCR23)
-        self.PCR24 = EsysTr (ctx, lib.ESYS_TR_PCR24)
-        self.PCR25 = EsysTr (ctx, lib.ESYS_TR_PCR25)
-        self.PCR26 = EsysTr (ctx, lib.ESYS_TR_PCR26)
-        self.PCR27 = EsysTr (ctx, lib.ESYS_TR_PCR27)
-        self.PCR28 = EsysTr (ctx, lib.ESYS_TR_PCR28)
-        self.PCR29 = EsysTr (ctx, lib.ESYS_TR_PCR29)
-        self.PCR30 = EsysTr (ctx, lib.ESYS_TR_PCR30)
-        self.PCR31 = EsysTr (ctx, lib.ESYS_TR_PCR31)
-        self.OWNER = EsysTr (ctx, lib.ESYS_TR_RH_OWNER)
-        self.NULL = EsysTr (ctx, lib.ESYS_TR_RH_NULL)
-        self.LOCKOUT = EsysTr (ctx, lib.ESYS_TR_RH_LOCKOUT)
-        self.ENDORSEMENT = EsysTr (ctx, lib.ESYS_TR_RH_ENDORSEMENT)
-        self.PLATFORM = EsysTr (ctx, lib.ESYS_TR_RH_PLATFORM)
-        self.PLATFORM_NV = EsysTr (ctx, lib.ESYS_TR_RH_PLATFORM_NV)
-        self.RH_OWNER = EsysTr (ctx, lib.ESYS_TR_RH_OWNER)
-        self.RH_NULL = EsysTr (ctx, lib.ESYS_TR_RH_NULL)
-        self.RH_LOCKOUT = EsysTr (ctx, lib.ESYS_TR_RH_LOCKOUT)
-        self.RH_ENDORSEMENT = EsysTr (ctx, lib.ESYS_TR_RH_ENDORSEMENT)
-        self.RH_PLATFORM = EsysTr (ctx, lib.ESYS_TR_RH_PLATFORM)
-        self.RH_PLATFORM_NV = EsysTr (ctx, lib.ESYS_TR_RH_PLATFORM_NV)
 
 #### Provide defines for constants ####
 
