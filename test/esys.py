@@ -9,7 +9,7 @@ import subprocess
 import unittest
 from time import sleep
 
-from tpm2_pytss import *
+from tpm2_pytss.pyesys import *
 
 class Tpm(object):
     def __init__(self):
