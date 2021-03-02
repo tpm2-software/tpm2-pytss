@@ -28,12 +28,13 @@ Supported versions of Python are
 Features
 --------
 
+**In Progress**
 We support the FAPI, ESAPI, and marshalling library.
 
 Dependencies
 ------------
 
-This has been tested against TPM2 TSS 2.4.0, SWIG 3 and SWIG 4.
+This has been tested against TPM2 TSS 2.4.0.
 
 tpm2-tss
 ~~~~~~~~
@@ -46,18 +47,6 @@ pkg-config
 ~~~~~~~~~~
 
 You need to install pkg-config
-
-swig
-~~~~
-
-You need to install `swig <http://swig.org/>`_.
-
-Ubuntu
-++++++
-
-.. code-block:: console
-
-    $ sudo apt-get -y install swig pkg-config
 
 ldconfig
 ~~~~~~~~
@@ -121,6 +110,8 @@ and put it somewher in your ``$PATH``.
 Logging
 -------
 
+** In Progress **
+
 To get traces of all calls into the TSS, use the ``TPM2_PYTSS_LOG_LEVEL``
 environment variable.
 
@@ -177,8 +168,3 @@ Example logs:
     :caption: Contents:
 
     GitHub <https://github.com/tpm2-software/tpm2-pytss>
-    examples/index
-    esys
-    fapi
-    tcti
-    binding
