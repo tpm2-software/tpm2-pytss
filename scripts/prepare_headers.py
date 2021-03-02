@@ -73,10 +73,6 @@ typedef struct TSS2_SYS_CONTEXT TSS2_SYS_CONTEXT;
     f = open(outfile, "w")
     f.write(
         """/* SPDX-License-Identifier: BSD-3
-*
-* Copyright 2019, Fraunhofer SIT
-* All rights reserved.
-*
 * This file was automatically generated. Do not modify !
 */
 
