@@ -12,11 +12,13 @@ site.ENABLE_USER_SITE = "--user" in sys.argv[1:]
 ORG = "tpm2-software"
 NAME = "tpm2-pytss"
 DESCRIPTION = "TPM 2.0 TSS Bindings for Python"
-AUTHOR_NAME = "John Andersen"
-AUTHOR_EMAIL = "john.s.andersen@intel.com"
-INSTALL_REQUIRES = []
+URL = "https://github.com/tpm2-software/tpm2-pytss"
+MAINTAINER_NAME = "William Roberts"
+MAINTAINER_EMAIL = "william.c.roberts@intel.com"
+SETUP_REQUIRES = ["cffi>=1.0.0"]
+INSTALL_REQUIRES = SETUP_REQUIRES
 
-IMPORT_NAME = NAME.replace("-", "_")
+VERSION = check_output("git describe --always --tags --dirty".split(),).decode()
 
 SELF_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -125,11 +127,11 @@ from setuptools import setup
 
 setup(
     name="tpm2_pytss",
-    version="0.1",
-    description="Binding for tpm2tss (Esys and types for now",
-    url="https://github.com/tpm2-software/tpm2-tss",
-    author="Andreas Fuchs",
-    setup_requires=["cffi>=1.0.0"],
+    version=VERSION,
+    description=DESCRIPTION,
+    url=URL,
+    author=MAINTAINER_NAME,
+    setup_requires=SETUP_REQUIRES,
     cffi_modules=["scripts/libesys_build.py:ffibuilder"],
-    install_requires=["cffi>=1.0.0"],
+    install_requires=INSTALL_REQUIRES,
 )
