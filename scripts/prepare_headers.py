@@ -9,7 +9,6 @@ import sys
 
 def prepare(indir, outfile):
     indir = indir + "/tss2/"
-    out = dict()
 
     # Read in headers
     s = open(indir + "tss2_common.h").read()
