@@ -56,7 +56,7 @@ class TestPyEsys(unittest.TestCase):
     def testGetRandom(self):
         sys.stderr.write("PYTEST BILL GETRANDOM: {}\n".format(self.ectx))
         r = self.ectx.GetRandom(5)
-        self.assertTrue(len(r) == 5)
+        self.assertEqual(len(r), 5)
 
     def testCreatePrimary(self):
         sys.stderr.write("PYTEST BILL CREATEPRIMARY: {}".format(self.ectx))
@@ -94,7 +94,7 @@ class TestPyEsys(unittest.TestCase):
             creationPCR,
             session1=ESYS_TR.PASSWORD,
         )
-        self.assertTrue(x is not None)
+        self.assertIsNot(x, None)
 
 
 if __name__ == "__main__":

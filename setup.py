@@ -1,16 +1,10 @@
 import os
 import site
-import stat
 import sys
-import glob
 import shlex
-import shutil
 import pathlib
-from io import open
 from subprocess import check_output
-from setuptools.command.build_py import build_py
-from setuptools.command.build_ext import build_ext
-from setuptools import find_packages, setup, Extension
+from setuptools import setup, Extension
 
 # workaround bug https://github.com/pypa/pip/issues/7953
 site.ENABLE_USER_SITE = "--user" in sys.argv[1:]
