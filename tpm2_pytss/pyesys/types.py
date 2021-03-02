@@ -2,7 +2,8 @@
 SPDX-License-Identifier: BSD-3
 """
 
-from ._libesys import ffi,lib
+from ._libesys import ffi, lib
+
 
 class ESYS_TR(object):
     NONE = lib.ESYS_TR_NONE
@@ -52,6 +53,7 @@ class ESYS_TR(object):
     RH_PLATFORM = lib.ESYS_TR_RH_PLATFORM
     RH_PLATFORM_NV = lib.ESYS_TR_RH_PLATFORM_NV
 
+
 class TPM2_ALG(int):
     ERROR = lib.TPM2_ALG_ERROR
     RSA = lib.TPM2_ALG_RSA
@@ -94,7 +96,10 @@ class TPM2_ALG(int):
     ECB = lib.TPM2_ALG_ECB
     FIRST = lib.TPM2_ALG_FIRST
     LAST = lib.TPM2_ALG_LAST
+
+
 TPM2_ALG_ID = TPM2_ALG
+
 
 class TPM2_ECC(int):
     NONE = lib.TPM2_ECC_NONE
@@ -106,7 +111,10 @@ class TPM2_ECC(int):
     BN_P256 = lib.TPM2_ECC_BN_P256
     BN_P638 = lib.TPM2_ECC_BN_P638
     SM2_P256 = lib.TPM2_ECC_SM2_P256
+
+
 TPM2_ECC_CURVE = TPM2_ECC
+
 
 class TPM2_CC(int):
     NV_UndefineSpaceSpecial = lib.TPM2_CC_NV_UndefineSpaceSpecial
@@ -228,6 +236,7 @@ class TPM2_CC(int):
     LAST = lib.TPM2_CC_LAST
     Vendor_TCG_Test = lib.TPM2_CC_Vendor_TCG_Test
 
+
 class TPM2_SPEC(int):
     FAMILY = lib.TPM2_SPEC_FAMILY
     LEVEL = lib.TPM2_SPEC_LEVEL
@@ -235,8 +244,10 @@ class TPM2_SPEC(int):
     YEAR = lib.TPM2_SPEC_YEAR
     DAY_OF_YEAR = lib.TPM2_SPEC_DAY_OF_YEAR
 
+
 class TPM2_GENERATED_VALUE(int):
     VALUE = lib.TPM2_GENERATED_VALUE
+
 
 class TPM2_RC(int):
     SUCCESS = lib.TPM2_RC_SUCCESS
@@ -360,6 +371,7 @@ class TPM2_RC(int):
     F = lib.TPM2_RC_F
     N_MASK = lib.TPM2_RC_N_MASK
 
+
 class TPM2_EO(int):
     EQ = lib.TPM2_EO_EQ
     NEQ = lib.TPM2_EO_NEQ
@@ -373,6 +385,7 @@ class TPM2_EO(int):
     UNSIGNED_LE = lib.TPM2_EO_UNSIGNED_LE
     BITSET = lib.TPM2_EO_BITSET
     BITCLEAR = lib.TPM2_EO_BITCLEAR
+
 
 class TPM2_ST(int):
     RSP_COMMAND = lib.TPM2_ST_RSP_COMMAND
@@ -393,14 +406,17 @@ class TPM2_ST(int):
     AUTH_SIGNED = lib.TPM2_ST_AUTH_SIGNED
     FU_MANIFEST = lib.TPM2_ST_FU_MANIFEST
 
+
 class TPM2_SU(int):
     CLEAR = lib.TPM2_SU_CLEAR
     STATE = lib.TPM2_SU_STATE
+
 
 class TPM2_SE(int):
     HMAC = lib.TPM2_SE_HMAC
     POLICY = lib.TPM2_SE_POLICY
     TRIAL = lib.TPM2_SE_TRIAL
+
 
 class TPM2_CAP(int):
     FIRST = lib.TPM2_CAP_FIRST
@@ -416,11 +432,14 @@ class TPM2_CAP(int):
     LAST = lib.TPM2_CAP_LAST
     VENDOR_PROPERTY = lib.TPM2_CAP_VENDOR_PROPERTY
 
+
 class TPM2_PT(int):
     NONE = lib.TPM2_PT_NONE
     GROUP = lib.TPM2_PT_GROUP
     FIXED = lib.TPM2_PT_FIXED
-#TODO    FAMILY_INDICATOR = lib.TPM2_PT_FAMILY_INDICATOR
+
+
+# TODO    FAMILY_INDICATOR = lib.TPM2_PT_FAMILY_INDICATOR
 #    LEVEL = lib.TPM2_PT_LEVEL
 #    REVISION = lib.TPM2_PT_REVISION
 #    DAY_OF_YEAR = lib.TPM2_PT_DAY_OF_YEAR
@@ -488,6 +507,7 @@ class TPM2_PT(int):
 #    AUDIT_COUNTER_0 = lib.TPM2_PT_AUDIT_COUNTER_0
 #    AUDIT_COUNTER_1 = lib.TPM2_PT_AUDIT_COUNTER_1
 
+
 class TPM2_PT_PCR(int):
     FIRST = lib.TPM2_PT_TPM2_PCR_FIRST
     SAVE = lib.TPM2_PT_PCR_SAVE
@@ -507,6 +527,7 @@ class TPM2_PT_PCR(int):
     AUTH = lib.TPM2_PT_PCR_AUTH
     LAST = lib.TPM2_PT_TPM2_PCR_LAST
 
+
 class TPM2_PS(int):
     MAIN = lib.TPM2_PS_MAIN
     PC = lib.TPM2_PS_PC
@@ -525,6 +546,7 @@ class TPM2_PS(int):
     MULTI_TENANT = lib.TPM2_PS_MULTI_TENANT
     TC = lib.TPM2_PS_TC
 
+
 class TPM2_HT(int):
     PCR = lib.TPM2_HT_PCR
     NV_INDEX = lib.TPM2_HT_NV_INDEX
@@ -536,6 +558,7 @@ class TPM2_HT(int):
     TRANSIENT = lib.TPM2_HT_TRANSIENT
     PERSISTENT = lib.TPM2_HT_PERSISTENT
 
+
 class TPMA_SESSION(int):
     CONTINUESESSION = lib.TPMA_SESSION_CONTINUESESSION
     AUDITEXCLUSIVE = lib.TPMA_SESSION_AUDITEXCLUSIVE
@@ -543,6 +566,7 @@ class TPMA_SESSION(int):
     DECRYPT = lib.TPMA_SESSION_DECRYPT
     ENCRYPT = lib.TPMA_SESSION_ENCRYPT
     AUDIT = lib.TPMA_SESSION_AUDIT
+
 
 class TPMA_LOCALITY(int):
     ZERO = lib.TPMA_LOCALITY_TPM2_LOC_ZERO
@@ -553,6 +577,7 @@ class TPMA_LOCALITY(int):
     EXTENDED_MASK = lib.TPMA_LOCALITY_EXTENDED_MASK
     EXTENDED_SHIFT = lib.TPMA_LOCALITY_EXTENDED_SHIFT
 
+
 class TPM2_NT(int):
     ORDINARY = lib.TPM2_NT_ORDINARY
     COUNTER = lib.TPM2_NT_COUNTER
@@ -560,6 +585,7 @@ class TPM2_NT(int):
     EXTEND = lib.TPM2_NT_EXTEND
     PIN_FAIL = lib.TPM2_NT_PIN_FAIL
     PIN_PASS = lib.TPM2_NT_PIN_PASS
+
 
 class TPM2_HR(int):
     HANDLE_MASK = lib.TPM2_HR_HANDLE_MASK
@@ -572,6 +598,7 @@ class TPM2_HR(int):
     PERSISTENT = lib.TPM2_HR_PERSISTENT
     NV_INDEX = lib.TPM2_HR_NV_INDEX
     PERMANENT = lib.TPM2_HR_PERMANENT
+
 
 class TPM2_HC(int):
     HR_HANDLE_MASK = lib.TPM2_HR_HANDLE_MASK
@@ -604,6 +631,7 @@ class TPM2_HC(int):
     PERMANENT_FIRST = lib.TPM2_PERMANENT_FIRST
     PERMANENT_LAST = lib.TPM2_PERMANENT_LAST
 
+
 class TPM2_CLOCK(int):
     COARSE_SLOWER = lib.TPM2_CLOCK_COARSE_SLOWER
     MEDIUM_SLOWER = lib.TPM2_CLOCK_MEDIUM_SLOWER
@@ -612,7 +640,10 @@ class TPM2_CLOCK(int):
     FINE_FASTER = lib.TPM2_CLOCK_FINE_FASTER
     MEDIUM_FASTER = lib.TPM2_CLOCK_MEDIUM_FASTER
     COARSE_FASTER = lib.TPM2_CLOCK_COARSE_FASTER
+
+
 TPM2_CLOCK_ADJUST = TPM2_CLOCK
+
 
 class TPMA_NV(int):
     PPWRITE = lib.TPMA_NV_PPWRITE
@@ -639,6 +670,7 @@ class TPMA_NV(int):
     PLATFORMCREATE = lib.TPMA_NV_PLATFORMCREATE
     READ_STCLEAR = lib.TPMA_NV_READ_STCLEAR
 
+
 class TPMA_CC(int):
     COMMANDINDEX_MASK = lib.TPMA_CC_COMMANDINDEX_MASK
     COMMANDINDEX_SHIFT = lib.TPMA_CC_COMMANDINDEX_SHIFT
@@ -651,6 +683,7 @@ class TPMA_CC(int):
     V = lib.TPMA_CC_V
     RES_MASK = lib.TPMA_CC_RES_MASK
     RES_SHIFT = lib.TPMA_CC_RES_SHIFT
+
 
 class TPMA_OBJECT(int):
     FIXEDTPM = lib.TPMA_OBJECT_FIXEDTPM
@@ -665,6 +698,7 @@ class TPMA_OBJECT(int):
     DECRYPT = lib.TPMA_OBJECT_DECRYPT
     SIGN_ENCRYPT = lib.TPMA_OBJECT_SIGN_ENCRYPT
 
+
 class TPMA_ALGORITHM(int):
     ASYMMETRIC = lib.TPMA_ALGORITHM_ASYMMETRIC
     SYMMETRIC = lib.TPMA_ALGORITHM_SYMMETRIC
@@ -674,6 +708,7 @@ class TPMA_ALGORITHM(int):
     ENCRYPTING = lib.TPMA_ALGORITHM_ENCRYPTING
     METHOD = lib.TPMA_ALGORITHM_METHOD
 
+
 class TPMA_PERMANENT(int):
     OWNERAUTHSET = lib.TPMA_PERMANENT_OWNERAUTHSET
     ENDORSEMENTAUTHSET = lib.TPMA_PERMANENT_ENDORSEMENTAUTHSET
@@ -682,6 +717,7 @@ class TPMA_PERMANENT(int):
     INLOCKOUT = lib.TPMA_PERMANENT_INLOCKOUT
     TPMGENERATEDEPS = lib.TPMA_PERMANENT_TPMGENERATEDEPS
 
+
 class TPMA_STARTUP(int):
     CLEAR_PHENABLE = lib.TPMA_STARTUP_CLEAR_PHENABLE
     CLEAR_SHENABLE = lib.TPMA_STARTUP_CLEAR_SHENABLE
@@ -689,246 +725,327 @@ class TPMA_STARTUP(int):
     CLEAR_PHENABLENV = lib.TPMA_STARTUP_CLEAR_PHENABLENV
     CLEAR_ORDERLY = lib.TPMA_STARTUP_CLEAR_ORDERLY
 
+
 class TPMA_MEMORY(int):
     SHAREDRAM = lib.TPMA_MEMORY_SHAREDRAM
     SHAREDNV = lib.TPMA_MEMORY_SHAREDNV
     OBJECTCOPIEDTORAM = lib.TPMA_MEMORY_OBJECTCOPIEDTORAM
 
+
 ### handy contructors
 
+
 def TPM2B_ATTEST():
-    return ffi.new('TPM2B_ATTEST *')
+    return ffi.new("TPM2B_ATTEST *")
+
 
 def TPM2B_CONTEXT_DATA():
-    return ffi.new('TPM2B_CONTEXT_DATA *')
+    return ffi.new("TPM2B_CONTEXT_DATA *")
+
 
 def TPM2B_CONTEXT_SENSITIVE():
-    return ffi.new('TPM2B_CONTEXT_SENSITIVE *')
+    return ffi.new("TPM2B_CONTEXT_SENSITIVE *")
+
 
 def TPM2B_CREATION_DATA():
-    return ffi.new('TPM2B_CREATION_DATA *')
+    return ffi.new("TPM2B_CREATION_DATA *")
+
 
 def TPM2B_DATA():
-    return ffi.new('TPM2B_DATA *')
+    return ffi.new("TPM2B_DATA *")
+
 
 def TPM2B_DIGEST():
-    return ffi.new('TPM2B_DIGEST *')
+    return ffi.new("TPM2B_DIGEST *")
+
 
 def TPM2B_ECC_PARAMETER():
-    return ffi.new('TPM2B_ECC_PARAMETER *')
+    return ffi.new("TPM2B_ECC_PARAMETER *")
+
 
 def TPM2B_ECC_POINT():
-    return ffi.new('TPM2B_ECC_POINT *')
+    return ffi.new("TPM2B_ECC_POINT *")
+
 
 def TPM2B_ENCRYPTED_SECRET():
-    return ffi.new('TPM2B_ENCRYPTED_SECRET *')
+    return ffi.new("TPM2B_ENCRYPTED_SECRET *")
+
 
 def TPM2B_EVENT():
-    return ffi.new('TPM2B_EVENT *')
+    return ffi.new("TPM2B_EVENT *")
+
 
 def TPM2B_ID_OBJECT():
-    return ffi.new('TPM2B_ID_OBJECT *')
+    return ffi.new("TPM2B_ID_OBJECT *")
+
 
 def TPM2B_IV():
-    return ffi.new('TPM2B_IV *')
+    return ffi.new("TPM2B_IV *")
+
 
 def TPM2B_MAX_BUFFER():
-    return ffi.new('TPM2B_MAX_BUFFER *')
+    return ffi.new("TPM2B_MAX_BUFFER *")
+
 
 def TPM2B_MAX_NV_BUFFER():
-    return ffi.new('TPM2B_MAX_NV_BUFFER *')
+    return ffi.new("TPM2B_MAX_NV_BUFFER *")
+
 
 def TPM2B_NAME():
-    return ffi.new('TPM2B_NAME *')
+    return ffi.new("TPM2B_NAME *")
+
 
 def TPM2B_NV_PUBLIC():
-    return ffi.new('TPM2B_NV_PUBLIC *')
+    return ffi.new("TPM2B_NV_PUBLIC *")
+
 
 def TPM2B_PRIVATE():
-    return ffi.new('TPM2B_PRIVATE *')
+    return ffi.new("TPM2B_PRIVATE *")
+
 
 def TPM2B_PRIVATE_KEY_RSA():
-    return ffi.new('TPM2B_PRIVATE_KEY_RSA *')
+    return ffi.new("TPM2B_PRIVATE_KEY_RSA *")
+
 
 def TPM2B_PRIVATE_VENDOR_SPECIFIC():
-    return ffi.new('TPM2B_PRIVATE_VENDOR_SPECIFIC *')
+    return ffi.new("TPM2B_PRIVATE_VENDOR_SPECIFIC *")
+
 
 def TPM2B_PUBLIC():
-    return ffi.new('TPM2B_PUBLIC *')
+    return ffi.new("TPM2B_PUBLIC *")
+
 
 def TPM2B_PUBLIC_KEY_RSA():
-    return ffi.new('TPM2B_PUBLIC_KEY_RSA *')
+    return ffi.new("TPM2B_PUBLIC_KEY_RSA *")
+
 
 def TPM2B_SENSITIVE():
-    return ffi.new('TPM2B_SENSITIVE *')
+    return ffi.new("TPM2B_SENSITIVE *")
+
 
 def TPM2B_SENSITIVE_CREATE():
-    return ffi.new('TPM2B_SENSITIVE_CREATE *')
+    return ffi.new("TPM2B_SENSITIVE_CREATE *")
+
 
 def TPM2B_SENSITIVE_DATA():
-    return ffi.new('TPM2B_SENSITIVE_DATA *')
+    return ffi.new("TPM2B_SENSITIVE_DATA *")
+
 
 def TPM2B_SYM_KEY():
-    return ffi.new('TPM2B_SYM_KEY *')
+    return ffi.new("TPM2B_SYM_KEY *")
+
 
 def TPM2B_TEMPLATE():
-    return ffi.new('TPM2B_TEMPLATE *')
+    return ffi.new("TPM2B_TEMPLATE *")
+
 
 def TPML_AC_CAPABILITIES():
-    return ffi.new('TPML_AC_CAPABILITIES *')
+    return ffi.new("TPML_AC_CAPABILITIES *")
+
 
 def TPML_ALG():
-    return ffi.new('TPML_ALG *')
+    return ffi.new("TPML_ALG *")
+
 
 def TPML_ALG_PROPERTY():
-    return ffi.new('TPML_ALG_PROPERTY *')
+    return ffi.new("TPML_ALG_PROPERTY *")
+
 
 def TPML_CC():
-    return ffi.new('TPML_CC *')
+    return ffi.new("TPML_CC *")
+
 
 def TPML_CCA():
-    return ffi.new('TPML_CCA *')
+    return ffi.new("TPML_CCA *")
+
 
 def TPML_DIGEST():
-    return ffi.new('TPML_DIGEST *')
+    return ffi.new("TPML_DIGEST *")
+
 
 def TPML_DIGEST_VALUES():
-    return ffi.new('TPML_DIGEST_VALUES *')
+    return ffi.new("TPML_DIGEST_VALUES *")
+
 
 def TPML_ECC_CURVE():
-    return ffi.new('TPML_ECC_CURVE *')
+    return ffi.new("TPML_ECC_CURVE *")
+
 
 def TPML_HANDLE():
-    return ffi.new('TPML_HANDLE *')
+    return ffi.new("TPML_HANDLE *")
+
 
 def TPML_INTEL_PTT_PROPERTY():
-    return ffi.new('TPML_INTEL_PTT_PROPERTY *')
+    return ffi.new("TPML_INTEL_PTT_PROPERTY *")
+
 
 def TPML_PCR_SELECTION():
-    return ffi.new('TPML_PCR_SELECTION *')
+    return ffi.new("TPML_PCR_SELECTION *")
+
 
 def TPML_TAGGED_PCR_PROPERTY():
-    return ffi.new('TPML_TAGGED_PCR_PROPERTY *')
+    return ffi.new("TPML_TAGGED_PCR_PROPERTY *")
+
 
 def TPML_TAGGED_TPM_PROPERTY():
-    return ffi.new('TPML_TAGGED_TPM_PROPERTY *')
+    return ffi.new("TPML_TAGGED_TPM_PROPERTY *")
+
 
 def TPMS_AC_OUTPUT():
-    return ffi.new('TPMS_AC_OUTPUT *')
+    return ffi.new("TPMS_AC_OUTPUT *")
+
 
 def TPMS_ALGORITHM_DESCRIPTION():
-    return ffi.new('TPMS_ALGORITHM_DESCRIPTION *')
+    return ffi.new("TPMS_ALGORITHM_DESCRIPTION *")
+
 
 def TPMS_ALGORITHM_DETAIL_ECC():
-    return ffi.new('TPMS_ALGORITHM_DETAIL_ECC *')
+    return ffi.new("TPMS_ALGORITHM_DETAIL_ECC *")
+
 
 def TPMS_ALG_PROPERTY():
-    return ffi.new('TPMS_ALG_PROPERTY *')
+    return ffi.new("TPMS_ALG_PROPERTY *")
+
 
 def TPMS_ASYM_PARMS():
-    return ffi.new('TPMS_ASYM_PARMS *')
+    return ffi.new("TPMS_ASYM_PARMS *")
+
 
 def TPMS_ATTEST():
-    return ffi.new('TPMS_ATTEST *')
+    return ffi.new("TPMS_ATTEST *")
+
 
 def TPMS_AUTH_COMMAND():
-    return ffi.new('TPMS_AUTH_COMMAND *')
+    return ffi.new("TPMS_AUTH_COMMAND *")
+
 
 def TPMS_AUTH_RESPONSE():
-    return ffi.new('TPMS_AUTH_RESPONSE *')
+    return ffi.new("TPMS_AUTH_RESPONSE *")
+
 
 def TPMS_CAPABILITY_DATA():
-    return ffi.new('TPMS_CAPABILITY_DATA *')
+    return ffi.new("TPMS_CAPABILITY_DATA *")
+
 
 def TPMS_CERTIFY_INFO():
-    return ffi.new('TPMS_CERTIFY_INFO *')
+    return ffi.new("TPMS_CERTIFY_INFO *")
+
 
 def TPMS_CLOCK_INFO():
-    return ffi.new('TPMS_CLOCK_INFO *')
+    return ffi.new("TPMS_CLOCK_INFO *")
+
 
 def TPMS_COMMAND_AUDIT_INFO():
-    return ffi.new('TPMS_COMMAND_AUDIT_INFO *')
+    return ffi.new("TPMS_COMMAND_AUDIT_INFO *")
+
 
 def TPMS_CONTEXT():
-    return ffi.new('TPMS_CONTEXT *')
+    return ffi.new("TPMS_CONTEXT *")
+
 
 def TPMS_CONTEXT_DATA():
-    return ffi.new('TPMS_CONTEXT_DATA *')
+    return ffi.new("TPMS_CONTEXT_DATA *")
+
 
 def TPMS_CREATION_DATA():
-    return ffi.new('TPMS_CREATION_DATA *')
+    return ffi.new("TPMS_CREATION_DATA *")
+
 
 def TPMS_CREATION_INFO():
-    return ffi.new('TPMS_CREATION_INFO *')
+    return ffi.new("TPMS_CREATION_INFO *")
+
 
 def TPMS_ECC_PARMS():
-    return ffi.new('TPMS_ECC_PARMS *')
+    return ffi.new("TPMS_ECC_PARMS *")
+
 
 def TPMS_ECC_POINT():
-    return ffi.new('TPMS_ECC_POINT *')
+    return ffi.new("TPMS_ECC_POINT *")
+
 
 def TPMS_EMPTY():
-    return ffi.new('TPMS_EMPTY *')
+    return ffi.new("TPMS_EMPTY *")
+
 
 def TPMS_ID_OBJECT():
-    return ffi.new('TPMS_ID_OBJECT *')
+    return ffi.new("TPMS_ID_OBJECT *")
+
 
 def TPMS_KEYEDHASH_PARMS():
-    return ffi.new('TPMS_KEYEDHASH_PARMS *')
+    return ffi.new("TPMS_KEYEDHASH_PARMS *")
+
 
 def TPMS_NV_CERTIFY_INFO():
-    return ffi.new('TPMS_NV_CERTIFY_INFO *')
+    return ffi.new("TPMS_NV_CERTIFY_INFO *")
+
 
 def TPMS_NV_PIN_COUNTER_PARAMETERS():
-    return ffi.new('TPMS_NV_PIN_COUNTER_PARAMETERS *')
+    return ffi.new("TPMS_NV_PIN_COUNTER_PARAMETERS *")
+
 
 def TPMS_NV_PUBLIC():
-    return ffi.new('TPMS_NV_PUBLIC *')
+    return ffi.new("TPMS_NV_PUBLIC *")
+
 
 def TPMS_PCR_SELECT():
-    return ffi.new('TPMS_PCR_SELECT *')
+    return ffi.new("TPMS_PCR_SELECT *")
+
 
 def TPMS_PCR_SELECTION():
-    return ffi.new('TPMS_PCR_SELECTION *')
+    return ffi.new("TPMS_PCR_SELECTION *")
+
 
 def TPMS_QUOTE_INFO():
-    return ffi.new('TPMS_QUOTE_INFO *')
+    return ffi.new("TPMS_QUOTE_INFO *")
+
 
 def TPMS_RSA_PARMS():
-    return ffi.new('TPMS_RSA_PARMS *')
+    return ffi.new("TPMS_RSA_PARMS *")
+
 
 def TPMS_SCHEME_ECDAA():
-    return ffi.new('TPMS_SCHEME_ECDAA *')
+    return ffi.new("TPMS_SCHEME_ECDAA *")
+
 
 def TPMS_SCHEME_HASH():
-    return ffi.new('TPMS_SCHEME_HASH *')
+    return ffi.new("TPMS_SCHEME_HASH *")
+
 
 def TPMS_SCHEME_XOR():
-    return ffi.new('TPMS_SCHEME_XOR *')
+    return ffi.new("TPMS_SCHEME_XOR *")
+
 
 def TPMS_SENSITIVE_CREATE():
-    return ffi.new('TPMS_SENSITIVE_CREATE *')
+    return ffi.new("TPMS_SENSITIVE_CREATE *")
+
 
 def TPMS_SESSION_AUDIT_INFO():
-    return ffi.new('TPMS_SESSION_AUDIT_INFO *')
+    return ffi.new("TPMS_SESSION_AUDIT_INFO *")
+
 
 def TPMS_SIGNATURE_ECC():
-    return ffi.new('TPMS_SIGNATURE_ECC *')
+    return ffi.new("TPMS_SIGNATURE_ECC *")
+
 
 def TPMS_SIGNATURE_RSA():
-    return ffi.new('TPMS_SIGNATURE_RSA *')
+    return ffi.new("TPMS_SIGNATURE_RSA *")
+
 
 def TPMS_SYMCIPHER_PARMS():
-    return ffi.new('TPMS_SYMCIPHER_PARMS *')
+    return ffi.new("TPMS_SYMCIPHER_PARMS *")
+
 
 def TPMS_TAGGED_PCR_SELECT():
-    return ffi.new('TPMS_TAGGED_PCR_SELECT *')
+    return ffi.new("TPMS_TAGGED_PCR_SELECT *")
+
 
 def TPMS_TAGGED_PROPERTY():
-    return ffi.new('TPMS_TAGGED_PROPERTY *')
+    return ffi.new("TPMS_TAGGED_PROPERTY *")
+
 
 def TPMS_TIME_ATTEST_INFO():
-    return ffi.new('TPMS_TIME_ATTEST_INFO *')
+    return ffi.new("TPMS_TIME_ATTEST_INFO *")
+
 
 def TPMS_TIME_INFO():
-    return ffi.new('TPMS_TIME_INFO *')
+    return ffi.new("TPMS_TIME_INFO *")

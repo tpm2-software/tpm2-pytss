@@ -28,6 +28,7 @@ SELF_PATH = os.path.dirname(os.path.realpath(__file__))
 
 README = pathlib.Path(SELF_PATH, "README.md").read_text()
 
+
 class PkgConfigNeededExtension(Extension):
     """
     By creating a subclass of Extension and using the :py:func:property builtin
