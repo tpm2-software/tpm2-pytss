@@ -3,17 +3,21 @@
 SPDX-License-Identifier: BSD-3
 """
 
+import io
+import os
 import re
 import sys
 
 
 def prepare(indir, outfile):
-    indir = indir + "/tss2/"
+    indir = os.path.join(indir, "tss2")
 
     # Read in headers
-    s = open(indir + "tss2_common.h").read()
+    s = io.open(os.path.join(indir, "tss2_common.h"), mode="r", encoding="utf-8").read()
 
-    s += open(indir + "tss2_tpm2_types.h").read()
+    s += io.open(
+        os.path.join(indir, "tss2_tpm2_types.h"), mode="r", encoding="utf-8"
+    ).read()
 
     s += """
 typedef struct TSS2_TCTI_CONTEXT TSS2_TCTI_CONTEXT;
@@ -21,7 +25,7 @@ typedef struct TSS2_TCTI_POLL_HANDLE TSS2_TCTI_POLL_HANDLE;
 typedef struct TSS2_SYS_CONTEXT TSS2_SYS_CONTEXT;
 """
 
-    s += open(indir + "tss2_esys.h").read()
+    s += io.open(os.path.join(indir, "tss2_esys.h"), mode="r", encoding="utf-8").read()
 
     # Remove false define (workaround)
     s = re.sub(
