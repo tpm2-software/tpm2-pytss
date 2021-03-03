@@ -31,6 +31,8 @@ Features
 **In Progress**
 We support the FAPI, ESAPI, and marshalling library.
 
+- :doc:`/esys`
+
 Dependencies
 ------------
 
@@ -167,4 +169,5 @@ Example logs:
     :maxdepth: 2
     :caption: Contents:
 
+    esys
     GitHub <https://github.com/tpm2-software/tpm2-pytss>
