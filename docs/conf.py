@@ -12,19 +12,20 @@
 #
 import os
 import sys
+import datetime
 from unittest.mock import patch
 
 sys.path.insert(0, os.path.abspath(".."))
 
 with patch("setuptools.setup"):
-    from setup import ORG, NAME, DESCRIPTION, VERSION, AUTHOR_NAME
+    from setup import ORG, NAME, DESCRIPTION, VERSION, MAINTAINER_NAME
 
 
 # -- Project information -----------------------------------------------------
 
 project = NAME
-copyright = "2019, Intel Corperation"
-author = AUTHOR_NAME
+copyright = "2019 - %d, Intel" % (datetime.datetime.today().year,)
+author = MAINTAINER_NAME
 
 # The short X.Y version
 version = VERSION
