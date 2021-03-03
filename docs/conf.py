@@ -15,23 +15,20 @@ import sys
 import datetime
 from unittest.mock import patch
 
-sys.path.insert(0, os.path.abspath(".."))
-
-with patch("setuptools.setup"):
-    from setup import ORG, NAME, DESCRIPTION, VERSION, MAINTAINER_NAME
+from setuptools_scm import get_version
 
 
 # -- Project information -----------------------------------------------------
 
-project = NAME
+project = "tpm2-pytss"
 copyright = "2019 - %d, Intel" % (datetime.datetime.today().year,)
-author = MAINTAINER_NAME
+author = "William Roberts"
 
 # The short X.Y version
-version = VERSION
+version = get_version(root="..", relative_to=__file__)
 
 # The full version, including alpha/beta/rc tags
-release = VERSION
+release = get_version(root="..", relative_to=__file__)
 
 
 # -- General configuration ---------------------------------------------------
@@ -43,7 +40,6 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
     "sphinx.ext.intersphinx",
-    "sphinxcontrib.asyncio",
 ]
 
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
@@ -65,9 +61,9 @@ exclude_patterns = []
 html_theme = "alabaster"
 
 html_theme_options = {
-    "description": DESCRIPTION,
-    "github_user": ORG,
-    "github_repo": NAME,
+    "description": "TPM 2.0 TSS Bindings for Python",
+    "github_user": "tpm2-software",
+    "github_repo": "tpm2-pytss",
     "github_button": True,
     "travis_button": True,
     "codecov_button": True,

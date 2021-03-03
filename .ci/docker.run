@@ -3,6 +3,12 @@
 
 set -e
 
+virtualenv .venv
+
+. .venv/bin/activate
+
 source $TRAVIS_BUILD_DIR/.ci/docker-prelude.sh
+
+$PYTHON -u -m pip install -e .[dev]
 
 $PYTHON -u -m coverage run -m unittest discover -v
