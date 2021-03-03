@@ -57,3 +57,9 @@ $ docker run --rm \
 - `PYESYS_TCTI_CONFIG`
   - Default: `None`
   - Set this to the config string to be passed to the init function of the TCTI.
+
+# Documentation
+
+Build the docs by running the Sphinx HTML builder on the `docs/` directory.
+
+You can also invoke `./scripts/docs.sh`
