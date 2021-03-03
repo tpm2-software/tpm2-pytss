@@ -26,7 +26,7 @@ $ black .
 ## Running
 
 ```console
-$ python3 setup.py test
+$ python -m unittest discover -v
 ```
 
 ## Docker

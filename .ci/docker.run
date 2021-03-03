@@ -5,4 +5,4 @@ set -e
 
 source $TRAVIS_BUILD_DIR/.ci/docker-prelude.sh
 
-$PYTHON -u -m coverage run setup.py test -s tests
+$PYTHON -u -m coverage run -m unittest discover -v
