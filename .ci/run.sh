@@ -71,7 +71,7 @@ function run_docs() {
     -v "${PWD}:/workspace/tpm2-pytss" \
     --env-file .ci/docker.env \
     tpm2software/tpm2-tss-python \
-    /bin/bash -c 'virtualenv .venv && . .venv/bin/activate && . .ci/docker-prelude.sh && python3 -m pip install -e .'
+    /bin/bash -c 'virtualenv .venv && . .venv/bin/activate && . .ci/docker-prelude.sh && python3 -m pip install -e .[dev]'
 
   # Make master docs
   master_docs="$(mktemp -d)"
@@ -99,7 +99,7 @@ function run_docs() {
     -v "${PWD}:/workspace/tpm2-pytss" \
     --env-file .ci/docker.env \
     tpm2software/tpm2-tss-python \
-    /bin/bash -c 'virtualenv .venv && . .venv/bin/activate && . .ci/docker-prelude.sh && python3 -m pip install -e .'
+    /bin/bash -c 'virtualenv .venv && . .venv/bin/activate && . .ci/docker-prelude.sh && python3 -m pip install -e .[dev]'
 
   docker run --rm \
     -u $(id -u):$(id -g) \

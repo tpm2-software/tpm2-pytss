@@ -7,6 +7,20 @@ submodule.
 $ git clone --recursive https://github.com/tpm2-software/tpm2-pytss
 ```
 
+# Python dependencies
+
+Make sure you have the latest version of build utilities installed
+
+```console
+$ pip install -U pip setuptools wheel
+```
+
+Install python dependencies by appending `[dev]` to the install command
+
+```console
+$ pip install -e .[dev]
+```
+
 # Style
 
 Install `black` version `19.10b0`
