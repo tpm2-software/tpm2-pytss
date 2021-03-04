@@ -34,11 +34,17 @@ function run_test() {
     return
   fi
 
-  if [ "x${GITHUB_REF}" == "xrefs/heads/master" ] || [ "x${GITHUB_REF}" == *"xrefs/tags/"* ]; then
+  if [[ "x${GITHUB_REF}" == "xrefs/tags/"* ]]; then
     git status
     git reset --hard HEAD
-    git clean -fdx
-    "${PYTHON}" -m dffml service dev release .
+    git clean -xdf
+    pypi_version=$(python -c 'import json, urllib.request; print(json.loads(urllib.request.urlopen("https://pypi.org/pypi/tpm2-pytss/json").read())["info"]["version"])')
+    tag=${GITHUB_REF/refs\/tags\//}
+    if [ "x${tag}" != "x${pypi_version}" ]; then
+      git reset --hard HEAD
+      python setup.py sdist
+      python -m twine upload dist/*
+    fi
   fi
 }
 
