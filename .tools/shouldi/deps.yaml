@@ -1,9 +1,0 @@
-dependencies:
-  python:
-    name: Python
-    url: https://python.org
-    license: Python License 2.0
-  tpm2-tss:
-    name: TPM2-TSS
-    url: https://github.com/tpm2-software/tpm2-tss
-    license: 3 Clause BSD
