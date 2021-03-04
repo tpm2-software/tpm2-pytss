@@ -54,12 +54,10 @@ class TestPyEsys(unittest.TestCase):
         TestPyEsys.tpm.close()
 
     def testGetRandom(self):
-        sys.stderr.write("PYTEST BILL GETRANDOM: {}\n".format(self.ectx))
         r = self.ectx.GetRandom(5)
         self.assertEqual(len(r), 5)
 
     def testCreatePrimary(self):
-        sys.stderr.write("PYTEST BILL CREATEPRIMARY: {}".format(self.ectx))
         inSensitive = TPM2B_SENSITIVE_CREATE()
         inPublic = TPM2B_PUBLIC()
         outsideInfo = TPM2B_DATA()
