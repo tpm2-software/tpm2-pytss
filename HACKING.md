@@ -4,7 +4,7 @@ You need to clone recursive so that you will get the siwg interface files as a
 submodule.
 
 ```console
-$ git clone --recursive https://github.com/tpm2-software/tpm2-pytss
+$ git clone https://github.com/tpm2-software/tpm2-pytss
 ```
 
 # Python dependencies
@@ -59,18 +59,7 @@ $ docker run --rm \
 
 ## Environment Variables
 
-- `SIM_RUNNING`
-  - If set to anything this tells `util.simulator` that you want it to use the
-    simulator that's already running instead of trying to start a new one.
-
-- `PYESYS_TCTI`
-  - Default: `mssim`
-  - Set this to the name of the TCTI you want to use. For example `device`,
-    `mssim`, `tabrmd`.
-
-- `PYESYS_TCTI_CONFIG`
-  - Default: `None`
-  - Set this to the config string to be passed to the init function of the TCTI.
+- NONE
 
 # Documentation
 
