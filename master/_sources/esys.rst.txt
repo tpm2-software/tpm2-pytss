@@ -1,12 +1,6 @@
-ESYS
+Esys
 ====
 
-Abstracted access to the ESYS bindings
-
-.. autoclass:: tpm2_pytss.esys.ESYS
-   :members:
-   :undoc-members:
-
-.. autoclass:: tpm2_pytss.esys.ESYSContext
+.. autoclass:: tpm2_pytss.pyesys.EsysContext
    :members:
    :undoc-members:

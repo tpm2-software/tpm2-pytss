@@ -5,17 +5,16 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>tpm2-pytss Documentation &#8212; tpm2-pytss 0.1.9 documentation</title>
+    <title>tpm2-pytss Documentation &#8212; tpm2-pytss 0.1.dev1+gfe8009f documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
-    <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Examples" href="examples/index.html" />
+    <link rel="next" title="Esys" href="esys.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -53,11 +52,15 @@ functions does.</p>
 </ul>
 <div class="section" id="features">
 <h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
-<p>We support the FAPI, ESAPI, and marshalling library.</p>
+<p><strong>In Progress</strong>
+We support the FAPI, ESAPI, and marshalling library.</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="esys.html"><span class="doc">Esys</span></a></p></li>
+</ul>
 </div>
 <div class="section" id="dependencies">
 <h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
-<p>This has been tested against TPM2 TSS 2.4.0, SWIG 3 and SWIG 4.</p>
+<p>This has been tested against TPM2 TSS 2.4.0.</p>
 <div class="section" id="tpm2-tss">
 <h3>tpm2-tss<a class="headerlink" href="#tpm2-tss" title="Permalink to this headline">¶</a></h3>
 <p>You need to install tpm2-tss prior to installing this,
@@ -66,16 +69,6 @@ functions does.</p>
 <div class="section" id="pkg-config">
 <h3>pkg-config<a class="headerlink" href="#pkg-config" title="Permalink to this headline">¶</a></h3>
 <p>You need to install pkg-config</p>
-</div>
-<div class="section" id="swig">
-<h3>swig<a class="headerlink" href="#swig" title="Permalink to this headline">¶</a></h3>
-<p>You need to install <a class="reference external" href="http://swig.org/">swig</a>.</p>
-<div class="section" id="ubuntu">
-<h4>Ubuntu<a class="headerlink" href="#ubuntu" title="Permalink to this headline">¶</a></h4>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> sudo apt-get -y install swig pkg-config
-</pre></div>
-</div>
-</div>
 </div>
 <div class="section" id="ldconfig">
 <h3>ldconfig<a class="headerlink" href="#ldconfig" title="Permalink to this headline">¶</a></h3>
@@ -91,10 +84,10 @@ you might get this error:</p>
 </div>
 <p>We make a config file that tells <code class="docutils literal notranslate"><span class="pre">ldconfig</span></code> to look in <code class="docutils literal notranslate"><span class="pre">/usr/local/lib</span></code> for
 shared libraries, then we run <code class="docutils literal notranslate"><span class="pre">ldconfig</span></code>.</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> sudo mkdir -p /etc/ld.so.conf.d/
-<span class="gp">$</span> <span class="nb">echo</span> <span class="s1">&#39;include /etc/ld.so.conf.d/*.conf&#39;</span> <span class="p">|</span> sudo tee -a /etc/ld.so.conf
-<span class="gp">$</span> <span class="nb">echo</span> <span class="s1">&#39;/usr/local/lib&#39;</span> <span class="p">|</span> sudo tee -a /etc/ld.so.conf.d/libc.conf
-<span class="gp">$</span> sudo ldconfig
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>sudo mkdir -p /etc/ld.so.conf.d/
+<span class="gp">$ </span><span class="nb">echo</span> <span class="s1">&#39;include /etc/ld.so.conf.d/*.conf&#39;</span> <span class="p">|</span> sudo tee -a /etc/ld.so.conf
+<span class="gp">$ </span><span class="nb">echo</span> <span class="s1">&#39;/usr/local/lib&#39;</span> <span class="p">|</span> sudo tee -a /etc/ld.so.conf.d/libc.conf
+<span class="gp">$ </span>sudo ldconfig
 </pre></div>
 </div>
 <div class="admonition note">
@@ -106,14 +99,14 @@ shared libraries, then we run <code class="docutils literal notranslate"><span c
 <div class="section" id="install">
 <h2>Install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h2>
 <p>Install from PyPi.</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python3 -m pip install tpm2-pytss
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python3 -m pip install tpm2-pytss
 </pre></div>
 </div>
 <p>Or install from the Git repo</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> git clone --depth <span class="m">1</span> --recurse-submodules -b <span class="si">${</span><span class="nv">TPM2_PYTSS_VERSION</span><span class="si">}</span> <span class="se">\</span>
-  https://github.com/tpm2-software/tpm2-pytss
-<span class="gp">$</span> <span class="nb">cd</span> tpm2-pytss
-<span class="gp">$</span> python3 -m pip install -e .
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>git clone --depth <span class="m">1</span> --recurse-submodules -b <span class="si">${</span><span class="nv">TPM2_PYTSS_VERSION</span><span class="si">}</span> <span class="se">\</span>
+<span class="go">  https://github.com/tpm2-software/tpm2-pytss</span>
+<span class="gp">$ </span><span class="nb">cd</span> tpm2-pytss
+<span class="gp">$ </span>python3 -m pip install -e .
 </pre></div>
 </div>
 </div>
@@ -122,15 +115,16 @@ shared libraries, then we run <code class="docutils literal notranslate"><span c
 <p>You need to have <code class="docutils literal notranslate"><span class="pre">tpm_server</span></code> installed in your path to run the tests.</p>
 <p>Download the latest version from <a class="reference external" href="https://sourceforge.net/projects/ibmswtpm2/files/">https://sourceforge.net/projects/ibmswtpm2/files/</a>
 and put it somewher in your <code class="docutils literal notranslate"><span class="pre">$PATH</span></code>.</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> python3 setup.py <span class="nb">test</span>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>python3 setup.py <span class="nb">test</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="logging">
 <h2>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h2>
+<p>** In Progress **</p>
 <p>To get traces of all calls into the TSS, use the <code class="docutils literal notranslate"><span class="pre">TPM2_PYTSS_LOG_LEVEL</span></code>
 environment variable.</p>
-<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$</span> <span class="nb">export</span> <span class="nv">TPM2_PYTSS_LOG_LEVEL</span><span class="o">=</span>debug
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span><span class="nb">export</span> <span class="nv">TPM2_PYTSS_LOG_LEVEL</span><span class="o">=</span>debug
 </pre></div>
 </div>
 <p>Example logs:</p>
@@ -178,16 +172,8 @@ environment variable.</p>
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="esys.html">Esys</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/tpm2-software/tpm2-pytss">GitHub</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="examples/fapi.html">FAPI</a></li>
-<li class="toctree-l2"><a class="reference internal" href="examples/esys.html">ESYS</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="esys.html">ESYS</a></li>
-<li class="toctree-l1"><a class="reference internal" href="fapi.html">FAPI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tcti.html">TCTIs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="binding.html">Esys Bindings</a></li>
 </ul>
 </div>
 </div>
@@ -245,19 +231,15 @@ environment variable.</p>
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="esys.html">Esys</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/tpm2-software/tpm2-pytss">GitHub</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples/index.html">Examples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="esys.html">ESYS</a></li>
-<li class="toctree-l1"><a class="reference internal" href="fapi.html">FAPI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tcti.html">TCTIs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="binding.html">Esys Bindings</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="#">Documentation overview</a><ul>
-      <li>Next: <a href="examples/index.html" title="next chapter">Examples</a></li>
+      <li>Next: <a href="esys.html" title="next chapter">Esys</a></li>
   </ul></li>
 </ul>
 </div>
@@ -284,10 +266,10 @@ environment variable.</p>
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2019, Intel Corperation.
+      &copy;2019 - 2021, Intel.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.3.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.1</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
