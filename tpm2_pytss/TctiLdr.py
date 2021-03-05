@@ -2,7 +2,7 @@
 SPDX-License-Identifier: BSD-3
 """
 
-from ._libesys import lib, ffi
+from ._libtpm2_pytss import lib, ffi
 
 from .utils import _chkrc
 
