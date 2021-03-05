@@ -19,9 +19,13 @@ def prepare(indir, outfile):
         os.path.join(indir, "tss2_tpm2_types.h"), mode="r", encoding="utf-8"
     ).read()
 
+    s += io.open(os.path.join(indir, "tss2_tcti.h"), mode="r", encoding="utf-8").read()
+
+    s += io.open(
+        os.path.join(indir, "tss2_tctildr.h"), mode="r", encoding="utf-8"
+    ).read()
+
     s += """
-typedef struct TSS2_TCTI_CONTEXT TSS2_TCTI_CONTEXT;
-typedef struct TSS2_TCTI_POLL_HANDLE TSS2_TCTI_POLL_HANDLE;
 typedef struct TSS2_SYS_CONTEXT TSS2_SYS_CONTEXT;
 """
 
@@ -34,6 +38,13 @@ typedef struct TSS2_SYS_CONTEXT TSS2_SYS_CONTEXT;
         s,
         flags=re.MULTILINE,
     )
+
+    # remove TCTI stuff
+    s = re.sub("#ifndef TSS2_API_VERSION.*\n.*\n#endif", "", s, flags=re.MULTILINE)
+    r = r"#if defined\(__linux__\) \|\| defined\(__unix__\) \|\| defined\(__APPLE__\) \|\| defined \(__QNXNTO__\) \|\| defined \(__VXWORKS__\)(\n.*)+#endif\n#endif"
+    s = re.sub(r, "typedef struct pollfd TSS2_TCTI_POLL_HANDLE;", s, flags=re.MULTILINE)
+    s = re.sub(r"#define TSS2_TCTI_.*\n.*", "", s, flags=re.MULTILINE)
+    s = re.sub(r"^\s*#define Tss2_Tcti_(?:.*\\\r?\n)*.*$", "", s, flags=re.MULTILINE)
 
     # Remove includes and guards
     s = re.sub("#ifndef.*", "", s)
