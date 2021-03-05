@@ -45,6 +45,7 @@ ffibuilder.set_source(
     """
      /* the C header of the library */
      #include <tss2/tss2_esys.h>
+     #include <tss2/tss2_tctildr.h>
 """,
     debug=True,
     libraries=["tss2-esys", "tss2-tctildr"],
