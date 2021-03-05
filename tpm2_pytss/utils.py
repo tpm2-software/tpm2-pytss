@@ -7,7 +7,7 @@ from ._libtpm2_pytss import ffi
 
 def _chkrc(rc):
     if rc != 0:
-        raise Exception(rc >> 16, rc & 0xFFFF)
+        raise RuntimeError(f"TSS2 Library call failed with: 0x{rc:X}")
 
 
 #### Utilities ####
