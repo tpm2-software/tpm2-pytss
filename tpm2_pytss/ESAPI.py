@@ -2,14 +2,14 @@
 SPDX-License-Identifier: BSD-3
 """
 
-from ._libesys import lib
+from ._libtpm2_pytss import lib
 
 from .types import *
 
 from .utils import _chkrc, TPM2B_pack, TPM2B_unpack
 
 
-class EsysContext:
+class ESAPI:
     def __init__(self, tcti=ffi.NULL):
 
         self.ctx_pp = ffi.new("ESYS_CONTEXT **")

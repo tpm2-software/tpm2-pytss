@@ -2,7 +2,7 @@
 SPDX-License-Identifier: BSD-3
 """
 
-from ._libesys import ffi, lib
+from ._libtpm2_pytss import ffi, lib
 
 
 class ESYS_TR(object):

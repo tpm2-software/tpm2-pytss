@@ -12,7 +12,7 @@ import tempfile
 import unittest
 from time import sleep
 
-from tpm2_pytss.pyesys import *
+from tpm2_pytss import *
 
 
 class BaseTpmSimulator(object):
@@ -142,7 +142,7 @@ class TestPyEsys(unittest.TestCase):
         TestPyEsys.tpm.start()
         try:
             TestPyEsys.tcti = TestPyEsys.tpm.get_tcti()
-            with EsysContext(TestPyEsys.tcti) as ectx:
+            with ESAPI(TestPyEsys.tcti) as ectx:
                 ectx.Startup(TPM2_SU.CLEAR)
 
         except Exception as e:
@@ -150,7 +150,7 @@ class TestPyEsys(unittest.TestCase):
             raise e
 
     def setUp(self):
-        self.ectx = EsysContext(TestPyEsys.tcti)
+        self.ectx = ESAPI(TestPyEsys.tcti)
 
     def tearDown(self):
         self.ectx.close()
