@@ -11,6 +11,8 @@ import subprocess
 import tempfile
 import unittest
 from time import sleep
+from ctypes import cdll
+
 
 from tpm2_pytss import *
 
@@ -41,6 +43,9 @@ class BaseTpmSimulator(object):
 
 
 class SwtpmSimulator(BaseTpmSimulator):
+    exe = "swtpm"
+    libname = "libtss2-tcti-swtpm.so"
+
     def __init__(self):
         self._port = None
         super().__init__()
@@ -79,6 +84,9 @@ class SwtpmSimulator(BaseTpmSimulator):
 
 
 class IBMSimulator(BaseTpmSimulator):
+    exe = "tpm_server"
+    libname = "libtss2-tcti-mssim.so"
+
     def __init__(self):
         self._port = None
         super().__init__()
@@ -112,17 +120,23 @@ class IBMSimulator(BaseTpmSimulator):
 class TpmSimulator(object):
 
     SIMULATORS = [
-        {"exe": "swtpm", "sim": SwtpmSimulator},
-        {"exe": "tpm_server", "sim": IBMSimulator},
+        SwtpmSimulator,
+        IBMSimulator,
     ]
 
     @staticmethod
     def getSimulator():
 
         for sim in TpmSimulator.SIMULATORS:
-            exe = spawn.find_executable(sim["exe"])
-            if exe:
-                return sim["sim"]()
+            exe = spawn.find_executable(sim.exe)
+            if not exe:
+                continue
+            try:
+                cdll.LoadLibrary(sim.libname)
+            except OSError:
+                continue
+
+            return sim()
 
         raise RuntimeError(
             "Expected to find a TPM 2.0 Simulator, tried {}, got None".format(
