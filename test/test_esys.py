@@ -3,47 +3,154 @@
 SPDX-License-Identifier: BSD-3
 """
 
+from distutils import spawn
+import logging
 import os
-import sys
+import random
 import subprocess
+import tempfile
 import unittest
 from time import sleep
 
 from tpm2_pytss.pyesys import *
 
 
-class Tpm(object):
+class BaseTpmSimulator(object):
     def __init__(self):
-        print("Setting up simulator: ", end="")
-        self.tpm = subprocess.Popen(["tpm_server", "-rm"])
-        sleep(2)
-        if self.tpm.poll() is not None:
-            print("tpm_server not started, retrying...")
-            sleep(5)
-            self.tpm = subprocess.Popen(["tpm_server"])
-            sleep(2)
-        if self.tpm.poll() is not None:
-            print("tpm_server not started, SKIPPING")
-            exit(77)  # Skipped
-        print("OK")
+        self.tpm = None
+
+    def start(self):
+        logger = logging.getLogger("DEBUG")
+        logger.debug('Setting up simulator: "{}"'.format(self.tpm))
+
+        tpm = None
+        for _ in range(0, 10):
+
+            random_port = random.randrange(2321, 65534)
+
+            tpm = self._start(port=random_port)
+            if tpm:
+                self.tpm = tpm
+                break
+
+        if not tpm:
+            raise SystemError("Could not start simulator")
 
     def close(self):
         self.tpm.terminate()
-        os.unlink("NVChip")
+
+
+class SwtpmSimulator(BaseTpmSimulator):
+    def __init__(self):
+        self._port = None
+        super().__init__()
+        self.working_dir = tempfile.TemporaryDirectory()
+
+    def _start(self, port):
+
+        cmd = [
+            "swtpm",
+            "socket",
+            "--tpm2",
+            "--server",
+            "port={}".format(port),
+            "--ctrl",
+            "type=tcp,port={}".format(port + 1),
+            "--flags",
+            "not-need-init",
+            "--tpmstate",
+            "dir={}".format(self.working_dir.name),
+        ]
+
+        tpm = subprocess.Popen(cmd)
+        sleep(2)
+
+        if not tpm.poll():
+            self._port = port
+            return tpm
+
+        return None
+
+    def get_tcti(self):
+        if self._port is None:
+            return None
+
+        return TctiLdr("swtpm", f"port={self._port}")
+
+
+class IBMSimulator(BaseTpmSimulator):
+    def __init__(self):
+        self._port = None
+        super().__init__()
+        self.working_dir = tempfile.TemporaryDirectory()
+
+    def _start(self, port):
+
+        cwd = os.getcwd()
+        os.chdir(self.working_dir.name)
+        try:
+            cmd = ["tpm_server", "-rm", "-port", "{}".format(port)]
+            tpm = subprocess.Popen(cmd)
+            sleep(2)
+
+            if not tpm.poll():
+                self._port = port
+                return tpm
+
+            return None
+
+        finally:
+            os.chdir(cwd)
+
+    def get_tcti(self):
+        if self._port is None:
+            return None
+
+        return TctiLdr("mssim", f"port={self._port}")
+
+
+class TpmSimulator(object):
+
+    SIMULATORS = [
+        {"exe": "swtpm", "sim": SwtpmSimulator},
+        {"exe": "tpm_server", "sim": IBMSimulator},
+    ]
+
+    @staticmethod
+    def getSimulator():
+
+        for sim in TpmSimulator.SIMULATORS:
+            exe = spawn.find_executable(sim["exe"])
+            if exe:
+                return sim["sim"]()
+
+        raise RuntimeError(
+            "Expected to find a TPM 2.0 Simulator, tried {}, got None".format(
+                TpmSimulator.SIMULATORS
+            )
+        )
 
 
 class TestPyEsys(unittest.TestCase):
     tpm = None
+    tcti = None
 
     @classmethod
     def setUpClass(cls):
         # This assumes that mssim or something similar is started and needs a startup command
-        TestPyEsys.tpm = Tpm()
-        with EsysContext() as ectx:
-            ectx.Startup(TPM2_SU.CLEAR)
+        TestPyEsys.tpm = TpmSimulator.getSimulator()
+        TestPyEsys.tpm.start()
+        try:
+            TestPyEsys.tcti = TestPyEsys.tpm.get_tcti()
+            with EsysContext(TestPyEsys.tcti) as ectx:
+                ectx.Startup(TPM2_SU.CLEAR)
+
+        except Exception as e:
+            TestPyEsys.tpm.close()
+            raise e
 
     def setUp(self):
-        self.ectx = EsysContext()
+        self.ectx = EsysContext(TestPyEsys.tcti)
 
     def tearDown(self):
         self.ectx.close()
@@ -52,6 +159,7 @@ class TestPyEsys(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         TestPyEsys.tpm.close()
+        TestPyEsys.tcti.close()
 
     def testGetRandom(self):
         r = self.ectx.GetRandom(5)

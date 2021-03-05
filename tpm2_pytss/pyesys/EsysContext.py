@@ -10,12 +10,10 @@ from .utils import _chkrc, TPM2B_pack, TPM2B_unpack
 
 
 class EsysContext:
-    def __init__(self, tcti=None):
-        if tcti is not None:
-            raise Exception("pytpm2tss", "tcti not supported")
+    def __init__(self, tcti=ffi.NULL):
 
         self.ctx_pp = ffi.new("ESYS_CONTEXT **")
-        _chkrc(lib.Esys_Initialize(self.ctx_pp, ffi.NULL, ffi.NULL))
+        _chkrc(lib.Esys_Initialize(self.ctx_pp, tcti.ctx, ffi.NULL))
         self.ctx = self.ctx_pp[0]
 
     def __enter__(self):
