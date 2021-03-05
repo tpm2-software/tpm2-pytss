@@ -13,5 +13,7 @@ COPY .ci/download-deps.sh /workspace/tpm2-pytss/.ci/download-deps.sh
 
 RUN bash -c 'source /workspace/tpm2-pytss/.ci/download-deps.sh && get_deps /workspace'
 
+ENV TSS2_LOG=all+trace
+
 WORKDIR /workspace/tpm2-pytss
 COPY . /workspace/tpm2-pytss
