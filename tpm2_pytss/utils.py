@@ -3,11 +3,12 @@ SPDX-License-Identifier: BSD-3
 """
 
 from ._libtpm2_pytss import ffi
+from .TSS2_Exception import TSS2_Exception
 
 
 def _chkrc(rc):
     if rc != 0:
-        raise RuntimeError(f"TSS2 Library call failed with: 0x{rc:X}")
+        raise TSS2_Exception(f"TSS2 Library call failed with: 0x{rc:X}")
 
 
 #### Utilities ####
