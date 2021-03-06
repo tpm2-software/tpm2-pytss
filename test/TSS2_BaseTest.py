@@ -9,6 +9,7 @@ import random
 import subprocess
 import tempfile
 import unittest
+import sys
 from time import sleep
 from ctypes import cdll
 
@@ -75,6 +76,13 @@ class SwtpmSimulator(BaseTpmSimulator):
 
         return None
 
+    @property
+    def tcti_name_conf(self):
+        if self._port is None:
+            return None
+
+        return f"swtpm:port={self._port}"
+
     def get_tcti(self):
         if self._port is None:
             return None
@@ -108,6 +116,13 @@ class IBMSimulator(BaseTpmSimulator):
 
         finally:
             os.chdir(cwd)
+
+    @property
+    def tcti_name_conf(self):
+        if self._port is None:
+            return None
+
+        return f"mssim:port={self._port}"
 
     def get_tcti(self):
         if self._port is None:
@@ -153,9 +168,44 @@ class TSS2_BaseTest(unittest.TestCase):
         # This assumes that mssim or something similar is started and needs a startup command
         TSS2_BaseTest.tpm = TpmSimulator.getSimulator()
         TSS2_BaseTest.tpm.start()
+
+    @classmethod
+    def tearDownClass(cls):
+        TSS2_BaseTest.tpm.close()
+        TSS2_BaseTest.tcti.close()
+
+
+class TSS2_BaseTest(unittest.TestCase):
+    tpm = None
+    tcti = None
+
+    @classmethod
+    def setUpClass(cls):
+        # This assumes that mssim or something similar is started and needs a startup command
+        TSS2_BaseTest.tpm = TpmSimulator.getSimulator()
+        TSS2_BaseTest.tpm.start()
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    @classmethod
+    def tearDownClass(cls):
+        TSS2_BaseTest.tpm.close()
+
+
+class TSS2_EsapiTest(TSS2_BaseTest):
+    tcti = None
+
+    @classmethod
+    def setUpClass(cls):
+        # This assumes that mssim or something similar is started and needs a startup command
+        super().setUpClass()
         try:
-            TSS2_BaseTest.tcti = TSS2_BaseTest.tpm.get_tcti()
-            with ESAPI(TSS2_BaseTest.tcti) as ectx:
+            TSS2_EsapiTest.tcti = TSS2_BaseTest.tpm.get_tcti()
+            with ESAPI(TSS2_EsapiTest.tcti) as ectx:
                 ectx.Startup(TPM2_SU.CLEAR)
 
         except Exception as e:
@@ -163,7 +213,8 @@ class TSS2_BaseTest(unittest.TestCase):
             raise e
 
     def setUp(self):
-        self.ectx = ESAPI(TSS2_BaseTest.tcti)
+        super().setUp()
+        self.ectx = ESAPI(TSS2_EsapiTest.tcti)
 
     def tearDown(self):
         self.ectx.close()
@@ -171,5 +222,45 @@ class TSS2_BaseTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        TSS2_BaseTest.tpm.close()
-        TSS2_BaseTest.tcti.close()
+        TSS2_EsapiTest.tcti.close()
+
+
+class TSS2_FapiTest(TSS2_BaseTest):
+    fapi_config = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fapi = None
+
+    @classmethod
+    def setUpClass(cls):
+        # This assumes that mssim or something similar is started and needs a startup command
+        super().setUpClass()
+
+        cls.fapi_config = FapiConfig(
+            temp_dirs=True, tcti=TSS2_BaseTest.tpm.tcti_name_conf
+        ).__enter__()
+
+        try:
+            with FAPI() as fapi:
+                fapi.provision()
+        except Exception as e:
+            TSS2_BaseTest.tpm.close()
+            raise e
+
+    def setUp(self):
+        super().setUp()
+        self.fapi = FAPI()
+        self.fapi.__enter__()
+
+    def tearDown(self):
+        self.fapi.__exit__(*sys.exc_info())
+        self.fapi = None
+
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+
+        if cls.fapi_config is not None:
+            cls.fapi_config.__exit__(*sys.exc_info())
+            cls.fapi_config = None

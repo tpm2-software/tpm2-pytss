@@ -6,10 +6,10 @@ SPDX-License-Identifier: BSD-3
 import unittest
 
 from tpm2_pytss import *
-from TSS2_BaseTest import TSS2_BaseTest
+from TSS2_BaseTest import TSS2_EsapiTest
 
 
-class TestEsys(TSS2_BaseTest):
+class TestEsys(TSS2_EsapiTest):
     def testGetRandom(self):
         r = self.ectx.GetRandom(5)
         self.assertEqual(len(r), 5)
