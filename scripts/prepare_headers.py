@@ -3,48 +3,15 @@
 SPDX-License-Identifier: BSD-3
 """
 
-import io
 import os
+import pathlib
 import re
+import textwrap
+
 import sys
 
 
-def prepare(indir, outfile):
-    indir = os.path.join(indir, "tss2")
-
-    # Read in headers
-    s = io.open(os.path.join(indir, "tss2_common.h"), mode="r", encoding="utf-8").read()
-
-    s += io.open(
-        os.path.join(indir, "tss2_tpm2_types.h"), mode="r", encoding="utf-8"
-    ).read()
-
-    s += io.open(os.path.join(indir, "tss2_tcti.h"), mode="r", encoding="utf-8").read()
-
-    s += io.open(
-        os.path.join(indir, "tss2_tctildr.h"), mode="r", encoding="utf-8"
-    ).read()
-
-    s += """
-typedef struct TSS2_SYS_CONTEXT TSS2_SYS_CONTEXT;
-"""
-
-    s += io.open(os.path.join(indir, "tss2_esys.h"), mode="r", encoding="utf-8").read()
-
-    # Remove false define (workaround)
-    s = re.sub(
-        "#define TPM2_MAX_TAGGED_POLICIES.*\n.*TPMS_TAGGED_POLICY\)\)",
-        "",
-        s,
-        flags=re.MULTILINE,
-    )
-
-    # remove TCTI stuff
-    s = re.sub("#ifndef TSS2_API_VERSION.*\n.*\n#endif", "", s, flags=re.MULTILINE)
-    r = r"#if defined\(__linux__\) \|\| defined\(__unix__\) \|\| defined\(__APPLE__\) \|\| defined \(__QNXNTO__\) \|\| defined \(__VXWORKS__\)(\n.*)+#endif\n#endif"
-    s = re.sub(r, "typedef struct pollfd TSS2_TCTI_POLL_HANDLE;", s, flags=re.MULTILINE)
-    s = re.sub(r"#define TSS2_TCTI_.*\n.*", "", s, flags=re.MULTILINE)
-    s = re.sub(r"^\s*#define Tss2_Tcti_(?:.*\\\r?\n)*.*$", "", s, flags=re.MULTILINE)
+def remove_common_guards(s):
 
     # Remove includes and guards
     s = re.sub("#ifndef.*", "", s)
@@ -74,23 +41,96 @@ typedef struct TSS2_SYS_CONTEXT TSS2_SYS_CONTEXT;
 
     # Restructure structs and untions with ...
     s = re.sub("\[.*?\]", "[...]", s)
-    #    s = re.sub('typedef struct {[^}]*} +([A-Za-z0-9_]+);',
-    #               'typedef struct { ...; } \g<1>;', s, flags=re.MULTILINE)
 
-    #    s = re.sub('typedef union {[^}]*} ([A-Za-z0-9_]+);',
-    #               'typedef union { ...; } \g<1>;', s, flags=re.MULTILINE)
+    return s
 
-    # Write result
-    f = open(outfile, "w")
-    f.write(
-        """/* SPDX-License-Identifier: BSD-3
-* This file was automatically generated. Do not modify !
-*/
 
-"""
+def prepare_common(dirpath):
+
+    s = pathlib.Path(dirpath, "tss2_common.h").read_text(encoding="utf-8")
+
+    return remove_common_guards(s)
+
+
+def prepare_types(dirpath):
+
+    s = pathlib.Path(dirpath, "tss2_tpm2_types.h").read_text(encoding="utf-8")
+
+    # Remove false define (workaround)
+    s = re.sub(
+        "#define TPM2_MAX_TAGGED_POLICIES.*\n.*TPMS_TAGGED_POLICY\)\)",
+        "",
+        s,
+        flags=re.MULTILINE,
     )
 
-    f.write(s)
+    return remove_common_guards(s)
+
+
+def prepare_tcti(dirpath):
+
+    s = pathlib.Path(dirpath, "tss2_tcti.h").read_text(encoding="utf-8")
+
+    s = re.sub("#ifndef TSS2_API_VERSION.*\n.*\n#endif", "", s, flags=re.MULTILINE)
+    r = r"#if defined\(__linux__\) \|\| defined\(__unix__\) \|\| defined\(__APPLE__\) \|\| defined \(__QNXNTO__\) \|\| defined \(__VXWORKS__\)(\n.*)+#endif\n#endif"
+    s = re.sub(r, "typedef struct pollfd TSS2_TCTI_POLL_HANDLE;", s)
+    s = re.sub(r"#define TSS2_TCTI_.*\n.*", "", s, flags=re.MULTILINE)
+    s = re.sub(r"^\s*#define Tss2_Tcti_(?:.*\\\r?\n)*.*$", "", s, flags=re.MULTILINE)
+
+    return remove_common_guards(s)
+
+
+def prepare_tcti_ldr(dirpath):
+
+    s = pathlib.Path(dirpath, "tss2_tctildr.h").read_text(encoding="utf-8")
+
+    return remove_common_guards(s)
+
+
+def prepare_sapi():
+    return "typedef struct TSS2_SYS_CONTEXT TSS2_SYS_CONTEXT;"
+
+
+def prepare_esapi(dirpath):
+
+    s = pathlib.Path(dirpath, "tss2_esys.h").read_text(encoding="utf-8")
+    return remove_common_guards(s)
+
+
+def prepare(indir, outfile):
+    indir = os.path.join(indir, "tss2")
+
+    common = prepare_common(indir)
+
+    types = prepare_types(indir)
+
+    tcti = prepare_tcti(indir)
+
+    tcti_ldr = prepare_tcti_ldr(indir)
+
+    sapi = prepare_sapi()
+
+    esapi = prepare_esapi(indir)
+
+    # Write result
+    with open(outfile, "w") as f:
+        f.write(
+            textwrap.dedent(
+                """
+            /*
+             * SPDX-License-Identifier: BSD-3
+             * This file was automatically generated. Do not modify !
+             */
+            """
+            )
+        )
+
+        f.write(common)
+        f.write(types)
+        f.write(tcti)
+        f.write(tcti_ldr)
+        f.write(sapi)
+        f.write(esapi)
 
 
 if __name__ == "__main__":
