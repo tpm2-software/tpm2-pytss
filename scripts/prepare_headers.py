@@ -6,9 +6,8 @@ SPDX-License-Identifier: BSD-3
 import os
 import pathlib
 import re
-import textwrap
-
 import sys
+import textwrap
 
 
 def remove_common_guards(s):
@@ -45,6 +44,14 @@ def remove_common_guards(s):
     return s
 
 
+def remove_poll_stuff(s, poll_handle_type):
+
+    r = r"#if defined\(__linux__\) \|\| defined\(__unix__\) \|\| defined\(__APPLE__\) \|\| defined \(__QNXNTO__\) \|\| defined \(__VXWORKS__\)(\n.*)+#endif\n#endif"
+
+    s = re.sub(r, f"typedef struct pollfd {poll_handle_type};", s)
+    return s
+
+
 def prepare_common(dirpath):
 
     s = pathlib.Path(dirpath, "tss2_common.h").read_text(encoding="utf-8")
@@ -72,8 +79,9 @@ def prepare_tcti(dirpath):
     s = pathlib.Path(dirpath, "tss2_tcti.h").read_text(encoding="utf-8")
 
     s = re.sub("#ifndef TSS2_API_VERSION.*\n.*\n#endif", "", s, flags=re.MULTILINE)
-    r = r"#if defined\(__linux__\) \|\| defined\(__unix__\) \|\| defined\(__APPLE__\) \|\| defined \(__QNXNTO__\) \|\| defined \(__VXWORKS__\)(\n.*)+#endif\n#endif"
-    s = re.sub(r, "typedef struct pollfd TSS2_TCTI_POLL_HANDLE;", s)
+
+    s = remove_poll_stuff(s, "TSS2_TCTI_POLL_HANDLE")
+
     s = re.sub(r"#define TSS2_TCTI_.*\n.*", "", s, flags=re.MULTILINE)
     s = re.sub(r"^\s*#define Tss2_Tcti_(?:.*\\\r?\n)*.*$", "", s, flags=re.MULTILINE)
 
@@ -97,6 +105,15 @@ def prepare_esapi(dirpath):
     return remove_common_guards(s)
 
 
+def prepare_fapi(dirpath):
+
+    s = pathlib.Path(dirpath, "tss2_fapi.h").read_text(encoding="utf-8")
+
+    s = remove_poll_stuff(s, "FAPI_POLL_HANDLE")
+
+    return remove_common_guards(s)
+
+
 def prepare(indir, outfile):
     indir = os.path.join(indir, "tss2")
 
@@ -111,6 +128,8 @@ def prepare(indir, outfile):
     sapi = prepare_sapi()
 
     esapi = prepare_esapi(indir)
+
+    fapi = prepare_fapi(indir)
 
     # Write result
     with open(outfile, "w") as f:
@@ -131,6 +150,7 @@ def prepare(indir, outfile):
         f.write(tcti_ldr)
         f.write(sapi)
         f.write(esapi)
+        f.write(fapi)
 
 
 if __name__ == "__main__":

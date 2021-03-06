@@ -46,9 +46,10 @@ ffibuilder.set_source(
      /* the C header of the library */
      #include <tss2/tss2_esys.h>
      #include <tss2/tss2_tctildr.h>
+     #include <tss2/tss2_fapi.h>
 """,
     debug=True,
-    libraries=["tss2-esys", "tss2-tctildr"],
+    libraries=["tss2-esys", "tss2-tctildr", "tss2-fapi"],
 )  # library name, for the linker
 
 if __name__ == "__main__":
