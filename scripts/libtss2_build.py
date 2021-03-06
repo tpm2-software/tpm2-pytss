@@ -3,7 +3,27 @@ from cffi import FFI
 ffibuilder = FFI()
 
 import os
+import pkgconfig
+import re
 import sys
+
+
+def get_include_paths(library_names):
+    if not isinstance(library_names, list):
+        library_names = [library_names]
+
+    # find search paths for libraries and header via pkg-config
+    header_dirs = set()
+
+    # for manually installed packages, env var PKG_CONFIG_PATH might need to be changed
+    for library_name in library_names:
+        cflags = pkgconfig.cflags(library_name)
+        header_dirs.update(re.findall(r"(?<=-I)\S+", cflags))
+
+    return header_dirs
+
+
+libraries = ["tss2-esys", "tss2-tctildr", "tss2-fapi"]
 
 # Set up the search path so we find prepare_header and other modules
 PATH = os.path.dirname(__file__) if len(os.path.dirname(__file__)) > 0 else os.getcwd()
@@ -14,16 +34,7 @@ print("adding path: {}".format(PATH))
 sys.path.insert(0, PATH)
 from prepare_headers import prepare
 
-# XXX For now just hardcode this, but we probably want to look at how to reuse the
-# pkgconfig extension.
-#
-# Generate a massaged header file for cffi bindings
-#
-
-tss2_header_dirs = [
-    "/usr/include",
-    "/usr/local/include",
-]
+tss2_header_dirs = get_include_paths(libraries)
 
 found_dir = None
 for hd in tss2_header_dirs:
@@ -48,7 +59,7 @@ ffibuilder.set_source(
      #include <tss2/tss2_tctildr.h>
      #include <tss2/tss2_fapi.h>
 """,
-    libraries=["tss2-esys", "tss2-tctildr", "tss2-fapi"],
+    libraries=libraries,
 )  # library name, for the linker
 
 if __name__ == "__main__":
