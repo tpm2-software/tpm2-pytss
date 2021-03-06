@@ -5,17 +5,17 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>tpm2_pytss.pyesys.EsysContext &#8212; tpm2-pytss 0.1.dev1+g1ed42b9 documentation</title>
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <link rel="index" title="Index" href="../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../search.html" />
+    <title>tpm2_pytss.ESAPI &#8212; tpm2-pytss 0.1.dev1+g5aca436 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
    
-  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
@@ -30,25 +30,23 @@
 
           <div class="body" role="main">
             
-  <h1>Source code for tpm2_pytss.pyesys.EsysContext</h1><div class="highlight"><pre>
+  <h1>Source code for tpm2_pytss.ESAPI</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">SPDX-License-Identifier: BSD-3</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">._libesys</span> <span class="kn">import</span> <span class="n">lib</span>
+<span class="kn">from</span> <span class="nn">._libtpm2_pytss</span> <span class="kn">import</span> <span class="n">lib</span>
 
 <span class="kn">from</span> <span class="nn">.types</span> <span class="kn">import</span> <span class="o">*</span>
 
 <span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">_chkrc</span><span class="p">,</span> <span class="n">TPM2B_pack</span><span class="p">,</span> <span class="n">TPM2B_unpack</span>
 
 
-<div class="viewcode-block" id="EsysContext"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext">[docs]</a><span class="k">class</span> <span class="nc">EsysContext</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tcti</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">tcti</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;pytpm2tss&quot;</span><span class="p">,</span> <span class="s2">&quot;tcti not supported&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="ESAPI"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI">[docs]</a><span class="k">class</span> <span class="nc">ESAPI</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tcti</span><span class="o">=</span><span class="n">ffi</span><span class="o">.</span><span class="n">NULL</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">ctx_pp</span> <span class="o">=</span> <span class="n">ffi</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;ESYS_CONTEXT **&quot;</span><span class="p">)</span>
-        <span class="n">_chkrc</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">Esys_Initialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctx_pp</span><span class="p">,</span> <span class="n">ffi</span><span class="o">.</span><span class="n">NULL</span><span class="p">,</span> <span class="n">ffi</span><span class="o">.</span><span class="n">NULL</span><span class="p">))</span>
+        <span class="n">_chkrc</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">Esys_Initialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctx_pp</span><span class="p">,</span> <span class="n">tcti</span><span class="o">.</span><span class="n">ctx</span><span class="p">,</span> <span class="n">ffi</span><span class="o">.</span><span class="n">NULL</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ctx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ctx_pp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -57,11 +55,11 @@
     <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-<div class="viewcode-block" id="EsysContext.close"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ESAPI.close"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.close">[docs]</a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">lib</span><span class="o">.</span><span class="n">Esys_Finalize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctx_pp</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ctx</span> <span class="o">=</span> <span class="n">ffi</span><span class="o">.</span><span class="n">NULL</span></div>
 
-<div class="viewcode-block" id="EsysContext.setAuth"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.setAuth">[docs]</a>    <span class="k">def</span> <span class="nf">setAuth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">esys_tr</span><span class="p">,</span> <span class="n">auth</span><span class="p">):</span>
+<div class="viewcode-block" id="ESAPI.setAuth"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.setAuth">[docs]</a>    <span class="k">def</span> <span class="nf">setAuth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">esys_tr</span><span class="p">,</span> <span class="n">auth</span><span class="p">):</span>
 
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">auth</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
             <span class="n">auth</span> <span class="o">=</span> <span class="n">auth</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
@@ -69,10 +67,10 @@
         <span class="n">auth_p</span> <span class="o">=</span> <span class="n">TPM2B_pack</span><span class="p">(</span><span class="n">auth</span><span class="p">,</span> <span class="s2">&quot;TPM2B_AUTH&quot;</span><span class="p">)</span>
         <span class="n">_chkrc</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">Esys_TR_SetAuth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="p">,</span> <span class="n">esys_tr</span><span class="p">,</span> <span class="n">auth_p</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="EsysContext.Startup"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.Startup">[docs]</a>    <span class="k">def</span> <span class="nf">Startup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">startupType</span><span class="p">):</span>
+<div class="viewcode-block" id="ESAPI.Startup"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.Startup">[docs]</a>    <span class="k">def</span> <span class="nf">Startup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">startupType</span><span class="p">):</span>
         <span class="n">_chkrc</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">Esys_Startup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="p">,</span> <span class="n">startupType</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="EsysContext.Shutdown"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.Shutdown">[docs]</a>    <span class="k">def</span> <span class="nf">Shutdown</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.Shutdown"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.Shutdown">[docs]</a>    <span class="k">def</span> <span class="nf">Shutdown</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">shutdownType</span><span class="p">,</span>
         <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
@@ -82,7 +80,7 @@
 
         <span class="n">_chkrc</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">Esys_Shutdown</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="p">,</span> <span class="n">session1</span><span class="p">,</span> <span class="n">session2</span><span class="p">,</span> <span class="n">session3</span><span class="p">,</span> <span class="n">shutdownType</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="EsysContext.SelfTest"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.SelfTest">[docs]</a>    <span class="k">def</span> <span class="nf">SelfTest</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.SelfTest"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.SelfTest">[docs]</a>    <span class="k">def</span> <span class="nf">SelfTest</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">fullTest</span><span class="p">,</span>
         <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
@@ -92,7 +90,7 @@
 
         <span class="n">_chkrc</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">Esys_SelfTest</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="p">,</span> <span class="n">session1</span><span class="p">,</span> <span class="n">session2</span><span class="p">,</span> <span class="n">session3</span><span class="p">,</span> <span class="n">fullTest</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="EsysContext.IncrementalSelfTest"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.IncrementalSelfTest">[docs]</a>    <span class="k">def</span> <span class="nf">IncrementalSelfTest</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.IncrementalSelfTest"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.IncrementalSelfTest">[docs]</a>    <span class="k">def</span> <span class="nf">IncrementalSelfTest</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">toTest</span><span class="p">,</span>
         <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
@@ -108,7 +106,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">toDoList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="EsysContext.GetTestResult"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.GetTestResult">[docs]</a>    <span class="k">def</span> <span class="nf">GetTestResult</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.GetTestResult"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.GetTestResult">[docs]</a>    <span class="k">def</span> <span class="nf">GetTestResult</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span> <span class="n">session2</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span> <span class="n">session3</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span>
     <span class="p">):</span>
 
@@ -121,7 +119,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">outData</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">testResult</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.StartAuthSession"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.StartAuthSession">[docs]</a>    <span class="k">def</span> <span class="nf">StartAuthSession</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.StartAuthSession"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.StartAuthSession">[docs]</a>    <span class="k">def</span> <span class="nf">StartAuthSession</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">tpmKey</span><span class="p">,</span>
         <span class="n">bind</span><span class="p">,</span>
@@ -153,7 +151,7 @@
         <span class="n">sessionHandleObject</span> <span class="o">=</span> <span class="n">sessionHandle</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">sessionHandleObject</span></div>
 
-<div class="viewcode-block" id="EsysContext.PolicyRestart"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PolicyRestart">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyRestart</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PolicyRestart"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PolicyRestart">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyRestart</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">sessionHandle</span><span class="p">,</span>
         <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
@@ -167,7 +165,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.Create"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.Create">[docs]</a>    <span class="k">def</span> <span class="nf">Create</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.Create"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.Create">[docs]</a>    <span class="k">def</span> <span class="nf">Create</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">parentHandle</span><span class="p">,</span>
         <span class="n">inSensitive</span><span class="p">,</span>
@@ -210,7 +208,7 @@
             <span class="n">creationTicket</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.Load"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.Load">[docs]</a>    <span class="k">def</span> <span class="nf">Load</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.Load"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.Load">[docs]</a>    <span class="k">def</span> <span class="nf">Load</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">parentHandle</span><span class="p">,</span>
         <span class="n">inPrivate</span><span class="p">,</span>
@@ -236,7 +234,7 @@
         <span class="n">objectHandleObject</span> <span class="o">=</span> <span class="n">objectHandle</span>
         <span class="k">return</span> <span class="n">objectHandleObject</span></div>
 
-<div class="viewcode-block" id="EsysContext.LoadExternal"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.LoadExternal">[docs]</a>    <span class="k">def</span> <span class="nf">LoadExternal</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.LoadExternal"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.LoadExternal">[docs]</a>    <span class="k">def</span> <span class="nf">LoadExternal</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">inPrivate</span><span class="p">,</span>
         <span class="n">inPublic</span><span class="p">,</span>
@@ -262,7 +260,7 @@
         <span class="n">objectHandleObject</span> <span class="o">=</span> <span class="n">objectHandle</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">objectHandleObject</span></div>
 
-<div class="viewcode-block" id="EsysContext.ReadPublic"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.ReadPublic">[docs]</a>    <span class="k">def</span> <span class="nf">ReadPublic</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.ReadPublic"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.ReadPublic">[docs]</a>    <span class="k">def</span> <span class="nf">ReadPublic</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">objectHandle</span><span class="p">,</span>
         <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
@@ -287,7 +285,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">outPublic</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">qualifiedName</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.ActivateCredential"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.ActivateCredential">[docs]</a>    <span class="k">def</span> <span class="nf">ActivateCredential</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.ActivateCredential"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.ActivateCredential">[docs]</a>    <span class="k">def</span> <span class="nf">ActivateCredential</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">activateHandle</span><span class="p">,</span>
         <span class="n">keyHandle</span><span class="p">,</span>
@@ -314,7 +312,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">certInfo</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="EsysContext.MakeCredential"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.MakeCredential">[docs]</a>    <span class="k">def</span> <span class="nf">MakeCredential</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.MakeCredential"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.MakeCredential">[docs]</a>    <span class="k">def</span> <span class="nf">MakeCredential</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">handle</span><span class="p">,</span>
         <span class="n">credential</span><span class="p">,</span>
@@ -341,7 +339,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">credentialBlob</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">secret</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.Unseal"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.Unseal">[docs]</a>    <span class="k">def</span> <span class="nf">Unseal</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.Unseal"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.Unseal">[docs]</a>    <span class="k">def</span> <span class="nf">Unseal</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">itemHandle</span><span class="p">,</span>
         <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
@@ -355,7 +353,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">outData</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="EsysContext.ObjectChangeAuth"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.ObjectChangeAuth">[docs]</a>    <span class="k">def</span> <span class="nf">ObjectChangeAuth</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.ObjectChangeAuth"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.ObjectChangeAuth">[docs]</a>    <span class="k">def</span> <span class="nf">ObjectChangeAuth</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">objectHandle</span><span class="p">,</span>
         <span class="n">parentHandle</span><span class="p">,</span>
@@ -380,7 +378,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">outPrivate</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="EsysContext.CreateLoaded"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.CreateLoaded">[docs]</a>    <span class="k">def</span> <span class="nf">CreateLoaded</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.CreateLoaded"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.CreateLoaded">[docs]</a>    <span class="k">def</span> <span class="nf">CreateLoaded</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">parentHandle</span><span class="p">,</span>
         <span class="n">inSensitive</span><span class="p">,</span>
@@ -410,7 +408,7 @@
         <span class="n">objectHandleObject</span> <span class="o">=</span> <span class="n">objectHandle</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">objectHandleObject</span><span class="p">,</span> <span class="n">outPrivate</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">outPublic</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.Duplicate"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.Duplicate">[docs]</a>    <span class="k">def</span> <span class="nf">Duplicate</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.Duplicate"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.Duplicate">[docs]</a>    <span class="k">def</span> <span class="nf">Duplicate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">objectHandle</span><span class="p">,</span>
         <span class="n">newParentHandle</span><span class="p">,</span>
@@ -441,7 +439,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">encryptionKeyOut</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">duplicate</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">outSymSeed</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.Rewrap"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.Rewrap">[docs]</a>    <span class="k">def</span> <span class="nf">Rewrap</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.Rewrap"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.Rewrap">[docs]</a>    <span class="k">def</span> <span class="nf">Rewrap</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">oldParent</span><span class="p">,</span>
         <span class="n">newParent</span><span class="p">,</span>
@@ -472,7 +470,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">outDuplicate</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">outSymSeed</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.Import"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.Import">[docs]</a>    <span class="k">def</span> <span class="nf">Import</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.Import"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.Import">[docs]</a>    <span class="k">def</span> <span class="nf">Import</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">parentHandle</span><span class="p">,</span>
         <span class="n">encryptionKey</span><span class="p">,</span>
@@ -503,7 +501,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">outPrivate</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="EsysContext.RSA_Encrypt"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.RSA_Encrypt">[docs]</a>    <span class="k">def</span> <span class="nf">RSA_Encrypt</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.RSA_Encrypt"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.RSA_Encrypt">[docs]</a>    <span class="k">def</span> <span class="nf">RSA_Encrypt</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">keyHandle</span><span class="p">,</span>
         <span class="n">message</span><span class="p">,</span>
@@ -530,7 +528,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">outData</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="EsysContext.RSA_Decrypt"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.RSA_Decrypt">[docs]</a>    <span class="k">def</span> <span class="nf">RSA_Decrypt</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.RSA_Decrypt"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.RSA_Decrypt">[docs]</a>    <span class="k">def</span> <span class="nf">RSA_Decrypt</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">keyHandle</span><span class="p">,</span>
         <span class="n">cipherText</span><span class="p">,</span>
@@ -557,7 +555,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">message</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="EsysContext.ECDH_KeyGen"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.ECDH_KeyGen">[docs]</a>    <span class="k">def</span> <span class="nf">ECDH_KeyGen</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.ECDH_KeyGen"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.ECDH_KeyGen">[docs]</a>    <span class="k">def</span> <span class="nf">ECDH_KeyGen</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">keyHandle</span><span class="p">,</span>
         <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
@@ -574,7 +572,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">zPoint</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pubPoint</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.ECDH_ZGen"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.ECDH_ZGen">[docs]</a>    <span class="k">def</span> <span class="nf">ECDH_ZGen</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.ECDH_ZGen"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.ECDH_ZGen">[docs]</a>    <span class="k">def</span> <span class="nf">ECDH_ZGen</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">keyHandle</span><span class="p">,</span>
         <span class="n">inPoint</span><span class="p">,</span>
@@ -591,7 +589,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">outPoint</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="EsysContext.ECC_Parameters"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.ECC_Parameters">[docs]</a>    <span class="k">def</span> <span class="nf">ECC_Parameters</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.ECC_Parameters"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.ECC_Parameters">[docs]</a>    <span class="k">def</span> <span class="nf">ECC_Parameters</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">curveID</span><span class="p">,</span>
         <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
@@ -607,7 +605,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">parameters</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="EsysContext.ZGen_2Phase"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.ZGen_2Phase">[docs]</a>    <span class="k">def</span> <span class="nf">ZGen_2Phase</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.ZGen_2Phase"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.ZGen_2Phase">[docs]</a>    <span class="k">def</span> <span class="nf">ZGen_2Phase</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">keyA</span><span class="p">,</span>
         <span class="n">inQsB</span><span class="p">,</span>
@@ -638,7 +636,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">outZ1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">outZ2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.EncryptDecrypt"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.EncryptDecrypt">[docs]</a>    <span class="k">def</span> <span class="nf">EncryptDecrypt</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.EncryptDecrypt"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.EncryptDecrypt">[docs]</a>    <span class="k">def</span> <span class="nf">EncryptDecrypt</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">keyHandle</span><span class="p">,</span>
         <span class="n">decrypt</span><span class="p">,</span>
@@ -669,7 +667,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">outData</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ivOut</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.EncryptDecrypt2"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.EncryptDecrypt2">[docs]</a>    <span class="k">def</span> <span class="nf">EncryptDecrypt2</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.EncryptDecrypt2"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.EncryptDecrypt2">[docs]</a>    <span class="k">def</span> <span class="nf">EncryptDecrypt2</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">keyHandle</span><span class="p">,</span>
         <span class="n">inData</span><span class="p">,</span>
@@ -700,7 +698,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">outData</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ivOut</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.Hash"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.Hash">[docs]</a>    <span class="k">def</span> <span class="nf">Hash</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.Hash"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.Hash">[docs]</a>    <span class="k">def</span> <span class="nf">Hash</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">data</span><span class="p">,</span>
         <span class="n">hashAlg</span><span class="p">,</span>
@@ -727,7 +725,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">outHash</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">validation</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.HMAC"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.HMAC">[docs]</a>    <span class="k">def</span> <span class="nf">HMAC</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.HMAC"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.HMAC">[docs]</a>    <span class="k">def</span> <span class="nf">HMAC</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">handle</span><span class="p">,</span>
         <span class="n">buffer</span><span class="p">,</span>
@@ -745,7 +743,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">outHMAC</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="EsysContext.GetRandom"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.GetRandom">[docs]</a>    <span class="k">def</span> <span class="nf">GetRandom</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.GetRandom"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.GetRandom">[docs]</a>    <span class="k">def</span> <span class="nf">GetRandom</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">bytesRequested</span><span class="p">,</span>
         <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
@@ -762,7 +760,7 @@
 
         <span class="k">return</span> <span class="n">TPM2B_unpack</span><span class="p">(</span><span class="n">randomBytes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.StirRandom"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.StirRandom">[docs]</a>    <span class="k">def</span> <span class="nf">StirRandom</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.StirRandom"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.StirRandom">[docs]</a>    <span class="k">def</span> <span class="nf">StirRandom</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">inData</span><span class="p">,</span>
         <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
@@ -772,7 +770,7 @@
 
         <span class="n">_chkrc</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">Esys_StirRandom</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="p">,</span> <span class="n">session1</span><span class="p">,</span> <span class="n">session2</span><span class="p">,</span> <span class="n">session3</span><span class="p">,</span> <span class="n">inData</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="EsysContext.HMAC_Start"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.HMAC_Start">[docs]</a>    <span class="k">def</span> <span class="nf">HMAC_Start</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.HMAC_Start"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.HMAC_Start">[docs]</a>    <span class="k">def</span> <span class="nf">HMAC_Start</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">handle</span><span class="p">,</span>
         <span class="n">auth</span><span class="p">,</span>
@@ -798,7 +796,7 @@
         <span class="n">sequenceHandleObject</span> <span class="o">=</span> <span class="n">sequenceHandle</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">sequenceHandleObject</span></div>
 
-<div class="viewcode-block" id="EsysContext.HashSequenceStart"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.HashSequenceStart">[docs]</a>    <span class="k">def</span> <span class="nf">HashSequenceStart</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.HashSequenceStart"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.HashSequenceStart">[docs]</a>    <span class="k">def</span> <span class="nf">HashSequenceStart</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">auth</span><span class="p">,</span>
         <span class="n">hashAlg</span><span class="p">,</span>
@@ -816,7 +814,7 @@
         <span class="n">sequenceHandleObject</span> <span class="o">=</span> <span class="n">sequenceHandle</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">sequenceHandleObject</span></div>
 
-<div class="viewcode-block" id="EsysContext.SequenceUpdate"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.SequenceUpdate">[docs]</a>    <span class="k">def</span> <span class="nf">SequenceUpdate</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.SequenceUpdate"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.SequenceUpdate">[docs]</a>    <span class="k">def</span> <span class="nf">SequenceUpdate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">sequenceHandle</span><span class="p">,</span>
         <span class="n">buffer</span><span class="p">,</span>
@@ -831,7 +829,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.SequenceComplete"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.SequenceComplete">[docs]</a>    <span class="k">def</span> <span class="nf">SequenceComplete</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.SequenceComplete"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.SequenceComplete">[docs]</a>    <span class="k">def</span> <span class="nf">SequenceComplete</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">sequenceHandle</span><span class="p">,</span>
         <span class="n">buffer</span><span class="p">,</span>
@@ -858,7 +856,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">validation</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.EventSequenceComplete"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.EventSequenceComplete">[docs]</a>    <span class="k">def</span> <span class="nf">EventSequenceComplete</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.EventSequenceComplete"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.EventSequenceComplete">[docs]</a>    <span class="k">def</span> <span class="nf">EventSequenceComplete</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">pcrHandle</span><span class="p">,</span>
         <span class="n">sequenceHandle</span><span class="p">,</span>
@@ -883,7 +881,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="EsysContext.Certify"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.Certify">[docs]</a>    <span class="k">def</span> <span class="nf">Certify</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.Certify"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.Certify">[docs]</a>    <span class="k">def</span> <span class="nf">Certify</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">objectHandle</span><span class="p">,</span>
         <span class="n">signHandle</span><span class="p">,</span>
@@ -912,7 +910,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">certifyInfo</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">signature</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.CertifyCreation"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.CertifyCreation">[docs]</a>    <span class="k">def</span> <span class="nf">CertifyCreation</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.CertifyCreation"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.CertifyCreation">[docs]</a>    <span class="k">def</span> <span class="nf">CertifyCreation</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">signHandle</span><span class="p">,</span>
         <span class="n">objectHandle</span><span class="p">,</span>
@@ -945,7 +943,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">certifyInfo</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">signature</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.Quote"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.Quote">[docs]</a>    <span class="k">def</span> <span class="nf">Quote</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.Quote"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.Quote">[docs]</a>    <span class="k">def</span> <span class="nf">Quote</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">signHandle</span><span class="p">,</span>
         <span class="n">qualifyingData</span><span class="p">,</span>
@@ -974,7 +972,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">quoted</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">signature</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.GetSessionAuditDigest"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.GetSessionAuditDigest">[docs]</a>    <span class="k">def</span> <span class="nf">GetSessionAuditDigest</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.GetSessionAuditDigest"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.GetSessionAuditDigest">[docs]</a>    <span class="k">def</span> <span class="nf">GetSessionAuditDigest</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">privacyAdminHandle</span><span class="p">,</span>
         <span class="n">signHandle</span><span class="p">,</span>
@@ -1005,7 +1003,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">auditInfo</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">signature</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.GetCommandAuditDigest"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.GetCommandAuditDigest">[docs]</a>    <span class="k">def</span> <span class="nf">GetCommandAuditDigest</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.GetCommandAuditDigest"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.GetCommandAuditDigest">[docs]</a>    <span class="k">def</span> <span class="nf">GetCommandAuditDigest</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">privacyHandle</span><span class="p">,</span>
         <span class="n">signHandle</span><span class="p">,</span>
@@ -1034,7 +1032,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">auditInfo</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">signature</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.GetTime"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.GetTime">[docs]</a>    <span class="k">def</span> <span class="nf">GetTime</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.GetTime"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.GetTime">[docs]</a>    <span class="k">def</span> <span class="nf">GetTime</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">privacyAdminHandle</span><span class="p">,</span>
         <span class="n">signHandle</span><span class="p">,</span>
@@ -1063,7 +1061,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">timeInfo</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">signature</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.Commit"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.Commit">[docs]</a>    <span class="k">def</span> <span class="nf">Commit</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.Commit"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.Commit">[docs]</a>    <span class="k">def</span> <span class="nf">Commit</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">signHandle</span><span class="p">,</span>
         <span class="n">P1</span><span class="p">,</span>
@@ -1096,7 +1094,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">K</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">L</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">E</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">counter</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.EC_Ephemeral"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.EC_Ephemeral">[docs]</a>    <span class="k">def</span> <span class="nf">EC_Ephemeral</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.EC_Ephemeral"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.EC_Ephemeral">[docs]</a>    <span class="k">def</span> <span class="nf">EC_Ephemeral</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">curveID</span><span class="p">,</span>
         <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
@@ -1113,7 +1111,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">Q</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">counter</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.VerifySignature"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.VerifySignature">[docs]</a>    <span class="k">def</span> <span class="nf">VerifySignature</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.VerifySignature"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.VerifySignature">[docs]</a>    <span class="k">def</span> <span class="nf">VerifySignature</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">keyHandle</span><span class="p">,</span>
         <span class="n">digest</span><span class="p">,</span>
@@ -1138,7 +1136,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">validation</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="EsysContext.Sign"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.Sign">[docs]</a>    <span class="k">def</span> <span class="nf">Sign</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.Sign"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.Sign">[docs]</a>    <span class="k">def</span> <span class="nf">Sign</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">keyHandle</span><span class="p">,</span>
         <span class="n">digest</span><span class="p">,</span>
@@ -1165,7 +1163,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">signature</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="EsysContext.SetCommandCodeAuditStatus"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.SetCommandCodeAuditStatus">[docs]</a>    <span class="k">def</span> <span class="nf">SetCommandCodeAuditStatus</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.SetCommandCodeAuditStatus"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.SetCommandCodeAuditStatus">[docs]</a>    <span class="k">def</span> <span class="nf">SetCommandCodeAuditStatus</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">auth</span><span class="p">,</span>
         <span class="n">auditAlg</span><span class="p">,</span>
@@ -1189,7 +1187,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.PCR_Extend"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PCR_Extend">[docs]</a>    <span class="k">def</span> <span class="nf">PCR_Extend</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PCR_Extend"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PCR_Extend">[docs]</a>    <span class="k">def</span> <span class="nf">PCR_Extend</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">pcrHandle</span><span class="p">,</span>
         <span class="n">digests</span><span class="p">,</span>
@@ -1204,7 +1202,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.PCR_Event"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PCR_Event">[docs]</a>    <span class="k">def</span> <span class="nf">PCR_Event</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PCR_Event"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PCR_Event">[docs]</a>    <span class="k">def</span> <span class="nf">PCR_Event</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">pcrHandle</span><span class="p">,</span>
         <span class="n">eventData</span><span class="p">,</span>
@@ -1221,7 +1219,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">digests</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="EsysContext.PCR_Read"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PCR_Read">[docs]</a>    <span class="k">def</span> <span class="nf">PCR_Read</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PCR_Read"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PCR_Read">[docs]</a>    <span class="k">def</span> <span class="nf">PCR_Read</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">pcrSelectionIn</span><span class="p">,</span>
         <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
@@ -1246,7 +1244,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">pcrUpdateCounter</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pcrSelectionOut</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pcrValues</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.PCR_Allocate"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PCR_Allocate">[docs]</a>    <span class="k">def</span> <span class="nf">PCR_Allocate</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PCR_Allocate"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PCR_Allocate">[docs]</a>    <span class="k">def</span> <span class="nf">PCR_Allocate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">authHandle</span><span class="p">,</span>
         <span class="n">pcrAllocation</span><span class="p">,</span>
@@ -1275,7 +1273,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">allocationSuccess</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">maxPCR</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sizeNeeded</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sizeAvailable</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.PCR_SetAuthPolicy"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PCR_SetAuthPolicy">[docs]</a>    <span class="k">def</span> <span class="nf">PCR_SetAuthPolicy</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PCR_SetAuthPolicy"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PCR_SetAuthPolicy">[docs]</a>    <span class="k">def</span> <span class="nf">PCR_SetAuthPolicy</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">authHandle</span><span class="p">,</span>
         <span class="n">authPolicy</span><span class="p">,</span>
@@ -1299,7 +1297,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.PCR_SetAuthValue"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PCR_SetAuthValue">[docs]</a>    <span class="k">def</span> <span class="nf">PCR_SetAuthValue</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PCR_SetAuthValue"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PCR_SetAuthValue">[docs]</a>    <span class="k">def</span> <span class="nf">PCR_SetAuthValue</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">pcrHandle</span><span class="p">,</span>
         <span class="n">auth</span><span class="p">,</span>
@@ -1314,7 +1312,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.PCR_Reset"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PCR_Reset">[docs]</a>    <span class="k">def</span> <span class="nf">PCR_Reset</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PCR_Reset"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PCR_Reset">[docs]</a>    <span class="k">def</span> <span class="nf">PCR_Reset</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">pcrHandle</span><span class="p">,</span>
         <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
@@ -1324,7 +1322,7 @@
 
         <span class="n">_chkrc</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">Esys_PCR_Reset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="p">,</span> <span class="n">pcrHandle</span><span class="p">,</span> <span class="n">session1</span><span class="p">,</span> <span class="n">session2</span><span class="p">,</span> <span class="n">session3</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="EsysContext.PolicySigned"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PolicySigned">[docs]</a>    <span class="k">def</span> <span class="nf">PolicySigned</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PolicySigned"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PolicySigned">[docs]</a>    <span class="k">def</span> <span class="nf">PolicySigned</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">authObject</span><span class="p">,</span>
         <span class="n">policySession</span><span class="p">,</span>
@@ -1359,7 +1357,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">timeout</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">policyTicket</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.PolicySecret"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PolicySecret">[docs]</a>    <span class="k">def</span> <span class="nf">PolicySecret</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PolicySecret"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PolicySecret">[docs]</a>    <span class="k">def</span> <span class="nf">PolicySecret</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">authHandle</span><span class="p">,</span>
         <span class="n">policySession</span><span class="p">,</span>
@@ -1392,7 +1390,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">timeout</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">policyTicket</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.PolicyTicket"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PolicyTicket">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyTicket</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PolicyTicket"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PolicyTicket">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyTicket</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">policySession</span><span class="p">,</span>
         <span class="n">timeout</span><span class="p">,</span>
@@ -1420,7 +1418,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.PolicyOR"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PolicyOR">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyOR</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PolicyOR"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PolicyOR">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyOR</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">policySession</span><span class="p">,</span>
         <span class="n">pHashList</span><span class="p">,</span>
@@ -1435,7 +1433,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.PolicyPCR"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PolicyPCR">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyPCR</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PolicyPCR"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PolicyPCR">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyPCR</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">policySession</span><span class="p">,</span>
         <span class="n">pcrDigest</span><span class="p">,</span>
@@ -1451,7 +1449,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.PolicyLocality"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PolicyLocality">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyLocality</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PolicyLocality"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PolicyLocality">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyLocality</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">policySession</span><span class="p">,</span>
         <span class="n">locality</span><span class="p">,</span>
@@ -1466,7 +1464,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.PolicyNV"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PolicyNV">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyNV</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PolicyNV"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PolicyNV">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyNV</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">authHandle</span><span class="p">,</span>
         <span class="n">nvIndex</span><span class="p">,</span>
@@ -1494,7 +1492,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.PolicyCounterTimer"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PolicyCounterTimer">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyCounterTimer</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PolicyCounterTimer"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PolicyCounterTimer">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyCounterTimer</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">policySession</span><span class="p">,</span>
         <span class="n">operandB</span><span class="p">,</span>
@@ -1518,7 +1516,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.PolicyCommandCode"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PolicyCommandCode">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyCommandCode</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PolicyCommandCode"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PolicyCommandCode">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyCommandCode</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">policySession</span><span class="p">,</span>
         <span class="n">code</span><span class="p">,</span>
@@ -1533,7 +1531,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.PolicyPhysicalPresence"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PolicyPhysicalPresence">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyPhysicalPresence</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PolicyPhysicalPresence"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PolicyPhysicalPresence">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyPhysicalPresence</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">policySession</span><span class="p">,</span>
         <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
@@ -1547,7 +1545,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.PolicyCpHash"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PolicyCpHash">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyCpHash</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PolicyCpHash"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PolicyCpHash">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyCpHash</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">policySession</span><span class="p">,</span>
         <span class="n">cpHashA</span><span class="p">,</span>
@@ -1562,7 +1560,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.PolicyNameHash"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PolicyNameHash">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyNameHash</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PolicyNameHash"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PolicyNameHash">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyNameHash</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">policySession</span><span class="p">,</span>
         <span class="n">nameHash</span><span class="p">,</span>
@@ -1577,7 +1575,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.PolicyDuplicationSelect"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PolicyDuplicationSelect">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyDuplicationSelect</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PolicyDuplicationSelect"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PolicyDuplicationSelect">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyDuplicationSelect</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">policySession</span><span class="p">,</span>
         <span class="n">objectName</span><span class="p">,</span>
@@ -1601,7 +1599,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.PolicyAuthorize"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PolicyAuthorize">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyAuthorize</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PolicyAuthorize"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PolicyAuthorize">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyAuthorize</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">policySession</span><span class="p">,</span>
         <span class="n">approvedPolicy</span><span class="p">,</span>
@@ -1627,7 +1625,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.PolicyAuthValue"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PolicyAuthValue">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyAuthValue</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PolicyAuthValue"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PolicyAuthValue">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyAuthValue</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">policySession</span><span class="p">,</span>
         <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
@@ -1641,7 +1639,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.PolicyPassword"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PolicyPassword">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyPassword</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PolicyPassword"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PolicyPassword">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyPassword</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">policySession</span><span class="p">,</span>
         <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
@@ -1655,7 +1653,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.PolicyGetDigest"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PolicyGetDigest">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyGetDigest</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PolicyGetDigest"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PolicyGetDigest">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyGetDigest</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">policySession</span><span class="p">,</span>
         <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
@@ -1671,7 +1669,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">policyDigest</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="EsysContext.PolicyNvWritten"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PolicyNvWritten">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyNvWritten</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PolicyNvWritten"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PolicyNvWritten">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyNvWritten</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">policySession</span><span class="p">,</span>
         <span class="n">writtenSet</span><span class="p">,</span>
@@ -1686,7 +1684,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.PolicyTemplate"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PolicyTemplate">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyTemplate</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PolicyTemplate"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PolicyTemplate">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyTemplate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">policySession</span><span class="p">,</span>
         <span class="n">templateHash</span><span class="p">,</span>
@@ -1701,7 +1699,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.PolicyAuthorizeNV"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PolicyAuthorizeNV">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyAuthorizeNV</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PolicyAuthorizeNV"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PolicyAuthorizeNV">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyAuthorizeNV</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">authHandle</span><span class="p">,</span>
         <span class="n">nvIndex</span><span class="p">,</span>
@@ -1723,7 +1721,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.CreatePrimary"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.CreatePrimary">[docs]</a>    <span class="k">def</span> <span class="nf">CreatePrimary</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.CreatePrimary"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.CreatePrimary">[docs]</a>    <span class="k">def</span> <span class="nf">CreatePrimary</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">primaryHandle</span><span class="p">,</span>
         <span class="n">inSensitive</span><span class="p">,</span>
@@ -1766,7 +1764,7 @@
             <span class="n">creationTicket</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.HierarchyControl"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.HierarchyControl">[docs]</a>    <span class="k">def</span> <span class="nf">HierarchyControl</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.HierarchyControl"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.HierarchyControl">[docs]</a>    <span class="k">def</span> <span class="nf">HierarchyControl</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">authHandle</span><span class="p">,</span>
         <span class="n">enable</span><span class="p">,</span>
@@ -1782,7 +1780,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.SetPrimaryPolicy"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.SetPrimaryPolicy">[docs]</a>    <span class="k">def</span> <span class="nf">SetPrimaryPolicy</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.SetPrimaryPolicy"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.SetPrimaryPolicy">[docs]</a>    <span class="k">def</span> <span class="nf">SetPrimaryPolicy</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">authHandle</span><span class="p">,</span>
         <span class="n">authPolicy</span><span class="p">,</span>
@@ -1798,7 +1796,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.ChangePPS"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.ChangePPS">[docs]</a>    <span class="k">def</span> <span class="nf">ChangePPS</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.ChangePPS"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.ChangePPS">[docs]</a>    <span class="k">def</span> <span class="nf">ChangePPS</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">authHandle</span><span class="p">,</span>
         <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
@@ -1808,7 +1806,7 @@
 
         <span class="n">_chkrc</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">Esys_ChangePPS</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="p">,</span> <span class="n">authHandle</span><span class="p">,</span> <span class="n">session1</span><span class="p">,</span> <span class="n">session2</span><span class="p">,</span> <span class="n">session3</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="EsysContext.ChangeEPS"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.ChangeEPS">[docs]</a>    <span class="k">def</span> <span class="nf">ChangeEPS</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.ChangeEPS"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.ChangeEPS">[docs]</a>    <span class="k">def</span> <span class="nf">ChangeEPS</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">authHandle</span><span class="p">,</span>
         <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
@@ -1818,7 +1816,7 @@
 
         <span class="n">_chkrc</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">Esys_ChangeEPS</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="p">,</span> <span class="n">authHandle</span><span class="p">,</span> <span class="n">session1</span><span class="p">,</span> <span class="n">session2</span><span class="p">,</span> <span class="n">session3</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="EsysContext.Clear"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.Clear">[docs]</a>    <span class="k">def</span> <span class="nf">Clear</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.Clear"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.Clear">[docs]</a>    <span class="k">def</span> <span class="nf">Clear</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">authHandle</span><span class="p">,</span>
         <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
@@ -1828,7 +1826,7 @@
 
         <span class="n">_chkrc</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">Esys_Clear</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="p">,</span> <span class="n">authHandle</span><span class="p">,</span> <span class="n">session1</span><span class="p">,</span> <span class="n">session2</span><span class="p">,</span> <span class="n">session3</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="EsysContext.ClearControl"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.ClearControl">[docs]</a>    <span class="k">def</span> <span class="nf">ClearControl</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.ClearControl"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.ClearControl">[docs]</a>    <span class="k">def</span> <span class="nf">ClearControl</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">auth</span><span class="p">,</span>
         <span class="n">disable</span><span class="p">,</span>
@@ -1841,7 +1839,7 @@
             <span class="n">lib</span><span class="o">.</span><span class="n">Esys_ClearControl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="p">,</span> <span class="n">auth</span><span class="p">,</span> <span class="n">session1</span><span class="p">,</span> <span class="n">session2</span><span class="p">,</span> <span class="n">session3</span><span class="p">,</span> <span class="n">disable</span><span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.HierarchyChangeAuth"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.HierarchyChangeAuth">[docs]</a>    <span class="k">def</span> <span class="nf">HierarchyChangeAuth</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.HierarchyChangeAuth"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.HierarchyChangeAuth">[docs]</a>    <span class="k">def</span> <span class="nf">HierarchyChangeAuth</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">authHandle</span><span class="p">,</span>
         <span class="n">newAuth</span><span class="p">,</span>
@@ -1856,7 +1854,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.DictionaryAttackLockReset"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.DictionaryAttackLockReset">[docs]</a>    <span class="k">def</span> <span class="nf">DictionaryAttackLockReset</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.DictionaryAttackLockReset"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.DictionaryAttackLockReset">[docs]</a>    <span class="k">def</span> <span class="nf">DictionaryAttackLockReset</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">lockHandle</span><span class="p">,</span>
         <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
@@ -1870,7 +1868,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.DictionaryAttackParameters"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.DictionaryAttackParameters">[docs]</a>    <span class="k">def</span> <span class="nf">DictionaryAttackParameters</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.DictionaryAttackParameters"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.DictionaryAttackParameters">[docs]</a>    <span class="k">def</span> <span class="nf">DictionaryAttackParameters</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">lockHandle</span><span class="p">,</span>
         <span class="n">newMaxTries</span><span class="p">,</span>
@@ -1894,7 +1892,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.PP_Commands"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.PP_Commands">[docs]</a>    <span class="k">def</span> <span class="nf">PP_Commands</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.PP_Commands"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PP_Commands">[docs]</a>    <span class="k">def</span> <span class="nf">PP_Commands</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">auth</span><span class="p">,</span>
         <span class="n">setList</span><span class="p">,</span>
@@ -1910,7 +1908,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.SetAlgorithmSet"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.SetAlgorithmSet">[docs]</a>    <span class="k">def</span> <span class="nf">SetAlgorithmSet</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.SetAlgorithmSet"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.SetAlgorithmSet">[docs]</a>    <span class="k">def</span> <span class="nf">SetAlgorithmSet</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">authHandle</span><span class="p">,</span>
         <span class="n">algorithmSet</span><span class="p">,</span>
@@ -1925,7 +1923,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.FieldUpgradeStart"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.FieldUpgradeStart">[docs]</a>    <span class="k">def</span> <span class="nf">FieldUpgradeStart</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.FieldUpgradeStart"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.FieldUpgradeStart">[docs]</a>    <span class="k">def</span> <span class="nf">FieldUpgradeStart</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">authorization</span><span class="p">,</span>
         <span class="n">keyHandle</span><span class="p">,</span>
@@ -1949,7 +1947,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.FieldUpgradeData"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.FieldUpgradeData">[docs]</a>    <span class="k">def</span> <span class="nf">FieldUpgradeData</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.FieldUpgradeData"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.FieldUpgradeData">[docs]</a>    <span class="k">def</span> <span class="nf">FieldUpgradeData</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">fuData</span><span class="p">,</span>
         <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
@@ -1966,7 +1964,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">nextDigest</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">firstDigest</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.FirmwareRead"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.FirmwareRead">[docs]</a>    <span class="k">def</span> <span class="nf">FirmwareRead</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.FirmwareRead"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.FirmwareRead">[docs]</a>    <span class="k">def</span> <span class="nf">FirmwareRead</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">sequenceNumber</span><span class="p">,</span>
         <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
@@ -1982,21 +1980,21 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">fuData</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="EsysContext.ContextSave"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.ContextSave">[docs]</a>    <span class="k">def</span> <span class="nf">ContextSave</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">saveHandle</span><span class="p">):</span>
+<div class="viewcode-block" id="ESAPI.ContextSave"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.ContextSave">[docs]</a>    <span class="k">def</span> <span class="nf">ContextSave</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">saveHandle</span><span class="p">):</span>
         <span class="n">context</span> <span class="o">=</span> <span class="n">ffi</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;TPMS_CONTEXT **&quot;</span><span class="p">)</span>
         <span class="n">_chkrc</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">Esys_ContextSave</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="p">,</span> <span class="n">saveHandle</span><span class="p">,</span> <span class="n">context</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">context</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="EsysContext.ContextLoad"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.ContextLoad">[docs]</a>    <span class="k">def</span> <span class="nf">ContextLoad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+<div class="viewcode-block" id="ESAPI.ContextLoad"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.ContextLoad">[docs]</a>    <span class="k">def</span> <span class="nf">ContextLoad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
         <span class="n">loadedHandle</span> <span class="o">=</span> <span class="n">ffi</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;ESYS_TR *&quot;</span><span class="p">)</span>
         <span class="n">_chkrc</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">Esys_ContextLoad</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">loadedHandle</span><span class="p">))</span>
         <span class="n">loadedHandleObject</span> <span class="o">=</span> <span class="n">loadedHandle</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">loadedHandleObject</span></div>
 
-<div class="viewcode-block" id="EsysContext.FlushContext"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.FlushContext">[docs]</a>    <span class="k">def</span> <span class="nf">FlushContext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flushHandle</span><span class="p">):</span>
+<div class="viewcode-block" id="ESAPI.FlushContext"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.FlushContext">[docs]</a>    <span class="k">def</span> <span class="nf">FlushContext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flushHandle</span><span class="p">):</span>
         <span class="n">_chkrc</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">Esys_FlushContext</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="p">,</span> <span class="n">flushHandle</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="EsysContext.EvictControl"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.EvictControl">[docs]</a>    <span class="k">def</span> <span class="nf">EvictControl</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.EvictControl"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.EvictControl">[docs]</a>    <span class="k">def</span> <span class="nf">EvictControl</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">auth</span><span class="p">,</span>
         <span class="n">objectHandle</span><span class="p">,</span>
@@ -2022,7 +2020,7 @@
         <span class="n">newObjectHandleObject</span> <span class="o">=</span> <span class="n">newObjectHandle</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">newObjectHandleObject</span></div>
 
-<div class="viewcode-block" id="EsysContext.ReadClock"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.ReadClock">[docs]</a>    <span class="k">def</span> <span class="nf">ReadClock</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.ReadClock"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.ReadClock">[docs]</a>    <span class="k">def</span> <span class="nf">ReadClock</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span> <span class="n">session2</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span> <span class="n">session3</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span>
     <span class="p">):</span>
 
@@ -2030,7 +2028,7 @@
         <span class="n">_chkrc</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">Esys_ReadClock</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="p">,</span> <span class="n">session1</span><span class="p">,</span> <span class="n">session2</span><span class="p">,</span> <span class="n">session3</span><span class="p">,</span> <span class="n">currentTime</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">currentTime</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="EsysContext.ClockSet"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.ClockSet">[docs]</a>    <span class="k">def</span> <span class="nf">ClockSet</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.ClockSet"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.ClockSet">[docs]</a>    <span class="k">def</span> <span class="nf">ClockSet</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">auth</span><span class="p">,</span>
         <span class="n">newTime</span><span class="p">,</span>
@@ -2041,7 +2039,7 @@
 
         <span class="n">_chkrc</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">Esys_ClockSet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="p">,</span> <span class="n">auth</span><span class="p">,</span> <span class="n">session1</span><span class="p">,</span> <span class="n">session2</span><span class="p">,</span> <span class="n">session3</span><span class="p">,</span> <span class="n">newTime</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="EsysContext.ClockRateAdjust"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.ClockRateAdjust">[docs]</a>    <span class="k">def</span> <span class="nf">ClockRateAdjust</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.ClockRateAdjust"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.ClockRateAdjust">[docs]</a>    <span class="k">def</span> <span class="nf">ClockRateAdjust</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">auth</span><span class="p">,</span>
         <span class="n">rateAdjust</span><span class="p">,</span>
@@ -2056,7 +2054,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.GetCapability"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.GetCapability">[docs]</a>    <span class="k">def</span> <span class="nf">GetCapability</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.GetCapability"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.GetCapability">[docs]</a>    <span class="k">def</span> <span class="nf">GetCapability</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">capability</span><span class="p">,</span>
         <span class="n">prop</span><span class="p">,</span>
@@ -2083,7 +2081,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">moreData</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">capabilityData</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.TestParms"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.TestParms">[docs]</a>    <span class="k">def</span> <span class="nf">TestParms</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.TestParms"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.TestParms">[docs]</a>    <span class="k">def</span> <span class="nf">TestParms</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">parameters</span><span class="p">,</span>
         <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
@@ -2093,7 +2091,7 @@
 
         <span class="n">_chkrc</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">Esys_TestParms</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="p">,</span> <span class="n">session1</span><span class="p">,</span> <span class="n">session2</span><span class="p">,</span> <span class="n">session3</span><span class="p">,</span> <span class="n">parameters</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="EsysContext.NV_DefineSpace"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.NV_DefineSpace">[docs]</a>    <span class="k">def</span> <span class="nf">NV_DefineSpace</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.NV_DefineSpace"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.NV_DefineSpace">[docs]</a>    <span class="k">def</span> <span class="nf">NV_DefineSpace</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">authHandle</span><span class="p">,</span>
         <span class="n">auth</span><span class="p">,</span>
@@ -2119,7 +2117,7 @@
         <span class="n">nvHandleObject</span> <span class="o">=</span> <span class="n">nvHandle</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">nvHandleObject</span></div>
 
-<div class="viewcode-block" id="EsysContext.NV_UndefineSpace"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.NV_UndefineSpace">[docs]</a>    <span class="k">def</span> <span class="nf">NV_UndefineSpace</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.NV_UndefineSpace"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.NV_UndefineSpace">[docs]</a>    <span class="k">def</span> <span class="nf">NV_UndefineSpace</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">authHandle</span><span class="p">,</span>
         <span class="n">nvIndex</span><span class="p">,</span>
@@ -2134,7 +2132,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.NV_UndefineSpaceSpecial"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.NV_UndefineSpaceSpecial">[docs]</a>    <span class="k">def</span> <span class="nf">NV_UndefineSpaceSpecial</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.NV_UndefineSpaceSpecial"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.NV_UndefineSpaceSpecial">[docs]</a>    <span class="k">def</span> <span class="nf">NV_UndefineSpaceSpecial</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">nvIndex</span><span class="p">,</span>
         <span class="n">platform</span><span class="p">,</span>
@@ -2149,7 +2147,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.NV_ReadPublic"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.NV_ReadPublic">[docs]</a>    <span class="k">def</span> <span class="nf">NV_ReadPublic</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.NV_ReadPublic"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.NV_ReadPublic">[docs]</a>    <span class="k">def</span> <span class="nf">NV_ReadPublic</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">nvIndex</span><span class="p">,</span>
         <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
@@ -2166,7 +2164,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">nvPublic</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">nvName</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.NV_Write"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.NV_Write">[docs]</a>    <span class="k">def</span> <span class="nf">NV_Write</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.NV_Write"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.NV_Write">[docs]</a>    <span class="k">def</span> <span class="nf">NV_Write</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">authHandle</span><span class="p">,</span>
         <span class="n">nvIndex</span><span class="p">,</span>
@@ -2190,7 +2188,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.NV_Increment"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.NV_Increment">[docs]</a>    <span class="k">def</span> <span class="nf">NV_Increment</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.NV_Increment"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.NV_Increment">[docs]</a>    <span class="k">def</span> <span class="nf">NV_Increment</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">authHandle</span><span class="p">,</span>
         <span class="n">nvIndex</span><span class="p">,</span>
@@ -2205,7 +2203,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.NV_Extend"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.NV_Extend">[docs]</a>    <span class="k">def</span> <span class="nf">NV_Extend</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.NV_Extend"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.NV_Extend">[docs]</a>    <span class="k">def</span> <span class="nf">NV_Extend</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">authHandle</span><span class="p">,</span>
         <span class="n">nvIndex</span><span class="p">,</span>
@@ -2221,7 +2219,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.NV_SetBits"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.NV_SetBits">[docs]</a>    <span class="k">def</span> <span class="nf">NV_SetBits</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.NV_SetBits"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.NV_SetBits">[docs]</a>    <span class="k">def</span> <span class="nf">NV_SetBits</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">authHandle</span><span class="p">,</span>
         <span class="n">nvIndex</span><span class="p">,</span>
@@ -2237,7 +2235,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.NV_WriteLock"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.NV_WriteLock">[docs]</a>    <span class="k">def</span> <span class="nf">NV_WriteLock</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.NV_WriteLock"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.NV_WriteLock">[docs]</a>    <span class="k">def</span> <span class="nf">NV_WriteLock</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">authHandle</span><span class="p">,</span>
         <span class="n">nvIndex</span><span class="p">,</span>
@@ -2252,7 +2250,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.NV_GlobalWriteLock"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.NV_GlobalWriteLock">[docs]</a>    <span class="k">def</span> <span class="nf">NV_GlobalWriteLock</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.NV_GlobalWriteLock"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.NV_GlobalWriteLock">[docs]</a>    <span class="k">def</span> <span class="nf">NV_GlobalWriteLock</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">authHandle</span><span class="p">,</span>
         <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
@@ -2266,7 +2264,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.NV_Read"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.NV_Read">[docs]</a>    <span class="k">def</span> <span class="nf">NV_Read</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.NV_Read"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.NV_Read">[docs]</a>    <span class="k">def</span> <span class="nf">NV_Read</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">authHandle</span><span class="p">,</span>
         <span class="n">nvIndex</span><span class="p">,</span>
@@ -2293,7 +2291,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="EsysContext.NV_ReadLock"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.NV_ReadLock">[docs]</a>    <span class="k">def</span> <span class="nf">NV_ReadLock</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.NV_ReadLock"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.NV_ReadLock">[docs]</a>    <span class="k">def</span> <span class="nf">NV_ReadLock</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">authHandle</span><span class="p">,</span>
         <span class="n">nvIndex</span><span class="p">,</span>
@@ -2308,7 +2306,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.NV_ChangeAuth"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.NV_ChangeAuth">[docs]</a>    <span class="k">def</span> <span class="nf">NV_ChangeAuth</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.NV_ChangeAuth"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.NV_ChangeAuth">[docs]</a>    <span class="k">def</span> <span class="nf">NV_ChangeAuth</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">nvIndex</span><span class="p">,</span>
         <span class="n">newAuth</span><span class="p">,</span>
@@ -2323,7 +2321,7 @@
             <span class="p">)</span>
         <span class="p">)</span></div>
 
-<div class="viewcode-block" id="EsysContext.NV_Certify"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.NV_Certify">[docs]</a>    <span class="k">def</span> <span class="nf">NV_Certify</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.NV_Certify"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.NV_Certify">[docs]</a>    <span class="k">def</span> <span class="nf">NV_Certify</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">signHandle</span><span class="p">,</span>
         <span class="n">authHandle</span><span class="p">,</span>
@@ -2358,7 +2356,7 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">certifyInfo</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">signature</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
-<div class="viewcode-block" id="EsysContext.Vendor_TCG_Test"><a class="viewcode-back" href="../../../esys.html#tpm2_pytss.pyesys.EsysContext.Vendor_TCG_Test">[docs]</a>    <span class="k">def</span> <span class="nf">Vendor_TCG_Test</span><span class="p">(</span>
+<div class="viewcode-block" id="ESAPI.Vendor_TCG_Test"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.Vendor_TCG_Test">[docs]</a>    <span class="k">def</span> <span class="nf">Vendor_TCG_Test</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">inputData</span><span class="p">,</span>
         <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
@@ -2381,7 +2379,7 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="../../../index.html">tpm2-pytss</a></h1>
+<h1 class="logo"><a href="../../index.html">tpm2-pytss</a></h1>
 
 
 
@@ -2426,15 +2424,15 @@
 <h3>Navigation</h3>
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../esys.html">Esys</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../esys.html">Esys</a></li>
 <li class="toctree-l1"><a class="reference external" href="https://github.com/tpm2-software/tpm2-pytss">GitHub</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
-  <li><a href="../../../index.html">Documentation overview</a><ul>
-  <li><a href="../../index.html">Module code</a><ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
   </ul></li>
   </ul></li>
 </ul>
@@ -2442,7 +2440,7 @@
 <div id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
-    <form class="search" action="../../../search.html" method="get">
+    <form class="search" action="../../search.html" method="get">
       <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
     </form>
@@ -2465,7 +2463,7 @@
       &copy;2019 - 2021, Intel.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.1</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.2</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
