@@ -10,10 +10,12 @@ from .utils import _chkrc, TPM2B_pack, TPM2B_unpack
 
 
 class ESAPI:
-    def __init__(self, tcti=ffi.NULL):
+    def __init__(self, tcti=None):
+
+        tctx = ffi.NULL if tcti is None else tcti.ctx
 
         self.ctx_pp = ffi.new("ESYS_CONTEXT **")
-        _chkrc(lib.Esys_Initialize(self.ctx_pp, tcti.ctx, ffi.NULL))
+        _chkrc(lib.Esys_Initialize(self.ctx_pp, tctx, ffi.NULL))
         self.ctx = self.ctx_pp[0]
 
     def __enter__(self):
