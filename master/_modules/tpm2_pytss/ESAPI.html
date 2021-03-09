@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>tpm2_pytss.ESAPI &#8212; tpm2-pytss 0.1.dev1+g57f9933 documentation</title>
+    <title>tpm2_pytss.ESAPI &#8212; tpm2-pytss 0.1.dev1+g9b9cfab documentation</title>
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -43,10 +43,12 @@
 
 
 <div class="viewcode-block" id="ESAPI"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI">[docs]</a><span class="k">class</span> <span class="nc">ESAPI</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tcti</span><span class="o">=</span><span class="n">ffi</span><span class="o">.</span><span class="n">NULL</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tcti</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="n">tctx</span> <span class="o">=</span> <span class="n">ffi</span><span class="o">.</span><span class="n">NULL</span> <span class="k">if</span> <span class="n">tcti</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">tcti</span><span class="o">.</span><span class="n">ctx</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">ctx_pp</span> <span class="o">=</span> <span class="n">ffi</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;ESYS_CONTEXT **&quot;</span><span class="p">)</span>
-        <span class="n">_chkrc</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">Esys_Initialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctx_pp</span><span class="p">,</span> <span class="n">tcti</span><span class="o">.</span><span class="n">ctx</span><span class="p">,</span> <span class="n">ffi</span><span class="o">.</span><span class="n">NULL</span><span class="p">))</span>
+        <span class="n">_chkrc</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">Esys_Initialize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctx_pp</span><span class="p">,</span> <span class="n">tctx</span><span class="p">,</span> <span class="n">ffi</span><span class="o">.</span><span class="n">NULL</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ctx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ctx_pp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
