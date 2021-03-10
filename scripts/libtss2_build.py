@@ -17,6 +17,7 @@ def get_include_paths(library_names):
 
     # for manually installed packages, env var PKG_CONFIG_PATH might need to be changed
     for library_name in library_names:
+        os.environ["PKG_CONFIG_ALLOW_SYSTEM_CFLAGS"] = "1"
         cflags = pkgconfig.cflags(library_name)
         header_dirs.update(re.findall(r"(?<=-I)\S+", cflags))
 
