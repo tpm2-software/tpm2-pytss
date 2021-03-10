@@ -16,7 +16,7 @@ function get_deps() {
     pushd tpm2-tss
     echo "pwd build tss: `pwd`"
     ./bootstrap
-    ./configure CFLAGS=-g
+    ./configure --sysconfdir=/etc CFLAGS=-g
     make -j4
     make install
     ldconfig
