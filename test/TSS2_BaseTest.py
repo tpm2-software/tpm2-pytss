@@ -222,6 +222,7 @@ class TSS2_EsapiTest(TSS2_BaseTest):
 
     @classmethod
     def tearDownClass(cls):
+        super().tearDownClass()
         TSS2_EsapiTest.tcti.close()
 
 
@@ -238,7 +239,7 @@ class TSS2_FapiTest(TSS2_BaseTest):
         super().setUpClass()
 
         cls.fapi_config = FapiConfig(
-            temp_dirs=True, tcti=TSS2_BaseTest.tpm.tcti_name_conf
+            temp_dirs=True, tcti=TSS2_BaseTest.tpm.tcti_name_conf, ek_cert_less="yes"
         ).__enter__()
 
         try:

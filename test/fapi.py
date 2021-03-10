@@ -6,7 +6,7 @@ SPDX-License-Identifier: BSD-3
 import unittest
 
 from tpm2_pytss import *
-from TSS2_BaseTest import TSS2_FapiTest
+from .TSS2_BaseTest import TSS2_FapiTest
 
 
 class TestFapi(TSS2_FapiTest):
