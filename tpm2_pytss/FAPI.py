@@ -10,6 +10,7 @@ from typing import Any, Callable, List, Optional, Tuple, Union
 from ._libtpm2_pytss import lib
 from .types import *
 from .utils import _chkrc, to_bytes_or_null, TPM2B_pack, TPM2B_unpack
+from .TSS2_Exception import TSS2_Exception
 
 FAPI_CONFIG_ENV = "TSS2_FAPICONF"
 FAPI_CONFIG_PATH = "/etc/tpm2-tss/fapi-config.json"
