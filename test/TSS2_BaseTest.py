@@ -169,22 +169,6 @@ class TSS2_BaseTest(unittest.TestCase):
         TSS2_BaseTest.tpm = TpmSimulator.getSimulator()
         TSS2_BaseTest.tpm.start()
 
-    @classmethod
-    def tearDownClass(cls):
-        TSS2_BaseTest.tpm.close()
-        TSS2_BaseTest.tcti.close()
-
-
-class TSS2_BaseTest(unittest.TestCase):
-    tpm = None
-    tcti = None
-
-    @classmethod
-    def setUpClass(cls):
-        # This assumes that mssim or something similar is started and needs a startup command
-        TSS2_BaseTest.tpm = TpmSimulator.getSimulator()
-        TSS2_BaseTest.tpm.start()
-
     def setUp(self):
         pass
 
