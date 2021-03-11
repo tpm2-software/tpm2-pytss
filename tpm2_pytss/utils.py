@@ -8,7 +8,7 @@ from .TSS2_Exception import TSS2_Exception
 
 def _chkrc(rc):
     if rc != 0:
-        raise TSS2_Exception(f"TSS2 Library call failed with: 0x{rc:X}")
+        raise TSS2_Exception(rc)
 
 
 def to_bytes_or_null(value, allow_null=True, encoding=None):
