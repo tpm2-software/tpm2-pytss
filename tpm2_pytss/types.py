@@ -735,317 +735,396 @@ class TPMA_MEMORY(int):
 ### handy contructors
 
 
-def TPM2B_ATTEST():
-    return ffi.new("TPM2B_ATTEST *")
+class TPM2B_ATTEST(object):
+    def __new__(self):
+        return ffi.new("TPM2B_ATTEST *")
 
 
-def TPM2B_CONTEXT_DATA():
-    return ffi.new("TPM2B_CONTEXT_DATA *")
+class TPM2B_CONTEXT_DATA(object):
+    def __new__(self):
+        return ffi.new("TPM2B_CONTEXT_DATA *")
 
 
-def TPM2B_CONTEXT_SENSITIVE():
-    return ffi.new("TPM2B_CONTEXT_SENSITIVE *")
+class TPM2B_CONTEXT_SENSITIVE(object):
+    def __new__(self):
+        return ffi.new("TPM2B_CONTEXT_SENSITIVE *")
 
 
-def TPM2B_CREATION_DATA():
-    return ffi.new("TPM2B_CREATION_DATA *")
+class TPM2B_CREATION_DATA(object):
+    def __new__(self):
+        return ffi.new("TPM2B_CREATION_DATA *")
 
 
-def TPM2B_DATA():
-    return ffi.new("TPM2B_DATA *")
+class TPM2B_DATA(object):
+    def __new__(self):
+        return ffi.new("TPM2B_DATA *")
 
 
-def TPM2B_DIGEST():
-    return ffi.new("TPM2B_DIGEST *")
+class TPM2B_DIGEST(object):
+    def __new__(self):
+        return ffi.new("TPM2B_DIGEST *")
 
 
-def TPM2B_ECC_PARAMETER():
-    return ffi.new("TPM2B_ECC_PARAMETER *")
+class TPM2B_ECC_PARAMETER(object):
+    def __new__(self):
+        return ffi.new("TPM2B_ECC_PARAMETER *")
 
 
-def TPM2B_ECC_POINT():
-    return ffi.new("TPM2B_ECC_POINT *")
+class TPM2B_ECC_POINT(object):
+    def __new__(self):
+        return ffi.new("TPM2B_ECC_POINT *")
 
 
-def TPM2B_ENCRYPTED_SECRET():
-    return ffi.new("TPM2B_ENCRYPTED_SECRET *")
+class TPM2B_ENCRYPTED_SECRET(object):
+    def __new__(self):
+        return ffi.new("TPM2B_ENCRYPTED_SECRET *")
 
 
-def TPM2B_EVENT():
-    return ffi.new("TPM2B_EVENT *")
+class TPM2B_EVENT(object):
+    def __new__(self):
+        return ffi.new("TPM2B_EVENT *")
 
 
-def TPM2B_ID_OBJECT():
-    return ffi.new("TPM2B_ID_OBJECT *")
+class TPM2B_ID_OBJECT(object):
+    def __new__(self):
+        return ffi.new("TPM2B_ID_OBJECT *")
 
 
-def TPM2B_IV():
-    return ffi.new("TPM2B_IV *")
+class TPM2B_IV(object):
+    def __new__(self):
+        return ffi.new("TPM2B_IV *")
 
 
-def TPM2B_MAX_BUFFER():
-    return ffi.new("TPM2B_MAX_BUFFER *")
+class TPM2B_MAX_BUFFER(object):
+    def __new__(self):
+        return ffi.new("TPM2B_MAX_BUFFER *")
 
 
-def TPM2B_MAX_NV_BUFFER():
-    return ffi.new("TPM2B_MAX_NV_BUFFER *")
+class TPM2B_MAX_NV_BUFFER(object):
+    def __new__(self):
+        return ffi.new("TPM2B_MAX_NV_BUFFER *")
 
 
-def TPM2B_NAME():
-    return ffi.new("TPM2B_NAME *")
+class TPM2B_NAME(object):
+    def __new__(self):
+        return ffi.new("TPM2B_NAME *")
 
 
-def TPM2B_NV_PUBLIC():
-    return ffi.new("TPM2B_NV_PUBLIC *")
+class TPM2B_NV_PUBLIC(object):
+    def __new__(self):
+        return ffi.new("TPM2B_NV_PUBLIC *")
 
 
-def TPM2B_PRIVATE():
-    return ffi.new("TPM2B_PRIVATE *")
+class TPM2B_PRIVATE(object):
+    def __new__(self):
+        return ffi.new("TPM2B_PRIVATE *")
 
 
-def TPM2B_PRIVATE_KEY_RSA():
-    return ffi.new("TPM2B_PRIVATE_KEY_RSA *")
+class TPM2B_PRIVATE_KEY_RSA(object):
+    def __new__(self):
+        return ffi.new("TPM2B_PRIVATE_KEY_RSA *")
 
 
-def TPM2B_PRIVATE_VENDOR_SPECIFIC():
-    return ffi.new("TPM2B_PRIVATE_VENDOR_SPECIFIC *")
+class TPM2B_PRIVATE_VENDOR_SPECIFIC(object):
+    def __new__(self):
+        return ffi.new("TPM2B_PRIVATE_VENDOR_SPECIFIC *")
 
 
-def TPM2B_PUBLIC():
-    return ffi.new("TPM2B_PUBLIC *")
+class TPM2B_PUBLIC(object):
+    def __new__(self):
+        return ffi.new("TPM2B_PUBLIC *")
 
 
-def TPM2B_PUBLIC_KEY_RSA():
-    return ffi.new("TPM2B_PUBLIC_KEY_RSA *")
+class TPM2B_PUBLIC_KEY_RSA(object):
+    def __new__(self):
+        return ffi.new("TPM2B_PUBLIC_KEY_RSA *")
 
 
-def TPM2B_SENSITIVE():
-    return ffi.new("TPM2B_SENSITIVE *")
+class TPM2B_SENSITIVE(object):
+    def __new__(self):
+        return ffi.new("TPM2B_SENSITIVE *")
 
 
-def TPM2B_SENSITIVE_CREATE():
-    return ffi.new("TPM2B_SENSITIVE_CREATE *")
+class TPM2B_SENSITIVE_CREATE(object):
+    def __new__(self):
+        return ffi.new("TPM2B_SENSITIVE_CREATE *")
 
 
-def TPM2B_SENSITIVE_DATA():
-    return ffi.new("TPM2B_SENSITIVE_DATA *")
+class TPM2B_SENSITIVE_DATA(object):
+    def __new__(self):
+        return ffi.new("TPM2B_SENSITIVE_DATA *")
 
 
-def TPM2B_SYM_KEY():
-    return ffi.new("TPM2B_SYM_KEY *")
+class TPM2B_SYM_KEY(object):
+    def __new__(self):
+        return ffi.new("TPM2B_SYM_KEY *")
 
 
-def TPM2B_TEMPLATE():
-    return ffi.new("TPM2B_TEMPLATE *")
+class TPM2B_TEMPLATE(object):
+    def __new__(self):
+        return ffi.new("TPM2B_TEMPLATE *")
 
 
-def TPML_AC_CAPABILITIES():
-    return ffi.new("TPML_AC_CAPABILITIES *")
+class TPML_AC_CAPABILITIES(object):
+    def __new__(self):
+        return ffi.new("TPML_AC_CAPABILITIES *")
 
 
-def TPML_ALG():
-    return ffi.new("TPML_ALG *")
+class TPML_ALG(object):
+    def __new__(self):
+        return ffi.new("TPML_ALG *")
 
 
-def TPML_ALG_PROPERTY():
-    return ffi.new("TPML_ALG_PROPERTY *")
+class TPML_ALG_PROPERTY(object):
+    def __new__(self):
+        return ffi.new("TPML_ALG_PROPERTY *")
 
 
-def TPML_CC():
-    return ffi.new("TPML_CC *")
+class TPML_CC(object):
+    def __new__(self):
+        return ffi.new("TPML_CC *")
 
 
-def TPML_CCA():
-    return ffi.new("TPML_CCA *")
+class TPML_CCA(object):
+    def __new__(self):
+        return ffi.new("TPML_CCA *")
 
 
-def TPML_DIGEST():
-    return ffi.new("TPML_DIGEST *")
+class TPML_DIGEST(object):
+    def __new__(self):
+        return ffi.new("TPML_DIGEST *")
 
 
-def TPML_DIGEST_VALUES():
-    return ffi.new("TPML_DIGEST_VALUES *")
+class TPML_DIGEST_VALUES(object):
+    def __new__(self):
+        return ffi.new("TPML_DIGEST_VALUES *")
 
 
-def TPML_ECC_CURVE():
-    return ffi.new("TPML_ECC_CURVE *")
+class TPML_ECC_CURVE(object):
+    def __new__(self):
+        return ffi.new("TPML_ECC_CURVE *")
 
 
-def TPML_HANDLE():
-    return ffi.new("TPML_HANDLE *")
+class TPML_HANDLE(object):
+    def __new__(self):
+        return ffi.new("TPML_HANDLE *")
 
 
-def TPML_INTEL_PTT_PROPERTY():
-    return ffi.new("TPML_INTEL_PTT_PROPERTY *")
+class TPML_INTEL_PTT_PROPERTY(object):
+    def __new__(self):
+        return ffi.new("TPML_INTEL_PTT_PROPERTY *")
 
 
-def TPML_PCR_SELECTION():
-    return ffi.new("TPML_PCR_SELECTION *")
+class TPML_PCR_SELECTION(object):
+    def __new__(self):
+        return ffi.new("TPML_PCR_SELECTION *")
 
 
-def TPML_TAGGED_PCR_PROPERTY():
-    return ffi.new("TPML_TAGGED_PCR_PROPERTY *")
+class TPML_TAGGED_PCR_PROPERTY(object):
+    def __new__(self):
+        return ffi.new("TPML_TAGGED_PCR_PROPERTY *")
 
 
-def TPML_TAGGED_TPM_PROPERTY():
-    return ffi.new("TPML_TAGGED_TPM_PROPERTY *")
+class TPML_TAGGED_TPM_PROPERTY(object):
+    def __new__(self):
+        return ffi.new("TPML_TAGGED_TPM_PROPERTY *")
 
 
-def TPMS_AC_OUTPUT():
-    return ffi.new("TPMS_AC_OUTPUT *")
+class TPMS_AC_OUTPUT(object):
+    def __new__(self):
+        return ffi.new("TPMS_AC_OUTPUT *")
 
 
-def TPMS_ALGORITHM_DESCRIPTION():
-    return ffi.new("TPMS_ALGORITHM_DESCRIPTION *")
+class TPMS_ALGORITHM_DESCRIPTION(object):
+    def __new__(self):
+        return ffi.new("TPMS_ALGORITHM_DESCRIPTION *")
 
 
-def TPMS_ALGORITHM_DETAIL_ECC():
-    return ffi.new("TPMS_ALGORITHM_DETAIL_ECC *")
+class TPMS_ALGORITHM_DETAIL_ECC(object):
+    def __new__(self):
+        return ffi.new("TPMS_ALGORITHM_DETAIL_ECC *")
 
 
-def TPMS_ALG_PROPERTY():
-    return ffi.new("TPMS_ALG_PROPERTY *")
+class TPMS_ALG_PROPERTY(object):
+    def __new__(self):
+        return ffi.new("TPMS_ALG_PROPERTY *")
 
 
-def TPMS_ASYM_PARMS():
-    return ffi.new("TPMS_ASYM_PARMS *")
+class TPMS_ASYM_PARMS(object):
+    def __new__(self):
+        return ffi.new("TPMS_ASYM_PARMS *")
 
 
-def TPMS_ATTEST():
-    return ffi.new("TPMS_ATTEST *")
+class TPMS_ATTEST(object):
+    def __new__(self):
+        return ffi.new("TPMS_ATTEST *")
 
 
-def TPMS_AUTH_COMMAND():
-    return ffi.new("TPMS_AUTH_COMMAND *")
+class TPMS_AUTH_COMMAND(object):
+    def __new__(self):
+        return ffi.new("TPMS_AUTH_COMMAND *")
 
 
-def TPMS_AUTH_RESPONSE():
-    return ffi.new("TPMS_AUTH_RESPONSE *")
+class TPMS_AUTH_RESPONSE(object):
+    def __new__(self):
+        return ffi.new("TPMS_AUTH_RESPONSE *")
 
 
-def TPMS_CAPABILITY_DATA():
-    return ffi.new("TPMS_CAPABILITY_DATA *")
+class TPMS_CAPABILITY_DATA(object):
+    def __new__(self):
+        return ffi.new("TPMS_CAPABILITY_DATA *")
 
 
-def TPMS_CERTIFY_INFO():
-    return ffi.new("TPMS_CERTIFY_INFO *")
+class TPMS_CERTIFY_INFO(object):
+    def __new__(self):
+        return ffi.new("TPMS_CERTIFY_INFO *")
 
 
-def TPMS_CLOCK_INFO():
-    return ffi.new("TPMS_CLOCK_INFO *")
+class TPMS_CLOCK_INFO(object):
+    def __new__(self):
+        return ffi.new("TPMS_CLOCK_INFO *")
 
 
-def TPMS_COMMAND_AUDIT_INFO():
-    return ffi.new("TPMS_COMMAND_AUDIT_INFO *")
+class TPMS_COMMAND_AUDIT_INFO(object):
+    def __new__(self):
+        return ffi.new("TPMS_COMMAND_AUDIT_INFO *")
 
 
-def TPMS_CONTEXT():
-    return ffi.new("TPMS_CONTEXT *")
+class TPMS_CONTEXT(object):
+    def __new__(self):
+        return ffi.new("TPMS_CONTEXT *")
 
 
-def TPMS_CONTEXT_DATA():
-    return ffi.new("TPMS_CONTEXT_DATA *")
+class TPMS_CONTEXT_DATA(object):
+    def __new__(self):
+        return ffi.new("TPMS_CONTEXT_DATA *")
 
 
-def TPMS_CREATION_DATA():
-    return ffi.new("TPMS_CREATION_DATA *")
+class TPMS_CREATION_DATA(object):
+    def __new__(self):
+        return ffi.new("TPMS_CREATION_DATA *")
 
 
-def TPMS_CREATION_INFO():
-    return ffi.new("TPMS_CREATION_INFO *")
+class TPMS_CREATION_INFO(object):
+    def __new__(self):
+        return ffi.new("TPMS_CREATION_INFO *")
 
 
-def TPMS_ECC_PARMS():
-    return ffi.new("TPMS_ECC_PARMS *")
+class TPMS_ECC_PARMS(object):
+    def __new__(self):
+        return ffi.new("TPMS_ECC_PARMS *")
 
 
-def TPMS_ECC_POINT():
-    return ffi.new("TPMS_ECC_POINT *")
+class TPMS_ECC_POINT(object):
+    def __new__(self):
+        return ffi.new("TPMS_ECC_POINT *")
 
 
-def TPMS_EMPTY():
-    return ffi.new("TPMS_EMPTY *")
+class TPMS_EMPTY(object):
+    def __new__(self):
+        return ffi.new("TPMS_EMPTY *")
 
 
-def TPMS_ID_OBJECT():
-    return ffi.new("TPMS_ID_OBJECT *")
+class TPMS_ID_OBJECT(object):
+    def __new__(self):
+        return ffi.new("TPMS_ID_OBJECT *")
 
 
-def TPMS_KEYEDHASH_PARMS():
-    return ffi.new("TPMS_KEYEDHASH_PARMS *")
+class TPMS_KEYEDHASH_PARMS(object):
+    def __new__(self):
+        return ffi.new("TPMS_KEYEDHASH_PARMS *")
 
 
-def TPMS_NV_CERTIFY_INFO():
-    return ffi.new("TPMS_NV_CERTIFY_INFO *")
+class TPMS_NV_CERTIFY_INFO(object):
+    def __new__(self):
+        return ffi.new("TPMS_NV_CERTIFY_INFO *")
 
 
-def TPMS_NV_PIN_COUNTER_PARAMETERS():
-    return ffi.new("TPMS_NV_PIN_COUNTER_PARAMETERS *")
+class TPMS_NV_PIN_COUNTER_PARAMETERS(object):
+    def __new__(self):
+        return ffi.new("TPMS_NV_PIN_COUNTER_PARAMETERS *")
 
 
-def TPMS_NV_PUBLIC():
-    return ffi.new("TPMS_NV_PUBLIC *")
+class TPMS_NV_PUBLIC(object):
+    def __new__(self):
+        return ffi.new("TPMS_NV_PUBLIC *")
 
 
-def TPMS_PCR_SELECT():
-    return ffi.new("TPMS_PCR_SELECT *")
+class TPMS_PCR_SELECT(object):
+    def __new__(self):
+        return ffi.new("TPMS_PCR_SELECT *")
 
 
-def TPMS_PCR_SELECTION():
-    return ffi.new("TPMS_PCR_SELECTION *")
+class TPMS_PCR_SELECTION(object):
+    def __new__(self):
+        return ffi.new("TPMS_PCR_SELECTION *")
 
 
-def TPMS_QUOTE_INFO():
-    return ffi.new("TPMS_QUOTE_INFO *")
+class TPMS_QUOTE_INFO(object):
+    def __new__(self):
+        return ffi.new("TPMS_QUOTE_INFO *")
 
 
-def TPMS_RSA_PARMS():
-    return ffi.new("TPMS_RSA_PARMS *")
+class TPMS_RSA_PARMS(object):
+    def __new__(self):
+        return ffi.new("TPMS_RSA_PARMS *")
 
 
-def TPMS_SCHEME_ECDAA():
-    return ffi.new("TPMS_SCHEME_ECDAA *")
+class TPMS_SCHEME_ECDAA(object):
+    def __new__(self):
+        return ffi.new("TPMS_SCHEME_ECDAA *")
 
 
-def TPMS_SCHEME_HASH():
-    return ffi.new("TPMS_SCHEME_HASH *")
+class TPMS_SCHEME_HASH(object):
+    def __new__(self):
+        return ffi.new("TPMS_SCHEME_HASH *")
 
 
-def TPMS_SCHEME_XOR():
-    return ffi.new("TPMS_SCHEME_XOR *")
+class TPMS_SCHEME_XOR(object):
+    def __new__(self):
+        return ffi.new("TPMS_SCHEME_XOR *")
 
 
-def TPMS_SENSITIVE_CREATE():
-    return ffi.new("TPMS_SENSITIVE_CREATE *")
+class TPMS_SENSITIVE_CREATE(object):
+    def __new__(self):
+        return ffi.new("TPMS_SENSITIVE_CREATE *")
 
 
-def TPMS_SESSION_AUDIT_INFO():
-    return ffi.new("TPMS_SESSION_AUDIT_INFO *")
+class TPMS_SESSION_AUDIT_INFO(object):
+    def __new__(self):
+        return ffi.new("TPMS_SESSION_AUDIT_INFO *")
 
 
-def TPMS_SIGNATURE_ECC():
-    return ffi.new("TPMS_SIGNATURE_ECC *")
+class TPMS_SIGNATURE_ECC(object):
+    def __new__(self):
+        return ffi.new("TPMS_SIGNATURE_ECC *")
 
 
-def TPMS_SIGNATURE_RSA():
-    return ffi.new("TPMS_SIGNATURE_RSA *")
+class TPMS_SIGNATURE_RSA(object):
+    def __new__(self):
+        return ffi.new("TPMS_SIGNATURE_RSA *")
 
 
-def TPMS_SYMCIPHER_PARMS():
-    return ffi.new("TPMS_SYMCIPHER_PARMS *")
+class TPMS_SYMCIPHER_PARMS(object):
+    def __new__(self):
+        return ffi.new("TPMS_SYMCIPHER_PARMS *")
 
 
-def TPMS_TAGGED_PCR_SELECT():
-    return ffi.new("TPMS_TAGGED_PCR_SELECT *")
+class TPMS_TAGGED_PCR_SELECT(object):
+    def __new__(self):
+        return ffi.new("TPMS_TAGGED_PCR_SELECT *")
 
 
-def TPMS_TAGGED_PROPERTY():
-    return ffi.new("TPMS_TAGGED_PROPERTY *")
+class TPMS_TAGGED_PROPERTY(object):
+    def __new__(self):
+        return ffi.new("TPMS_TAGGED_PROPERTY *")
 
 
-def TPMS_TIME_ATTEST_INFO():
-    return ffi.new("TPMS_TIME_ATTEST_INFO *")
+class TPMS_TIME_ATTEST_INFO(object):
+    def __new__(self):
+        return ffi.new("TPMS_TIME_ATTEST_INFO *")
 
 
-def TPMS_TIME_INFO():
-    return ffi.new("TPMS_TIME_INFO *")
+class TPMS_TIME_INFO(object):
+    def __new__(self):
+        return ffi.new("TPMS_TIME_INFO *")
