@@ -160,81 +160,61 @@ class TpmSimulator(object):
 
 
 class TSS2_BaseTest(unittest.TestCase):
-    tpm = None
-    tcti = None
-
-    @classmethod
-    def setUpClass(cls):
-        # This assumes that mssim or something similar is started and needs a startup command
-        TSS2_BaseTest.tpm = TpmSimulator.getSimulator()
-        TSS2_BaseTest.tpm.start()
-
     def setUp(self):
-        pass
+        self.tpm = TpmSimulator.getSimulator()
+        self.tpm.start()
 
     def tearDown(self):
-        pass
-
-    @classmethod
-    def tearDownClass(cls):
-        TSS2_BaseTest.tpm.close()
+        self.tpm.close()
 
 
 class TSS2_EsapiTest(TSS2_BaseTest):
-    tcti = None
-
-    @classmethod
-    def setUpClass(cls):
-        # This assumes that mssim or something similar is started and needs a startup command
-        super().setUpClass()
-        try:
-            TSS2_EsapiTest.tcti = TSS2_BaseTest.tpm.get_tcti()
-            with ESAPI(TSS2_EsapiTest.tcti) as ectx:
-                ectx.Startup(TPM2_SU.CLEAR)
-
-        except Exception as e:
-            TSS2_BaseTest.tpm.close()
-            raise e
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.tcti = None
+        self.ectx = None
 
     def setUp(self):
         super().setUp()
-        self.ectx = ESAPI(TSS2_EsapiTest.tcti)
+        try:
+            self.tcti = self.tpm.get_tcti()
+            with ESAPI(self.tcti) as ectx:
+                ectx.Startup(TPM2_SU.CLEAR)
+
+        except Exception as e:
+            self.tpm.close()
+            raise e
+        self.ectx = ESAPI(self.tcti)
 
     def tearDown(self):
         self.ectx.close()
-        self.ectx = None
-
-    @classmethod
-    def tearDownClass(cls):
-        super().tearDownClass()
-        TSS2_EsapiTest.tcti.close()
+        self.tcti.close()
+        super().tearDown()
 
 
 class TSS2_FapiTest(TSS2_BaseTest):
-    fapi_config = None
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fapi = None
+        self.fapi_config = None
 
-    @classmethod
-    def setUpClass(cls):
+    def setUp(self):
+        super().setUp()
+
         # This assumes that mssim or something similar is started and needs a startup command
         super().setUpClass()
 
-        cls.fapi_config = FapiConfig(
-            temp_dirs=True, tcti=TSS2_BaseTest.tpm.tcti_name_conf, ek_cert_less="yes"
+        self.fapi_config = FapiConfig(
+            temp_dirs=True, tcti=self.tpm.tcti_name_conf, ek_cert_less="yes"
         ).__enter__()
 
         try:
             with FAPI() as fapi:
                 fapi.provision()
         except Exception as e:
-            TSS2_BaseTest.tpm.close()
+            self.tpm.close()
             raise e
 
-    def setUp(self):
-        super().setUp()
         self.fapi = FAPI()
         self.fapi.__enter__()
 
@@ -242,10 +222,8 @@ class TSS2_FapiTest(TSS2_BaseTest):
         self.fapi.__exit__(*sys.exc_info())
         self.fapi = None
 
-    @classmethod
-    def tearDownClass(cls):
-        super().tearDownClass()
+        if self.fapi_config is not None:
+            self.fapi_config.__exit__(*sys.exc_info())
+            self.fapi_config = None
 
-        if cls.fapi_config is not None:
-            cls.fapi_config.__exit__(*sys.exc_info())
-            cls.fapi_config = None
+        super().tearDown()
