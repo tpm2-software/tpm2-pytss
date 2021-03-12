@@ -24,7 +24,7 @@ def get_include_paths(library_names):
     return header_dirs
 
 
-libraries = ["tss2-esys", "tss2-tctildr", "tss2-fapi"]
+libraries = ["tss2-esys", "tss2-tctildr", "tss2-fapi", "tss2-rc"]
 
 # Set up the search path so we find prepare_header and other modules
 PATH = os.path.dirname(__file__) if len(os.path.dirname(__file__)) > 0 else os.getcwd()
