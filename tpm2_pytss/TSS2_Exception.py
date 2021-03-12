@@ -1,9 +1,12 @@
+from ._libtpm2_pytss import lib, ffi
 from .types import TPM2_RC
 
 
 class TSS2_Exception(RuntimeError):
     def __init__(self, rc):
-        super(TSS2_Exception, self).__init__(f"TSS2 Library call failed with: 0x{rc:X}")
+        errmsg = ffi.string(lib.Tss2_RC_Decode(rc)).decode()
+        super(TSS2_Exception, self).__init__(f"{errmsg}")
+
         self.rc = rc
         self.handle = 0
         self.parameter = 0

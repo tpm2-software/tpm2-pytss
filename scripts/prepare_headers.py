@@ -114,6 +114,13 @@ def prepare_fapi(dirpath):
     return remove_common_guards(s)
 
 
+def prepare_rcdecode(dirpath):
+
+    s = pathlib.Path(dirpath, "tss2_rc.h").read_text(encoding="utf-8")
+
+    return remove_common_guards(s)
+
+
 def prepare(indir, outfile):
     indir = os.path.join(indir, "tss2")
 
@@ -130,6 +137,8 @@ def prepare(indir, outfile):
     esapi = prepare_esapi(indir)
 
     fapi = prepare_fapi(indir)
+
+    rcdecode = prepare_rcdecode(indir)
 
     # Write result
     with open(outfile, "w") as f:
@@ -151,6 +160,7 @@ def prepare(indir, outfile):
         f.write(sapi)
         f.write(esapi)
         f.write(fapi)
+        f.write(rcdecode)
 
 
 if __name__ == "__main__":
