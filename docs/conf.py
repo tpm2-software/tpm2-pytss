@@ -21,8 +21,8 @@ from setuptools_scm import get_version
 # -- Project information -----------------------------------------------------
 
 project = "tpm2-pytss"
-copyright = "2019 - %d, Intel" % (datetime.datetime.today().year,)
-author = "William Roberts"
+author = "tpm2-software"
+copyright = f"2019 - {datetime.datetime.today().year}, {author}"
 
 # The short X.Y version
 version = get_version(root="..", relative_to=__file__)
@@ -60,14 +60,22 @@ exclude_patterns = []
 #
 html_theme = "alabaster"
 
-html_theme_options = {
-    "description": "TPM 2.0 TSS Bindings for Python",
-    "github_user": "tpm2-software",
-    "github_repo": "tpm2-pytss",
-    "github_button": True,
-    "travis_button": True,
-    "codecov_button": True,
-}
+# The theme to use for HTML and HTML Help pages.  See the documentation for
+# a list of builtin themes.
+#
+# The Read the Docs theme is available from
+# - https://github.com/snide/sphinx_rtd_theme
+# - https://pypi.python.org/pypi/sphinx_rtd_theme
+# - python-sphinx-rtd-theme package (on Debian)
+try:
+    import sphinx_rtd_theme
+
+    html_theme = "sphinx_rtd_theme"
+    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+except ImportError:
+    sys.stderr.write(
+        "Warning: The Sphinx 'sphinx_rtd_theme' HTML theme was not found. Make sure you have the theme installed to produce pretty HTML output. Falling back to the default theme.\n"
+    )
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
