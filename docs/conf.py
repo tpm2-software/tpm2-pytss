@@ -40,7 +40,11 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
     "sphinx.ext.intersphinx",
+    "sphinx.ext.napoleon",
 ]
+
+# Autodoc settings
+autodoc_typehints = "none"
 
 intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
 
