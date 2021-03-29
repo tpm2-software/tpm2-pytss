@@ -51,6 +51,16 @@ class TestEsys(TSS2_EsapiTest):
         )
         self.assertIsNot(x, None)
 
+    def testPCRRead(self):
+
+        pcrsels = TPML_PCR_SELECTION.parse("sha1:3+sha256:all")
+        _, _, digests, = self.ectx.PCR_Read(pcrsels)
+
+        self.assertEqual(len(digests[0]), 20)
+
+        for d in digests[1:]:
+            self.assertEqual(len(d), 32)
+
 
 if __name__ == "__main__":
     unittest.main()

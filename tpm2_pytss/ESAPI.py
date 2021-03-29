@@ -6,7 +6,7 @@ from ._libtpm2_pytss import lib
 
 from .types import *
 
-from .utils import _chkrc, TPM2B_pack, TPM2B_unpack
+from .utils import _chkrc, TPM2B_pack, TPM2B_unpack, TPML_unpack
 
 
 class ESAPI:
@@ -1211,7 +1211,12 @@ class ESAPI:
                 pcrValues,
             )
         )
-        return (pcrUpdateCounter[0], pcrSelectionOut[0], pcrValues[0])
+
+        return (
+            pcrUpdateCounter[0],
+            pcrSelectionOut[0],
+            TPML_unpack(pcrValues[0], "digests"),
+        )
 
     def PCR_Allocate(
         self,
