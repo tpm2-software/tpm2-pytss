@@ -4,6 +4,8 @@ SPDX-License-Identifier: BSD-3
 
 from ._libtpm2_pytss import ffi, lib
 
+from tpm2_pytss.utils import CLASS_INT_ATTRS_from_string
+
 
 class ESYS_TR(object):
     NONE = lib.ESYS_TR_NONE
@@ -96,6 +98,15 @@ class TPM2_ALG(int):
     ECB = lib.TPM2_ALG_ECB
     FIRST = lib.TPM2_ALG_FIRST
     LAST = lib.TPM2_ALG_LAST
+
+    # int's are not mutable, so do it in __new__ over __init__
+    def __new__(cls, value=ERROR):
+
+        # If it's a string initializer value, see if it matches anything in the list
+        if isinstance(value, str):
+            value = CLASS_INT_ATTRS_from_string(cls, value)
+
+        return int.__new__(cls, value)
 
 
 TPM2_ALG_ID = TPM2_ALG
@@ -916,8 +927,54 @@ class TPML_INTEL_PTT_PROPERTY(object):
 
 
 class TPML_PCR_SELECTION(object):
-    def __new__(self):
-        return ffi.new("TPML_PCR_SELECTION *")
+    def __new__(self, pcr_selections=None):
+
+        x = ffi.new("TPML_PCR_SELECTION *")
+
+        if pcr_selections is None or len(pcr_selections) == 0:
+            return x
+
+        if len(pcr_selections) > lib.TPM2_NUM_PCR_BANKS:
+            raise RuntimeError(
+                f"PCR Selection list greater than {lib.TPM2_NUM_PCR_BANKS}, "
+                f"got {len(pcr_selections)}"
+            )
+
+        x.count = len(pcr_selections)
+        for i, p in enumerate(pcr_selections):
+            x.pcrSelections[i] = p[0]
+
+        return x
+
+    @staticmethod
+    def parse(selections):
+
+        if selections is None or len(selections) == 0:
+            return TPML_PCR_SELECTION()
+
+        selectors = selections.split("+") if "+" in selections else [selections]
+
+        if len(selectors) - 1 != selections.count("+"):
+            raise RuntimeError(
+                f"Malformed PCR bank selection list (unbalanced +), got: {selections}"
+            )
+
+        for x in selectors:
+            if len(x) == 0:
+                raise RuntimeError(
+                    f"Malformed PCR bank selection list (unbalanced +), got: {selections}"
+                )
+
+        count = len(selectors)
+        if count > lib.TPM2_NUM_PCR_BANKS:
+            raise RuntimeError(
+                f"PCR Selection list greater than f{lib.TPM2_NUM_PCR_BANKS}, "
+                f"got {len(selectors)}"
+            )
+
+        selections = [TPMS_PCR_SELECTION.parse(x) for x in selectors]
+
+        return TPML_PCR_SELECTION(selections)
 
 
 class TPML_TAGGED_PCR_PROPERTY(object):
@@ -1056,8 +1113,60 @@ class TPMS_PCR_SELECT(object):
 
 
 class TPMS_PCR_SELECTION(object):
-    def __new__(self):
-        return ffi.new("TPMS_PCR_SELECTION *")
+    def __new__(self, halg=0, pcrs=None):
+        x = ffi.new("TPMS_PCR_SELECTION *")
+
+        if not halg and not pcrs:
+            return x
+
+        if bool(halg) != bool(pcrs):
+            raise RuntimeError("halg and pcrs MUST be specified")
+
+        x.hash = halg
+        x.sizeofSelect = 3
+
+        if pcrs == "all" or (len(pcrs) == 1 and pcrs[0] == "all"):
+            x.pcrSelect[0] = 0xFF
+            x.pcrSelect[1] = 0xFF
+            x.pcrSelect[2] = 0xFF
+            return x
+
+        for pcr in pcrs:
+            if pcr < 0 or pcr > lib.TPM2_PCR_LAST:
+                raise RuntimeError(f"PCR Index out of range, got {pcr}")
+            x.pcrSelect[pcr // 8] |= 1 << (pcr % 8)
+
+        return x
+
+    @staticmethod
+    def parse(selection):
+
+        if selection is None or len(selection) == 0:
+            return TPMS_PCR_SELECTION()
+
+        hunks = [x.strip() for x in selection.split(":")]
+        if len(hunks) != 2:
+            raise RuntimeError(f"PCR Selection malformed, got {selection}")
+
+        try:
+            halg = int(hunks[0], 0)
+        except ValueError:
+            try:
+                halg = TPM2_ALG(hunks[0])
+            except KeyError:
+                raise RuntimeError(
+                    f"Expected int or algorithm friendly name, got {hunks[0]}"
+                )
+
+        if hunks[1] != "all":
+            try:
+                pcrs = [int(x.strip(), 0) for x in hunks[1].split(",")]
+            except ValueError:
+                raise RuntimeError(f"Expected PCR number, got {hunks[1]}")
+        else:
+            pcrs = hunks[1]
+
+        return TPMS_PCR_SELECTION(halg=halg, pcrs=pcrs)
 
 
 class TPMS_QUOTE_INFO(object):
