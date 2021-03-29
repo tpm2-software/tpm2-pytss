@@ -33,7 +33,11 @@ def to_bytes_or_null(value, allow_null=True, encoding=None):
 
 
 def TPM2B_unpack(x):
-    return ffi.unpack(x.buffer, x.size)
+    b = ffi.unpack(x.buffer, x.size)
+    if isinstance(b, list):
+        b = bytes(b)
+
+    return b
 
 
 def TPM2B_pack(x, t="DIGEST"):
