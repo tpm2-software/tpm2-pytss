@@ -43,3 +43,16 @@ def TPM2B_pack(x, t="DIGEST"):
     r.size = len(x)
     ffi.memmove(r.buffer, x, len(x))
     return r
+
+
+def CLASS_INT_ATTRS_from_string(cls, str_value):
+    """
+    Given a class, lookup int attributes by name and return that attribute value.
+    :param cls: The class to search.
+    :param str_value: The key for the attribute in the class.
+    """
+
+    friendly = {
+        key: value for (key, value) in vars(cls).items() if isinstance(value, int)
+    }
+    return friendly[str_value.upper()]
