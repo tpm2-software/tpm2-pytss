@@ -13,7 +13,10 @@ from .utils import _chkrc, to_bytes_or_null, TPM2B_pack, TPM2B_unpack
 from .TSS2_Exception import TSS2_Exception
 
 FAPI_CONFIG_ENV = "TSS2_FAPICONF"
-FAPI_CONFIG_PATH = "/etc/tpm2-tss/fapi-config.json"
+FAPI_CONFIG_PATHS = [
+    "/etc/tpm2-tss/fapi-config.json",
+    "/usr/local/etc/tpm2-tss/fapi-config.json",
+]
 
 
 class FapiConfig(contextlib.ExitStack):
@@ -23,7 +26,7 @@ class FapiConfig(contextlib.ExitStack):
         f"""Create a temporary Fapi environment. Get the fapi_conf in this order:
         * `config` if given
         * File specified with environment variable `{FAPI_CONFIG_ENV}` if defined
-        * Installed config at `{FAPI_CONFIG_PATH}`
+        * Installed config at `{FAPI_CONFIG_PATHS}`
 
         Single entries are overridden if additional named arguments are given
         and/or if `temp_dirs` is True.
@@ -45,9 +48,25 @@ class FapiConfig(contextlib.ExitStack):
 
         if self.config is None:
             # Load the currently active fapi-config.json
-            config_path = os.environ.get(FAPI_CONFIG_ENV, FAPI_CONFIG_PATH)
-            with open(config_path) as file:
-                self.config = json.load(file)
+            config_path = os.environ.get(FAPI_CONFIG_ENV, None)
+            if config_path is None:
+                for p in FAPI_CONFIG_PATHS:
+                    try:
+                        with open(p) as file:
+                            self.config = json.load(file)
+                            break
+                    except FileNotFoundError:
+                        # keep trying
+                        pass
+
+                if self.config is None:
+                    raise RuntimeError(
+                        f"Could not find fapi config at {FAPI_CONFIG_PATHS}, "
+                        f"set env var {FAPI_CONFIG_ENV}"
+                    )
+            else:
+                with open(config_path) as file:
+                    self.config = json.load(file)
 
         self.config = {**self.config, **kwargs}
 
