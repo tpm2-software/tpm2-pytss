@@ -40,7 +40,7 @@ $ black .
 ## Running
 
 ```console
-$ python -m unittest discover -v
+$ python -m pytest -n $(nproc) --cov=tpm2_pytss -v
 ```
 
 ## Docker
