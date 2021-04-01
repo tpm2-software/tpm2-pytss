@@ -6,7 +6,7 @@ from ._libtpm2_pytss import lib
 
 from .types import *
 
-from .utils import _chkrc, TPM2B_pack, TPM2B_unpack, TPML_unpack
+from .utils import _chkrc, TPM2B_pack
 
 
 class ESAPI:
@@ -1205,7 +1205,7 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                pcrSelectionIn,
+                pcrSelectionIn._cdata,
                 pcrUpdateCounter,
                 pcrSelectionOut,
                 pcrValues,
@@ -1214,8 +1214,8 @@ class ESAPI:
 
         return (
             pcrUpdateCounter[0],
-            pcrSelectionOut[0],
-            TPML_unpack(pcrValues[0], "digests"),
+            TPML_PCR_SELECTION(_cdata=pcrSelectionOut[0]),
+            TPML_DIGEST(_cdata=pcrValues[0]),
         )
 
     def PCR_Allocate(
@@ -1718,10 +1718,10 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                inSensitive,
-                inPublic,
-                outsideInfo,
-                creationPCR,
+                inSensitive._cdata,
+                inPublic._cdata,
+                outsideInfo._cdata,
+                creationPCR._cdata,
                 objectHandle,
                 outPublic,
                 creationData,
@@ -1729,13 +1729,13 @@ class ESAPI:
                 creationTicket,
             )
         )
-        objectHandleObject = objectHandle[0]
+
         return (
-            objectHandleObject,
-            outPublic[0],
-            creationData[0],
-            creationHash[0],
-            creationTicket[0],
+            ESYS_TR(objectHandle[0]),
+            TPM2B_PUBLIC(_cdata=outPublic[0]),
+            TPM2B_CREATION_DATA(_cdata=creationData[0]),
+            TPM2B_DIGEST(_cdata=creationHash[0]),
+            TPMT_TK_CREATION(_cdata=creationTicket[0]),
         )
 
     def HierarchyControl(
