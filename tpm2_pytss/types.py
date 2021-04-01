@@ -4,10 +4,10 @@ SPDX-License-Identifier: BSD-3
 
 from ._libtpm2_pytss import ffi, lib
 
-from tpm2_pytss.utils import CLASS_INT_ATTRS_from_string
+from tpm2_pytss.utils import CLASS_INT_ATTRS_from_string, TPM2B_unpack
 
 
-class ESYS_TR(object):
+class ESYS_TR(int):
     NONE = lib.ESYS_TR_NONE
     PASSWORD = lib.ESYS_TR_PASSWORD
     PCR0 = lib.ESYS_TR_PCR0
@@ -743,196 +743,281 @@ class TPMA_MEMORY(int):
     OBJECTCOPIEDTORAM = lib.TPMA_MEMORY_OBJECTCOPIEDTORAM
 
 
-### handy contructors
+class TPM_OBJECT(object):
+    def __init__(self, _cdata=None):
+
+        if _cdata is None:
+            _cdata = ffi.new(f"{self.__class__.__name__} *")
+
+        self._cdata = _cdata
+
+    @staticmethod
+    def _fixup_classname(tipe):
+        # Some versions of tpm2-tss had anonymous structs, so the kind will be struct
+        # but the name will not contain it
+        if tipe.cname.startswith(tipe.kind):
+            return tipe.cname[len(tipe.kind) + 1 :]
+
+        return tipe.cname
+
+    def __getattribute__(self, key):
+        try:
+            # go through object to avoid invoking THIS objects __getattribute__ call
+            # and thus infinite recursion
+            return object.__getattribute__(self, key)
+        except AttributeError:
+            # Ok the object has no idea what you're looking for... can we handle it?
+            # Yes we could use self._cdata as it will only recurse once, but lets avoid it.
+            _cdata = object.__getattribute__(self, "_cdata")
 
+            # Get the attribute they're looking for out of _cdata
+            x = getattr(_cdata, key)
 
-class TPM2B_ATTEST(object):
-    def __new__(self):
-        return ffi.new("TPM2B_ATTEST *")
+            # type is reserved by python, so use tipe
+            tipe = None
+            try:
+                tipe = ffi.typeof(x)
+            except TypeError:
+                # Python native values wont ffi.typeof
+                return x
 
+            # Native arrays, like uint8_t[4] we don't wrap. We just let the underlying
+            # data type handle it.
+            if tipe.kind == "array" and tipe.cname.startswith("uint"):
+                return x
 
-class TPM2B_CONTEXT_DATA(object):
-    def __new__(self):
-        return ffi.new("TPM2B_CONTEXT_DATA *")
+            # if it's not a struct or union, we don't wrap it and thus we don't
+            # know what to do with it.
+            if tipe.kind != "struct" and tipe.kind != "union":
+                raise TypeError(f'Not struct or union, got: "{tipe.kind}"')
 
+            clsname = TPM_OBJECT._fixup_classname(tipe)
+            subclass = globals()[clsname]
+            obj = subclass(_cdata=x)
+            return obj
 
-class TPM2B_CONTEXT_SENSITIVE(object):
-    def __new__(self):
-        return ffi.new("TPM2B_CONTEXT_SENSITIVE *")
+    def __setattr__(self, key, value):
+        # print(f"SET ATTRIBUTE {key}")
+        try:
+            # Get _cdata without invoking getattr
+            _cdata = object.__getattribute__(self, "_cdata")
+            setattr(_cdata, key, value)
+        except (AttributeError, TypeError):
+            return object.__setattr__(self, key, value)
 
 
-class TPM2B_CREATION_DATA(object):
-    def __new__(self):
-        return ffi.new("TPM2B_CREATION_DATA *")
+class TPML_OBJECT(TPM_OBJECT):
+    def __getattribute__(self, key):
 
+        try:
+            # Can the parent handle it?
+            x = TPM_OBJECT.__getattribute__(self, key)
+            return x
+        except TypeError:
+            pass
 
-class TPM2B_DATA(object):
-    def __new__(self):
-        return ffi.new("TPM2B_DATA *")
+        # Must be a TPML style array
+        # Get cdata without implicitly invoking a derived classes __getattribute__
+        # This will prevent recursion and stack depth issues.
+        _cdata = object.__getattribute__(self, "_cdata")
 
+        # This will invoke the CFFI implementation, so getattr is safe here.
+        x = getattr(_cdata, key)
 
-class TPM2B_DIGEST(object):
-    def __new__(self):
-        return ffi.new("TPM2B_DIGEST *")
+        # If this isn't a CFFI type, something wen't crazy, and typeof() will raise TypeError.
+        tipe = ffi.typeof(x)
+        if tipe.kind != "array":
+            raise TypeError(
+                f'Unknown scalar conversion for kind "{tipe.kind}" for key "{key}"'
+            )
 
+        # subclasses in the arrays within the CTypes are fixed, so
+        # we only need to do this once
+        clsname = TPM_OBJECT._fixup_classname(tipe.item)
+        subclass = globals()[clsname]
 
-class TPM2B_ECC_PARAMETER(object):
-    def __new__(self):
-        return ffi.new("TPM2B_ECC_PARAMETER *")
+        l = []
+        # do not go through __len__
+        count = _cdata.count
+        for i in range(0, count):
+            obj = subclass(_cdata=x[i])
+            l.append(obj)
 
+        return l
 
-class TPM2B_ECC_POINT(object):
-    def __new__(self):
-        return ffi.new("TPM2B_ECC_POINT *")
+    def __len__(self):
 
+        return self._cdata.count
 
-class TPM2B_ENCRYPTED_SECRET(object):
-    def __new__(self):
-        return ffi.new("TPM2B_ENCRYPTED_SECRET *")
 
+class TPMU_PUBLIC_PARMS(TPM_OBJECT):
+    pass
 
-class TPM2B_EVENT(object):
-    def __new__(self):
-        return ffi.new("TPM2B_EVENT *")
 
+class TPMT_PUBLIC(TPM_OBJECT):
+    pass
 
-class TPM2B_ID_OBJECT(object):
-    def __new__(self):
-        return ffi.new("TPM2B_ID_OBJECT *")
 
+class TPM2B_ATTEST(TPM_OBJECT):
+    pass
 
-class TPM2B_IV(object):
-    def __new__(self):
-        return ffi.new("TPM2B_IV *")
 
+class TPM2B_CONTEXT_DATA(TPM_OBJECT):
+    pass
 
-class TPM2B_MAX_BUFFER(object):
-    def __new__(self):
-        return ffi.new("TPM2B_MAX_BUFFER *")
 
+class TPM2B_CONTEXT_SENSITIVE(TPM_OBJECT):
+    pass
 
-class TPM2B_MAX_NV_BUFFER(object):
-    def __new__(self):
-        return ffi.new("TPM2B_MAX_NV_BUFFER *")
 
+class TPM2B_CREATION_DATA(TPM_OBJECT):
+    pass
 
-class TPM2B_NAME(object):
-    def __new__(self):
-        return ffi.new("TPM2B_NAME *")
 
+class TPM2B_DATA(TPM_OBJECT):
+    pass
 
-class TPM2B_NV_PUBLIC(object):
-    def __new__(self):
-        return ffi.new("TPM2B_NV_PUBLIC *")
 
+class TPM2B_DIGEST(TPM_OBJECT):
+    pass
 
-class TPM2B_PRIVATE(object):
-    def __new__(self):
-        return ffi.new("TPM2B_PRIVATE *")
 
+class TPM2B_ECC_PARAMETER(TPM_OBJECT):
+    pass
 
-class TPM2B_PRIVATE_KEY_RSA(object):
-    def __new__(self):
-        return ffi.new("TPM2B_PRIVATE_KEY_RSA *")
 
+class TPM2B_ECC_POINT(TPM_OBJECT):
+    pass
 
-class TPM2B_PRIVATE_VENDOR_SPECIFIC(object):
-    def __new__(self):
-        return ffi.new("TPM2B_PRIVATE_VENDOR_SPECIFIC *")
 
+class TPM2B_ENCRYPTED_SECRET(TPM_OBJECT):
+    pass
 
-class TPM2B_PUBLIC(object):
-    def __new__(self):
-        return ffi.new("TPM2B_PUBLIC *")
 
+class TPM2B_EVENT(TPM_OBJECT):
+    pass
 
-class TPM2B_PUBLIC_KEY_RSA(object):
-    def __new__(self):
-        return ffi.new("TPM2B_PUBLIC_KEY_RSA *")
 
+class TPM2B_ID_OBJECT(TPM_OBJECT):
+    pass
 
-class TPM2B_SENSITIVE(object):
-    def __new__(self):
-        return ffi.new("TPM2B_SENSITIVE *")
 
+class TPM2B_IV(TPM_OBJECT):
+    pass
 
-class TPM2B_SENSITIVE_CREATE(object):
-    def __new__(self):
-        return ffi.new("TPM2B_SENSITIVE_CREATE *")
 
+class TPM2B_MAX_BUFFER(TPM_OBJECT):
+    pass
 
-class TPM2B_SENSITIVE_DATA(object):
-    def __new__(self):
-        return ffi.new("TPM2B_SENSITIVE_DATA *")
 
+class TPM2B_MAX_NV_BUFFER(TPM_OBJECT):
+    pass
 
-class TPM2B_SYM_KEY(object):
-    def __new__(self):
-        return ffi.new("TPM2B_SYM_KEY *")
 
+class TPM2B_NAME(TPM_OBJECT):
+    pass
 
-class TPM2B_TEMPLATE(object):
-    def __new__(self):
-        return ffi.new("TPM2B_TEMPLATE *")
 
+class TPM2B_NV_PUBLIC(TPM_OBJECT):
+    pass
 
-class TPML_AC_CAPABILITIES(object):
-    def __new__(self):
-        return ffi.new("TPML_AC_CAPABILITIES *")
 
+class TPM2B_PRIVATE(TPM_OBJECT):
+    pass
 
-class TPML_ALG(object):
-    def __new__(self):
-        return ffi.new("TPML_ALG *")
 
+class TPM2B_PRIVATE_KEY_RSA(TPM_OBJECT):
+    pass
 
-class TPML_ALG_PROPERTY(object):
-    def __new__(self):
-        return ffi.new("TPML_ALG_PROPERTY *")
 
+class TPM2B_PRIVATE_VENDOR_SPECIFIC(TPM_OBJECT):
+    pass
 
-class TPML_CC(object):
-    def __new__(self):
-        return ffi.new("TPML_CC *")
 
+class TPM2B_PUBLIC(TPM_OBJECT):
+    pass
 
-class TPML_CCA(object):
-    def __new__(self):
-        return ffi.new("TPML_CCA *")
 
+class TPM2B_PUBLIC_KEY_RSA(TPM_OBJECT):
+    pass
 
-class TPML_DIGEST(object):
-    def __new__(self):
-        return ffi.new("TPML_DIGEST *")
 
+class TPM2B_SENSITIVE(TPM_OBJECT):
+    pass
 
-class TPML_DIGEST_VALUES(object):
-    def __new__(self):
-        return ffi.new("TPML_DIGEST_VALUES *")
 
+class TPM2B_SENSITIVE_CREATE(TPM_OBJECT):
+    pass
 
-class TPML_ECC_CURVE(object):
-    def __new__(self):
-        return ffi.new("TPML_ECC_CURVE *")
 
+class TPM2B_SENSITIVE_DATA(TPM_OBJECT):
+    pass
 
-class TPML_HANDLE(object):
-    def __new__(self):
-        return ffi.new("TPML_HANDLE *")
 
+class TPM2B_SYM_KEY(TPM_OBJECT):
+    pass
 
-class TPML_INTEL_PTT_PROPERTY(object):
-    def __new__(self):
-        return ffi.new("TPML_INTEL_PTT_PROPERTY *")
 
+class TPM2B_TEMPLATE(TPM_OBJECT):
+    pass
 
-class TPML_PCR_SELECTION(object):
-    def __new__(self, pcr_selections=None):
 
-        x = ffi.new("TPML_PCR_SELECTION *")
+class TPML_AC_CAPABILITIES(TPM_OBJECT):
+    pass
+
+
+class TPML_ALG(TPM_OBJECT):
+    pass
+
+
+class TPML_ALG_PROPERTY(TPM_OBJECT):
+    pass
+
+
+class TPML_CC(TPM_OBJECT):
+    pass
+
+
+class TPML_CCA(TPM_OBJECT):
+    pass
+
+
+class TPML_DIGEST(TPML_OBJECT):
+    def __getitem__(self, item):
+        try:
+            return object.__getitem__(self, item)
+        except AttributeError:
+            if isinstance(item, slice):
+                if item.stop is None:
+                    item = slice(item.start, len(self) - 1, item.step)
+                digest_list = self._cdata.digests[item]
+                return [TPM2B_unpack(x) for x in digest_list]
+
+            return TPM2B_unpack(self._cdata.digests[item])
+
+
+class TPML_DIGEST_VALUES(TPML_OBJECT):
+    pass
+
+
+class TPML_ECC_CURVE(TPML_OBJECT):
+    pass
+
+
+class TPML_HANDLE(TPML_OBJECT):
+    pass
+
+
+class TPML_INTEL_PTT_PROPERTY(TPML_OBJECT):
+    pass
+
+
+class TPML_PCR_SELECTION(TPML_OBJECT):
+    def __init__(self, pcr_selections=None, _cdata=None):
+        super().__init__(_cdata=_cdata)
 
         if pcr_selections is None or len(pcr_selections) == 0:
-            return x
+            return
 
         if len(pcr_selections) > lib.TPM2_NUM_PCR_BANKS:
             raise RuntimeError(
@@ -940,11 +1025,9 @@ class TPML_PCR_SELECTION(object):
                 f"got {len(pcr_selections)}"
             )
 
-        x.count = len(pcr_selections)
+        self._cdata.count = len(pcr_selections)
         for i, p in enumerate(pcr_selections):
-            x.pcrSelections[i] = p[0]
-
-        return x
+            self._cdata.pcrSelections[i] = p._cdata[0]
 
     @staticmethod
     def parse(selections):
@@ -977,166 +1060,137 @@ class TPML_PCR_SELECTION(object):
         return TPML_PCR_SELECTION(selections)
 
 
-class TPML_TAGGED_PCR_PROPERTY(object):
-    def __new__(self):
-        return ffi.new("TPML_TAGGED_PCR_PROPERTY *")
+class TPML_TAGGED_PCR_PROPERTY(TPML_OBJECT):
+    pass
 
 
-class TPML_TAGGED_TPM_PROPERTY(object):
-    def __new__(self):
-        return ffi.new("TPML_TAGGED_TPM_PROPERTY *")
+class TPML_TAGGED_TPM_PROPERTY(TPML_OBJECT):
+    pass
 
 
-class TPMS_AC_OUTPUT(object):
-    def __new__(self):
-        return ffi.new("TPMS_AC_OUTPUT *")
+class TPMS_AC_OUTPUT(TPM_OBJECT):
+    pass
 
 
-class TPMS_ALGORITHM_DESCRIPTION(object):
-    def __new__(self):
-        return ffi.new("TPMS_ALGORITHM_DESCRIPTION *")
+class TPMS_ALGORITHM_DESCRIPTION(TPM_OBJECT):
+    pass
 
 
-class TPMS_ALGORITHM_DETAIL_ECC(object):
-    def __new__(self):
-        return ffi.new("TPMS_ALGORITHM_DETAIL_ECC *")
+class TPMS_ALGORITHM_DETAIL_ECC(TPM_OBJECT):
+    pass
 
 
-class TPMS_ALG_PROPERTY(object):
-    def __new__(self):
-        return ffi.new("TPMS_ALG_PROPERTY *")
+class TPMS_ALG_PROPERTY(TPM_OBJECT):
+    pass
 
 
-class TPMS_ASYM_PARMS(object):
-    def __new__(self):
-        return ffi.new("TPMS_ASYM_PARMS *")
+class TPMS_ASYM_PARMS(TPM_OBJECT):
+    pass
 
 
-class TPMS_ATTEST(object):
-    def __new__(self):
-        return ffi.new("TPMS_ATTEST *")
+class TPMS_ATTEST(TPM_OBJECT):
+    pass
 
 
-class TPMS_AUTH_COMMAND(object):
-    def __new__(self):
-        return ffi.new("TPMS_AUTH_COMMAND *")
+class TPMS_AUTH_COMMAND(TPM_OBJECT):
+    pass
 
 
-class TPMS_AUTH_RESPONSE(object):
-    def __new__(self):
-        return ffi.new("TPMS_AUTH_RESPONSE *")
+class TPMS_AUTH_RESPONSE(TPM_OBJECT):
+    pass
 
 
-class TPMS_CAPABILITY_DATA(object):
-    def __new__(self):
-        return ffi.new("TPMS_CAPABILITY_DATA *")
+class TPMS_CAPABILITY_DATA(TPM_OBJECT):
+    pass
 
 
-class TPMS_CERTIFY_INFO(object):
-    def __new__(self):
-        return ffi.new("TPMS_CERTIFY_INFO *")
+class TPMS_CERTIFY_INFO(TPM_OBJECT):
+    pass
 
 
-class TPMS_CLOCK_INFO(object):
-    def __new__(self):
-        return ffi.new("TPMS_CLOCK_INFO *")
+class TPMS_CLOCK_INFO(TPM_OBJECT):
+    pass
 
 
-class TPMS_COMMAND_AUDIT_INFO(object):
-    def __new__(self):
-        return ffi.new("TPMS_COMMAND_AUDIT_INFO *")
+class TPMS_COMMAND_AUDIT_INFO(TPM_OBJECT):
+    pass
 
 
-class TPMS_CONTEXT(object):
-    def __new__(self):
-        return ffi.new("TPMS_CONTEXT *")
+class TPMS_CONTEXT(TPM_OBJECT):
+    pass
 
 
-class TPMS_CONTEXT_DATA(object):
-    def __new__(self):
-        return ffi.new("TPMS_CONTEXT_DATA *")
+class TPMS_CONTEXT_DATA(TPM_OBJECT):
+    pass
 
 
-class TPMS_CREATION_DATA(object):
-    def __new__(self):
-        return ffi.new("TPMS_CREATION_DATA *")
+class TPMS_CREATION_DATA(TPM_OBJECT):
+    pass
 
 
-class TPMS_CREATION_INFO(object):
-    def __new__(self):
-        return ffi.new("TPMS_CREATION_INFO *")
+class TPMS_CREATION_INFO(TPM_OBJECT):
+    pass
 
 
-class TPMS_ECC_PARMS(object):
-    def __new__(self):
-        return ffi.new("TPMS_ECC_PARMS *")
+class TPMS_ECC_PARMS(TPM_OBJECT):
+    pass
 
 
-class TPMS_ECC_POINT(object):
-    def __new__(self):
-        return ffi.new("TPMS_ECC_POINT *")
+class TPMS_ECC_POINT(TPM_OBJECT):
+    pass
 
 
-class TPMS_EMPTY(object):
-    def __new__(self):
-        return ffi.new("TPMS_EMPTY *")
+class TPMS_EMPTY(TPM_OBJECT):
+    pass
 
 
-class TPMS_ID_OBJECT(object):
-    def __new__(self):
-        return ffi.new("TPMS_ID_OBJECT *")
+class TPMS_ID_OBJECT(TPM_OBJECT):
+    pass
 
 
-class TPMS_KEYEDHASH_PARMS(object):
-    def __new__(self):
-        return ffi.new("TPMS_KEYEDHASH_PARMS *")
+class TPMS_KEYEDHASH_PARMS(TPM_OBJECT):
+    pass
 
 
-class TPMS_NV_CERTIFY_INFO(object):
-    def __new__(self):
-        return ffi.new("TPMS_NV_CERTIFY_INFO *")
+class TPMS_NV_CERTIFY_INFO(TPM_OBJECT):
+    pass
 
 
-class TPMS_NV_PIN_COUNTER_PARAMETERS(object):
-    def __new__(self):
-        return ffi.new("TPMS_NV_PIN_COUNTER_PARAMETERS *")
+class TPMS_NV_PIN_COUNTER_PARAMETERS(TPM_OBJECT):
+    pass
 
 
-class TPMS_NV_PUBLIC(object):
-    def __new__(self):
-        return ffi.new("TPMS_NV_PUBLIC *")
+class TPMS_NV_PUBLIC(TPM_OBJECT):
+    pass
 
 
-class TPMS_PCR_SELECT(object):
-    def __new__(self):
-        return ffi.new("TPMS_PCR_SELECT *")
+class TPMS_PCR_SELECT(TPM_OBJECT):
+    pass
 
 
-class TPMS_PCR_SELECTION(object):
-    def __new__(self, halg=0, pcrs=None):
-        x = ffi.new("TPMS_PCR_SELECTION *")
+class TPMS_PCR_SELECTION(TPM_OBJECT):
+    def __init__(self, halg=0, pcrs=None, _cdata=None):
+        super().__init__(_cdata=_cdata)
 
         if not halg and not pcrs:
-            return x
+            return
 
         if bool(halg) != bool(pcrs):
             raise RuntimeError("halg and pcrs MUST be specified")
 
-        x.hash = halg
-        x.sizeofSelect = 3
+        self._cdata.hash = halg
+        self._cdata.sizeofSelect = 3
 
         if pcrs == "all" or (len(pcrs) == 1 and pcrs[0] == "all"):
-            x.pcrSelect[0] = 0xFF
-            x.pcrSelect[1] = 0xFF
-            x.pcrSelect[2] = 0xFF
-            return x
+            self._cdata.pcrSelect[0] = 0xFF
+            self._cdata.pcrSelect[1] = 0xFF
+            self._cdata.pcrSelect[2] = 0xFF
+            return
 
         for pcr in pcrs:
             if pcr < 0 or pcr > lib.TPM2_PCR_LAST:
                 raise RuntimeError(f"PCR Index out of range, got {pcr}")
-            x.pcrSelect[pcr // 8] |= 1 << (pcr % 8)
-
-        return x
+            self._cdata.pcrSelect[pcr // 8] |= 1 << (pcr % 8)
 
     @staticmethod
     def parse(selection):
@@ -1169,71 +1223,77 @@ class TPMS_PCR_SELECTION(object):
         return TPMS_PCR_SELECTION(halg=halg, pcrs=pcrs)
 
 
-class TPMS_QUOTE_INFO(object):
-    def __new__(self):
-        return ffi.new("TPMS_QUOTE_INFO *")
+class TPMS_QUOTE_INFO(TPM_OBJECT):
+    pass
 
 
-class TPMS_RSA_PARMS(object):
-    def __new__(self):
-        return ffi.new("TPMS_RSA_PARMS *")
+class TPMS_RSA_PARMS(TPM_OBJECT):
+    pass
 
 
-class TPMS_SCHEME_ECDAA(object):
-    def __new__(self):
-        return ffi.new("TPMS_SCHEME_ECDAA *")
+class TPMS_SCHEME_ECDAA(TPM_OBJECT):
+    pass
 
 
-class TPMS_SCHEME_HASH(object):
-    def __new__(self):
-        return ffi.new("TPMS_SCHEME_HASH *")
+class TPMS_SCHEME_HASH(TPM_OBJECT):
+    pass
 
 
-class TPMS_SCHEME_XOR(object):
-    def __new__(self):
-        return ffi.new("TPMS_SCHEME_XOR *")
+class TPMS_SCHEME_XOR(TPM_OBJECT):
+    pass
 
 
-class TPMS_SENSITIVE_CREATE(object):
-    def __new__(self):
-        return ffi.new("TPMS_SENSITIVE_CREATE *")
+class TPMS_SENSITIVE_CREATE(TPM_OBJECT):
+    pass
 
 
-class TPMS_SESSION_AUDIT_INFO(object):
-    def __new__(self):
-        return ffi.new("TPMS_SESSION_AUDIT_INFO *")
+class TPMS_SESSION_AUDIT_INFO(TPM_OBJECT):
+    pass
 
 
-class TPMS_SIGNATURE_ECC(object):
-    def __new__(self):
-        return ffi.new("TPMS_SIGNATURE_ECC *")
+class TPMS_SIGNATURE_ECC(TPM_OBJECT):
+    pass
 
 
-class TPMS_SIGNATURE_RSA(object):
-    def __new__(self):
-        return ffi.new("TPMS_SIGNATURE_RSA *")
+class TPMS_SIGNATURE_RSA(TPM_OBJECT):
+    pass
 
 
-class TPMS_SYMCIPHER_PARMS(object):
-    def __new__(self):
-        return ffi.new("TPMS_SYMCIPHER_PARMS *")
+class TPMS_SYMCIPHER_PARMS(TPM_OBJECT):
+    pass
 
 
-class TPMS_TAGGED_PCR_SELECT(object):
-    def __new__(self):
-        return ffi.new("TPMS_TAGGED_PCR_SELECT *")
+class TPMS_TAGGED_PCR_SELECT(TPM_OBJECT):
+    pass
 
 
-class TPMS_TAGGED_PROPERTY(object):
-    def __new__(self):
-        return ffi.new("TPMS_TAGGED_PROPERTY *")
+class TPMS_TAGGED_PROPERTY(TPM_OBJECT):
+    pass
 
 
-class TPMS_TIME_ATTEST_INFO(object):
-    def __new__(self):
-        return ffi.new("TPMS_TIME_ATTEST_INFO *")
+class TPMS_TIME_ATTEST_INFO(TPM_OBJECT):
+    pass
 
 
-class TPMS_TIME_INFO(object):
-    def __new__(self):
-        return ffi.new("TPMS_TIME_INFO *")
+class TPMS_TIME_INFO(TPM_OBJECT):
+    pass
+
+
+class TPMT_ECC_SCHEME(TPM_OBJECT):
+    pass
+
+
+class TPMU_ASYM_SCHEME(TPM_OBJECT):
+    pass
+
+
+class TPMT_SYM_DEF_OBJECT(TPM_OBJECT):
+    pass
+
+
+class TPMT_KDF_SCHEME(TPM_OBJECT):
+    pass
+
+
+class TPMT_TK_CREATION(TPM_OBJECT):
+    pass

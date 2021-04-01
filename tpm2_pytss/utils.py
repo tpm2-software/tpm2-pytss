@@ -49,11 +49,6 @@ def TPM2B_pack(x, t="DIGEST"):
     return r
 
 
-def TPML_unpack(x, field_name):
-
-    return [TPM2B_unpack(getattr(x, field_name)[i]) for i in range(0, x.count)]
-
-
 def CLASS_INT_ATTRS_from_string(cls, str_value):
     """
     Given a class, lookup int attributes by name and return that attribute value.
