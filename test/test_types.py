@@ -8,7 +8,7 @@ import unittest
 from tpm2_pytss import *
 
 
-class ExceptionTest(unittest.TestCase):
+class TypesTest(unittest.TestCase):
     def test_TPML_PCR_SELECTION_parse_2_banks_all_friendly(self):
         pcr_sels = TPML_PCR_SELECTION.parse("sha1:3,4+sha256:all")
 
