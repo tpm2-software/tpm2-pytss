@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>tpm2_pytss.ESAPI &#8212; tpm2-pytss 0.1.dev1+g444a053 documentation</title>
+    <title>tpm2_pytss.ESAPI &#8212; tpm2-pytss 0.1.dev1+g82f228d documentation</title>
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -39,7 +39,7 @@
 
 <span class="kn">from</span> <span class="nn">.types</span> <span class="kn">import</span> <span class="o">*</span>
 
-<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">_chkrc</span><span class="p">,</span> <span class="n">TPM2B_pack</span><span class="p">,</span> <span class="n">TPM2B_unpack</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">_chkrc</span><span class="p">,</span> <span class="n">TPM2B_pack</span>
 
 
 <div class="viewcode-block" id="ESAPI"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI">[docs]</a><span class="k">class</span> <span class="nc">ESAPI</span><span class="p">:</span>
@@ -1238,13 +1238,18 @@
                 <span class="n">session1</span><span class="p">,</span>
                 <span class="n">session2</span><span class="p">,</span>
                 <span class="n">session3</span><span class="p">,</span>
-                <span class="n">pcrSelectionIn</span><span class="p">,</span>
+                <span class="n">pcrSelectionIn</span><span class="o">.</span><span class="n">_cdata</span><span class="p">,</span>
                 <span class="n">pcrUpdateCounter</span><span class="p">,</span>
                 <span class="n">pcrSelectionOut</span><span class="p">,</span>
                 <span class="n">pcrValues</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">pcrUpdateCounter</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pcrSelectionOut</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">pcrValues</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
+
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">pcrUpdateCounter</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">TPML_PCR_SELECTION</span><span class="p">(</span><span class="n">_cdata</span><span class="o">=</span><span class="n">pcrSelectionOut</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+            <span class="n">TPML_DIGEST</span><span class="p">(</span><span class="n">_cdata</span><span class="o">=</span><span class="n">pcrValues</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+        <span class="p">)</span></div>
 
 <div class="viewcode-block" id="ESAPI.PCR_Allocate"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PCR_Allocate">[docs]</a>    <span class="k">def</span> <span class="nf">PCR_Allocate</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -1746,10 +1751,10 @@
                 <span class="n">session1</span><span class="p">,</span>
                 <span class="n">session2</span><span class="p">,</span>
                 <span class="n">session3</span><span class="p">,</span>
-                <span class="n">inSensitive</span><span class="p">,</span>
-                <span class="n">inPublic</span><span class="p">,</span>
-                <span class="n">outsideInfo</span><span class="p">,</span>
-                <span class="n">creationPCR</span><span class="p">,</span>
+                <span class="n">inSensitive</span><span class="o">.</span><span class="n">_cdata</span><span class="p">,</span>
+                <span class="n">inPublic</span><span class="o">.</span><span class="n">_cdata</span><span class="p">,</span>
+                <span class="n">outsideInfo</span><span class="o">.</span><span class="n">_cdata</span><span class="p">,</span>
+                <span class="n">creationPCR</span><span class="o">.</span><span class="n">_cdata</span><span class="p">,</span>
                 <span class="n">objectHandle</span><span class="p">,</span>
                 <span class="n">outPublic</span><span class="p">,</span>
                 <span class="n">creationData</span><span class="p">,</span>
@@ -1757,13 +1762,13 @@
                 <span class="n">creationTicket</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)</span>
-        <span class="n">objectHandleObject</span> <span class="o">=</span> <span class="n">objectHandle</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
         <span class="k">return</span> <span class="p">(</span>
-            <span class="n">objectHandleObject</span><span class="p">,</span>
-            <span class="n">outPublic</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-            <span class="n">creationData</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-            <span class="n">creationHash</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-            <span class="n">creationTicket</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">ESYS_TR</span><span class="p">(</span><span class="n">objectHandle</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+            <span class="n">TPM2B_PUBLIC</span><span class="p">(</span><span class="n">_cdata</span><span class="o">=</span><span class="n">outPublic</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+            <span class="n">TPM2B_CREATION_DATA</span><span class="p">(</span><span class="n">_cdata</span><span class="o">=</span><span class="n">creationData</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+            <span class="n">TPM2B_DIGEST</span><span class="p">(</span><span class="n">_cdata</span><span class="o">=</span><span class="n">creationHash</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+            <span class="n">TPMT_TK_CREATION</span><span class="p">(</span><span class="n">_cdata</span><span class="o">=</span><span class="n">creationTicket</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="ESAPI.HierarchyControl"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.HierarchyControl">[docs]</a>    <span class="k">def</span> <span class="nf">HierarchyControl</span><span class="p">(</span>
@@ -2465,7 +2470,7 @@
       &copy;2019 - 2021, Intel.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.2</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.5.3</a>
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
