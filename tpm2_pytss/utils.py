@@ -49,7 +49,7 @@ def TPM2B_pack(x, t="DIGEST"):
     return r
 
 
-def CLASS_INT_ATTRS_from_string(cls, str_value):
+def CLASS_INT_ATTRS_from_string(cls, str_value, fixup_map=None):
     """
     Given a class, lookup int attributes by name and return that attribute value.
     :param cls: The class to search.
@@ -57,6 +57,12 @@ def CLASS_INT_ATTRS_from_string(cls, str_value):
     """
 
     friendly = {
-        key: value for (key, value) in vars(cls).items() if isinstance(value, int)
+        key.upper(): value
+        for (key, value) in vars(cls).items()
+        if isinstance(value, int)
     }
+
+    if fixup_map is not None and str_value.upper() in fixup_map:
+        str_value = fixup_map[str_value.upper()]
+
     return friendly[str_value.upper()]
