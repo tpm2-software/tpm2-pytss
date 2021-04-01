@@ -279,6 +279,241 @@ class TypesTest(unittest.TestCase):
         ):
             TPM2B_DIGEST(_cdata=ffi.new("uint8_t *"))
 
+    def test_TPM2_ALG_parse(self):
+        self.assertEqual(TPM2_ALG.parse("sha"), TPM2_ALG.SHA)
+        self.assertEqual(TPM2_ALG.parse("sha1"), TPM2_ALG.SHA1)
+        self.assertEqual(TPM2_ALG.parse("sha256"), TPM2_ALG.SHA256)
+        self.assertEqual(TPM2_ALG.parse("ShA384"), TPM2_ALG.SHA384)
+        self.assertEqual(TPM2_ALG.parse("SHA512"), TPM2_ALG.SHA512)
+
+        self.assertEqual(TPM2_ALG.parse("mgf1"), TPM2_ALG.MGF1)
+        self.assertEqual(TPM2_ALG.parse("RSaes"), TPM2_ALG.RSAES)
+        self.assertEqual(TPM2_ALG.parse("ECDH"), TPM2_ALG.ECDH)
+        self.assertEqual(TPM2_ALG.parse("SHA3_512"), TPM2_ALG.SHA3_512)
+
+        with self.assertRaises(RuntimeError):
+            TPM2_ALG.parse("")
+
+        with self.assertRaises(RuntimeError):
+            TPM2_ALG.parse(None)
+
+        with self.assertRaises(RuntimeError):
+            TPM2_ALG.parse("foo")
+
+    def test_ESYS_TR(self):
+        self.assertEqual(ESYS_TR.parse("PCR0"), ESYS_TR.PCR0)
+        self.assertEqual(ESYS_TR.parse("NONE"), ESYS_TR.NONE)
+        self.assertEqual(ESYS_TR.parse("LoCkout"), ESYS_TR.LOCKOUT)
+        self.assertEqual(ESYS_TR.parse("owner"), ESYS_TR.OWNER)
+        self.assertEqual(ESYS_TR.parse("NuLL"), ESYS_TR.NULL)
+
+        with self.assertRaises(RuntimeError):
+            ESYS_TR.parse("")
+
+        with self.assertRaises(RuntimeError):
+            ESYS_TR.parse(None)
+
+        with self.assertRaises(RuntimeError):
+            ESYS_TR.parse("foo"), TPM2_ALG.SHA512
+
+    def test_TPM2_ECC(self):
+        self.assertEqual(TPM2_ECC.parse("NONE"), TPM2_ECC.NONE)
+        self.assertEqual(TPM2_ECC.parse("nist_p192"), TPM2_ECC.NIST_P192)
+        self.assertEqual(TPM2_ECC.parse("BN_P256"), TPM2_ECC.BN_P256)
+        self.assertEqual(TPM2_ECC.parse("sm2_P256"), TPM2_ECC.SM2_P256)
+
+        with self.assertRaises(RuntimeError):
+            TPM2_ECC.parse("")
+
+        with self.assertRaises(RuntimeError):
+            TPM2_ECC.parse(None)
+
+        with self.assertRaises(RuntimeError):
+            TPM2_ECC.parse("foo")
+
+    def test_TPM2_CC(self):
+        self.assertEqual(TPM2_CC.parse("NV_Increment"), TPM2_CC.NV_Increment)
+        self.assertEqual(TPM2_CC.parse("PCR_Reset"), TPM2_CC.PCR_Reset)
+        self.assertEqual(TPM2_CC.parse("Certify"), TPM2_CC.Certify)
+        self.assertEqual(TPM2_CC.parse("UnSEAL"), TPM2_CC.Unseal)
+
+        with self.assertRaises(RuntimeError):
+            TPM2_CC.parse("")
+
+        with self.assertRaises(RuntimeError):
+            TPM2_CC.parse(None)
+
+        with self.assertRaises(RuntimeError):
+            TPM2_CC.parse("foo")
+
+    def test_TPMA_OBJECT(self):
+        self.assertEqual(TPMA_OBJECT.parse("FIXEDTPM"), TPMA_OBJECT.FIXEDTPM)
+        self.assertEqual(
+            TPMA_OBJECT.parse("ADMINwithPOLICY"), TPMA_OBJECT.ADMINWITHPOLICY
+        )
+        self.assertEqual(TPMA_OBJECT.parse("SIGN_ENCRYPT"), TPMA_OBJECT.SIGN_ENCRYPT)
+
+        self.assertEqual(TPMA_OBJECT.parse("SIGN"), TPMA_OBJECT.SIGN_ENCRYPT)
+        self.assertEqual(TPMA_OBJECT.parse("ENCRYPT"), TPMA_OBJECT.SIGN_ENCRYPT)
+
+        self.assertEqual(TPMA_OBJECT.parse("sign"), TPMA_OBJECT.SIGN_ENCRYPT)
+        self.assertEqual(TPMA_OBJECT.parse("encrypt"), TPMA_OBJECT.SIGN_ENCRYPT)
+
+        self.assertEqual(TPMA_OBJECT.parse("siGN"), TPMA_OBJECT.SIGN_ENCRYPT)
+        self.assertEqual(TPMA_OBJECT.parse("enCRYpt"), TPMA_OBJECT.SIGN_ENCRYPT)
+
+        self.assertEqual(
+            TPMA_OBJECT.parse("sign_encrypt|ADMINWITHPOLICY|fixedTPM"),
+            (
+                TPMA_OBJECT.SIGN_ENCRYPT
+                | TPMA_OBJECT.FIXEDTPM
+                | TPMA_OBJECT.ADMINWITHPOLICY
+            ),
+        )
+
+        with self.assertRaises(RuntimeError):
+            TPMA_OBJECT.parse("")
+
+        with self.assertRaises(RuntimeError):
+            TPMA_OBJECT.parse(None)
+
+        with self.assertRaises(RuntimeError):
+            TPMA_OBJECT.parse("foo")
+
+    def test_TPMA_NV(self):
+        self.assertEqual(TPMA_NV.parse("ppwrite"), TPMA_NV.PPWRITE)
+        self.assertEqual(TPMA_NV.parse("ORDerlY"), TPMA_NV.ORDERLY)
+        self.assertEqual(TPMA_NV.parse("NO_DA"), TPMA_NV.NO_DA)
+
+        self.assertEqual(
+            TPMA_NV.parse("ppwrite|orderly|NO_DA"),
+            (TPMA_NV.PPWRITE | TPMA_NV.ORDERLY | TPMA_NV.NO_DA),
+        )
+
+        self.assertEqual(TPMA_NV.parse("noda"), TPMA_NV.NO_DA)
+        self.assertEqual(TPMA_NV.parse("NodA"), TPMA_NV.NO_DA)
+        self.assertEqual(TPMA_NV.parse("NODA"), TPMA_NV.NO_DA)
+
+        with self.assertRaises(RuntimeError):
+            TPMA_NV.parse("")
+
+        with self.assertRaises(RuntimeError):
+            TPMA_NV.parse(None)
+
+        with self.assertRaises(RuntimeError):
+            TPMA_NV.parse("foo")
+
+    def test_TPM2_SPEC(self):
+        self.assertEqual(TPM2_SPEC.parse("Family"), TPM2_SPEC.FAMILY)
+        self.assertEqual(TPM2_SPEC.parse("Level"), TPM2_SPEC.LEVEL)
+        self.assertEqual(TPM2_SPEC.parse("DAY_of_YEAR"), TPM2_SPEC.DAY_OF_YEAR)
+
+        with self.assertRaises(RuntimeError):
+            TPM2_SPEC.parse("")
+
+        with self.assertRaises(RuntimeError):
+            TPM2_SPEC.parse(None)
+
+        with self.assertRaises(RuntimeError):
+            TPM2_SPEC.parse("foo")
+
+    def test_TPM2_GENERATED_VALUE(self):
+        self.assertEqual(
+            TPM2_GENERATED_VALUE.parse("value"), TPM2_GENERATED_VALUE.VALUE
+        )
+
+        with self.assertRaises(RuntimeError):
+            TPM2_GENERATED_VALUE.parse("")
+
+        with self.assertRaises(RuntimeError):
+            TPM2_GENERATED_VALUE.parse(None)
+
+        with self.assertRaises(RuntimeError):
+            TPM2_GENERATED_VALUE.parse("foo")
+
+    def test_TPM2_RC(self):
+        self.assertEqual(TPM2_RC.parse("Success"), TPM2_RC.SUCCESS)
+        self.assertEqual(TPM2_RC.parse("HMAC"), TPM2_RC.HMAC)
+        self.assertEqual(TPM2_RC.parse("NO_RESULT"), TPM2_RC.NO_RESULT)
+
+        with self.assertRaises(RuntimeError):
+            TPM2_RC.parse("")
+
+        with self.assertRaises(RuntimeError):
+            TPM2_RC.parse(None)
+
+        with self.assertRaises(RuntimeError):
+            TPM2_RC.parse("foo")
+
+    def test_TPM2_EO(self):
+        self.assertEqual(TPM2_EO.parse("EQ"), TPM2_EO.EQ)
+        self.assertEqual(TPM2_EO.parse("unsigned_GT"), TPM2_EO.UNSIGNED_GT)
+        self.assertEqual(TPM2_EO.parse("BITCLEAR"), TPM2_EO.BITCLEAR)
+
+        with self.assertRaises(RuntimeError):
+            TPM2_EO.parse("")
+
+        with self.assertRaises(RuntimeError):
+            TPM2_EO.parse(None)
+
+        with self.assertRaises(RuntimeError):
+            TPM2_EO.parse("foo")
+
+    def test_TPM2_ST(self):
+        self.assertEqual(TPM2_ST.parse("null"), TPM2_ST.NULL)
+        self.assertEqual(TPM2_ST.parse("AUTH_SECRET"), TPM2_ST.AUTH_SECRET)
+        self.assertEqual(TPM2_ST.parse("fu_manifest"), TPM2_ST.FU_MANIFEST)
+
+        with self.assertRaises(RuntimeError):
+            TPM2_ST.parse("")
+
+        with self.assertRaises(RuntimeError):
+            TPM2_ST.parse(None)
+
+        with self.assertRaises(RuntimeError):
+            TPM2_ST.parse("foo")
+
+    def test_TPM2_SU(self):
+        self.assertEqual(TPM2_SU.parse("clear"), TPM2_SU.CLEAR)
+        self.assertEqual(TPM2_SU.parse("State"), TPM2_SU.STATE)
+
+        with self.assertRaises(RuntimeError):
+            TPM2_SU.parse("")
+
+        with self.assertRaises(RuntimeError):
+            TPM2_SU.parse(None)
+
+        with self.assertRaises(RuntimeError):
+            TPM2_SU.parse("foo")
+
+    def test_TPM2_SE(self):
+        self.assertEqual(TPM2_SE.parse("hmac"), TPM2_SE.HMAC)
+        self.assertEqual(TPM2_SE.parse("TRiaL"), TPM2_SE.TRIAL)
+        self.assertEqual(TPM2_SE.parse("POLICY"), TPM2_SE.POLICY)
+
+        with self.assertRaises(RuntimeError):
+            TPM2_SE.parse("")
+
+        with self.assertRaises(RuntimeError):
+            TPM2_SE.parse(None)
+
+        with self.assertRaises(RuntimeError):
+            TPM2_SE.parse("foo")
+
+    def test_TPM2_PT(self):
+        self.assertEqual(TPM2_PT.parse("none"), TPM2_PT.NONE)
+        self.assertEqual(TPM2_PT.parse("GrouP"), TPM2_PT.GROUP)
+        self.assertEqual(TPM2_PT.parse("FIXED"), TPM2_PT.FIXED)
+
+        with self.assertRaises(RuntimeError):
+            TPM2_PT.parse("")
+
+        with self.assertRaises(RuntimeError):
+            TPM2_PT.parse(None)
+
+        with self.assertRaises(RuntimeError):
+            TPM2_PT.parse("foo")
+
 
 if __name__ == "__main__":
     unittest.main()

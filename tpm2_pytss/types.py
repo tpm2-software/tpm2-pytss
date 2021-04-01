@@ -7,7 +7,55 @@ from ._libtpm2_pytss import ffi, lib
 from tpm2_pytss.utils import CLASS_INT_ATTRS_from_string, TPM2B_unpack
 
 
-class ESYS_TR(int):
+class TPM_FRIENDLY_INT(int):
+    _FIXUP_MAP = {}
+
+    @classmethod
+    def parse(cls, value):
+        # If it's a string initializer value, see if it matches anything in the list
+        if isinstance(value, str):
+            try:
+                value = CLASS_INT_ATTRS_from_string(cls, value)
+            except KeyError:
+                raise RuntimeError(
+                    f'Could not convert friendly name to value, got: "{value}"'
+                )
+
+        if not isinstance(value, int):
+            raise RuntimeError(f'Expected int object, got: "{type(value)}"')
+
+        return value
+
+
+class TPM_FRIENDLY_INTLIST(TPM_FRIENDLY_INT):
+    @classmethod
+    def parse(cls, value):
+
+        intvalue = 0
+
+        if value is None:
+            raise RuntimeError(f'Expected int object, got: "{type(value)}"')
+
+        if len(value) == 0:
+            raise RuntimeError(
+                f'Could not convert friendly name to value, got: "{value}"'
+            )
+
+        # If it's a string initializer value, see if it matches anything in the list
+        if isinstance(value, str):
+            hunks = value.split("|") if "|" in value else [value]
+            for k in hunks:
+                try:
+                    intvalue |= CLASS_INT_ATTRS_from_string(cls, k, cls._FIXUP_MAP)
+                except KeyError:
+                    raise RuntimeError(
+                        f'Could not convert friendly name to value, got: "{k}"'
+                    )
+
+        return super().parse(intvalue)
+
+
+class ESYS_TR(TPM_FRIENDLY_INT):
     NONE = lib.ESYS_TR_NONE
     PASSWORD = lib.ESYS_TR_PASSWORD
     PCR0 = lib.ESYS_TR_PCR0
@@ -56,7 +104,7 @@ class ESYS_TR(int):
     RH_PLATFORM_NV = lib.ESYS_TR_RH_PLATFORM_NV
 
 
-class TPM2_ALG(int):
+class TPM2_ALG(TPM_FRIENDLY_INT):
     ERROR = lib.TPM2_ALG_ERROR
     RSA = lib.TPM2_ALG_RSA
     SHA = lib.TPM2_ALG_SHA
@@ -99,20 +147,11 @@ class TPM2_ALG(int):
     FIRST = lib.TPM2_ALG_FIRST
     LAST = lib.TPM2_ALG_LAST
 
-    # int's are not mutable, so do it in __new__ over __init__
-    def __new__(cls, value=ERROR):
-
-        # If it's a string initializer value, see if it matches anything in the list
-        if isinstance(value, str):
-            value = CLASS_INT_ATTRS_from_string(cls, value)
-
-        return int.__new__(cls, value)
-
 
 TPM2_ALG_ID = TPM2_ALG
 
 
-class TPM2_ECC(int):
+class TPM2_ECC(TPM_FRIENDLY_INT):
     NONE = lib.TPM2_ECC_NONE
     NIST_P192 = lib.TPM2_ECC_NIST_P192
     NIST_P224 = lib.TPM2_ECC_NIST_P224
@@ -127,7 +166,7 @@ class TPM2_ECC(int):
 TPM2_ECC_CURVE = TPM2_ECC
 
 
-class TPM2_CC(int):
+class TPM2_CC(TPM_FRIENDLY_INT):
     NV_UndefineSpaceSpecial = lib.TPM2_CC_NV_UndefineSpaceSpecial
     FIRST = lib.TPM2_CC_FIRST
     EvictControl = lib.TPM2_CC_EvictControl
@@ -248,7 +287,7 @@ class TPM2_CC(int):
     Vendor_TCG_Test = lib.TPM2_CC_Vendor_TCG_Test
 
 
-class TPM2_SPEC(int):
+class TPM2_SPEC(TPM_FRIENDLY_INT):
     FAMILY = lib.TPM2_SPEC_FAMILY
     LEVEL = lib.TPM2_SPEC_LEVEL
     VERSION = lib.TPM2_SPEC_VERSION
@@ -256,11 +295,11 @@ class TPM2_SPEC(int):
     DAY_OF_YEAR = lib.TPM2_SPEC_DAY_OF_YEAR
 
 
-class TPM2_GENERATED_VALUE(int):
+class TPM2_GENERATED_VALUE(TPM_FRIENDLY_INT):
     VALUE = lib.TPM2_GENERATED_VALUE
 
 
-class TPM2_RC(int):
+class TPM2_RC(TPM_FRIENDLY_INT):
     SUCCESS = lib.TPM2_RC_SUCCESS
     BAD_TAG = lib.TPM2_RC_BAD_TAG
     VER1 = lib.TPM2_RC_VER1
@@ -383,7 +422,7 @@ class TPM2_RC(int):
     N_MASK = lib.TPM2_RC_N_MASK
 
 
-class TPM2_EO(int):
+class TPM2_EO(TPM_FRIENDLY_INT):
     EQ = lib.TPM2_EO_EQ
     NEQ = lib.TPM2_EO_NEQ
     SIGNED_GT = lib.TPM2_EO_SIGNED_GT
@@ -398,7 +437,7 @@ class TPM2_EO(int):
     BITCLEAR = lib.TPM2_EO_BITCLEAR
 
 
-class TPM2_ST(int):
+class TPM2_ST(TPM_FRIENDLY_INT):
     RSP_COMMAND = lib.TPM2_ST_RSP_COMMAND
     NULL = lib.TPM2_ST_NULL
     NO_SESSIONS = lib.TPM2_ST_NO_SESSIONS
@@ -418,18 +457,18 @@ class TPM2_ST(int):
     FU_MANIFEST = lib.TPM2_ST_FU_MANIFEST
 
 
-class TPM2_SU(int):
+class TPM2_SU(TPM_FRIENDLY_INT):
     CLEAR = lib.TPM2_SU_CLEAR
     STATE = lib.TPM2_SU_STATE
 
 
-class TPM2_SE(int):
+class TPM2_SE(TPM_FRIENDLY_INT):
     HMAC = lib.TPM2_SE_HMAC
     POLICY = lib.TPM2_SE_POLICY
     TRIAL = lib.TPM2_SE_TRIAL
 
 
-class TPM2_CAP(int):
+class TPM2_CAP(TPM_FRIENDLY_INT):
     FIRST = lib.TPM2_CAP_FIRST
     ALGS = lib.TPM2_CAP_ALGS
     HANDLES = lib.TPM2_CAP_HANDLES
@@ -444,7 +483,7 @@ class TPM2_CAP(int):
     VENDOR_PROPERTY = lib.TPM2_CAP_VENDOR_PROPERTY
 
 
-class TPM2_PT(int):
+class TPM2_PT(TPM_FRIENDLY_INT):
     NONE = lib.TPM2_PT_NONE
     GROUP = lib.TPM2_PT_GROUP
     FIXED = lib.TPM2_PT_FIXED
@@ -519,7 +558,7 @@ class TPM2_PT(int):
 #    AUDIT_COUNTER_1 = lib.TPM2_PT_AUDIT_COUNTER_1
 
 
-class TPM2_PT_PCR(int):
+class TPM2_PT_PCR(TPM_FRIENDLY_INT):
     FIRST = lib.TPM2_PT_TPM2_PCR_FIRST
     SAVE = lib.TPM2_PT_PCR_SAVE
     EXTEND_L0 = lib.TPM2_PT_PCR_EXTEND_L0
@@ -539,7 +578,7 @@ class TPM2_PT_PCR(int):
     LAST = lib.TPM2_PT_TPM2_PCR_LAST
 
 
-class TPM2_PS(int):
+class TPM2_PS(TPM_FRIENDLY_INT):
     MAIN = lib.TPM2_PS_MAIN
     PC = lib.TPM2_PS_PC
     PDA = lib.TPM2_PS_PDA
@@ -558,7 +597,7 @@ class TPM2_PS(int):
     TC = lib.TPM2_PS_TC
 
 
-class TPM2_HT(int):
+class TPM2_HT(TPM_FRIENDLY_INT):
     PCR = lib.TPM2_HT_PCR
     NV_INDEX = lib.TPM2_HT_NV_INDEX
     HMAC_SESSION = lib.TPM2_HT_HMAC_SESSION
@@ -570,7 +609,7 @@ class TPM2_HT(int):
     PERSISTENT = lib.TPM2_HT_PERSISTENT
 
 
-class TPMA_SESSION(int):
+class TPMA_SESSION(TPM_FRIENDLY_INT):
     CONTINUESESSION = lib.TPMA_SESSION_CONTINUESESSION
     AUDITEXCLUSIVE = lib.TPMA_SESSION_AUDITEXCLUSIVE
     AUDITRESET = lib.TPMA_SESSION_AUDITRESET
@@ -579,7 +618,7 @@ class TPMA_SESSION(int):
     AUDIT = lib.TPMA_SESSION_AUDIT
 
 
-class TPMA_LOCALITY(int):
+class TPMA_LOCALITY(TPM_FRIENDLY_INT):
     ZERO = lib.TPMA_LOCALITY_TPM2_LOC_ZERO
     ONE = lib.TPMA_LOCALITY_TPM2_LOC_ONE
     TWO = lib.TPMA_LOCALITY_TPM2_LOC_TWO
@@ -589,7 +628,7 @@ class TPMA_LOCALITY(int):
     EXTENDED_SHIFT = lib.TPMA_LOCALITY_EXTENDED_SHIFT
 
 
-class TPM2_NT(int):
+class TPM2_NT(TPM_FRIENDLY_INT):
     ORDINARY = lib.TPM2_NT_ORDINARY
     COUNTER = lib.TPM2_NT_COUNTER
     BITS = lib.TPM2_NT_BITS
@@ -598,7 +637,7 @@ class TPM2_NT(int):
     PIN_PASS = lib.TPM2_NT_PIN_PASS
 
 
-class TPM2_HR(int):
+class TPM2_HR(TPM_FRIENDLY_INT):
     HANDLE_MASK = lib.TPM2_HR_HANDLE_MASK
     RANGE_MASK = lib.TPM2_HR_RANGE_MASK
     SHIFT = lib.TPM2_HR_SHIFT
@@ -611,7 +650,7 @@ class TPM2_HR(int):
     PERMANENT = lib.TPM2_HR_PERMANENT
 
 
-class TPM2_HC(int):
+class TPM2_HC(TPM_FRIENDLY_INT):
     HR_HANDLE_MASK = lib.TPM2_HR_HANDLE_MASK
     HR_RANGE_MASK = lib.TPM2_HR_RANGE_MASK
     HR_SHIFT = lib.TPM2_HR_SHIFT
@@ -643,7 +682,7 @@ class TPM2_HC(int):
     PERMANENT_LAST = lib.TPM2_PERMANENT_LAST
 
 
-class TPM2_CLOCK(int):
+class TPM2_CLOCK(TPM_FRIENDLY_INT):
     COARSE_SLOWER = lib.TPM2_CLOCK_COARSE_SLOWER
     MEDIUM_SLOWER = lib.TPM2_CLOCK_MEDIUM_SLOWER
     FINE_SLOWER = lib.TPM2_CLOCK_FINE_SLOWER
@@ -656,7 +695,10 @@ class TPM2_CLOCK(int):
 TPM2_CLOCK_ADJUST = TPM2_CLOCK
 
 
-class TPMA_NV(int):
+class TPMA_NV(TPM_FRIENDLY_INTLIST):
+
+    _FIXUP_MAP = {"NODA": "NO_DA"}
+
     PPWRITE = lib.TPMA_NV_PPWRITE
     OWNERWRITE = lib.TPMA_NV_OWNERWRITE
     AUTHWRITE = lib.TPMA_NV_AUTHWRITE
@@ -682,7 +724,7 @@ class TPMA_NV(int):
     READ_STCLEAR = lib.TPMA_NV_READ_STCLEAR
 
 
-class TPMA_CC(int):
+class TPMA_CC(TPM_FRIENDLY_INT):
     COMMANDINDEX_MASK = lib.TPMA_CC_COMMANDINDEX_MASK
     COMMANDINDEX_SHIFT = lib.TPMA_CC_COMMANDINDEX_SHIFT
     NV = lib.TPMA_CC_NV
@@ -696,7 +738,7 @@ class TPMA_CC(int):
     RES_SHIFT = lib.TPMA_CC_RES_SHIFT
 
 
-class TPMA_OBJECT(int):
+class TPMA_OBJECT(TPM_FRIENDLY_INTLIST):
     FIXEDTPM = lib.TPMA_OBJECT_FIXEDTPM
     STCLEAR = lib.TPMA_OBJECT_STCLEAR
     FIXEDPARENT = lib.TPMA_OBJECT_FIXEDPARENT
@@ -709,8 +751,13 @@ class TPMA_OBJECT(int):
     DECRYPT = lib.TPMA_OBJECT_DECRYPT
     SIGN_ENCRYPT = lib.TPMA_OBJECT_SIGN_ENCRYPT
 
+    _FIXUP_MAP = {
+        "SIGN": "SIGN_ENCRYPT",
+        "ENCRYPT": "SIGN_ENCRYPT",
+    }
 
-class TPMA_ALGORITHM(int):
+
+class TPMA_ALGORITHM(TPM_FRIENDLY_INT):
     ASYMMETRIC = lib.TPMA_ALGORITHM_ASYMMETRIC
     SYMMETRIC = lib.TPMA_ALGORITHM_SYMMETRIC
     HASH = lib.TPMA_ALGORITHM_HASH
@@ -720,7 +767,7 @@ class TPMA_ALGORITHM(int):
     METHOD = lib.TPMA_ALGORITHM_METHOD
 
 
-class TPMA_PERMANENT(int):
+class TPMA_PERMANENT(TPM_FRIENDLY_INT):
     OWNERAUTHSET = lib.TPMA_PERMANENT_OWNERAUTHSET
     ENDORSEMENTAUTHSET = lib.TPMA_PERMANENT_ENDORSEMENTAUTHSET
     LOCKOUTAUTHSET = lib.TPMA_PERMANENT_LOCKOUTAUTHSET
@@ -729,7 +776,7 @@ class TPMA_PERMANENT(int):
     TPMGENERATEDEPS = lib.TPMA_PERMANENT_TPMGENERATEDEPS
 
 
-class TPMA_STARTUP(int):
+class TPMA_STARTUP(TPM_FRIENDLY_INT):
     CLEAR_PHENABLE = lib.TPMA_STARTUP_CLEAR_PHENABLE
     CLEAR_SHENABLE = lib.TPMA_STARTUP_CLEAR_SHENABLE
     CLEAR_EHENABLE = lib.TPMA_STARTUP_CLEAR_EHENABLE
@@ -737,7 +784,7 @@ class TPMA_STARTUP(int):
     CLEAR_ORDERLY = lib.TPMA_STARTUP_CLEAR_ORDERLY
 
 
-class TPMA_MEMORY(int):
+class TPMA_MEMORY(TPM_FRIENDLY_INT):
     SHAREDRAM = lib.TPMA_MEMORY_SHAREDRAM
     SHAREDNV = lib.TPMA_MEMORY_SHAREDNV
     OBJECTCOPIEDTORAM = lib.TPMA_MEMORY_OBJECTCOPIEDTORAM
@@ -754,9 +801,11 @@ class TPM_OBJECT(object):
         tipe = ffi.typeof(_cdata)
         if tipe.kind == "pointer":
             tipe = tipe.item
-        if tipe.cname != self.__class__.__name__:
+
+        expected_cname = self._fixup_classname(tipe)
+        if expected_cname != self.__class__.__name__:
             raise TypeError(
-                f"Unexpected _cdata type {tipe.cname}, expected {self.__class__.__name__}"
+                f"Unexpected _cdata type {expected_cname}, expected {self.__class__.__name__}"
             )
         fields = [x[0] for x in tipe.fields]
         for k, v in kwargs.items():
@@ -1221,7 +1270,7 @@ class TPMS_PCR_SELECTION(TPM_OBJECT):
             halg = int(hunks[0], 0)
         except ValueError:
             try:
-                halg = TPM2_ALG(hunks[0])
+                halg = TPM2_ALG.parse(hunks[0])
             except KeyError:
                 raise RuntimeError(
                     f"Expected int or algorithm friendly name, got {hunks[0]}"
