@@ -744,12 +744,23 @@ class TPMA_MEMORY(int):
 
 
 class TPM_OBJECT(object):
-    def __init__(self, _cdata=None):
+    def __init__(self, _cdata=None, **kwargs):
 
         if _cdata is None:
             _cdata = ffi.new(f"{self.__class__.__name__} *")
 
         self._cdata = _cdata
+
+        tipe = ffi.typeof(_cdata)
+        if tipe.kind == "pointer":
+            tipe = tipe.item
+        fields = [x[0] for x in tipe.fields]
+        for k, v in kwargs.items():
+            if k not in fields:
+                raise AttributeError(
+                    f"{self.__class__.__name__} has no field by the name of {k}"
+                )
+            self.__setattr__(k, v)
 
     @staticmethod
     def _fixup_classname(tipe):
