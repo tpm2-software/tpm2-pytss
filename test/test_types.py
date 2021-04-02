@@ -261,6 +261,18 @@ class TypesTest(unittest.TestCase):
             inPublic.publicArea.parameters.eccDetail.curveID, TPM2_ECC.NIST_P256
         )
 
+    def test_TPM_OBJECT_init(self):
+        digest = TPM2B_DIGEST(size=4, buffer=b"test")
+
+        self.assertEqual(digest.size, 4)
+        b = ffi.buffer(digest.buffer, digest.size)
+        self.assertEqual(b, b"test")
+
+        with self.assertRaises(
+            AttributeError, msg="TPM2B_DIGEST has no field by the name of badfield"
+        ):
+            TPM2B_DIGEST(badfield=1)
+
 
 if __name__ == "__main__":
     unittest.main()
