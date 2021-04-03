@@ -754,6 +754,10 @@ class TPM_OBJECT(object):
         tipe = ffi.typeof(_cdata)
         if tipe.kind == "pointer":
             tipe = tipe.item
+        if tipe.cname != self.__class__.__name__:
+            raise TypeError(
+                f"Unexpected _cdata type {tipe.cname}, expected {self.__class__.__name__}"
+            )
         fields = [x[0] for x in tipe.fields]
         for k, v in kwargs.items():
             if k not in fields:
