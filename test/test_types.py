@@ -273,6 +273,12 @@ class TypesTest(unittest.TestCase):
         ):
             TPM2B_DIGEST(badfield=1)
 
+    def test_TPM_OBJECT_init_cdata(self):
+        with self.assertRaises(
+            TypeError, msg="Unexpected _cdata type uint8_t, expected TPM2B_DIGEST"
+        ):
+            TPM2B_DIGEST(_cdata=ffi.new("uint8_t *"))
+
 
 if __name__ == "__main__":
     unittest.main()
