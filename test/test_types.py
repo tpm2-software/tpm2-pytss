@@ -514,6 +514,63 @@ class TypesTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             TPM2_PT.parse("foo")
 
+    def test_TPM2B_PUBLIC_specified_parts(self):
+
+        attrs = (
+            TPMA_OBJECT.USERWITHAUTH
+            | TPMA_OBJECT.SIGN_ENCRYPT
+            | TPMA_OBJECT.RESTRICTED
+            | TPMA_OBJECT.FIXEDTPM
+            | TPMA_OBJECT.FIXEDPARENT
+            | TPMA_OBJECT.SENSITIVEDATAORIGIN
+        )
+
+        templ = TPMT_PUBLIC(
+            type=TPM2_ALG.ECC, nameAlg=TPM2_ALG.parse("SHA1"), objectAttributes=attrs
+        )
+
+        inPublic = TPM2B_PUBLIC(publicArea=templ)
+
+        inPublic.publicArea.parameters.eccDetail.scheme.scheme = TPM2_ALG.ECDSA
+        inPublic.publicArea.parameters.eccDetail.scheme.details.ecdsa.hashAlg = (
+            TPM2_ALG.SHA256
+        )
+        inPublic.publicArea.parameters.eccDetail.symmetric.algorithm = TPM2_ALG.NULL
+        inPublic.publicArea.parameters.eccDetail.kdf.scheme = TPM2_ALG.NULL
+        inPublic.publicArea.parameters.eccDetail.curveID = TPM2_ECC.NIST_P256
+
+        # test getting
+        self.assertEqual(inPublic.publicArea.type, TPM2_ALG.ECC)
+        self.assertEqual(inPublic.publicArea.nameAlg, TPM2_ALG.SHA1)
+        self.assertEqual(
+            inPublic.publicArea.objectAttributes,
+            (
+                TPMA_OBJECT.USERWITHAUTH
+                | TPMA_OBJECT.SIGN_ENCRYPT
+                | TPMA_OBJECT.RESTRICTED
+                | TPMA_OBJECT.FIXEDTPM
+                | TPMA_OBJECT.FIXEDPARENT
+                | TPMA_OBJECT.SENSITIVEDATAORIGIN
+            ),
+        )
+
+        self.assertEqual(
+            inPublic.publicArea.parameters.eccDetail.scheme.scheme, TPM2_ALG.ECDSA
+        )
+        self.assertEqual(
+            inPublic.publicArea.parameters.eccDetail.scheme.details.ecdsa.hashAlg,
+            TPM2_ALG.SHA256,
+        )
+        self.assertEqual(
+            inPublic.publicArea.parameters.eccDetail.symmetric.algorithm, TPM2_ALG.NULL
+        )
+        self.assertEqual(
+            inPublic.publicArea.parameters.eccDetail.kdf.scheme, TPM2_ALG.NULL
+        )
+        self.assertEqual(
+            inPublic.publicArea.parameters.eccDetail.curveID, TPM2_ECC.NIST_P256
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
