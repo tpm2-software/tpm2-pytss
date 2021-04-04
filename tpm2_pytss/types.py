@@ -4,7 +4,7 @@ SPDX-License-Identifier: BSD-3
 
 from ._libtpm2_pytss import ffi, lib
 
-from tpm2_pytss.utils import CLASS_INT_ATTRS_from_string, TPM2B_unpack
+from tpm2_pytss.utils import CLASS_INT_ATTRS_from_string, TPM2B_unpack, _chkrc
 
 
 class TPM_FRIENDLY_INT(int):
@@ -886,6 +886,31 @@ class TPM_OBJECT(object):
             setattr(_cdata, key, value)
         except (AttributeError, TypeError):
             return object.__setattr__(self, key, value)
+
+    def Marshal(self):
+        mfunc = getattr(lib, f"Tss2_MU_{self.__class__.__name__}_Marshal", None)
+        if mfunc is None:
+            raise RuntimeError(
+                f"No marshal function found for {self.__class__.__name__}"
+            )
+        _cdata = self._cdata
+        tipe = ffi.typeof(_cdata)
+        if tipe.kind != "pointer":
+            _cdata = ffi.new(f"{self.__class__.__name__} *", self._cdata)
+        offset = ffi.new("size_t *")
+        buf = ffi.new("uint8_t[4096]")
+        _chkrc(mfunc(_cdata, buf, 4096, offset))
+        return bytes(buf[0 : offset[0]])
+
+    @classmethod
+    def Unmarshal(cls, buf):
+        umfunc = getattr(lib, f"Tss2_MU_{cls.__name__}_Unmarshal", None)
+        if umfunc is None:
+            raise RuntimeError(f"No unmarshal function found for {cls.__name__}")
+        _cdata = ffi.new(f"{cls.__name__} *")
+        offset = ffi.new("size_t *")
+        _chkrc(umfunc(buf, len(buf), offset, _cdata))
+        return cls(_cdata=_cdata), offset[0]
 
 
 class TPML_OBJECT(TPM_OBJECT):
