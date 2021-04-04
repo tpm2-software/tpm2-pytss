@@ -39,7 +39,7 @@ def remove_common_guards(s):
     s = re.sub("(#define [A-Za-z0-9_]+) .*", "\g<1>...", s)
 
     # Restructure structs and untions with ...
-    s = re.sub("\[.*?\]", "[...]", s)
+    s = re.sub("\[.+?\]", "[...]", s)
 
     return s
 
@@ -121,6 +121,37 @@ def prepare_rcdecode(dirpath):
     return remove_common_guards(s)
 
 
+def prepare_mu(dirpath):
+
+    s = pathlib.Path(dirpath, "tss2_mu.h").read_text(encoding="utf-8")
+
+    s = remove_common_guards(s)
+
+    # At least tpm2-tss 3.0.3 have duplicated BYTE (un)marshal functions which break cffi
+    # So removing them is needed until 3.1.x has reached most distributions
+    n = re.findall(
+        "TSS2_RC\s+Tss2_MU_BYTE_Marshal\(.+?\);", s, re.DOTALL | re.MULTILINE
+    )
+    if len(n) > 1:
+        s = re.sub(
+            "TSS2_RC\s+Tss2_MU_BYTE_Marshal\(.+?\);", "", s, 1, re.DOTALL | re.MULTILINE
+        )
+
+    n = re.findall(
+        "TSS2_RC\s+Tss2_MU_BYTE_Unmarshal\(.+?\);", s, re.DOTALL | re.MULTILINE
+    )
+    if len(n) > 1:
+        s = re.sub(
+            "TSS2_RC\s+Tss2_MU_BYTE_Unmarshal\(.+?\);",
+            "",
+            s,
+            1,
+            re.DOTALL | re.MULTILINE,
+        )
+
+    return s
+
+
 def prepare(indir, outfile):
     indir = os.path.join(indir, "tss2")
 
@@ -139,6 +170,8 @@ def prepare(indir, outfile):
     fapi = prepare_fapi(indir)
 
     rcdecode = prepare_rcdecode(indir)
+
+    mu = prepare_mu(indir)
 
     # Write result
     with open(outfile, "w") as f:
@@ -161,6 +194,7 @@ def prepare(indir, outfile):
         f.write(esapi)
         f.write(fapi)
         f.write(rcdecode)
+        f.write(mu)
 
 
 if __name__ == "__main__":
