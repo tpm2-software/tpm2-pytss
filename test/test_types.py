@@ -571,6 +571,21 @@ class TypesTest(unittest.TestCase):
             inPublic.publicArea.parameters.eccDetail.curveID, TPM2_ECC.NIST_P256
         )
 
+    def test_marshal(self):
+        pb = TPM2B_PUBLIC()
+        pb.publicArea.authPolicy.size = 8
+        pb.publicArea.authPolicy.buffer = b"password"
+        b = pb.publicArea.authPolicy.Marshal()
+        self.assertEqual(b, b"\x00\x08password")
+
+    def test_unmarshal(self):
+        buf = b"\x00\x05test1"
+        d, offset = TPM2B_DIGEST.Unmarshal(buf)
+        self.assertEqual(offset, 7)
+        self.assertEqual(d.size, 5)
+        db = ffi.buffer(d.buffer, d.size)
+        self.assertEqual(db, b"test1")
+
 
 if __name__ == "__main__":
     unittest.main()
