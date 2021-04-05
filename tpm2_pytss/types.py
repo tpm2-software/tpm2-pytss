@@ -1383,3 +1383,15 @@ class TPMT_TK_CREATION(TPM_OBJECT):
 
 class TPMT_ASYM_SCHEME(TPM_OBJECT):
     pass
+
+
+class TPMT_RSA_SCHEME(TPM_OBJECT):
+    pass
+
+
+class TPMU_SYM_KEY_BITS(TPM_OBJECT):
+    pass
+
+
+class TPMU_SYM_MODE(TPM_OBJECT):
+    pass
