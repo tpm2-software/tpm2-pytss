@@ -7,6 +7,10 @@ from ._libtpm2_pytss import ffi, lib
 from tpm2_pytss.utils import CLASS_INT_ATTRS_from_string, TPM2B_unpack, _chkrc
 
 
+class ParserAttributeError(Exception):
+    pass
+
+
 class TPM_FRIENDLY_INT(int):
     _FIXUP_MAP = {}
 
@@ -15,7 +19,7 @@ class TPM_FRIENDLY_INT(int):
         # If it's a string initializer value, see if it matches anything in the list
         if isinstance(value, str):
             try:
-                value = CLASS_INT_ATTRS_from_string(cls, value)
+                value = CLASS_INT_ATTRS_from_string(cls, value, cls._FIXUP_MAP)
             except KeyError:
                 raise RuntimeError(
                     f'Could not convert friendly name to value, got: "{value}"'
@@ -161,6 +165,14 @@ class TPM2_ECC(TPM_FRIENDLY_INT):
     BN_P256 = lib.TPM2_ECC_BN_P256
     BN_P638 = lib.TPM2_ECC_BN_P638
     SM2_P256 = lib.TPM2_ECC_SM2_P256
+
+    _FIXUP_MAP = {
+        "192": "NIST_P192",
+        "224": "NIST_P224",
+        "256": "NIST_P256",
+        "384": "NIST_P384",
+        "521": "NIST_P521",
+    }
 
 
 TPM2_ECC_CURVE = TPM2_ECC
@@ -962,7 +974,330 @@ class TPMU_PUBLIC_PARMS(TPM_OBJECT):
 
 
 class TPMT_PUBLIC(TPM_OBJECT):
-    pass
+    @staticmethod
+    def _handle_rsa(objstr, templ):
+        templ.type = TPM2_ALG.RSA
+
+        if objstr is None or objstr == "":
+            objstr = "2048"
+
+        expected = ["1024", "2048", "3072", "4096"]
+        if objstr not in expected:
+            raise RuntimeError(
+                f'Expected keybits for RSA to be one of {expected}, got:"{objstr}"'
+            )
+
+        keybits = int(objstr)
+        templ.parameters.rsaDetail.keyBits = keybits
+
+        return True
+
+    @staticmethod
+    def _handle_ecc(objstr, templ):
+        templ.type = TPM2_ALG.ECC
+
+        if objstr is None or objstr == "":
+            curve = TPM2_ECC_CURVE.NIST_P256
+        else:
+            curve = TPM2_ECC_CURVE.parse(objstr)
+
+        templ.parameters.eccDetail.curveID = curve
+        templ.parameters.eccDetail.kdf.scheme = TPM2_ALG.NULL
+
+        return True
+
+    @staticmethod
+    def _handle_sym_common(objstr):
+
+        if objstr is None or len(objstr) == 0:
+            objstr = "128"
+
+        bits = objstr[:3]
+        expected = ["128", "192", "256"]
+        if bits not in expected:
+            raise RuntimeError(f'Expected bits to be one of {expected}, got: "{bits}"')
+
+        bits = int(bits)
+
+        # go past bits
+        objstr = objstr[3:]
+        if len(objstr) == 0:
+            mode = "null"
+        else:
+            expected = ["cfb", "cbc", "ofb", "ctr", "ecb"]
+            if objstr not in expected:
+                raise RuntimeError(
+                    f'Expected mode to be one of {expected}, got: "{objstr}"'
+                )
+            mode = objstr
+
+        mode = TPM2_ALG.parse(mode)
+
+        return (bits, mode)
+
+    @staticmethod
+    def _handle_aes(objstr, templ):
+        templ.type = TPM2_ALG.SYMCIPHER
+        templ.parameters.symDetail.sym.algorithm = TPM2_ALG.AES
+
+        bits, mode = TPMT_PUBLIC._handle_sym_common(objstr)
+        templ.parameters.symDetail.sym.keyBits.sym = bits
+        templ.parameters.symDetail.sym.mode.sym = mode
+        return False
+
+    @staticmethod
+    def _handle_camellia(objstr, templ):
+        templ.type = TPM2_ALG.SYMCIPHER
+        templ.parameters.symDetail.sym.algorithm = TPM2_ALG.CAMELLIA
+
+        bits, mode = TPMT_PUBLIC._handle_sym_common(objstr)
+        templ.parameters.symDetail.sym.keyBits.sym = bits
+        templ.parameters.symDetail.sym.mode.sym = mode
+
+        return False
+
+    @staticmethod
+    def _handle_xor(templ):
+        templ.type = TPM2_ALG.KEYEDHASH
+        templ.parameters.keyedHashDetail.scheme.scheme = TPM2_ALG.XOR
+
+        return True
+
+    @staticmethod
+    def _handle_hmac(templ):
+        templ.type = TPM2_ALG.KEYEDHASH
+        templ.parameters.keyedHashDetail.scheme.scheme = TPM2_ALG.HMAC
+
+        return True
+
+    @staticmethod
+    def _handle_keyedhash(templ):
+        templ.type = TPM2_ALG.KEYEDHASH
+        templ.parameters.keyedHashDetail.scheme.scheme = TPM2_ALG.NONE
+
+        return False
+
+    @staticmethod
+    def _error_on_conflicting_sign_attrs(templ):
+        """
+        If the scheme is set, both the encrypt and decrypt attributes cannot be set,
+        check to see if this is the case, and turn down:
+          - DECRYPT - If its a signing scheme.
+          - ENCRYPT - If its an asymmetric enc scheme.
+
+        :param templ: The template to modify
+        """
+
+        # Nothing to do
+        if templ.parameters.asymDetail.scheme.scheme == TPM2_ALG.NULL:
+            return
+
+        is_both_set = bool(templ.objectAttributes & TPMA_OBJECT.SIGN_ENCRYPT) and bool(
+            templ.objectAttributes & TPMA_OBJECT.DECRYPT
+        )
+
+        # One could smarten this up to behave like tpm2-tools and trun down the attribute, but for now
+        # error on bad attribute sets
+        if is_both_set:
+            raise ParserAttributeError(
+                "Cannot set both SIGN_ENCRYPT and DECRYPT in objectAttributes"
+            )
+
+    @staticmethod
+    def _handle_scheme_rsa(scheme, templ):
+
+        if scheme is None or len(scheme) == 0:
+            scheme = "null"
+
+        halg = ""
+        # rsaes must match exactly takes no other params
+        if scheme == "rsapss":
+            templ.parameters.asymDetail.scheme.scheme = TPM2_ALG.RSAES
+            TPMT_PUBLIC._error_on_conflicting_sign_attrs(templ)
+            return
+
+        halg = ""
+        if scheme == "null":
+            templ.parameters.asymDetail.scheme.scheme = TPM2_ALG.NULL
+        elif scheme.startswith("rsassa"):
+            templ.parameters.asymDetail.scheme.scheme = TPM2_ALG.RSASSA
+            halg = scheme[len("rsassa") + 1 :]
+        else:
+            templ.parameters.asymDetail.scheme.scheme = TPM2_ALG.NULL
+            raise RuntimeError(
+                f'Expected RSA scheme null or rsapss or prefix of rsapss, rsassa, got "{scheme}"'
+            )
+
+        if halg == "":
+            halg = "sha256"
+
+        templ.parameters.asymDetail.scheme.details.anySig.hashAlg = TPM2_ALG.parse(halg)
+
+        TPMT_PUBLIC._error_on_conflicting_sign_attrs(templ)
+
+        return True
+
+    @staticmethod
+    def _handle_scheme_ecc(scheme, templ):
+
+        if scheme is None or len(scheme) == 0:
+            scheme = "null"
+
+        halg = ""
+        if scheme.startswith("oaep"):
+            templ.parameters.asymDetail.scheme.scheme = TPM2_ALG.OAEP
+            halg = scheme[len("oaep") + 1 :]
+        elif scheme.startswith("ecdsa"):
+            templ.parameters.asymDetail.scheme.scheme = TPM2_ALG.ECDSA
+            halg = scheme[len("ecdsa") + 1 :]
+        elif scheme.startswith("ecdh"):
+            templ.parameters.asymDetail.scheme.scheme = TPM2_ALG.ECDH
+            halg = scheme[len("ecdh") + 1 :]
+        elif scheme.startswith("ecschnorr"):
+            templ.parameters.asymDetail.scheme.scheme = TPM2_ALG.ECSCHNORR
+            halg = scheme[len("ecschnorr") + 1 :]
+        elif scheme.startswith("ecdaa"):
+            templ.parameters.asymDetail.scheme.scheme = TPM2_ALG.ECDAA
+            counter = scheme[5:] if len(scheme) > 5 else "0"
+            hunks = counter.split("-")
+            counter = hunks[0]
+            halg = hunks[1] if len(hunks) > 1 else ""
+            templ.parameters.eccDetail.scheme.details.ecdaa.count = int(counter)
+        elif scheme == "null":
+            templ.parameters.scheme.scheme = TPM2_ALG.NULL
+        else:
+            templ.parameters.asymDetail.scheme.scheme = TPM2_ALG.NULL
+            raise RuntimeError(
+                f'Expected EC scheme null or prefix of oaep, ecdsa, ecdh, scshnorr, ecdaa, got "{scheme}"'
+            )
+
+        if halg == "":
+            halg = "sha256"
+
+        templ.parameters.asymDetail.scheme.details.anySig.hashAlg = TPM2_ALG.parse(halg)
+
+        TPMT_PUBLIC._error_on_conflicting_sign_attrs(templ)
+
+        return True
+
+    @staticmethod
+    def _handle_scheme_keyedhash(scheme, templ):
+
+        if scheme is None or scheme == "":
+            scheme = "sha256"
+
+        halg = TPM2_ALG.parse(scheme)
+        if templ.parameters.keyedHashDetail.scheme.scheme == TPM2_ALG.HMAC:
+            templ.parameters.keyedHashDetail.scheme.details.hmac.hashAlg = halg
+        elif templ.parameters.keyedHashDetail.scheme.scheme == TPM2_ALG.XOR:
+            templ.parameters.keyedHashDetail.scheme.details.xor.hashAlg = halg
+            templ.parameters.keyedHashDetail.scheme.details.xor.kdf = (
+                TPM2_ALG.KDF1_SP800_108
+            )
+        else:
+            raise RuntimeError(
+                f'Expected one of HMAC or XOR, got: "{templ.parameters.keyedHashDetail.scheme.scheme}"'
+            )
+
+    @staticmethod
+    def _handle_scheme(scheme, templ):
+        if templ.type == TPM2_ALG.RSA:
+            TPMT_PUBLIC._handle_scheme_rsa(scheme, templ)
+        elif templ.type == TPM2_ALG.ECC:
+            TPMT_PUBLIC._handle_scheme_ecc(scheme, templ)
+        elif templ.type == TPM2_ALG.KEYEDHASH:
+            TPMT_PUBLIC._handle_scheme_keyedhash(scheme, templ)
+        else:
+            # TODO make __str__ routine for int types
+            raise RuntimeError(
+                f'Expected object to be of type RSA, ECC or KEYEDHASH, got "{templ.type}"'
+            )
+
+    @staticmethod
+    def _handle_asymdetail(detail, templ):
+
+        if templ.type != TPM2_ALG.RSA and templ.type != TPM2_ALG.ECC:
+            raise RuntimeError(
+                f'Expected only RSA and ECC objects to have asymdetail, got: "{templ.type}"'
+            )
+
+        is_restricted = bool(templ.objectAttributes & TPMA_OBJECT.RESTRICTED)
+        is_rsapss = templ.parameters.asymDetail.scheme.scheme == TPM2_ALG.RSAPSS
+
+        if detail is None or detail == "":
+            detail = "aes128cfb" if is_restricted or is_rsapss else "null"
+
+        if detail == "null":
+            templ.parameters.symDetail.sym.algorithm = TPM2_ALG.NULL
+            return
+
+        if detail.startswith("aes"):
+            templ.parameters.symDetail.sym.algorithm = TPM2_ALG.AES
+            detail = detail[3:]
+        elif detail.startswith("camellia"):
+            templ.parameters.symDetail.sym.algorithm = TPM2_ALG.AES
+            detail = detail[3:]
+        else:
+            raise RuntimeError(
+                f'Expected symetric detail to be null or start with one of aes, camellia, got: "{detail}"'
+            )
+
+        bits, mode = TPMT_PUBLIC._handle_sym_common(detail)
+        templ.parameters.symDetail.sym.keyBits.sym = bits
+        templ.parameters.symDetail.sym.mode.sym = mode
+
+    @classmethod
+    def parse(
+        cls,
+        alg="rsa",
+        objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS,
+        nameAlg="sha256",
+    ):
+
+        templ = TPMT_PUBLIC()
+
+        if isinstance(nameAlg, str):
+            nameAlg = TPM2_ALG.parse(nameAlg)
+        templ.nameAlg = nameAlg
+
+        if isinstance(objectAttributes, str):
+            objectAttributes = TPMA_OBJECT.parse(objectAttributes)
+        templ.objectAttributes = objectAttributes
+
+        alg = alg.lower()
+
+        hunks = alg.split(":")
+        objstr = hunks[0].lower()
+        scheme = hunks[1].lower() if len(hunks) > 1 else None
+        symdetail = hunks[2].lower() if len(hunks) > 2 else None
+
+        expected = ("rsa", "ecc", "aes", "camellia", "xor", "hmac", "keyedhash")
+
+        keep_processing = False
+        prefix = tuple(filter(lambda x: objstr.startswith(x), expected))
+        if len(prefix) == 1:
+            prefix = prefix[0]
+            keep_processing = getattr(TPMT_PUBLIC, f"_handle_{prefix}")(
+                objstr[3:], templ
+            )
+        else:
+            raise RuntimeError(
+                f'Expected object prefix to be one of {expected}, got: "{objstr}"'
+            )
+
+        if not keep_processing:
+            return templ
+
+        # at this point we either have scheme as a scheme or an asym detail
+        try:
+            TPMT_PUBLIC._handle_scheme(scheme, templ)
+        except RuntimeError as e:
+            # nope try it as asymdetail
+            symdetail = scheme
+
+        TPMT_PUBLIC._handle_asymdetail(symdetail, templ)
+
+        return templ
 
 
 class TPM2B_ATTEST(TPM_OBJECT):

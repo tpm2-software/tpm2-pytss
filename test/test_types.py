@@ -2,7 +2,7 @@
 """
 SPDX-License-Identifier: BSD-3
 """
-
+import itertools
 import unittest
 
 from tpm2_pytss import *
@@ -585,6 +585,285 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(d.size, 5)
         db = ffi.buffer(d.buffer, d.size)
         self.assertEqual(db, b"test1")
+
+    def test_TPMT_PUBLIC_empty(self):
+
+        templ = TPMT_PUBLIC.parse()
+        self.assertEqual(templ.nameAlg, TPM2_ALG.SHA256)
+        self.assertEqual(
+            templ.objectAttributes, TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS
+        )
+
+        self.assertEqual(templ.type, TPM2_ALG.RSA)
+
+        self.assertEqual(templ.type, TPM2_ALG.RSA)
+        self.assertEqual(templ.parameters.rsaDetail.keyBits, 2048)
+        self.assertEqual(templ.parameters.asymDetail.scheme.scheme, TPM2_ALG.NULL)
+
+        self.assertEqual(templ.parameters.rsaDetail.symmetric.algorithm, TPM2_ALG.NULL)
+
+    def test_TPMT_PUBLIC_parse_rsa(self):
+
+        templ = TPMT_PUBLIC.parse("rsa")
+        self.assertEqual(templ.nameAlg, TPM2_ALG.SHA256)
+        self.assertEqual(
+            templ.objectAttributes, TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS
+        )
+
+        self.assertEqual(templ.type, TPM2_ALG.RSA)
+
+        self.assertEqual(templ.type, TPM2_ALG.RSA)
+        self.assertEqual(templ.parameters.rsaDetail.keyBits, 2048)
+        self.assertEqual(templ.parameters.asymDetail.scheme.scheme, TPM2_ALG.NULL)
+
+        self.assertEqual(templ.parameters.rsaDetail.symmetric.algorithm, TPM2_ALG.NULL)
+
+    def test_TPMT_PUBLIC_parse_rsa_keysizes(self):
+
+        for keysize in [1024, 2048, 3072, 4096]:
+            templ = TPMT_PUBLIC.parse(f"rsa{keysize}")
+            self.assertEqual(templ.nameAlg, TPM2_ALG.SHA256)
+            self.assertEqual(
+                templ.objectAttributes, TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS
+            )
+
+            self.assertEqual(templ.type, TPM2_ALG.RSA)
+            self.assertEqual(templ.parameters.rsaDetail.keyBits, keysize)
+            self.assertEqual(templ.parameters.asymDetail.scheme.scheme, TPM2_ALG.NULL)
+
+            self.assertEqual(
+                templ.parameters.rsaDetail.symmetric.algorithm, TPM2_ALG.NULL
+            )
+
+    def test_TPMT_PUBLIC_parse_rsa2048_(self):
+
+        templ = TPMT_PUBLIC.parse("rsa2048:")
+        self.assertEqual(templ.nameAlg, TPM2_ALG.SHA256)
+        self.assertEqual(
+            templ.objectAttributes, TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS
+        )
+
+        self.assertEqual(templ.type, TPM2_ALG.RSA)
+        self.assertEqual(templ.parameters.rsaDetail.keyBits, 2048)
+        self.assertEqual(templ.parameters.asymDetail.scheme.scheme, TPM2_ALG.NULL)
+
+        self.assertEqual(templ.parameters.rsaDetail.symmetric.algorithm, TPM2_ALG.NULL)
+
+    def test_TPMT_PUBLIC_parse_rsaall_all(self):
+
+        rsasizes = [1024, 2048, 3072, 4096]
+        keysizes = [128, 192, 256]
+        modes = ["cfb", "cbc", "ofb", "ctr", "ecb"]
+
+        for rsasize, keysize, mode, in list(
+            itertools.product(rsasizes, keysizes, modes)
+        ):
+            templ = TPMT_PUBLIC.parse(
+                f"rsa{rsasize}:rsassa-sha384:aes{keysize}{mode}",
+                TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS,
+            )
+            self.assertEqual(templ.nameAlg, TPM2_ALG.SHA256)
+            self.assertEqual(
+                templ.objectAttributes,
+                TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS,
+            )
+
+            self.assertEqual(templ.type, TPM2_ALG.RSA)
+            self.assertEqual(templ.parameters.rsaDetail.exponent, 0)
+            self.assertEqual(templ.parameters.rsaDetail.keyBits, rsasize)
+            self.assertEqual(
+                templ.parameters.asymDetail.scheme.details.anySig.hashAlg,
+                TPM2_ALG.SHA384,
+            )
+            self.assertEqual(templ.parameters.rsaDetail.symmetric.keyBits.aes, keysize)
+            self.assertEqual(
+                templ.parameters.rsaDetail.symmetric.mode.sym, TPM2_ALG.parse(mode)
+            )
+            self.assertEqual(
+                templ.parameters.rsaDetail.symmetric.algorithm, TPM2_ALG.AES
+            )
+
+    def test_TPMT_PUBLIC_parse_rsa2048_restricted(self):
+
+        templ = TPMT_PUBLIC.parse(alg="rsa2048", objectAttributes="RESTRICTED")
+        self.assertEqual(templ.nameAlg, TPM2_ALG.SHA256)
+        self.assertEqual(templ.objectAttributes, TPMA_OBJECT.RESTRICTED)
+
+        self.assertEqual(templ.type, TPM2_ALG.RSA)
+        self.assertEqual(templ.parameters.rsaDetail.keyBits, 2048)
+        self.assertEqual(templ.parameters.asymDetail.scheme.scheme, TPM2_ALG.NULL)
+
+        self.assertEqual(templ.parameters.rsaDetail.symmetric.keyBits.aes, 128)
+        self.assertEqual(templ.parameters.rsaDetail.symmetric.mode.sym, TPM2_ALG.CFB)
+        self.assertEqual(templ.parameters.rsaDetail.symmetric.algorithm, TPM2_ALG.AES)
+
+    def test_TPMT_PUBLIC_parse_ecc_ecdaa4_sha256(self):
+
+        # scheme is set, so we need to be smarter about the attributes we use
+        templ = TPMT_PUBLIC.parse(
+            f"ecc:ecdaa4-sha256",
+            objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS,
+        )
+        self.assertEqual(templ.nameAlg, TPM2_ALG.SHA256)
+        self.assertEqual(
+            templ.objectAttributes, TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS
+        )
+
+        self.assertEqual(templ.type, TPM2_ALG.ECC)
+        self.assertEqual(templ.parameters.eccDetail.curveID, TPM2_ECC_CURVE.NIST_P256)
+        self.assertEqual(templ.parameters.eccDetail.scheme.scheme, TPM2_ALG.ECDAA)
+        self.assertEqual(templ.parameters.eccDetail.scheme.details.ecdaa.count, 4)
+        self.assertEqual(
+            templ.parameters.eccDetail.scheme.details.ecdaa.hashAlg, TPM2_ALG.SHA256
+        )
+        self.assertEqual(
+            templ.parameters.asymDetail.scheme.details.anySig.hashAlg, TPM2_ALG.SHA256
+        )
+
+        # since this was restricted it should set the symmetric details to aes128cfb
+        self.assertEqual(templ.parameters.asymDetail.symmetric.keyBits.aes, 128)
+        self.assertEqual(templ.parameters.asymDetail.symmetric.mode.sym, TPM2_ALG.CFB)
+        self.assertEqual(templ.parameters.asymDetail.symmetric.algorithm, TPM2_ALG.AES)
+
+    def test_TPMT_PUBLIC_parse_ecc_ecdaa4(self):
+
+        # scheme is set, so we need to be smarter about the attributes we use
+        templ = TPMT_PUBLIC.parse(
+            f"ecc:ecdaa4",
+            objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS,
+        )
+        self.assertEqual(templ.nameAlg, TPM2_ALG.SHA256)
+        self.assertEqual(
+            templ.objectAttributes, TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS
+        )
+
+        self.assertEqual(templ.type, TPM2_ALG.ECC)
+        self.assertEqual(templ.parameters.eccDetail.curveID, TPM2_ECC_CURVE.NIST_P256)
+        self.assertEqual(templ.parameters.eccDetail.scheme.scheme, TPM2_ALG.ECDAA)
+        self.assertEqual(templ.parameters.eccDetail.scheme.details.ecdaa.count, 4)
+        self.assertEqual(
+            templ.parameters.eccDetail.scheme.details.ecdaa.hashAlg, TPM2_ALG.SHA256
+        )
+        self.assertEqual(
+            templ.parameters.asymDetail.scheme.details.anySig.hashAlg, TPM2_ALG.SHA256
+        )
+
+        # since this was restricted it should set the symmetric details to aes128cfb
+        self.assertEqual(templ.parameters.asymDetail.symmetric.keyBits.aes, 128)
+        self.assertEqual(templ.parameters.asymDetail.symmetric.mode.sym, TPM2_ALG.CFB)
+        self.assertEqual(templ.parameters.asymDetail.symmetric.algorithm, TPM2_ALG.AES)
+
+    def test_TPMT_PUBLIC_parse_ecda_ecdh_sha384(self):
+
+        # scheme is set, so we need to be smarter about the attributes we use
+        templ = TPMT_PUBLIC.parse(
+            f"ecc:ecdh-sha384",
+            objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS,
+        )
+        self.assertEqual(templ.nameAlg, TPM2_ALG.SHA256)
+        self.assertEqual(
+            templ.objectAttributes, TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS
+        )
+
+        self.assertEqual(templ.type, TPM2_ALG.ECC)
+        self.assertEqual(templ.parameters.eccDetail.curveID, TPM2_ECC_CURVE.NIST_P256)
+        self.assertEqual(templ.parameters.eccDetail.scheme.scheme, TPM2_ALG.ECDH)
+        self.assertEqual(
+            templ.parameters.eccDetail.scheme.details.ecdh.hashAlg, TPM2_ALG.SHA384
+        )
+        self.assertEqual(
+            templ.parameters.asymDetail.scheme.details.anySig.hashAlg, TPM2_ALG.SHA384
+        )
+
+        # since this was restricted it should set the symmetric details to aes128cfb
+        self.assertEqual(templ.parameters.asymDetail.symmetric.keyBits.aes, 128)
+        self.assertEqual(templ.parameters.asymDetail.symmetric.mode.sym, TPM2_ALG.CFB)
+        self.assertEqual(templ.parameters.asymDetail.symmetric.algorithm, TPM2_ALG.AES)
+
+    def test_TPMT_PUBLIC_parse_ecda_ecdsa_ecdh_ecschnorr(self):
+
+        # scheme is set, so we need to be smarter about the attributes we use
+        for scheme in ["ecdsa", "ecdh", "ecschnorr"]:
+            templ = TPMT_PUBLIC.parse(
+                f"ecc:{scheme}",
+                objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS,
+            )
+            self.assertEqual(templ.nameAlg, TPM2_ALG.SHA256)
+            self.assertEqual(
+                templ.objectAttributes,
+                TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS,
+            )
+
+            self.assertEqual(templ.type, TPM2_ALG.ECC)
+            self.assertEqual(
+                templ.parameters.eccDetail.curveID, TPM2_ECC_CURVE.NIST_P256
+            )
+            self.assertEqual(
+                templ.parameters.eccDetail.scheme.scheme, TPM2_ALG.parse(scheme)
+            )
+            self.assertEqual(
+                templ.parameters.asymDetail.scheme.details.anySig.hashAlg,
+                TPM2_ALG.SHA256,
+            )
+
+            # since this was restricted it should set the symmetric details to aes128cfb
+            self.assertEqual(templ.parameters.asymDetail.symmetric.keyBits.aes, 128)
+            self.assertEqual(
+                templ.parameters.asymDetail.symmetric.mode.sym, TPM2_ALG.CFB
+            )
+            self.assertEqual(
+                templ.parameters.asymDetail.symmetric.algorithm, TPM2_ALG.AES
+            )
+
+    def test_TPMT_PUBLIC_parse_ecc_all(self):
+
+        curves = ["192", "224", "256", "384", "521"]
+        keysizes = [128, 192, 256]
+        modes = ["cfb", "cbc", "ofb", "ctr", "ecb"]
+        schemes = [
+            "ecdsa",
+            "ecdh",
+            "ecschnorr",
+            "ecdsa-sha",
+            "ecdh-sha384",
+            "ecschnorr-sha512",
+        ]
+
+        for curve, keysize, mode, scheme in list(
+            itertools.product(curves, keysizes, modes, schemes)
+        ):
+            templ = TPMT_PUBLIC.parse(
+                f"ecc{curve}:{scheme}:aes{keysize}{mode}",
+                objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS,
+            )
+            self.assertEqual(templ.nameAlg, TPM2_ALG.SHA256)
+            self.assertEqual(
+                templ.objectAttributes,
+                TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS,
+            )
+
+            hunks = scheme.split("-")
+            scheme = hunks[0]
+            scheme_halg = TPM2_ALG.parse(hunks[1] if len(hunks) > 1 else "sha256")
+
+            self.assertEqual(templ.type, TPM2_ALG.ECC)
+            self.assertEqual(
+                templ.parameters.eccDetail.curveID, TPM2_ECC_CURVE.parse(curve)
+            )
+            self.assertEqual(
+                templ.parameters.eccDetail.scheme.scheme, TPM2_ALG.parse(scheme)
+            )
+            self.assertEqual(
+                templ.parameters.asymDetail.scheme.details.anySig.hashAlg, scheme_halg
+            )
+
+            self.assertEqual(templ.parameters.asymDetail.symmetric.keyBits.aes, keysize)
+            self.assertEqual(
+                templ.parameters.asymDetail.symmetric.mode.sym, TPM2_ALG.parse(mode)
+            )
+            self.assertEqual(
+                templ.parameters.asymDetail.symmetric.algorithm, TPM2_ALG.AES
+            )
 
 
 if __name__ == "__main__":
