@@ -1361,3 +1361,7 @@ class TPMT_KDF_SCHEME(TPM_OBJECT):
 
 class TPMT_TK_CREATION(TPM_OBJECT):
     pass
+
+
+class TPMT_ASYM_SCHEME(TPM_OBJECT):
+    pass
