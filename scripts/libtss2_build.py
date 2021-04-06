@@ -2,10 +2,18 @@ from cffi import FFI
 
 ffibuilder = FFI()
 
+import importlib.util
 import os
 import pkgconfig
 import re
 import sys
+
+# import tpm2_pytss.constants
+constants_spec = importlib.util.spec_from_file_location(
+    "tpm2_pytss.constants", "tpm2_pytss/constants.py"
+)
+constants = importlib.util.module_from_spec(constants_spec)
+constants_spec.loader.exec_module(constants)
 
 
 def get_include_paths(library_names):
@@ -49,7 +57,19 @@ if found_dir is None:
 # strip tss2 prefix
 prepare(found_dir, "libesys.h")
 
-ffibuilder.cdef(open("libesys.h").read())
+ffibuilder.cdef(
+    open("libesys.h").read()
+    + "".join(
+        f"""
+    extern "Python" TSS2_RC {constants.CALLBACK_BASE_NAME[constants.CallbackType.FAPI_AUTH]}{i}(
+        char     const *objectPath,
+        char     const *description,
+        char    const **auth,
+        void           *userData);
+"""
+        for i in range(0, constants.CALLBACK_COUNT)
+    )
+)
 
 # so it is often just the "#include".
 ffibuilder.set_source(
