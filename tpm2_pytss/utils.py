@@ -18,6 +18,8 @@ def to_bytes_or_null(value, allow_null=True, encoding=None):
     bytes: bytes
     str:   str.encode()
     """
+    if encoding is None:
+        encoding = "utf-8"
     if value is None:
         if allow_null:
             return ffi.NULL
