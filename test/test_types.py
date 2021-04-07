@@ -865,6 +865,58 @@ class TypesTest(unittest.TestCase):
                 templ.parameters.asymDetail.symmetric.algorithm, TPM2_ALG.AES
             )
 
+    def test_TPML_ALG_parse_none(self):
+        a = TPML_ALG.parse(None)
+        self.assertEqual(len(a), 0)
+
+    def test_TPML_ALG_parse_empty(self):
+        a = TPML_ALG.parse("")
+        self.assertEqual(len(a), 0)
+
+    def test_TPML_ALG_parse_commas(self):
+        a = TPML_ALG.parse(",,,,,,")
+        self.assertEqual(len(a), 0)
+
+    def test_TPML_ALG_parse_single(self):
+        a = TPML_ALG.parse("rsa")
+        self.assertEqual(len(a), 1)
+        self.assertEqual(a[0], TPM2_ALG.RSA)
+
+    def test_TPML_ALG_parse_double(self):
+        a = TPML_ALG.parse("rsa,aes")
+        self.assertEqual(len(a), 2)
+        self.assertEqual(a[0], TPM2_ALG.RSA)
+        self.assertEqual(a[1], TPM2_ALG.AES)
+
+    def test_TPML_ALG_parse_double_spaces(self):
+        a = TPML_ALG.parse(" rsa , aes")
+        self.assertEqual(len(a), 2)
+        self.assertEqual(a[0], TPM2_ALG.RSA)
+        self.assertEqual(a[1], TPM2_ALG.AES)
+
+    def test_TPML_ALG_parse_double_mixed_case(self):
+        a = TPML_ALG.parse("RSa,aEs")
+        self.assertEqual(len(a), 2)
+        self.assertEqual(a[0], TPM2_ALG.RSA)
+        self.assertEqual(a[1], TPM2_ALG.AES)
+
+    def test_TPML_ALG_parse_double_extra_commas(self):
+        a = TPML_ALG.parse(",RSa,,aEs,,")
+        self.assertEqual(len(a), 2)
+        self.assertEqual(a[0], TPM2_ALG.RSA)
+        self.assertEqual(a[1], TPM2_ALG.AES)
+
+    def test_TPML_ALG_parse_bad(self):
+
+        with self.assertRaises(RuntimeError):
+            TPML_ALG.parse("not,real,alg")
+
+        with self.assertRaises(RuntimeError):
+            TPML_ALG.parse("jfghsjhdgfdhg")
+
+        with self.assertRaises(RuntimeError):
+            TPML_ALG.parse("aes,rsa,foo")
+
 
 if __name__ == "__main__":
     unittest.main()

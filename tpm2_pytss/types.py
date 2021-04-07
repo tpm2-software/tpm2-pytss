@@ -1526,7 +1526,14 @@ class TPML_ALG(TPML_OBJECT):
     @classmethod
     def parse(cls, algorithms):
 
-        alglist = [TPM2_ALG.parse(a) for a in algorithms.split(",")]
+        if algorithms is None or len(algorithms) == 0:
+            return TPML_ALG()
+
+        alglist = []
+        for a in algorithms.split(","):
+            a = a.strip()
+            if len(a) > 0:
+                alglist.append(TPM2_ALG.parse(a))
 
         return TPML_ALG(alglist)
 
