@@ -100,6 +100,16 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TSS2_Exception):
             public, name = self.ectx.NV_ReadPublic(nv_index)
 
+    def test_hierarchychangeauth(self):
+
+        self.ectx.HierarchyChangeAuth(ESYS_TR.OWNER, "passwd")
+
+        # force esys to forget about the 'good' password
+        self.ectx.setAuth(ESYS_TR.OWNER, "badpasswd")
+
+        with self.assertRaises(TSS2_Exception):
+            self.ectx.HierarchyChangeAuth(ESYS_TR.OWNER, "anotherpasswd")
+
 
 if __name__ == "__main__":
     unittest.main()
