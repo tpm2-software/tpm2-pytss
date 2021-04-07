@@ -2070,7 +2070,7 @@ class ESAPI:
         authHandle,
         auth,
         publicInfo,
-        session1=ESYS_TR.NONE,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
@@ -2083,8 +2083,8 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                auth,
-                publicInfo,
+                TPM2B_pack(auth, t="TPM2B_AUTH"),
+                publicInfo._cdata,
                 nvHandle,
             )
         )
@@ -2095,7 +2095,7 @@ class ESAPI:
         self,
         authHandle,
         nvIndex,
-        session1=ESYS_TR.NONE,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
@@ -2136,18 +2136,21 @@ class ESAPI:
                 self.ctx, nvIndex, session1, session2, session3, nvPublic, nvName
             )
         )
-        return (nvPublic[0], nvName[0])
+        return (TPM2B_NV_PUBLIC(_cdata=nvPublic[0]), TPM2B_NAME(_cdata=nvName[0]))
 
     def NV_Write(
         self,
-        authHandle,
         nvIndex,
         data,
-        offset,
-        session1=ESYS_TR.NONE,
+        offset=0,
+        authHandle=0,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
+
+        if authHandle == 0:
+            authHandle = nvIndex
 
         _chkrc(
             lib.Esys_NV_Write(
@@ -2157,7 +2160,7 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                data,
+                TPM2B_pack(data, t="TPM2B_MAX_NV_BUFFER"),
                 offset,
             )
         )
@@ -2240,14 +2243,17 @@ class ESAPI:
 
     def NV_Read(
         self,
-        authHandle,
         nvIndex,
         size,
-        offset,
-        session1=ESYS_TR.NONE,
+        offset=0,
+        authHandle=0,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
+
+        if authHandle == 0:
+            authHandle = nvIndex
 
         data = ffi.new("TPM2B_MAX_NV_BUFFER **")
         _chkrc(
@@ -2263,7 +2269,7 @@ class ESAPI:
                 data,
             )
         )
-        return data[0]
+        return TPM2B_unpack(data[0])
 
     def NV_ReadLock(
         self,
