@@ -927,6 +927,12 @@ class TPM_OBJECT(object):
         return cls(_cdata=_cdata), offset[0]
 
 
+class TPM2B_OBJECT(TPM_OBJECT):
+    def __len__(self):
+        cdata = self._cdata
+        return cdata.size
+
+
 class TPML_OBJECT(TPM_OBJECT):
     def __getattribute__(self, key):
 
@@ -1302,59 +1308,59 @@ class TPMT_PUBLIC(TPM_OBJECT):
         return templ
 
 
-class TPM2B_ATTEST(TPM_OBJECT):
+class TPM2B_ATTEST(TPM2B_OBJECT):
     pass
 
 
-class TPM2B_CONTEXT_DATA(TPM_OBJECT):
+class TPM2B_CONTEXT_DATA(TPM2B_OBJECT):
     pass
 
 
-class TPM2B_CONTEXT_SENSITIVE(TPM_OBJECT):
+class TPM2B_CONTEXT_SENSITIVE(TPM2B_OBJECT):
     pass
 
 
-class TPM2B_CREATION_DATA(TPM_OBJECT):
+class TPM2B_CREATION_DATA(TPM2B_OBJECT):
     pass
 
 
-class TPM2B_DATA(TPM_OBJECT):
+class TPM2B_DATA(TPM2B_OBJECT):
     pass
 
 
-class TPM2B_DIGEST(TPM_OBJECT):
+class TPM2B_DIGEST(TPM2B_OBJECT):
     pass
 
 
-class TPM2B_ECC_PARAMETER(TPM_OBJECT):
+class TPM2B_ECC_PARAMETER(TPM2B_OBJECT):
     pass
 
 
-class TPM2B_ECC_POINT(TPM_OBJECT):
+class TPM2B_ECC_POINT(TPM2B_OBJECT):
     pass
 
 
-class TPM2B_ENCRYPTED_SECRET(TPM_OBJECT):
+class TPM2B_ENCRYPTED_SECRET(TPM2B_OBJECT):
     pass
 
 
-class TPM2B_EVENT(TPM_OBJECT):
+class TPM2B_EVENT(TPM2B_OBJECT):
     pass
 
 
-class TPM2B_ID_OBJECT(TPM_OBJECT):
+class TPM2B_ID_OBJECT(TPM2B_OBJECT):
     pass
 
 
-class TPM2B_IV(TPM_OBJECT):
+class TPM2B_IV(TPM2B_OBJECT):
     pass
 
 
-class TPM2B_MAX_BUFFER(TPM_OBJECT):
+class TPM2B_MAX_BUFFER(TPM2B_OBJECT):
     pass
 
 
-class TPM2B_MAX_NV_BUFFER(TPM_OBJECT):
+class TPM2B_MAX_NV_BUFFER(TPM2B_OBJECT):
     pass
 
 
@@ -1362,47 +1368,47 @@ class TPM2B_NAME(TPM_OBJECT):
     pass
 
 
-class TPM2B_NV_PUBLIC(TPM_OBJECT):
+class TPM2B_NV_PUBLIC(TPM2B_OBJECT):
     pass
 
 
-class TPM2B_PRIVATE(TPM_OBJECT):
+class TPM2B_PRIVATE(TPM2B_OBJECT):
     pass
 
 
-class TPM2B_PRIVATE_KEY_RSA(TPM_OBJECT):
+class TPM2B_PRIVATE_KEY_RSA(TPM2B_OBJECT):
     pass
 
 
-class TPM2B_PRIVATE_VENDOR_SPECIFIC(TPM_OBJECT):
+class TPM2B_PRIVATE_VENDOR_SPECIFIC(TPM2B_OBJECT):
     pass
 
 
-class TPM2B_PUBLIC(TPM_OBJECT):
+class TPM2B_PUBLIC(TPM2B_OBJECT):
     pass
 
 
-class TPM2B_PUBLIC_KEY_RSA(TPM_OBJECT):
+class TPM2B_PUBLIC_KEY_RSA(TPM2B_OBJECT):
     pass
 
 
-class TPM2B_SENSITIVE(TPM_OBJECT):
+class TPM2B_SENSITIVE(TPM2B_OBJECT):
     pass
 
 
-class TPM2B_SENSITIVE_CREATE(TPM_OBJECT):
+class TPM2B_SENSITIVE_CREATE(TPM2B_OBJECT):
     pass
 
 
-class TPM2B_SENSITIVE_DATA(TPM_OBJECT):
+class TPM2B_SENSITIVE_DATA(TPM2B_OBJECT):
     pass
 
 
-class TPM2B_SYM_KEY(TPM_OBJECT):
+class TPM2B_SYM_KEY(TPM2B_OBJECT):
     pass
 
 
-class TPM2B_TEMPLATE(TPM_OBJECT):
+class TPM2B_TEMPLATE(TPM2B_OBJECT):
     pass
 
 
