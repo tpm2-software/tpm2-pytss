@@ -30,9 +30,6 @@ class ESAPI:
 
     def setAuth(self, esys_tr, auth):
 
-        if type(auth) is str:
-            auth = auth.encode()
-
         auth_p = TPM2B_pack(auth, "TPM2B_AUTH")
         _chkrc(lib.Esys_TR_SetAuth(self.ctx, esys_tr, auth_p))
 
