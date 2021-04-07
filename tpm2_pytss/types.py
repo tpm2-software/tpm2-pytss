@@ -936,6 +936,67 @@ class TPM2B_OBJECT(TPM_OBJECT):
 
 
 class TPML_OBJECT(TPM_OBJECT):
+    def __init__(self, _cdata=None, **kwargs):
+
+        # folks may call this routine without a keyword argument which means it may
+        # end up in _cdata, so we want to try and work this out
+        unknown = None
+        try:
+            # is _cdata actual ffi data?
+            ffi.typeof(_cdata)
+        except TypeError:
+            # No, its some type of pyton data, so clear it from _cdata and call init
+            unknown = _cdata
+            _cdata = None
+
+        super().__init__(_cdata=_cdata)
+
+        # if it's unknown, find the field it's destined for. This is easy for TPML_
+        # types becuase their is only one field.
+        if unknown:
+            tipe = ffi.typeof(self._cdata)
+
+            if tipe.kind == "pointer":
+                tipe = tipe.item
+
+            field_name = next((v[0] for v in tipe.fields if v[0] != "count"), None)
+
+            if len(kwargs) != 0:
+                raise RuntimeError(
+                    f"Ambigous call, try using key {field_name} in parameters"
+                )
+
+            kwargs[field_name] = unknown
+
+        elif len(kwargs) == 0:
+            return
+        elif len(kwargs) != 1:
+            raise RuntimeError(
+                f"Expected at most one key value pair, got: {len(kwargs)}"
+            )
+
+        key = [*kwargs][0]
+
+        cdata_array = self._cdata.__getattribute__(key)
+
+        if isinstance(kwargs[key], TPM_OBJECT):
+            kwargs[key] = [kwargs[key]]
+
+        if not isinstance(kwargs[key], (list, tuple)):
+            raise TypeError(
+                "Expected initializer for TPML data types to be a list or tuple"
+            )
+
+        for i, x in enumerate(kwargs[key]):
+            if not isinstance(x, TPM_OBJECT):
+                raise TypeError(
+                    f'Expected item at index {i} to be a TPM_OBJECT, got: "{type(x)}"'
+                )
+
+            cdata_array[i] = x._cdata[0]
+
+        self._cdata.count = len(kwargs[key])
+
     def __getattribute__(self, key):
 
         try:
@@ -1470,22 +1531,6 @@ class TPML_INTEL_PTT_PROPERTY(TPML_OBJECT):
 
 
 class TPML_PCR_SELECTION(TPML_OBJECT):
-    def __init__(self, pcr_selections=None, _cdata=None):
-        super().__init__(_cdata=_cdata)
-
-        if pcr_selections is None or len(pcr_selections) == 0:
-            return
-
-        if len(pcr_selections) > lib.TPM2_NUM_PCR_BANKS:
-            raise RuntimeError(
-                f"PCR Selection list greater than {lib.TPM2_NUM_PCR_BANKS}, "
-                f"got {len(pcr_selections)}"
-            )
-
-        self._cdata.count = len(pcr_selections)
-        for i, p in enumerate(pcr_selections):
-            self._cdata.pcrSelections[i] = p._cdata[0]
-
     @staticmethod
     def parse(selections):
 
