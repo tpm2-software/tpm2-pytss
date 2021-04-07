@@ -47,6 +47,8 @@ def TPM2B_pack(x, t="DIGEST"):
     r = ffi.new("TPM2B_{0} *".format(t))
     if x is None:
         return r
+    if isinstance(x, str):
+        x = x.encode()
     r.size = len(x)
     ffi.memmove(r.buffer, x, len(x))
     return r
