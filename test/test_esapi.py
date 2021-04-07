@@ -110,6 +110,12 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TSS2_Exception):
             self.ectx.HierarchyChangeAuth(ESYS_TR.OWNER, "anotherpasswd")
 
+    def test_fulltest_YES(self):
+        self.ectx.SelfTest(True)
+
+    def test_fulltest_NO(self):
+        self.ectx.SelfTest(False)
+
 
 if __name__ == "__main__":
     unittest.main()
