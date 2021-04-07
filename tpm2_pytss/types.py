@@ -6,6 +6,8 @@ from ._libtpm2_pytss import ffi, lib
 
 from tpm2_pytss.utils import CLASS_INT_ATTRS_from_string, TPM2B_unpack, _chkrc
 
+import binascii
+
 
 class ParserAttributeError(Exception):
     pass
@@ -1364,8 +1366,13 @@ class TPM2B_MAX_NV_BUFFER(TPM2B_OBJECT):
     pass
 
 
-class TPM2B_NAME(TPM_OBJECT):
-    pass
+class TPM2B_NAME(TPM2B_OBJECT):
+    def __str__(self):
+
+        cdata = self._cdata
+        x = TPM2B_unpack(cdata, n="name")
+        h = binascii.hexlify(x)
+        return h.decode()
 
 
 class TPM2B_NV_PUBLIC(TPM2B_OBJECT):
