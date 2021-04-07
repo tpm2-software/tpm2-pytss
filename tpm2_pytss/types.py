@@ -895,6 +895,8 @@ class TPM_OBJECT(object):
         try:
             # Get _cdata without invoking getattr
             _cdata = object.__getattribute__(self, "_cdata")
+            if isinstance(value, TPM_OBJECT):
+                value = value._cdata[0]
             setattr(_cdata, key, value)
         except (AttributeError, TypeError):
             return object.__setattr__(self, key, value)
