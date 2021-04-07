@@ -101,7 +101,7 @@ class TypesTest(unittest.TestCase):
         second = TPMS_PCR_SELECTION.parse("sha384:all")
         third = TPMS_PCR_SELECTION.parse("sha1:1,3")
 
-        pcr_sels = TPML_PCR_SELECTION(pcrSelections=[first, second, third])
+        pcr_sels = TPML_PCR_SELECTION([first, second, third])
         self.assertEqual(pcr_sels.count, 3)
 
         x = pcr_sels.pcrSelections[0]
