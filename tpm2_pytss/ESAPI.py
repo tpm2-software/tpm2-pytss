@@ -67,10 +67,10 @@ class ESAPI:
         toDoList = ffi.new("TPML_ALG **")
         _chkrc(
             lib.Esys_IncrementalSelfTest(
-                self.ctx, session1, session2, session3, toTest, toDoList
+                self.ctx, session1, session2, session3, toTest._cdata, toDoList
             )
         )
-        return toDoList[0]
+        return TPML_ALG(toDoList[0])
 
     def GetTestResult(
         self, session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE
