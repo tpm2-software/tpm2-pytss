@@ -116,6 +116,10 @@ class TestEsys(TSS2_EsapiTest):
     def test_fulltest_NO(self):
         self.ectx.SelfTest(False)
 
+    def test_incremental_self_test(self):
+        algs = TPML_ALG.parse("rsa,ecc,xor,aes,cbc")
+
+        self.ectx.IncrementalSelfTest(algs)
 
 
 if __name__ == "__main__":
