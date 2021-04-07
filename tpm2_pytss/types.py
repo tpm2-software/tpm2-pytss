@@ -1036,9 +1036,46 @@ class TPML_OBJECT(TPM_OBJECT):
 
         return l
 
+    def __getitem__(self, item):
+        try:
+            return object.__getitem__(self, item)
+        except AttributeError:
+            pass
+
+        if not isinstance(item, (int, slice)):
+            raise TypeError(
+                f"list indices must be integers or slices, not {type(item)}"
+            )
+
+        # figure out what part named _cdata to go into
+        tipe = ffi.typeof(self._cdata)
+        if tipe.kind == "pointer":
+            tipe = tipe.item
+
+        field_name = next((v[0] for v in tipe.fields if v[0] != "count"), None)
+
+        if isinstance(item, slice):
+            if item.stop is None:
+                item = slice(item.start, len(self) - 1, item.step)
+
+        # git the cdata field
+        cdata_list = self._cdata.__getattribute__(field_name)
+
+        # return what was requested
+        raw_data = cdata_list[item]
+
+        if isinstance(item, int):
+            return self._getitem_unpacker(raw_data)
+
+        return [self._getitem_unpacker(x) for x in raw_data]
+
     def __len__(self):
 
         return self._cdata.count
+
+    @staticmethod
+    def _getitem_unpacker(x):
+        return x
 
 
 class TPMU_PUBLIC_PARMS(TPM_OBJECT):
@@ -1485,8 +1522,13 @@ class TPML_AC_CAPABILITIES(TPML_OBJECT):
     pass
 
 
-class TPML_ALG(TPM_OBJECT):
-    pass
+class TPML_ALG(TPML_OBJECT):
+    @classmethod
+    def parse(cls, algorithms):
+
+        alglist = [TPM2_ALG.parse(a) for a in algorithms.split(",")]
+
+        return TPML_ALG(alglist)
 
 
 class TPML_ALG_PROPERTY(TPML_OBJECT):
@@ -1502,17 +1544,9 @@ class TPML_CCA(TPML_OBJECT):
 
 
 class TPML_DIGEST(TPML_OBJECT):
-    def __getitem__(self, item):
-        try:
-            return object.__getitem__(self, item)
-        except AttributeError:
-            if isinstance(item, slice):
-                if item.stop is None:
-                    item = slice(item.start, len(self) - 1, item.step)
-                digest_list = self._cdata.digests[item]
-                return [TPM2B_unpack(x) for x in digest_list]
-
-            return TPM2B_unpack(self._cdata.digests[item])
+    @staticmethod
+    def _getitem_unpacker(x):
+        return TPM2B_unpack(x)
 
 
 class TPML_DIGEST_VALUES(TPML_OBJECT):
