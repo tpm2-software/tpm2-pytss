@@ -44,6 +44,8 @@ def TPM2B_pack(x, t="DIGEST"):
     if t.startswith("TPM2B_"):
         t = t[6:]
     r = ffi.new("TPM2B_{0} *".format(t))
+    if x is None:
+        return r
     r.size = len(x)
     ffi.memmove(r.buffer, x, len(x))
     return r
