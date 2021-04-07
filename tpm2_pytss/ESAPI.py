@@ -1814,14 +1814,19 @@ class ESAPI:
         self,
         authHandle,
         newAuth,
-        session1=ESYS_TR.NONE,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
         _chkrc(
             lib.Esys_HierarchyChangeAuth(
-                self.ctx, authHandle, session1, session2, session3, newAuth
+                self.ctx,
+                authHandle,
+                session1,
+                session2,
+                session3,
+                TPM2B_pack(newAuth, t="TPM2B_AUTH"),
             )
         )
 
