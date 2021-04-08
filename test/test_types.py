@@ -917,6 +917,69 @@ class TypesTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             TPML_ALG.parse("aes,rsa,foo")
 
+    def test_TPML_ALG_setitem_single(self):
+        t = TPML_ALG()
+        t[0] = TPM2_ALG.AES
+        t[2] = TPM2_ALG.CAMELLIA
+        t[8] = TPM2_ALG.ECDH
+        self.assertEqual(t[0], TPM2_ALG.AES)
+        self.assertEqual(t[2], TPM2_ALG.CAMELLIA)
+        self.assertEqual(t[8], TPM2_ALG.ECDH)
+        self.assertEqual(len(t), 9)
+
+    def test_TPML_ALG_setitem_slices(self):
+        t = TPML_ALG()
+        t[0:4] = [TPM2_ALG.AES, TPM2_ALG.CAMELLIA, TPM2_ALG.ECDH, TPM2_ALG.ECMQV]
+        self.assertEqual(t[0], TPM2_ALG.AES)
+        self.assertEqual(t[1], TPM2_ALG.CAMELLIA)
+        self.assertEqual(t[2], TPM2_ALG.ECDH)
+        self.assertEqual(t[3], TPM2_ALG.ECMQV)
+        self.assertEqual(len(t), 4)
+
+    def test_TPML_ALG_setitem_slices_with_step(self):
+        t = TPML_ALG()
+        t[0:4:2] = [TPM2_ALG.AES, TPM2_ALG.ECDH]
+        self.assertEqual(t[0], TPM2_ALG.AES)
+        self.assertEqual(t[1], 0)
+        self.assertEqual(t[2], TPM2_ALG.ECDH)
+        self.assertEqual(t[3], 0)
+        self.assertEqual(len(t), 4)
+
+    def test_TPML_ALG_setitem_slices_with_too_many_unpack(self):
+
+        t = TPML_ALG()
+        with self.assertRaises(ValueError):
+            t[0:4:2] = [TPM2_ALG.AES, TPM2_ALG.ECDH, TPM2_ALG.CAMELLIA]
+
+    def test_TPML_ALG_setitem_slices_with_too_few_unpack(self):
+
+        t = TPML_ALG()
+        with self.assertRaises(ValueError):
+            t[0:4:2] = [TPM2_ALG.AES]
+
+    def test_TPML_ALG_setitem_slices_set_list_with_int_key(self):
+
+        t = TPML_ALG()
+        with self.assertRaises(TypeError):
+            t[0] = [TPM2_ALG.AES]
+
+    def test_TPML_PCR_SELECTION_setattr_slice(self):
+        t = TPML_PCR_SELECTION()
+        x = [
+            TPMS_PCR_SELECTION.parse("sha256:1,2,3"),
+            TPMS_PCR_SELECTION.parse("sha384:0,5,6"),
+            TPMS_PCR_SELECTION.parse("sha512:7"),
+        ]
+
+        t[0:3] = x
+        self.assertEqual(t[0].hash, TPM2_ALG.SHA256)
+        self.assertEqual(t[0].pcrSelect[0], 14)
+        self.assertEqual(t[1].hash, TPM2_ALG.SHA384)
+        self.assertEqual(t[1].pcrSelect[0], 97)
+        self.assertEqual(t[2].hash, TPM2_ALG.SHA512)
+        self.assertEqual(t[2].pcrSelect[0], 128)
+        self.assertEqual(len(t), 3)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1073,6 +1073,43 @@ class TPML_OBJECT(TPM_OBJECT):
 
         return self._cdata.count
 
+    def __setitem__(self, key, value):
+
+        if not isinstance(key, (int, slice)):
+            raise TypeError(f"list indices must be integers or slices, not {type(key)}")
+
+        if isinstance(key, int) and not isinstance(value, (TPM_OBJECT, int)):
+            raise TypeError(
+                f"expected value to be TPM_OBJECT or integer not {type(value)}"
+            )
+
+        tipe = ffi.typeof(self._cdata)
+        if tipe.kind == "pointer":
+            tipe = tipe.item
+
+        field_name = next((v[0] for v in tipe.fields if v[0] != "count"), None)
+
+        cdata_list = self._cdata.__getattribute__(field_name)
+
+        # make everything looks like slice
+        if isinstance(key, int):
+            key = slice(key, key + 1, 1)
+            value = [value]
+        elif key.step is None:
+            key = slice(key.start, key.stop, 1)
+
+        r = range(key.start, key.stop, key.step)
+        if len(r) != len(value):
+            raise ValueError("Expected {len(r)} items to unpack, got: {len(value)}")
+
+        for value_offset, cdata_offset in enumerate(r):
+            x = value[value_offset]
+            x = x._cdata[0] if isinstance(x, TPM_OBJECT) else x
+            cdata_list[cdata_offset] = x
+
+        if key.stop > self._cdata.count:
+            self._cdata.count = key.stop
+
     @staticmethod
     def _getitem_unpacker(x):
         return x
