@@ -10,6 +10,8 @@ from tpm2_pytss.utils import (
     _chkrc,
     fixup_cdata_kwargs,
     cpointer_to_ctype,
+    fixup_classname,
+    convert_to_python_native,
 )
 
 import binascii
@@ -836,7 +838,7 @@ class TPM_OBJECT(object):
 
         tipe = cpointer_to_ctype(self._cdata)
 
-        expected_cname = self._fixup_classname(tipe)
+        expected_cname = fixup_classname(tipe)
         # Because we alias TPM2B_AUTH as a TPM2B_DIGEST in the C code
         if (
             expected_cname != "TPM2B_DIGEST"
@@ -854,15 +856,6 @@ class TPM_OBJECT(object):
                 )
             self.__setattr__(k, v)
 
-    @staticmethod
-    def _fixup_classname(tipe):
-        # Some versions of tpm2-tss had anonymous structs, so the kind will be struct
-        # but the name will not contain it
-        if tipe.cname.startswith(tipe.kind):
-            return tipe.cname[len(tipe.kind) + 1 :]
-
-        return tipe.cname
-
     def __getattribute__(self, key):
         try:
             # go through object to avoid invoking THIS objects __getattribute__ call
@@ -876,27 +869,7 @@ class TPM_OBJECT(object):
             # Get the attribute they're looking for out of _cdata
             x = getattr(_cdata, key)
 
-            # type is reserved by python, so use tipe
-            tipe = None
-            try:
-                tipe = ffi.typeof(x)
-            except TypeError:
-                # Python native values wont ffi.typeof
-                return x
-
-            # Native arrays, like uint8_t[4] we don't wrap. We just let the underlying
-            # data type handle it.
-            if tipe.kind == "array" and tipe.cname.startswith("uint"):
-                return x
-
-            # if it's not a struct or union, we don't wrap it and thus we don't
-            # know what to do with it.
-            if tipe.kind != "struct" and tipe.kind != "union":
-                raise TypeError(f'Not struct or union, got: "{tipe.kind}"')
-
-            clsname = TPM_OBJECT._fixup_classname(tipe)
-            subclass = globals()[clsname]
-            obj = subclass(_cdata=x)
+            obj = convert_to_python_native(globals(), x)
             return obj
 
     def __setattr__(self, key, value):
@@ -1036,7 +1009,7 @@ class TPML_OBJECT(TPM_OBJECT):
 
         # subclasses in the arrays within the CTypes are fixed, so
         # we only need to do this once
-        clsname = TPM_OBJECT._fixup_classname(tipe.item)
+        clsname = fixup_classname(tipe.item)
         subclass = globals()[clsname]
 
         l = []
@@ -1049,6 +1022,7 @@ class TPML_OBJECT(TPM_OBJECT):
         return l
 
     def __getitem__(self, item):
+        item_was_int = isinstance(item, int)
         try:
             return object.__getitem__(self, item)
         except AttributeError:
@@ -1066,20 +1040,23 @@ class TPML_OBJECT(TPM_OBJECT):
 
         field_name = next((v[0] for v in tipe.fields if v[0] != "count"), None)
 
-        if isinstance(item, slice):
-            if item.stop is None:
-                item = slice(item.start, len(self) - 1, item.step)
-
-        # git the cdata field
-        cdata_list = self._cdata.__getattribute__(field_name)
-
-        # return what was requested
-        raw_data = cdata_list[item]
-
         if isinstance(item, int):
-            return self._getitem_unpacker(raw_data)
+            item = slice(item, item + 1)
 
-        return [self._getitem_unpacker(x) for x in raw_data]
+        if item.stop is None:
+            item = slice(item.start, len(self) - 1, item.step)
+
+        # get the cdata field
+        cdata_list = self._cdata.__getattribute__(field_name)
+        cdatas = cdata_list[item]
+
+        if len(cdatas) > 0 and not isinstance(cdatas[0], ffi.CData):
+            return cdatas[0] if item_was_int else cdatas
+
+        # convert it to python native
+        objects = [convert_to_python_native(globals(), x) for x in cdatas]
+
+        return objects[0] if item_was_int else objects
 
     def __len__(self):
 
@@ -1600,9 +1577,7 @@ class TPML_CCA(TPML_OBJECT):
 
 
 class TPML_DIGEST(TPML_OBJECT):
-    @staticmethod
-    def _getitem_unpacker(x):
-        return TPM2B_unpack(x)
+    pass
 
 
 class TPML_DIGEST_VALUES(TPML_OBJECT):

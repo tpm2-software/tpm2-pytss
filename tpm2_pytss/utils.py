@@ -115,3 +115,35 @@ def fixup_cdata_kwargs(this, _cdata, kwargs):
         return (_cdata, {})
 
     return (_cdata, kwargs)
+
+
+def convert_to_python_native(global_map, data):
+
+    if not isinstance(data, ffi.CData):
+        return data
+
+    tipe = ffi.typeof(data)
+
+    # Native arrays, like uint8_t[4] we don't wrap. We just let the underlying
+    # data type handle it.
+    if tipe.kind == "array" and tipe.cname.startswith("uint"):
+        return data
+
+    # if it's not a struct or union, we don't wrap it and thus we don't
+    # know what to do with it.
+    if tipe.kind != "struct" and tipe.kind != "union":
+        raise TypeError(f'Not struct or union, got: "{tipe.kind}"')
+
+    clsname = fixup_classname(tipe)
+    subclass = global_map[clsname]
+    obj = subclass(_cdata=data)
+    return obj
+
+
+def fixup_classname(tipe):
+    # Some versions of tpm2-tss had anonymous structs, so the kind will be struct
+    # but the name will not contain it
+    if tipe.cname.startswith(tipe.kind):
+        return tipe.cname[len(tipe.kind) + 1 :]
+
+    return tipe.cname
