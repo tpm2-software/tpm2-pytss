@@ -4,7 +4,13 @@ SPDX-License-Identifier: BSD-3
 
 from ._libtpm2_pytss import ffi, lib
 
-from tpm2_pytss.utils import CLASS_INT_ATTRS_from_string, TPM2B_unpack, _chkrc
+from tpm2_pytss.utils import (
+    CLASS_INT_ATTRS_from_string,
+    TPM2B_unpack,
+    _chkrc,
+    fixup_cdata_kwargs,
+    cpointer_to_ctype,
+)
 
 import binascii
 
@@ -825,14 +831,10 @@ class TPMA_MEMORY(TPM_FRIENDLY_INT):
 class TPM_OBJECT(object):
     def __init__(self, _cdata=None, **kwargs):
 
-        if _cdata is None:
-            _cdata = ffi.new(f"{self.__class__.__name__} *")
-
+        _cdata, kwargs = fixup_cdata_kwargs(self, _cdata, kwargs)
         self._cdata = _cdata
 
-        tipe = ffi.typeof(_cdata)
-        if tipe.kind == "pointer":
-            tipe = tipe.item
+        tipe = cpointer_to_ctype(self._cdata)
 
         expected_cname = self._fixup_classname(tipe)
         if expected_cname != self.__class__.__name__:
@@ -938,42 +940,12 @@ class TPM2B_OBJECT(TPM_OBJECT):
 class TPML_OBJECT(TPM_OBJECT):
     def __init__(self, _cdata=None, **kwargs):
 
-        # folks may call this routine without a keyword argument which means it may
-        # end up in _cdata, so we want to try and work this out
-        unknown = None
-        try:
-            # is _cdata actual ffi data?
-            ffi.typeof(_cdata)
-        except TypeError:
-            # No, its some type of pyton data, so clear it from _cdata and call init
-            unknown = _cdata
-            _cdata = None
-
+        _cdata, kwargs = fixup_cdata_kwargs(self, _cdata, kwargs)
         super().__init__(_cdata=_cdata)
 
-        # if it's unknown, find the field it's destined for. This is easy for TPML_
-        # types becuase their is only one field.
-        if unknown:
-            tipe = ffi.typeof(self._cdata)
-
-            if tipe.kind == "pointer":
-                tipe = tipe.item
-
-            field_name = next((v[0] for v in tipe.fields if v[0] != "count"), None)
-
-            if len(kwargs) != 0:
-                raise RuntimeError(
-                    f"Ambigous call, try using key {field_name} in parameters"
-                )
-
-            kwargs[field_name] = unknown
-
-        elif len(kwargs) == 0:
+        # Nothing todo
+        if len(kwargs) == 0:
             return
-        elif len(kwargs) != 1:
-            raise RuntimeError(
-                f"Expected at most one key value pair, got: {len(kwargs)}"
-            )
 
         key = [*kwargs][0]
 
