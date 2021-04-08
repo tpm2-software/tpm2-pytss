@@ -837,7 +837,12 @@ class TPM_OBJECT(object):
         tipe = cpointer_to_ctype(self._cdata)
 
         expected_cname = self._fixup_classname(tipe)
-        if expected_cname != self.__class__.__name__:
+        # Because we alias TPM2B_AUTH as a TPM2B_DIGEST in the C code
+        if (
+            expected_cname != "TPM2B_DIGEST"
+            and expected_cname != self.__class__.__name__
+            and "TPM2B_" not in expected_cname
+        ):
             raise TypeError(
                 f"Unexpected _cdata type {expected_cname}, expected {self.__class__.__name__}"
             )
@@ -899,8 +904,15 @@ class TPM_OBJECT(object):
         try:
             # Get _cdata without invoking getattr
             _cdata = object.__getattribute__(self, "_cdata")
+            tipe = ffi.typeof(_cdata)
             if isinstance(value, TPM_OBJECT):
                 value = value._cdata[0]
+            if (
+                "TPM2B_DIGEST" in tipe.cname
+                and key == "buffer"
+                and isinstance(value, str)
+            ):
+                value = value.encode()
             setattr(_cdata, key, value)
         except (AttributeError, TypeError):
             return object.__setattr__(self, key, value)
@@ -932,6 +944,34 @@ class TPM_OBJECT(object):
 
 
 class TPM2B_OBJECT(TPM_OBJECT):
+    def __init__(self, _cdata=None, **kwargs):
+        _cdata, kwargs = fixup_cdata_kwargs(self, _cdata, kwargs)
+        super().__init__(_cdata, **kwargs)
+
+        # we don't set size on nested compount TPM2B structures, like TPM2B_PUBLIC
+        tipe = ffi.typeof(_cdata)
+        if "TPM2B_DIGEST" not in tipe.cname:
+            return
+
+        # if their is nothing to update OR the caller passed both the
+        # buffer AND the size, their is nothing to do.
+        if len(kwargs) == 0 or len(kwargs) == 2:
+            return
+
+        key = [*kwargs][0]
+        value = kwargs[key]
+        if len(kwargs) == 0:
+            return
+
+        # update the len
+        _cdata.size = len(value)
+
+    def __getattribute__(self, key):
+        value = super().__getattribute__(key)
+        if key == "buffer":
+            value = ffi.buffer(value, self._cdata.size)
+        return value
+
     def __len__(self):
         cdata = self._cdata
         return cdata.size
@@ -1870,6 +1910,7 @@ class TPMU_SYM_MODE(TPM_OBJECT):
 
 class TPMT_SYM_DEF(TPM_OBJECT):
     pass
+
 
 class TPM2B_AUTH(TPM2B_OBJECT):
     pass

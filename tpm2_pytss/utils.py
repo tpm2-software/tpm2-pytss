@@ -84,12 +84,11 @@ def fixup_cdata_kwargs(this, _cdata, kwargs):
 
     # folks may call this routine without a keyword argument which means it may
     # end up in _cdata, so we want to try and work this out
-    null_cdata = _cdata == None
     unknown = None
     try:
         # is _cdata actual ffi data?
         ffi.typeof(_cdata)
-    except TypeError:
+    except (TypeError, ffi.error):
         # No, its some type of pyton data, so clear it from _cdata and call init
         unknown = _cdata
         _cdata = None
@@ -114,7 +113,5 @@ def fixup_cdata_kwargs(this, _cdata, kwargs):
         kwargs[field_name] = unknown
     elif len(kwargs) == 0:
         return (_cdata, {})
-    elif not null_cdata and len(kwargs) != 1:
-        raise RuntimeError(f"Expected at most one key value pair, got: {len(kwargs)}")
 
     return (_cdata, kwargs)
