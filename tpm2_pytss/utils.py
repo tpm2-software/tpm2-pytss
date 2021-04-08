@@ -71,3 +71,50 @@ def CLASS_INT_ATTRS_from_string(cls, str_value, fixup_map=None):
         str_value = fixup_map[str_value.upper()]
 
     return friendly[str_value.upper()]
+
+
+def cpointer_to_ctype(x):
+    tipe = ffi.typeof(x)
+    if tipe.kind == "pointer":
+        tipe = tipe.item
+    return tipe
+
+
+def fixup_cdata_kwargs(this, _cdata, kwargs):
+
+    # folks may call this routine without a keyword argument which means it may
+    # end up in _cdata, so we want to try and work this out
+    null_cdata = _cdata == None
+    unknown = None
+    try:
+        # is _cdata actual ffi data?
+        ffi.typeof(_cdata)
+    except TypeError:
+        # No, its some type of pyton data, so clear it from _cdata and call init
+        unknown = _cdata
+        _cdata = None
+
+        if _cdata is None:
+            _cdata = ffi.new(f"{this.__class__.__name__} *")
+
+    # if it's unknown, find the field it's destined for. This is easy for TPML_
+    # and TPM2B_ types because their is only one field.
+    if unknown is not None:
+        tipe = cpointer_to_ctype(_cdata)
+
+        # ignore the field that is size or count, and get the one for the data
+        size_field_name = "size" if "TPM2B_" in tipe.cname else "count"
+        field_name = next((v[0] for v in tipe.fields if v[0] != size_field_name), None)
+
+        if len(kwargs) != 0:
+            raise RuntimeError(
+                f"Ambigous call, try using key {field_name} in parameters"
+            )
+
+        kwargs[field_name] = unknown
+    elif len(kwargs) == 0:
+        return (_cdata, {})
+    elif not null_cdata and len(kwargs) != 1:
+        raise RuntimeError(f"Expected at most one key value pair, got: {len(kwargs)}")
+
+    return (_cdata, kwargs)
