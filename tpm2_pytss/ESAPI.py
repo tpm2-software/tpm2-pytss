@@ -120,6 +120,10 @@ class ESAPI:
         sessionHandleObject = sessionHandle[0]
         return sessionHandleObject
 
+    def TRSess_SetAttributes(self, session, attributes, mask=0xFF):
+
+        _chkrc(lib.Esys_TRSess_SetAttributes(self.ctx, session, attributes, mask))
+
     def PolicyRestart(
         self,
         sessionHandle,
