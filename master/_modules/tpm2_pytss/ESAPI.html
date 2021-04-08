@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>tpm2_pytss.ESAPI &#8212; tpm2-pytss 0.1.dev1+g48ace72 documentation</title>
+    <title>tpm2_pytss.ESAPI &#8212; tpm2-pytss 0.1.dev1+g81cddce documentation</title>
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -100,10 +100,10 @@
         <span class="n">toDoList</span> <span class="o">=</span> <span class="n">ffi</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;TPML_ALG **&quot;</span><span class="p">)</span>
         <span class="n">_chkrc</span><span class="p">(</span>
             <span class="n">lib</span><span class="o">.</span><span class="n">Esys_IncrementalSelfTest</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="p">,</span> <span class="n">session1</span><span class="p">,</span> <span class="n">session2</span><span class="p">,</span> <span class="n">session3</span><span class="p">,</span> <span class="n">toTest</span><span class="p">,</span> <span class="n">toDoList</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="p">,</span> <span class="n">session1</span><span class="p">,</span> <span class="n">session2</span><span class="p">,</span> <span class="n">session3</span><span class="p">,</span> <span class="n">toTest</span><span class="o">.</span><span class="n">_cdata</span><span class="p">,</span> <span class="n">toDoList</span>
             <span class="p">)</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">toDoList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+        <span class="k">return</span> <span class="n">TPML_ALG</span><span class="p">(</span><span class="n">toDoList</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="ESAPI.GetTestResult"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.GetTestResult">[docs]</a>    <span class="k">def</span> <span class="nf">GetTestResult</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span> <span class="n">session2</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span> <span class="n">session3</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span>
