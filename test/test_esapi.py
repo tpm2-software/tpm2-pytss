@@ -194,6 +194,43 @@ class TestEsys(TSS2_EsapiTest):
         random = self.ectx.GetRandom(4, session1=session)
         self.assertEqual(len(random), 4)
 
+    def test_start_authSession_enckey_bindkey(self):
+
+        alg = "rsa2048:aes128cfb"
+        attrs = TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS
+        inPublic = TPM2B_PUBLIC(TPMT_PUBLIC.parse(alg=alg, objectAttributes=attrs))
+        inSensitive = TPM2B_SENSITIVE_CREATE(
+            TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
+        )
+        outsideInfo = TPM2B_DATA()
+        creationPCR = TPML_PCR_SELECTION()
+
+        handle, _, _, _, _ = self.ectx.CreatePrimary(
+            ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
+        )
+
+        sym = TPMT_SYM_DEF(
+            algorithm=TPM2_ALG.XOR,
+            keyBits=TPMU_SYM_KEY_BITS(exclusiveOr=TPM2_ALG.SHA256),
+            mode=TPMU_SYM_MODE(aes=TPM2_ALG.CFB),
+        )
+
+        session = self.ectx.StartAuthSession(
+            tpmKey=handle,
+            bind=handle,
+            nonceCaller=None,
+            sessionType=TPM2_SE.POLICY,
+            symmetric=sym,
+            authHash=TPM2_ALG.SHA256,
+        )
+
+        self.ectx.TRSess_SetAttributes(
+            session, (TPMA_SESSION.ENCRYPT | TPMA_SESSION.DECRYPT)
+        )
+
+        random = self.ectx.GetRandom(4, session1=session)
+        self.assertEqual(len(random), 4)
+
 
 if __name__ == "__main__":
     unittest.main()
