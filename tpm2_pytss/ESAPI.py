@@ -83,7 +83,7 @@ class ESAPI:
                 self.ctx, session1, session2, session3, outData, testResult
             )
         )
-        return (outData[0], testResult[0])
+        return (TPM2B_MAX_BUFFER(outData[0]), TPM2_RC(testResult[0]))
 
     def StartAuthSession(
         self,
