@@ -98,6 +98,9 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        if nonceCaller is None:
+            nonceCaller = ffi.NULL
+
         sessionHandle = ffi.new("ESYS_TR *")
         _chkrc(
             lib.Esys_StartAuthSession(
@@ -109,7 +112,7 @@ class ESAPI:
                 session3,
                 nonceCaller,
                 sessionType,
-                symmetric,
+                symmetric._cdata,
                 authHash,
                 sessionHandle,
             )

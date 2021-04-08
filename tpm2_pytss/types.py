@@ -1894,3 +1894,7 @@ class TPMU_SYM_KEY_BITS(TPM_OBJECT):
 
 class TPMU_SYM_MODE(TPM_OBJECT):
     pass
+
+
+class TPMT_SYM_DEF(TPM_OBJECT):
+    pass

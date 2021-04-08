@@ -132,6 +132,33 @@ class TestEsys(TSS2_EsapiTest):
         )
         self.assertEqual(rc, TPM2_RC.SUCCESS)
 
+    def test_hmac_session(self):
+
+        sym = TPMT_SYM_DEF(
+            algorithm=TPM2_ALG.XOR,
+            keyBits=TPMU_SYM_KEY_BITS(exclusiveOr=TPM2_ALG.SHA256),
+            mode=TPMU_SYM_MODE(aes=TPM2_ALG.CFB),
+        )
+
+        hmac_session = self.ectx.StartAuthSession(
+            tpmKey=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            nonceCaller=None,
+            sessionType=TPM2_SE.HMAC,
+            symmetric=sym,
+            authHash=TPM2_ALG.SHA256,
+        )
+        self.assertTrue(hmac_session)
+        self.ectx.HierarchyChangeAuth(ESYS_TR.OWNER, "passwd", session1=hmac_session)
+
+        # force esys to forget about the 'good' password
+        self.ectx.setAuth(ESYS_TR.OWNER, "badpasswd")
+
+        with self.assertRaises(TSS2_Exception):
+            self.ectx.HierarchyChangeAuth(
+                ESYS_TR.OWNER, "anotherpasswd", session1=hmac_session
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
