@@ -265,7 +265,7 @@ class TypesTest(unittest.TestCase):
         digest = TPM2B_DIGEST(size=4, buffer=b"test")
 
         self.assertEqual(digest.size, 4)
-        b = ffi.buffer(digest.buffer, digest.size)
+        b = digest.buffer
         self.assertEqual(b, b"test")
 
         with self.assertRaises(
@@ -583,7 +583,7 @@ class TypesTest(unittest.TestCase):
         d, offset = TPM2B_DIGEST.Unmarshal(buf)
         self.assertEqual(offset, 7)
         self.assertEqual(d.size, 5)
-        db = ffi.buffer(d.buffer, d.size)
+        db = d.buffer
         self.assertEqual(db, b"test1")
 
     def test_TPMT_PUBLIC_empty(self):
@@ -979,6 +979,25 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(t[2].hash, TPM2_ALG.SHA512)
         self.assertEqual(t[2].pcrSelect[0], 128)
         self.assertEqual(len(t), 3)
+
+    def test_TPM2B_AUTH_empty(self):
+        x = TPM2B_AUTH()
+        self.assertEqual(x.size, 0)
+
+    def test_TPM2B_AUTH_bad_fields(self):
+        with self.assertRaises(AttributeError):
+            TPM2B_AUTH(foo="bar")
+
+    def test_TPM2B_AUTH_empty_str(self):
+        x = TPM2B_AUTH("")
+        self.assertEqual(x.size, 0)
+
+    def test_TPM2B_AUTH_set_str(self):
+        # You can send it in as a string
+        x = TPM2B_AUTH("password")
+        self.assertEqual(x.size, 8)
+        # but you get bytes back
+        self.assertEqual(x.buffer, b"password")
 
 
 if __name__ == "__main__":
