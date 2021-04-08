@@ -121,6 +121,17 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.IncrementalSelfTest(algs)
 
+    def test_incremental_resume_test(self):
+        algs = TPML_ALG.parse("rsa,ecc,xor,aes,cbc")
+
+        self.ectx.IncrementalSelfTest(algs)
+        toDo, rc = self.ectx.GetTestResult()
+        self.assertTrue(
+            isinstance(toDo, TPM2B_MAX_BUFFER),
+            f"Expected TODO list to be TPM2B_MAX_BUFFER, got: {type(toDo)}",
+        )
+        self.assertEqual(rc, TPM2_RC.SUCCESS)
+
 
 if __name__ == "__main__":
     unittest.main()
