@@ -834,7 +834,7 @@ class TPM_OBJECT(object):
     def __init__(self, _cdata=None, **kwargs):
 
         _cdata, kwargs = fixup_cdata_kwargs(self, _cdata, kwargs)
-        self._cdata = _cdata
+        object.__setattr__(self, "_cdata", _cdata)
 
         tipe = cpointer_to_ctype(self._cdata)
 
@@ -873,21 +873,26 @@ class TPM_OBJECT(object):
             return obj
 
     def __setattr__(self, key, value):
+
+        _cdata = object.__getattribute__(self, "_cdata")
+        tipe = ffi.typeof(_cdata)
+        if isinstance(value, TPM_OBJECT):
+            value = value._cdata[0]
+        if "TPM2B_DIGEST" in tipe.cname and key == "buffer" and isinstance(value, str):
+            value = value.encode()
+
         try:
             # Get _cdata without invoking getattr
-            _cdata = object.__getattribute__(self, "_cdata")
-            tipe = ffi.typeof(_cdata)
-            if isinstance(value, TPM_OBJECT):
-                value = value._cdata[0]
-            if (
-                "TPM2B_DIGEST" in tipe.cname
-                and key == "buffer"
-                and isinstance(value, str)
-            ):
-                value = value.encode()
             setattr(_cdata, key, value)
         except AttributeError:
             return object.__setattr__(self, key, value)
+        except TypeError as e:
+            subdata = getattr(_cdata, key)
+            if not "TPM2B_DIGEST" in ffi.typeof(subdata).cname:
+                raise e
+
+            # recurse intentionally to set it with a python type
+            setattr(self, key, TPM2B_DIGEST(value))
 
     def Marshal(self):
         mfunc = getattr(lib, f"Tss2_MU_{self.__class__.__name__}_Marshal", None)
@@ -947,6 +952,23 @@ class TPM2B_OBJECT(TPM_OBJECT):
     def __len__(self):
         cdata = self._cdata
         return cdata.size
+
+    def __bytes__(self):
+
+        _cdata = self._cdata
+
+        # not everything uses .buffer, for instance TPM2B_NAME uses .name
+        tipe = cpointer_to_ctype(_cdata)
+        field_name = next((v[0] for v in tipe.fields if v[0] != "size"), None)
+
+        buffer = TPM2B_unpack(_cdata, n=field_name)
+
+        return buffer
+
+    def __str__(self):
+        b = bytes(self)
+        h = binascii.hexlify(b)
+        return h.decode()
 
 
 class TPML_OBJECT(TPM_OBJECT):
@@ -1491,12 +1513,7 @@ class TPM2B_MAX_NV_BUFFER(TPM2B_OBJECT):
 
 
 class TPM2B_NAME(TPM2B_OBJECT):
-    def __str__(self):
-
-        cdata = self._cdata
-        x = TPM2B_unpack(cdata, n="name")
-        h = binascii.hexlify(x)
-        return h.decode()
+    pass
 
 
 class TPM2B_NV_PUBLIC(TPM2B_OBJECT):

@@ -2,6 +2,7 @@
 """
 SPDX-License-Identifier: BSD-3
 """
+import binascii
 import itertools
 import unittest
 
@@ -998,6 +999,13 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(x.size, 8)
         # but you get bytes back
         self.assertEqual(x.buffer, b"password")
+        self.assertEqual(bytes(x), b"password")
+
+    def test_TPMS_SENSITIVE_CREATE_with_string(self):
+
+        x = TPMS_SENSITIVE_CREATE(userAuth="password")
+        p = str(x.userAuth)
+        self.assertEqual(p, binascii.hexlify("password".encode()).decode())
 
 
 if __name__ == "__main__":
