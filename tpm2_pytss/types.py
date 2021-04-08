@@ -873,7 +873,6 @@ class TPM_OBJECT(object):
             return obj
 
     def __setattr__(self, key, value):
-        # print(f"SET ATTRIBUTE {key}")
         try:
             # Get _cdata without invoking getattr
             _cdata = object.__getattribute__(self, "_cdata")
