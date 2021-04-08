@@ -1870,3 +1870,6 @@ class TPMU_SYM_MODE(TPM_OBJECT):
 
 class TPMT_SYM_DEF(TPM_OBJECT):
     pass
+
+class TPM2B_AUTH(TPM2B_OBJECT):
+    pass
