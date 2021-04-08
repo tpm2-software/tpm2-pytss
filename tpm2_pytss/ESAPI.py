@@ -1702,7 +1702,7 @@ class ESAPI:
         inPublic,
         outsideInfo,
         creationPCR,
-        session1=ESYS_TR.NONE,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
