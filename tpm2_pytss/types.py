@@ -887,7 +887,7 @@ class TPM_OBJECT(object):
             ):
                 value = value.encode()
             setattr(_cdata, key, value)
-        except (AttributeError, TypeError):
+        except AttributeError:
             return object.__setattr__(self, key, value)
 
     def Marshal(self):
