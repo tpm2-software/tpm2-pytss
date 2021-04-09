@@ -100,6 +100,10 @@ class ESAPI:
 
         if nonceCaller is None:
             nonceCaller = ffi.NULL
+        elif isinstance(nonceCaller, TPM_OBJECT):
+            nonceCaller = nonceCaller._cdata
+        else:
+            raise TypeError("Expected nonceCaller to be None or TPM_OBJECT")
 
         sessionHandle = ffi.new("ESYS_TR *")
         _chkrc(

@@ -1905,3 +1905,7 @@ class TPMT_SYM_DEF(TPM_OBJECT):
 
 class TPM2B_AUTH(TPM2B_OBJECT):
     pass
+
+
+class TPM2B_NONCE(TPM2B_OBJECT):
+    pass
