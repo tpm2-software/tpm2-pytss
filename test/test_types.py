@@ -981,6 +981,36 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(t[2].pcrSelect[0], 128)
         self.assertEqual(len(t), 3)
 
+    def test_TPML_PCR_SELECTION_iterator(self):
+        pcrselections = TPML_PCR_SELECTION.parse("sha256:1,2,3+sha384:0,5,6+sha512:7")
+
+        self.assertEqual(len(pcrselections), 3)
+
+        for i, selection in enumerate(pcrselections):
+
+            if i == 0:
+                self.assertEqual(selection.hash, TPM2_ALG.SHA256)
+                self.assertEqual(selection.pcrSelect[0], 14)
+            elif i == 1:
+                self.assertEqual(selection.hash, TPM2_ALG.SHA384)
+                self.assertEqual(selection.pcrSelect[0], 97)
+            elif i == 2:
+                self.assertEqual(selection.hash, TPM2_ALG.SHA512)
+                self.assertEqual(selection.pcrSelect[0], 128)
+
+        # make sure state resets
+        for i, selection in enumerate(pcrselections):
+
+            if i == 0:
+                self.assertEqual(selection.hash, TPM2_ALG.SHA256)
+                self.assertEqual(selection.pcrSelect[0], 14)
+            elif i == 1:
+                self.assertEqual(selection.hash, TPM2_ALG.SHA384)
+                self.assertEqual(selection.pcrSelect[0], 97)
+            elif i == 2:
+                self.assertEqual(selection.hash, TPM2_ALG.SHA512)
+                self.assertEqual(selection.pcrSelect[0], 128)
+
     def test_TPM2B_AUTH_empty(self):
         x = TPM2B_AUTH()
         self.assertEqual(x.size, 0)
