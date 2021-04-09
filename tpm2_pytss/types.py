@@ -971,6 +971,24 @@ class TPM2B_OBJECT(TPM_OBJECT):
         return h.decode()
 
 
+class TPML_Iterator(object):
+    def __init__(self, tpml):
+        self._tpml = tpml
+        self._index = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+
+        if self._index > self._tpml.count - 1:
+            raise StopIteration
+
+        x = self._tpml[self._index]
+        self._index = self._index + 1
+        return x
+
+
 class TPML_OBJECT(TPM_OBJECT):
     def __init__(self, _cdata=None, **kwargs):
 
@@ -1119,6 +1137,9 @@ class TPML_OBJECT(TPM_OBJECT):
 
         if key.stop > self._cdata.count:
             self._cdata.count = key.stop
+
+    def __iter__(self):
+        return TPML_Iterator(self)
 
     @staticmethod
     def _getitem_unpacker(x):
