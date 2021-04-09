@@ -190,7 +190,7 @@ class ESAPI:
         parentHandle,
         inPrivate,
         inPublic,
-        session1=ESYS_TR.NONE,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
@@ -203,12 +203,12 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                inPrivate,
-                inPublic,
+                inPrivate._cdata,
+                inPublic._cdata,
                 objectHandle,
             )
         )
-        objectHandleObject = objectHandle
+        objectHandleObject = objectHandle[0]
         return objectHandleObject
 
     def LoadExternal(
