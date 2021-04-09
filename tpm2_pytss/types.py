@@ -1141,10 +1141,6 @@ class TPML_OBJECT(TPM_OBJECT):
     def __iter__(self):
         return TPML_Iterator(self)
 
-    @staticmethod
-    def _getitem_unpacker(x):
-        return x
-
 
 class TPMU_PUBLIC_PARMS(TPM_OBJECT):
     pass
