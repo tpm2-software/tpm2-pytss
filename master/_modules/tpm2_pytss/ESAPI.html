@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>tpm2_pytss.ESAPI &#8212; tpm2-pytss 0.1.dev1+g81cddce documentation</title>
+    <title>tpm2_pytss.ESAPI &#8212; tpm2-pytss 0.1.dev1+g53e9e94 documentation</title>
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -116,7 +116,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="p">,</span> <span class="n">session1</span><span class="p">,</span> <span class="n">session2</span><span class="p">,</span> <span class="n">session3</span><span class="p">,</span> <span class="n">outData</span><span class="p">,</span> <span class="n">testResult</span>
             <span class="p">)</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">outData</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">testResult</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
+        <span class="k">return</span> <span class="p">(</span><span class="n">TPM2B_MAX_BUFFER</span><span class="p">(</span><span class="n">outData</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">TPM2_RC</span><span class="p">(</span><span class="n">testResult</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span></div>
 
 <div class="viewcode-block" id="ESAPI.StartAuthSession"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.StartAuthSession">[docs]</a>    <span class="k">def</span> <span class="nf">StartAuthSession</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -131,6 +131,9 @@
         <span class="n">session3</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
     <span class="p">):</span>
 
+        <span class="k">if</span> <span class="n">nonceCaller</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">nonceCaller</span> <span class="o">=</span> <span class="n">ffi</span><span class="o">.</span><span class="n">NULL</span>
+
         <span class="n">sessionHandle</span> <span class="o">=</span> <span class="n">ffi</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;ESYS_TR *&quot;</span><span class="p">)</span>
         <span class="n">_chkrc</span><span class="p">(</span>
             <span class="n">lib</span><span class="o">.</span><span class="n">Esys_StartAuthSession</span><span class="p">(</span>
@@ -142,13 +145,17 @@
                 <span class="n">session3</span><span class="p">,</span>
                 <span class="n">nonceCaller</span><span class="p">,</span>
                 <span class="n">sessionType</span><span class="p">,</span>
-                <span class="n">symmetric</span><span class="p">,</span>
+                <span class="n">symmetric</span><span class="o">.</span><span class="n">_cdata</span><span class="p">,</span>
                 <span class="n">authHash</span><span class="p">,</span>
                 <span class="n">sessionHandle</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)</span>
         <span class="n">sessionHandleObject</span> <span class="o">=</span> <span class="n">sessionHandle</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">sessionHandleObject</span></div>
+
+<div class="viewcode-block" id="ESAPI.TRSess_SetAttributes"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.TRSess_SetAttributes">[docs]</a>    <span class="k">def</span> <span class="nf">TRSess_SetAttributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">attributes</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="mh">0xFF</span><span class="p">):</span>
+
+        <span class="n">_chkrc</span><span class="p">(</span><span class="n">lib</span><span class="o">.</span><span class="n">Esys_TRSess_SetAttributes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">attributes</span><span class="p">,</span> <span class="n">mask</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="ESAPI.PolicyRestart"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.PolicyRestart">[docs]</a>    <span class="k">def</span> <span class="nf">PolicyRestart</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -1732,7 +1739,7 @@
         <span class="n">inPublic</span><span class="p">,</span>
         <span class="n">outsideInfo</span><span class="p">,</span>
         <span class="n">creationPCR</span><span class="p">,</span>
-        <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
+        <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">PASSWORD</span><span class="p">,</span>
         <span class="n">session2</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
         <span class="n">session3</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
     <span class="p">):</span>

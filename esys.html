@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Esys &#8212; tpm2-pytss 0.1.dev1+g81cddce documentation</title>
+    <title>Esys &#8212; tpm2-pytss 0.1.dev1+g53e9e94 documentation</title>
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -108,7 +108,7 @@
 
 <dl class="py method">
 <dt id="tpm2_pytss.ESAPI.CreatePrimary">
-<code class="sig-name descname"><span class="pre">CreatePrimary</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primaryHandle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inSensitive</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inPublic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outsideInfo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">creationPCR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4095</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4095</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session3</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4095</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tpm2_pytss/ESAPI.html#ESAPI.CreatePrimary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tpm2_pytss.ESAPI.CreatePrimary" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">CreatePrimary</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">primaryHandle</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inSensitive</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inPublic</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outsideInfo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">creationPCR</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">255</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4095</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session3</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4095</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tpm2_pytss/ESAPI.html#ESAPI.CreatePrimary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tpm2_pytss.ESAPI.CreatePrimary" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -574,6 +574,11 @@
 <dl class="py method">
 <dt id="tpm2_pytss.ESAPI.StirRandom">
 <code class="sig-name descname"><span class="pre">StirRandom</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">inData</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session1</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4095</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session2</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4095</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session3</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4095</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tpm2_pytss/ESAPI.html#ESAPI.StirRandom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tpm2_pytss.ESAPI.StirRandom" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="tpm2_pytss.ESAPI.TRSess_SetAttributes">
+<code class="sig-name descname"><span class="pre">TRSess_SetAttributes</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attributes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">255</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tpm2_pytss/ESAPI.html#ESAPI.TRSess_SetAttributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tpm2_pytss.ESAPI.TRSess_SetAttributes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
