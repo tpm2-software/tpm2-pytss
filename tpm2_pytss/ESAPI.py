@@ -260,7 +260,11 @@ class ESAPI:
                 qualifiedName,
             )
         )
-        return (outPublic[0], name[0], qualifiedName[0])
+        return (
+            TPM2B_PUBLIC(outPublic[0]),
+            TPM2B_NAME(name[0]),
+            TPM2B_NAME(qualifiedName[0]),
+        )
 
     def ActivateCredential(
         self,
