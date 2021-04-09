@@ -303,6 +303,36 @@ class TestEsys(TSS2_EsapiTest):
             isinstance(pub, TPM2B_PUBLIC), f"Expected TPM2B_PUBLIC, got: {type(pub)}"
         )
 
+    def test_load(self):
+
+        alg = "rsa2048:aes128cfb"
+        attrs = TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS
+        inPublic = TPM2B_PUBLIC(TPMT_PUBLIC.parse(alg=alg, objectAttributes=attrs))
+        inSensitive = TPM2B_SENSITIVE_CREATE(
+            TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
+        )
+        outsideInfo = TPM2B_DATA()
+        creationPCR = TPML_PCR_SELECTION()
+
+        parentHandle, _, _, _, _ = self.ectx.CreatePrimary(
+            ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
+        )
+
+        childInSensitive = TPM2B_SENSITIVE_CREATE(
+            TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("childpassword"))
+        )
+
+        alg = "rsa2048"
+        attrs = TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS
+        childInPublic = TPM2B_PUBLIC(TPMT_PUBLIC.parse(alg=alg, objectAttributes=attrs))
+
+        priv, pub, _, _, _ = self.ectx.Create(
+            parentHandle, childInSensitive, childInPublic, outsideInfo, creationPCR
+        )
+
+        childHandle = self.ectx.Load(parentHandle, priv, pub)
+        self.assertTrue(childHandle)
+
 
 if __name__ == "__main__":
     unittest.main()
