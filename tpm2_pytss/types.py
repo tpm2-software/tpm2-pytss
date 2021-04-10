@@ -920,65 +920,52 @@ class TPM_OBJECT(object):
         return cls(_cdata=_cdata), offset[0]
 
 
-class TPM2B_OBJECT(TPM_OBJECT):
-    def __init__(self, _cdata=None, **kwargs):
-        _cdata, kwargs = fixup_cdata_kwargs(self, _cdata, kwargs)
-        super().__init__(_cdata, **kwargs)
+class TPM2B_SIMPLE_OBJECT(TPM_OBJECT):
+    @classmethod
+    def _get_bytefield(cls):
+        tipe = ffi.typeof(f"{cls.__name__}")
+        for f in tipe.fields:
+            if f[0] != "size":
+                return f[0]
 
-        # if their is nothing to update OR the caller passed both the
-        # buffer AND the size, their is nothing to do.
-        if len(kwargs) == 0 or len(kwargs) == 2:
-            return
-
-        # we don't set size on nested compound TPM2B structures, like TPM2B_PUBLIC
-        tipe = cpointer_to_ctype(_cdata)
-        field_name = next((v[0] for v in tipe.fields if v[0] != "size"), None)
-
-        field_cdata = self._cdata.__getattribute__(field_name)
-        tipe = ffi.typeof(field_cdata)
-        if tipe.kind != "array":
-            return
-
-        key = [*kwargs][0]
-        value = kwargs[key]
-        if len(kwargs) == 0:
-            return
-
-        # update the len
-        _cdata.size = len(value)
+    def __setattr__(self, key, value):
+        _bytefield = type(self)._get_bytefield()
+        if key == "size":
+            raise AttributeError(f"{key} is read only")
+        super().__setattr__(key, value)
+        if key == _bytefield:
+            self._cdata.size = len(value)
 
     def __getattribute__(self, key):
-        value = super().__getattribute__(key)
-
-        try:
-            tipe = ffi.typeof(value)
-            if tipe.kind == "array":
-                return ffi.buffer(value, self._cdata.size)
-        except TypeError:
-            pass
-
-        return value
+        _bytefield = type(self)._get_bytefield()
+        if key == _bytefield:
+            b = getattr(self._cdata, _bytefield)
+            return memoryview(ffi.buffer(b, self._cdata.size))
+        return super().__getattribute__(key)
 
     def __len__(self):
-        cdata = self._cdata
-        return cdata.size
+        return self._cdata.size
+
+    def __getitem__(self, index):
+        _bytefield = type(self)._get_bytefield()
+        buf = getattr(self, _bytefield)
+        if isinstance(index, int):
+            if index >= self._cdata.size:
+                raise IndexError("out of range")
+            return buf[index]
+        elif isinstance(index, slice):
+            return buf[index]
+        else:
+            raise TypeError("index must an int or a slice")
 
     def __bytes__(self):
-
-        _cdata = self._cdata
-
-        # not everything uses .buffer, for instance TPM2B_NAME uses .name
-        tipe = cpointer_to_ctype(_cdata)
-        field_name = next((v[0] for v in tipe.fields if v[0] != "size"), None)
-
-        buffer = TPM2B_unpack(_cdata, n=field_name)
-
-        return buffer
+        _bytefield = type(self)._get_bytefield()
+        buf = getattr(self, _bytefield)
+        return bytes(buf)
 
     def __str__(self):
-        b = bytes(self)
-        h = binascii.hexlify(b)
-        return h.decode()
+        b = self.__bytes__()
+        return binascii.hexlify(b).decode()
 
 
 class TPML_Iterator(object):
@@ -1483,107 +1470,107 @@ class TPMT_PUBLIC(TPM_OBJECT):
         return templ
 
 
-class TPM2B_ATTEST(TPM2B_OBJECT):
+class TPM2B_ATTEST(TPM2B_SIMPLE_OBJECT):
     pass
 
 
-class TPM2B_CONTEXT_DATA(TPM2B_OBJECT):
+class TPM2B_CONTEXT_DATA(TPM2B_SIMPLE_OBJECT):
     pass
 
 
-class TPM2B_CONTEXT_SENSITIVE(TPM2B_OBJECT):
+class TPM2B_CONTEXT_SENSITIVE(TPM2B_SIMPLE_OBJECT):
     pass
 
 
-class TPM2B_CREATION_DATA(TPM2B_OBJECT):
+class TPM2B_CREATION_DATA(TPM_OBJECT):
     pass
 
 
-class TPM2B_DATA(TPM2B_OBJECT):
+class TPM2B_DATA(TPM2B_SIMPLE_OBJECT):
     pass
 
 
-class TPM2B_DIGEST(TPM2B_OBJECT):
+class TPM2B_DIGEST(TPM2B_SIMPLE_OBJECT):
     pass
 
 
-class TPM2B_ECC_PARAMETER(TPM2B_OBJECT):
+class TPM2B_ECC_PARAMETER(TPM2B_SIMPLE_OBJECT):
     pass
 
 
-class TPM2B_ECC_POINT(TPM2B_OBJECT):
+class TPM2B_ECC_POINT(TPM_OBJECT):
     pass
 
 
-class TPM2B_ENCRYPTED_SECRET(TPM2B_OBJECT):
+class TPM2B_ENCRYPTED_SECRET(TPM2B_SIMPLE_OBJECT):
     pass
 
 
-class TPM2B_EVENT(TPM2B_OBJECT):
+class TPM2B_EVENT(TPM2B_SIMPLE_OBJECT):
     pass
 
 
-class TPM2B_ID_OBJECT(TPM2B_OBJECT):
+class TPM2B_ID_OBJECT(TPM2B_SIMPLE_OBJECT):
     pass
 
 
-class TPM2B_IV(TPM2B_OBJECT):
+class TPM2B_IV(TPM2B_SIMPLE_OBJECT):
     pass
 
 
-class TPM2B_MAX_BUFFER(TPM2B_OBJECT):
+class TPM2B_MAX_BUFFER(TPM2B_SIMPLE_OBJECT):
     pass
 
 
-class TPM2B_MAX_NV_BUFFER(TPM2B_OBJECT):
+class TPM2B_MAX_NV_BUFFER(TPM2B_SIMPLE_OBJECT):
     pass
 
 
-class TPM2B_NAME(TPM2B_OBJECT):
+class TPM2B_NAME(TPM2B_SIMPLE_OBJECT):
     pass
 
 
-class TPM2B_NV_PUBLIC(TPM2B_OBJECT):
+class TPM2B_NV_PUBLIC(TPM_OBJECT):
     pass
 
 
-class TPM2B_PRIVATE(TPM2B_OBJECT):
+class TPM2B_PRIVATE(TPM2B_SIMPLE_OBJECT):
     pass
 
 
-class TPM2B_PRIVATE_KEY_RSA(TPM2B_OBJECT):
+class TPM2B_PRIVATE_KEY_RSA(TPM2B_SIMPLE_OBJECT):
     pass
 
 
-class TPM2B_PRIVATE_VENDOR_SPECIFIC(TPM2B_OBJECT):
+class TPM2B_PRIVATE_VENDOR_SPECIFIC(TPM2B_SIMPLE_OBJECT):
     pass
 
 
-class TPM2B_PUBLIC(TPM2B_OBJECT):
+class TPM2B_PUBLIC(TPM_OBJECT):
     pass
 
 
-class TPM2B_PUBLIC_KEY_RSA(TPM2B_OBJECT):
+class TPM2B_PUBLIC_KEY_RSA(TPM2B_SIMPLE_OBJECT):
     pass
 
 
-class TPM2B_SENSITIVE(TPM2B_OBJECT):
+class TPM2B_SENSITIVE(TPM_OBJECT):
     pass
 
 
-class TPM2B_SENSITIVE_CREATE(TPM2B_OBJECT):
+class TPM2B_SENSITIVE_CREATE(TPM_OBJECT):
     pass
 
 
-class TPM2B_SENSITIVE_DATA(TPM2B_OBJECT):
+class TPM2B_SENSITIVE_DATA(TPM2B_SIMPLE_OBJECT):
     pass
 
 
-class TPM2B_SYM_KEY(TPM2B_OBJECT):
+class TPM2B_SYM_KEY(TPM2B_SIMPLE_OBJECT):
     pass
 
 
-class TPM2B_TEMPLATE(TPM2B_OBJECT):
+class TPM2B_TEMPLATE(TPM2B_SIMPLE_OBJECT):
     pass
 
 
@@ -1930,9 +1917,9 @@ class TPMT_SYM_DEF(TPM_OBJECT):
     pass
 
 
-class TPM2B_AUTH(TPM2B_OBJECT):
+class TPM2B_AUTH(TPM2B_SIMPLE_OBJECT):
     pass
 
 
-class TPM2B_NONCE(TPM2B_OBJECT):
+class TPM2B_NONCE(TPM2B_SIMPLE_OBJECT):
     pass
