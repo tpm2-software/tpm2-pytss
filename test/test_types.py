@@ -263,16 +263,13 @@ class TypesTest(unittest.TestCase):
         )
 
     def test_TPM_OBJECT_init(self):
-        digest = TPM2B_DIGEST(size=4, buffer=b"test")
-
-        self.assertEqual(digest.size, 4)
-        b = digest.buffer
-        self.assertEqual(b, b"test")
+        pub = TPM2B_PUBLIC(publicArea=TPMT_PUBLIC(nameAlg=TPM2_ALG.SHA256))
+        self.assertEqual(pub.publicArea.nameAlg, TPM2_ALG.SHA256)
 
         with self.assertRaises(
-            AttributeError, msg="TPM2B_DIGEST has no field by the name of badfield"
+            AttributeError, msg="TPM2B_PUBLIC has no field by the name of badfield"
         ):
-            TPM2B_DIGEST(badfield=1)
+            TPM2B_PUBLIC(badfield=1)
 
     def test_TPM_OBJECT_init_cdata(self):
         with self.assertRaises(
@@ -574,7 +571,6 @@ class TypesTest(unittest.TestCase):
 
     def test_marshal(self):
         pb = TPM2B_PUBLIC()
-        pb.publicArea.authPolicy.size = 8
         pb.publicArea.authPolicy.buffer = b"password"
         b = pb.publicArea.authPolicy.Marshal()
         self.assertEqual(b, b"\x00\x08password")
@@ -1037,20 +1033,37 @@ class TypesTest(unittest.TestCase):
         p = str(x.userAuth)
         self.assertEqual(p, binascii.hexlify("password".encode()).decode())
 
-    def test_TPM2B_NAME(self):
-        name = binascii.unhexlify(
-            "000b34e9133541f7874f5ec2cd867b873b05cea0c1677b0cc7d740988e999bee5450"
-        )
-        print(len(name))
-        x = TPM2B_NAME(name)
-        self.assertEqual(x.size, 34)
-        n = bytes(x)
-        self.assertEqual(len(n), x.size)
-        self.assertEqual(n, name)
+    def test_TPM2B_SIMPLE_OBJECT(self):
+        bob = b"bunchofbytes"
+        dig = TPM2B_NAME(bob)
+        self.assertEqual(dig.name, bob)
+        self.assertEqual(len(dig), len(bob))
 
-    def test_TPM2B_PUBLIC_fail_from_bytes(self):
+        for i in range(0, len(dig)):
+            self.assertEqual(dig[i], bob[i])
+
+        with self.assertRaises(IndexError):
+            dig[len(dig)]
+
+        self.assertEqual(dig[0:3], b"bun")
+
+        self.assertEqual(dig[60:64], b"")
+
         with self.assertRaises(TypeError):
-            TPM2B_PUBLIC(b"0011223344556677889900")
+            dig["str"]
+
+        i = 0
+        for b in dig:
+            self.assertEqual(b, bob[i])
+            i = i + 1
+
+        b = bytes(dig)
+        self.assertEqual(b, bob)
+
+        with self.assertRaises(AttributeError):
+            dig.size = 1
+        with self.assertRaises(TypeError):
+            dig.name[0] = b"\x00"
 
 
 if __name__ == "__main__":
