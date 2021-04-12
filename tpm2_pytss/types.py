@@ -12,6 +12,7 @@ from tpm2_pytss.utils import (
     fixup_classname,
     convert_to_python_native,
 )
+from tpm2_pytss.crypto import public_from_pem, private_from_pem, public_to_pem
 
 import binascii
 
@@ -1546,7 +1547,35 @@ class TPM2B_PRIVATE_VENDOR_SPECIFIC(TPM2B_SIMPLE_OBJECT):
 
 
 class TPM2B_PUBLIC(TPM_OBJECT):
-    pass
+    @classmethod
+    def fromPEM(
+        cls,
+        data,
+        nameAlg=TPM2_ALG.SHA256,
+        objectAttributes=(
+            TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH
+        ),
+        symmetric=None,
+        scheme=None,
+    ):
+        p = cls()
+        public_from_pem(data, p)
+        p.publicArea.nameAlg = nameAlg
+        p.publicArea.objectAttributes = objectAttributes
+        if symmetric is None:
+            p.publicArea.parameters.asymDetail.symmetric.algorithm = TPM2_ALG.NULL
+        else:
+            p.publicArea.parameters.asymDetail.symmetric = symmetric
+        if scheme is None:
+            p.publicArea.parameters.asymDetail.scheme.scheme = TPM2_ALG.NULL
+        else:
+            p.publicArea.parameters.asymDetail.scheme.scheme = scheme
+        if p.publicArea.type == TPM2_ALG.ECC:
+            p.publicArea.parameters.eccDetail.kdf.scheme = TPM2_ALG.NULL
+        return p
+
+    def toPEM(self):
+        return public_to_pem(self)
 
 
 class TPM2B_PUBLIC_KEY_RSA(TPM2B_SIMPLE_OBJECT):
@@ -1554,7 +1583,11 @@ class TPM2B_PUBLIC_KEY_RSA(TPM2B_SIMPLE_OBJECT):
 
 
 class TPM2B_SENSITIVE(TPM_OBJECT):
-    pass
+    @classmethod
+    def fromPEM(cls, data):
+        p = cls()
+        private_from_pem(data, p)
+        return p
 
 
 class TPM2B_SENSITIVE_CREATE(TPM_OBJECT):
@@ -1921,4 +1954,16 @@ class TPM2B_AUTH(TPM2B_SIMPLE_OBJECT):
 
 
 class TPM2B_NONCE(TPM2B_SIMPLE_OBJECT):
+    pass
+
+
+class TPMU_PUBLIC_ID(TPM_OBJECT):
+    pass
+
+
+class TPMT_SENSITIVE(TPM_OBJECT):
+    pass
+
+
+class TPMU_SENSITIVE_COMPOSITE(TPM_OBJECT):
     pass

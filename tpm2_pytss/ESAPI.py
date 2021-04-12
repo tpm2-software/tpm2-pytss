@@ -228,8 +228,8 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                inPrivate,
-                inPublic,
+                inPrivate._cdata,
+                inPublic._cdata,
                 hierarchy,
                 objectHandle,
             )
