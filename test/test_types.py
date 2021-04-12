@@ -1037,6 +1037,17 @@ class TypesTest(unittest.TestCase):
         p = str(x.userAuth)
         self.assertEqual(p, binascii.hexlify("password".encode()).decode())
 
+    def test_TPM2B_NAME(self):
+        name = binascii.unhexlify(
+            "000b34e9133541f7874f5ec2cd867b873b05cea0c1677b0cc7d740988e999bee5450"
+        )
+        print(len(name))
+        x = TPM2B_NAME(name)
+        self.assertEqual(x.size, 34)
+        n = bytes(x)
+        self.assertEqual(len(n), x.size)
+        self.assertEqual(n, name)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -925,14 +925,18 @@ class TPM2B_OBJECT(TPM_OBJECT):
         _cdata, kwargs = fixup_cdata_kwargs(self, _cdata, kwargs)
         super().__init__(_cdata, **kwargs)
 
-        # we don't set size on nested compount TPM2B structures, like TPM2B_PUBLIC
-        tipe = ffi.typeof(_cdata)
-        if "TPM2B_DIGEST" not in tipe.cname:
-            return
-
         # if their is nothing to update OR the caller passed both the
         # buffer AND the size, their is nothing to do.
         if len(kwargs) == 0 or len(kwargs) == 2:
+            return
+
+        # we don't set size on nested compound TPM2B structures, like TPM2B_PUBLIC
+        tipe = cpointer_to_ctype(_cdata)
+        field_name = next((v[0] for v in tipe.fields if v[0] != "size"), None)
+
+        field_cdata = self._cdata.__getattribute__(field_name)
+        tipe = ffi.typeof(field_cdata)
+        if tipe.kind != "array":
             return
 
         key = [*kwargs][0]
@@ -945,8 +949,14 @@ class TPM2B_OBJECT(TPM_OBJECT):
 
     def __getattribute__(self, key):
         value = super().__getattribute__(key)
-        if key == "buffer":
-            value = ffi.buffer(value, self._cdata.size)
+
+        try:
+            tipe = ffi.typeof(value)
+            if tipe.kind == "array":
+                return ffi.buffer(value, self._cdata.size)
+        except TypeError:
+            pass
+
         return value
 
     def __len__(self):
