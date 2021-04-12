@@ -1048,6 +1048,10 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(len(n), x.size)
         self.assertEqual(n, name)
 
+    def test_TPM2B_PUBLIC_fail_from_bytes(self):
+        with self.assertRaises(TypeError):
+            TPM2B_PUBLIC(b"0011223344556677889900")
+
 
 if __name__ == "__main__":
     unittest.main()
