@@ -323,7 +323,7 @@ class ESAPI:
     def Unseal(
         self,
         itemHandle,
-        session1=ESYS_TR.NONE,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
@@ -332,7 +332,7 @@ class ESAPI:
         _chkrc(
             lib.Esys_Unseal(self.ctx, itemHandle, session1, session2, session3, outData)
         )
-        return outData[0]
+        return TPM2B_SENSITIVE_DATA(outData[0])
 
     def ObjectChangeAuth(
         self,

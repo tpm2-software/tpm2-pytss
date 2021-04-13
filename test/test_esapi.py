@@ -430,6 +430,51 @@ class TestEsys(TSS2_EsapiTest):
         )
         self.assertEqual(bytes(certInfo), b"this is my credential")
 
+    def test_unseal(self):
+
+        alg = "rsa2048:aes128cfb"
+        attrs = TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS
+        inPublic = TPM2B_PUBLIC(TPMT_PUBLIC.parse(alg=alg, objectAttributes=attrs))
+        inSensitive = TPM2B_SENSITIVE_CREATE(
+            TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
+        )
+        outsideInfo = TPM2B_DATA()
+        creationPCR = TPML_PCR_SELECTION()
+
+        parentHandle, _, _, _, _ = self.ectx.CreatePrimary(
+            ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
+        )
+
+        attrs = (
+            TPMA_OBJECT.USERWITHAUTH | TPMA_OBJECT.FIXEDPARENT | TPMA_OBJECT.FIXEDTPM
+        )
+
+        templ = TPMT_PUBLIC(
+            type=TPM2_ALG.KEYEDHASH, objectAttributes=attrs, nameAlg=TPM2_ALG.SHA256
+        )
+        templ.parameters.keyedHashDetail.scheme.scheme = TPM2_ALG.NULL
+        templ.parameters.keyedHashDetail.scheme.details.hmac.hashAlg = TPM2_ALG.SHA256
+        childInPublic = TPM2B_PUBLIC(templ)
+
+        childInSensitive = TPM2B_SENSITIVE_CREATE(
+            # TODO make sure this works without the buffer, and for other SIMPLE TPM2B types
+            TPMS_SENSITIVE_CREATE(
+                userAuth=TPM2B_AUTH("childpassword"),
+                data=TPM2B_SENSITIVE_DATA(b"sealedsecret"),
+            )
+        )
+
+        priv, pub, _, _, _ = self.ectx.Create(
+            parentHandle, childInSensitive, childInPublic, outsideInfo, creationPCR
+        )
+
+        childHandle = self.ectx.Load(parentHandle, priv, pub)
+
+        self.ectx.setAuth(childHandle, "childpassword")
+
+        secret = self.ectx.Unseal(childHandle)
+        self.assertEqual(bytes(secret), b"sealedsecret")
+
 
 if __name__ == "__main__":
     unittest.main()
