@@ -379,6 +379,57 @@ class TestEsys(TSS2_EsapiTest):
         self.assertTrue(name.size, 32)
         self.assertTrue(qname.size, 32)
 
+    def test_makecredential(self):
+
+        alg = "rsa2048:aes128cfb"
+        attrs = TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS
+        inPublic = TPM2B_PUBLIC(TPMT_PUBLIC.parse(alg=alg, objectAttributes=attrs))
+        inSensitive = TPM2B_SENSITIVE_CREATE(
+            TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
+        )
+        outsideInfo = TPM2B_DATA()
+        creationPCR = TPML_PCR_SELECTION()
+
+        parentHandle, _, _, _, _ = self.ectx.CreatePrimary(
+            ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
+        )
+
+        alg = "rsa2048"
+        attrs = (
+            TPMA_OBJECT.RESTRICTED
+            | TPMA_OBJECT.DECRYPT
+            | TPMA_OBJECT.USERWITHAUTH
+            | TPMA_OBJECT.SENSITIVEDATAORIGIN
+        )
+        childInPublic = TPM2B_PUBLIC(TPMT_PUBLIC.parse(alg=alg, objectAttributes=attrs))
+        childInSensitive = TPM2B_SENSITIVE_CREATE(
+            TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("childpassword"))
+        )
+
+        priv, pub, _, _, _ = self.ectx.Create(
+            parentHandle, childInSensitive, childInPublic, outsideInfo, creationPCR
+        )
+
+        childHandle = self.ectx.Load(parentHandle, priv, pub)
+
+        primaryKeyName = self.ectx.ReadPublic(parentHandle)[1]
+
+        credential = TPM2B_DIGEST("this is my credential")
+
+        # this can be done without a key as in tpm2-tools project, but for simpplicity
+        # use the TPM command, which uses the PUBLIC portion of the object and thus
+        # needs no auth.
+        credentialBlob, secret = self.ectx.MakeCredential(
+            childHandle, credential, primaryKeyName
+        )
+
+        self.ectx.setAuth(childHandle, "childpassword")
+
+        certInfo = self.ectx.ActivateCredential(
+            parentHandle, childHandle, credentialBlob, secret
+        )
+        self.assertEqual(bytes(certInfo), b"this is my credential")
+
 
 if __name__ == "__main__":
     unittest.main()

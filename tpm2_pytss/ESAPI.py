@@ -272,8 +272,8 @@ class ESAPI:
         keyHandle,
         credentialBlob,
         secret,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
+        session1=ESYS_TR.PASSWORD,
+        session2=ESYS_TR.PASSWORD,
         session3=ESYS_TR.NONE,
     ):
 
@@ -286,12 +286,12 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                credentialBlob,
-                secret,
+                credentialBlob._cdata,
+                secret._cdata,
                 certInfo,
             )
         )
-        return certInfo[0]
+        return TPM2B_DIGEST(certInfo[0])
 
     def MakeCredential(
         self,
@@ -312,13 +312,13 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                credential,
-                objectName,
+                credential._cdata,
+                objectName._cdata,
                 credentialBlob,
                 secret,
             )
         )
-        return (credentialBlob[0], secret[0])
+        return (TPM2B_ID_OBJECT(credentialBlob[0]), TPM2B_ENCRYPTED_SECRET(secret[0]))
 
     def Unseal(
         self,
