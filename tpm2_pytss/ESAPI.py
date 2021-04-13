@@ -6,7 +6,7 @@ from ._libtpm2_pytss import lib
 
 from .types import *
 
-from .utils import _chkrc, TPM2B_pack
+from .utils import _chkrc, TPM2B_pack, TPM2B_unpack
 
 
 class ESAPI:
