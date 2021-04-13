@@ -475,6 +475,53 @@ class TestEsys(TSS2_EsapiTest):
         secret = self.ectx.Unseal(childHandle)
         self.assertEqual(bytes(secret), b"sealedsecret")
 
+    def test_objectChangeAuth(self):
+
+        alg = "rsa2048:aes128cfb"
+        attrs = TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS
+        inPublic = TPM2B_PUBLIC(TPMT_PUBLIC.parse(alg=alg, objectAttributes=attrs))
+        inSensitive = TPM2B_SENSITIVE_CREATE(
+            TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
+        )
+        outsideInfo = TPM2B_DATA()
+        creationPCR = TPML_PCR_SELECTION()
+
+        parentHandle, _, _, _, _ = self.ectx.CreatePrimary(
+            ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
+        )
+
+        alg = "rsa2048"
+        attrs = (
+            TPMA_OBJECT.RESTRICTED
+            | TPMA_OBJECT.DECRYPT
+            | TPMA_OBJECT.USERWITHAUTH
+            | TPMA_OBJECT.SENSITIVEDATAORIGIN
+        )
+        childInPublic = TPM2B_PUBLIC(TPMT_PUBLIC.parse(alg=alg, objectAttributes=attrs))
+        childInSensitive = TPM2B_SENSITIVE_CREATE(
+            TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("childpassword"))
+        )
+
+        priv, pub, _, _, _ = self.ectx.Create(
+            parentHandle, childInSensitive, childInPublic, outsideInfo, creationPCR
+        )
+
+        childHandle = self.ectx.Load(parentHandle, priv, pub)
+
+        # force an error
+        self.ectx.setAuth(childHandle, "BADchildpassword")
+
+        with self.assertRaises(TSS2_Exception):
+            self.ectx.ObjectChangeAuth(childHandle, parentHandle, "newauth")
+
+        self.ectx.setAuth(childHandle, "childpassword")
+
+        self.ectx.ObjectChangeAuth(childHandle, parentHandle, TPM2B_AUTH("newauth"))
+
+        self.ectx.ObjectChangeAuth(childHandle, parentHandle, b"anotherauth")
+
+        self.ectx.ObjectChangeAuth(childHandle, parentHandle, "yetanotherone")
+
 
 if __name__ == "__main__":
     unittest.main()
