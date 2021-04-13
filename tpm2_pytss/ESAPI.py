@@ -339,10 +339,12 @@ class ESAPI:
         objectHandle,
         parentHandle,
         newAuth,
-        session1=ESYS_TR.NONE,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
+        if isinstance(newAuth, (str, bytes)):
+            newAuth = TPM2B_AUTH(newAuth)
 
         outPrivate = ffi.new("TPM2B_PRIVATE **")
         _chkrc(
@@ -353,11 +355,11 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                newAuth,
+                newAuth._cdata,
                 outPrivate,
             )
         )
-        return outPrivate[0]
+        return TPM2B_PRIVATE(outPrivate[0])
 
     def CreateLoaded(
         self,
