@@ -6,7 +6,6 @@ from ._libtpm2_pytss import ffi, lib
 
 from tpm2_pytss.utils import (
     CLASS_INT_ATTRS_from_string,
-    TPM2B_unpack,
     _chkrc,
     fixup_cdata_kwargs,
     cpointer_to_ctype,
