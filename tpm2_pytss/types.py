@@ -847,13 +847,25 @@ class TPM_OBJECT(object):
             raise TypeError(
                 f"Unexpected _cdata type {expected_cname}, expected {self.__class__.__name__}"
             )
-        fields = [x[0] for x in tipe.fields]
+        fields = {x[0]: x[1].type for x in tipe.fields}
         for k, v in kwargs.items():
             if k not in fields:
                 raise AttributeError(
                     f"{self.__class__.__name__} has no field by the name of {k}"
                 )
-            self.__setattr__(k, v)
+            cname = fields[k]
+            if cname.kind != "primitive":
+                clsname = fixup_classname(cname)
+                clazz = globals()[clsname]
+                # If subclass object is a TPM2B SIMPLE object, and we have a raw str, or bytes, convert
+                if issubclass(clazz, TPM2B_SIMPLE_OBJECT) and isinstance(
+                    v, (str, bytes)
+                ):
+                    _bytefield = clazz._get_bytefield()
+                    subobj = clazz(_cdata=None)
+                    setattr(subobj, _bytefield, v)
+                    v = subobj
+            TPM_OBJECT.__setattr__(self, k, v)
 
     def __getattribute__(self, key):
         try:
@@ -874,24 +886,13 @@ class TPM_OBJECT(object):
     def __setattr__(self, key, value):
 
         _cdata = object.__getattribute__(self, "_cdata")
-        tipe = ffi.typeof(_cdata)
         if isinstance(value, TPM_OBJECT):
             value = value._cdata[0]
-        if "TPM2B_DIGEST" in tipe.cname and key == "buffer" and isinstance(value, str):
-            value = value.encode()
-
         try:
             # Get _cdata without invoking getattr
             setattr(_cdata, key, value)
         except AttributeError:
             return object.__setattr__(self, key, value)
-        except TypeError as e:
-            subdata = getattr(_cdata, key)
-            if not "TPM2B_DIGEST" in ffi.typeof(subdata).cname:
-                raise e
-
-            # recurse intentionally to set it with a python type
-            setattr(self, key, TPM2B_DIGEST(value))
 
     def Marshal(self):
         mfunc = getattr(lib, f"Tss2_MU_{self.__class__.__name__}_Marshal", None)
@@ -920,6 +921,25 @@ class TPM_OBJECT(object):
 
 
 class TPM2B_SIMPLE_OBJECT(TPM_OBJECT):
+    def __init__(self, _cdata=None, **kwargs):
+
+        _cdata, kwargs = fixup_cdata_kwargs(self, _cdata, kwargs)
+        _bytefield = type(self)._get_bytefield()
+
+        for k, v in kwargs.items():
+            if k == "size":
+                raise AttributeError(f"{k} is read only")
+            if k != _bytefield:
+                raise AttributeError(f"{self.__name__} has no field {k}")
+
+            if isinstance(v, str):
+                v = v.encode()
+
+            setattr(_cdata, k, v)
+            _cdata.size = len(v)
+
+        super().__init__(_cdata=_cdata)
+
     @classmethod
     def _get_bytefield(cls):
         tipe = ffi.typeof(f"{cls.__name__}")
@@ -928,12 +948,18 @@ class TPM2B_SIMPLE_OBJECT(TPM_OBJECT):
                 return f[0]
 
     def __setattr__(self, key, value):
-        _bytefield = type(self)._get_bytefield()
+
         if key == "size":
             raise AttributeError(f"{key} is read only")
-        super().__setattr__(key, value)
+
+        _bytefield = type(self)._get_bytefield()
         if key == _bytefield:
+            if isinstance(value, str):
+                value = value.encode()
+            setattr(self._cdata, key, value)
             self._cdata.size = len(value)
+        else:
+            super().__setattr__(key, value)
 
     def __getattribute__(self, key):
         _bytefield = type(self)._get_bytefield()
