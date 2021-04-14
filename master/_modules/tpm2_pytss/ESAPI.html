@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>tpm2_pytss.ESAPI &#8212; tpm2-pytss 0.1.dev1+gdfbb821 documentation</title>
+    <title>tpm2_pytss.ESAPI &#8212; tpm2-pytss 0.1.dev1+gbe891e9 documentation</title>
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -356,7 +356,7 @@
 <div class="viewcode-block" id="ESAPI.Unseal"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.Unseal">[docs]</a>    <span class="k">def</span> <span class="nf">Unseal</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">itemHandle</span><span class="p">,</span>
-        <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
+        <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">PASSWORD</span><span class="p">,</span>
         <span class="n">session2</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
         <span class="n">session3</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
     <span class="p">):</span>
@@ -365,17 +365,19 @@
         <span class="n">_chkrc</span><span class="p">(</span>
             <span class="n">lib</span><span class="o">.</span><span class="n">Esys_Unseal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ctx</span><span class="p">,</span> <span class="n">itemHandle</span><span class="p">,</span> <span class="n">session1</span><span class="p">,</span> <span class="n">session2</span><span class="p">,</span> <span class="n">session3</span><span class="p">,</span> <span class="n">outData</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">outData</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+        <span class="k">return</span> <span class="n">TPM2B_SENSITIVE_DATA</span><span class="p">(</span><span class="n">outData</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="ESAPI.ObjectChangeAuth"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.ObjectChangeAuth">[docs]</a>    <span class="k">def</span> <span class="nf">ObjectChangeAuth</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">objectHandle</span><span class="p">,</span>
         <span class="n">parentHandle</span><span class="p">,</span>
         <span class="n">newAuth</span><span class="p">,</span>
-        <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
+        <span class="n">session1</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">PASSWORD</span><span class="p">,</span>
         <span class="n">session2</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
         <span class="n">session3</span><span class="o">=</span><span class="n">ESYS_TR</span><span class="o">.</span><span class="n">NONE</span><span class="p">,</span>
     <span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">newAuth</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)):</span>
+            <span class="n">newAuth</span> <span class="o">=</span> <span class="n">TPM2B_AUTH</span><span class="p">(</span><span class="n">newAuth</span><span class="p">)</span>
 
         <span class="n">outPrivate</span> <span class="o">=</span> <span class="n">ffi</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;TPM2B_PRIVATE **&quot;</span><span class="p">)</span>
         <span class="n">_chkrc</span><span class="p">(</span>
@@ -386,11 +388,11 @@
                 <span class="n">session1</span><span class="p">,</span>
                 <span class="n">session2</span><span class="p">,</span>
                 <span class="n">session3</span><span class="p">,</span>
-                <span class="n">newAuth</span><span class="p">,</span>
+                <span class="n">newAuth</span><span class="o">.</span><span class="n">_cdata</span><span class="p">,</span>
                 <span class="n">outPrivate</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">outPrivate</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+        <span class="k">return</span> <span class="n">TPM2B_PRIVATE</span><span class="p">(</span><span class="n">outPrivate</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="ESAPI.CreateLoaded"><a class="viewcode-back" href="../../esys.html#tpm2_pytss.ESAPI.CreateLoaded">[docs]</a>    <span class="k">def</span> <span class="nf">CreateLoaded</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
