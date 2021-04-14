@@ -1089,6 +1089,19 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(str(t.x), binascii.hexlify(x.encode()).decode())
         self.assertEqual(str(t.y), binascii.hexlify(y.encode()).decode())
 
+        x = b"12345678"
+        y = b"87654321"
+        t = TPMS_ECC_POINT()
+        t.x = x
+        t.y = y
+        self.assertEqual(bytes(t.x), x)
+        self.assertEqual(bytes(t.y), y)
+        self.assertEqual(len(t.x), len(x))
+        self.assertEqual(len(t.y), len(y))
+
+        self.assertEqual(str(t.x), binascii.hexlify(x).decode())
+        self.assertEqual(str(t.y), binascii.hexlify(y).decode())
+
 
 if __name__ == "__main__":
     unittest.main()

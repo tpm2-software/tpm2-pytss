@@ -893,6 +893,31 @@ class TPM_OBJECT(object):
             setattr(_cdata, key, value)
         except AttributeError:
             return object.__setattr__(self, key, value)
+        except TypeError as e:
+            data = getattr(_cdata, key)
+            tipe = ffi.typeof(data)
+            clsname = fixup_classname(tipe)
+            clazz = None
+            try:
+                clazz = globals()[clsname]
+            except KeyError:
+                raise e
+
+            _bytefield = clazz._get_bytefield()
+            data = getattr(data, _bytefield)
+            tipe = ffi.typeof(data)
+            if tipe.kind != "array" or not issubclass(clazz, TPM2B_SIMPLE_OBJECT):
+                raise e
+
+            if isinstance(value, str):
+                value = value.encode()
+
+            subobj = clazz(_cdata=None)
+            setattr(subobj, _bytefield, value)
+            value = subobj
+
+            # recurse so we can get handling of setattr with Python wrapped data
+            setattr(self, key, value)
 
     def Marshal(self):
         mfunc = getattr(lib, f"Tss2_MU_{self.__class__.__name__}_Marshal", None)
