@@ -37,6 +37,6 @@ jobs:
         export PATH="${HOME}/.local/bin:${PATH}"
         export TWINE_USERNAME=__token__
         export TWINE_PASSWORD=${{ secrets.PYPI_TPM2_PYTSS }}
-        export GITHUB_PAGES_KEY=${{ secrets.GITHUB_PAGES_KEY }}
+        export SSH_TPM2_PYTSS_GH_PAGES=${{ secrets.SSH_TPM2_PYTSS_GH_PAGES }}
         export ${{ matrix.check }}=1
         ./.ci/run.sh
