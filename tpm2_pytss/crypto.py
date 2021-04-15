@@ -11,7 +11,7 @@ from cryptography.hazmat.primitives.serialization import (
     Encoding,
     PublicFormat,
 )
-
+from cryptography.hazmat.backends import default_backend
 
 _curvetable = (
     (lib.TPM2_ECC_NIST_P192, ec.SECP192R1),
@@ -45,7 +45,7 @@ def _int_to_buffer(i, b):
 
 
 def public_from_pem(data, obj):
-    key = load_pem_public_key(data)
+    key = load_pem_public_key(data, backend=default_backend())
     nums = key.public_numbers()
     if isinstance(key, rsa.RSAPublicKey):
         obj.publicArea.type = lib.TPM2_ALG_RSA
@@ -68,7 +68,7 @@ def public_from_pem(data, obj):
 
 
 def private_from_pem(data, obj):
-    key = load_pem_private_key(data, None)
+    key = load_pem_private_key(data, None, backend=default_backend())
     nums = key.private_numbers()
     if isinstance(key, rsa.RSAPrivateKey):
         obj.sensitiveArea.sensitiveType = lib.TPM2_ALG_RSA
@@ -89,7 +89,7 @@ def public_to_pem(obj):
         if e == 0:
             e = 65537
         nums = rsa.RSAPublicNumbers(e, n)
-        key = nums.public_key()
+        key = nums.public_key(backend=default_backend())
     elif obj.publicArea.type == lib.TPM2_ALG_ECC:
         curve = _get_curve(obj.publicArea.parameters.eccDetail.curveID)
         if curve is None:
@@ -99,7 +99,7 @@ def public_to_pem(obj):
         x = int.from_bytes(obj.publicArea.unique.ecc.x, byteorder="big")
         y = int.from_bytes(obj.publicArea.unique.ecc.y, byteorder="big")
         nums = ec.EllipticCurvePublicNumbers(x, y, curve())
-        key = nums.public_key()
+        key = nums.public_key(backend=default_backend())
     else:
         raise RuntimeError(f"unsupported key type: {obj.publicArea.type}")
     return key.public_bytes(Encoding.PEM, PublicFormat.SubjectPublicKeyInfo)
