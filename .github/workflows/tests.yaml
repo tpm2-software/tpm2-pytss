@@ -31,11 +31,12 @@ jobs:
         python -m pip install --upgrade twine codecov black==19.10b0
         docker build -t tpm2software/tpm2-tss-python -f .ci/Dockerfile.tpm2-tss-python .
     - name: Test
+      env:
+        CODECOV_TOKEN: true
       run: |
         export PATH="${HOME}/.local/bin:${PATH}"
         export TWINE_USERNAME=__token__
         export TWINE_PASSWORD=${{ secrets.PYPI_TPM2_PYTSS }}
-        export CODECOV_TOKEN=${{ secrets.CODECOV_TOKEN }}
         export GITHUB_PAGES_KEY=${{ secrets.GITHUB_PAGES_KEY }}
         export ${{ matrix.check }}=1
         ./.ci/run.sh
