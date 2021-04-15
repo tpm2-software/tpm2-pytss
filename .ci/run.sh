@@ -26,7 +26,7 @@ function run_test() {
     tpm2software/tpm2-tss-python \
     /bin/bash -c '/workspace/tpm2-pytss/.ci/docker.run'
 
-  if [ "x${CODECOV_TOKEN}" != "x" ]; then
+  if [ -n "${ENABLE_COVERAGE}" ]; then
     "${PYTHON}" -m codecov
   fi
 
