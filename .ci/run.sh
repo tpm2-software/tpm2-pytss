@@ -75,6 +75,17 @@ function run_style() {
   "${PYTHON}" -m black --check "${SRC_ROOT}"
 }
 
+function run_build_docs() {
+
+  docker run --rm \
+    -u $(id -u):$(id -g) \
+    -v "${PWD}:/workspace/tpm2-pytss" \
+    --env-file .ci/docker.env \
+    tpm2software/tpm2-tss-python \
+    /bin/bash -c 'virtualenv .venv && . .venv/bin/activate && . .ci/docker-prelude.sh && python3 -m pip install -e .[dev] && ./scripts/docs.sh '
+}
+
+
 function run_docs() {
   export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 
@@ -178,7 +189,7 @@ elif [ "x${WHITESPACE}" != "x" ]; then
 elif [ "x${STYLE}" != "x" ]; then
   run_style
 elif [ "x${DOCS}" != "x" ]; then
-  run_docs
+  run_build_docs
 elif [ "x${PUBLISH_PKG}" != "x" ]; then
   run_publish_pkg
 fi
