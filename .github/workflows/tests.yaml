@@ -28,7 +28,7 @@ jobs:
       run: |
         mkdir -p ~/.local/bin
         python -m pip install --upgrade pip
-        python -m pip install --upgrade twine codecov black==19.10b0
+        python -m pip install --upgrade twine black==19.10b0
         docker build -t tpm2software/tpm2-tss-python -f .ci/Dockerfile.tpm2-tss-python .
     - name: Test
       env:
