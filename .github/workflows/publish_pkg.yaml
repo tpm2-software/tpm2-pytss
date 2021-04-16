@@ -1,0 +1,31 @@
+name: Publish PyPI Package
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Install Dependencies
+      run: |
+        python3 -m pip install --user --upgrade pip
+        python3 -m pip install --user --upgrade twine
+        docker build -t tpm2software/tpm2-tss-python -f .ci/Dockerfile.tpm2-tss-python .
+
+    - name: Test
+      env:
+        TEST: 1
+      run: ./.ci/run.sh
+
+    - name: Publish to PyPi
+      env:
+        PUBLISH_PKG: 1
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_TPM2_PYTSS }}
+      run: ./.ci/run.sh

@@ -10,6 +10,33 @@ PYTHON=${PYTHON:-"python3"}
 
 TEMP_DIRS=()
 
+function run_publish_pkg() {
+  if [ "x${GITHUB_ACTIONS}" != "xtrue" ]; then
+    echo "Did not detect github actions, exiting."
+    exit 1
+  fi
+
+  if [[ "x${GITHUB_REF}" != "xrefs/tags/"* ]]; then
+    echo "Did not detect TAG, got ${GITHUB_REF}."
+    echo "exiting."
+    exit 1
+  fi
+
+  git status
+  git reset --hard HEAD
+  git clean -xdf
+
+  pypi_version=$(python -c 'import json, urllib.request; print(json.loads(urllib.request.urlopen("https://pypi.org/pypi/tpm2-pytss/json").read())["info"]["version"])')
+  tag=${GITHUB_REF/refs\/tags\//}
+  if [ "x${tag}" == "x${pypi_version}" ]; then
+    echo "Git Tag is same as PyPI version: ${tag} == ${pypi_version}"
+    echo "Nothing to do, exiting."
+    exit 0
+  fi
+  python setup.py sdist
+  python -m twine upload dist/*
+}
+
 function run_test() {
 
   ci_env=""
@@ -24,23 +51,6 @@ function run_test() {
     $ci_env \
     tpm2software/tpm2-tss-python \
     /bin/bash -c '/workspace/tpm2-pytss/.ci/docker.run'
-
-  if [ "x${GITHUB_ACTIONS}" != "xtrue" ]; then
-    return
-  fi
-
-  if [[ "x${GITHUB_REF}" == "xrefs/tags/"* ]]; then
-    git status
-    git reset --hard HEAD
-    git clean -xdf
-    pypi_version=$(python -c 'import json, urllib.request; print(json.loads(urllib.request.urlopen("https://pypi.org/pypi/tpm2-pytss/json").read())["info"]["version"])')
-    tag=${GITHUB_REF/refs\/tags\//}
-    if [ "x${tag}" != "x${pypi_version}" ]; then
-      git reset --hard HEAD
-      python setup.py sdist
-      python -m twine upload dist/*
-    fi
-  fi
 }
 
 function run_whitespace() {
@@ -166,4 +176,6 @@ elif [ "x${STYLE}" != "x" ]; then
   run_style
 elif [ "x${DOCS}" != "x" ]; then
   run_docs
+elif [ "x${PUBLISH_PKG}" != "x" ]; then
+  run_publish_pkg
 fi
