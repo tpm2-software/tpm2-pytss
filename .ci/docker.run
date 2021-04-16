@@ -9,7 +9,7 @@ virtualenv .venv
 
 . .venv/bin/activate
 
-source $TRAVIS_BUILD_DIR/.ci/docker-prelude.sh
+source $GITHUB_WORKSPACE/.ci/docker-prelude.sh
 
 $PYTHON -u -m pip install -e .[dev]
 
