@@ -8,11 +8,11 @@ if [ "x${DEBUG_CI}" != "x" ]; then
   set -x
 fi
 
-WORKSPACE=`dirname $TRAVIS_BUILD_DIR`
+WORKSPACE=`dirname $GITHUB_WORKSPACE`
 
 echo "Workspace: $WORKSPACE"
 
-source $TRAVIS_BUILD_DIR/.ci/download-deps.sh
+source $GITHUB_WORKSPACE/.ci/download-deps.sh
 
 get_deps "$WORKSPACE"
 
@@ -20,6 +20,6 @@ export PYTHON=python3
 export LD_LIBRARY_PATH=/usr/local/lib/
 export PATH=/root/.local/bin/:/ibmtpm974/src:$PATH
 
-echo "echo changing to $TRAVIS_BUILD_DIR"
+echo "echo changing to $GITHUB_WORKSPACE"
 # Change to the the travis build dir
-cd $TRAVIS_BUILD_DIR
+cd $GITHUB_WORKSPACE
