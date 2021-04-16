@@ -8,6 +8,9 @@ fi
 SRC_ROOT=${SRC_ROOT:-"${PWD}"}
 PYTHON=${PYTHON:-"python3"}
 
+PUBLISH_AUTHOR_NAME="TPM2 CI Bot"
+PUBLISH_AUTHOR_EMAIL="tpm2-pytss-gh-pages@outlook.com"
+
 TEMP_DIRS=()
 
 function run_publish_pkg() {
@@ -129,8 +132,8 @@ function run_docs() {
 
   cd "${release_docs}/html"
 
-  git config user.name 'John Andersen'
-  git config user.email 'johnandersenpdx@gmail.com'
+  git config user.name "${PUBLISH_AUTHOR_NAME}"
+  git config user.email "${PUBLISH_AUTHOR_EMAIL}"
 
   git add -A
   git commit -sam "docs: $(date)"
