@@ -32,7 +32,7 @@ jobs:
         docker build -t tpm2software/tpm2-tss-python -f .ci/Dockerfile.tpm2-tss-python .
     - name: Test
       env:
-        CODECOV_TOKEN: true
+        ENABLE_COVERAGE: true
       run: |
         export PATH="${HOME}/.local/bin:${PATH}"
         export TWINE_USERNAME=__token__
