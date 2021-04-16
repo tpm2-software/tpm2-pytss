@@ -9,7 +9,7 @@ jobs:
       fail-fast: false
       max-parallel: 4
       matrix:
-        check: [STYLE, DOCS, TEST]
+        check: [DOCS, TEST]
         python-version: [3.7]
 
     steps:
@@ -50,4 +50,20 @@ jobs:
     - name: Check
       env:
         WHITESPACE: 1
+      run: ./.ci/run.sh
+
+  style-check:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Install Dependencies
+      run: |
+        python3 -m pip install --user --upgrade pip
+        python3 -m pip install --user --upgrade black==19.10b0
+
+    - name: Check
+      env:
+        STYLE: 1
       run: ./.ci/run.sh
