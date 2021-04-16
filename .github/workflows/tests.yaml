@@ -9,7 +9,7 @@ jobs:
       fail-fast: false
       max-parallel: 4
       matrix:
-        check: [WHITESPACE, STYLE, DOCS, TEST]
+        check: [STYLE, DOCS, TEST]
         python-version: [3.7]
 
     steps:
@@ -40,3 +40,14 @@ jobs:
         export SSH_TPM2_PYTSS_GH_PAGES=${{ secrets.SSH_TPM2_PYTSS_GH_PAGES }}
         export ${{ matrix.check }}=1
         ./.ci/run.sh
+
+  whitespace-check:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Check
+      env:
+        WHITESPACE: 1
+      run: ./.ci/run.sh
