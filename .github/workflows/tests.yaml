@@ -15,11 +15,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Install Dependencies
-      run: |
-        mkdir -p ~/.local/bin
-        python -m pip install --upgrade pip
-        python -m pip install --upgrade twine
-        docker build -t tpm2software/tpm2-tss-python -f .ci/Dockerfile.tpm2-tss-python .
+      run: docker build -t tpm2software/tpm2-tss-python -f .ci/Dockerfile.tpm2-tss-python .
 
     - name: Test
       env:
