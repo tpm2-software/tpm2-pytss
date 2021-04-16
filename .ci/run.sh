@@ -86,7 +86,7 @@ function run_build_docs() {
 }
 
 
-function run_docs() {
+function run_publish_docs() {
   export GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 
   cd "${SRC_ROOT}"
@@ -192,4 +192,6 @@ elif [ "x${DOCS}" != "x" ]; then
   run_build_docs
 elif [ "x${PUBLISH_PKG}" != "x" ]; then
   run_publish_pkg
+elif [ "x${PUBLISH_DOCS}" != "x" ]; then
+  run_publish_docs
 fi
