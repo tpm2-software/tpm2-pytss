@@ -12,23 +12,18 @@ TEMP_DIRS=()
 
 function run_test() {
 
-  docker run --rm \
-    -u $(id -u):$(id -g) \
-    -v "${PWD}:/workspace/tpm2-pytss" \
-    --env-file .ci/docker.env \
-    tpm2software/tpm2-tss-python \
-    /bin/bash -c 'python3 setup.py sdist && python3 setup.py bdist'
+  ci_env=""
+  if [ "$ENABLE_COVERAGE" == "true" ]; then
+    ci_env=$(bash <(curl -s https://codecov.io/env))
+  fi
 
   docker run --rm \
     -u $(id -u):$(id -g) \
     -v "${PWD}:/workspace/tpm2-pytss" \
     --env-file .ci/docker.env \
+    $ci_env \
     tpm2software/tpm2-tss-python \
     /bin/bash -c '/workspace/tpm2-pytss/.ci/docker.run'
-
-  if [ -n "${ENABLE_COVERAGE}" ]; then
-    "${PYTHON}" -m codecov
-  fi
 
   if [ "x${GITHUB_ACTIONS}" != "xtrue" ]; then
     return

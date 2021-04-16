@@ -3,6 +3,8 @@
 
 set -e
 
+python3 setup.py sdist && python3 setup.py bdist
+
 virtualenv .venv
 
 . .venv/bin/activate
@@ -12,3 +14,9 @@ source $TRAVIS_BUILD_DIR/.ci/docker-prelude.sh
 $PYTHON -u -m pip install -e .[dev]
 
 $PYTHON -m pytest -n $(nproc) --cov=tpm2_pytss -v
+
+if [ -n "${ENABLE_COVERAGE}" ]; then
+  "${PYTHON}" -m codecov
+fi
+
+exit 0
