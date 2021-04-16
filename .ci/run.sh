@@ -6,7 +6,7 @@ if [ -d "${HOME}/.local/bin" ]; then
 fi
 
 SRC_ROOT=${SRC_ROOT:-"${PWD}"}
-PYTHON=${PYTHON:-"python3.7"}
+PYTHON=${PYTHON:-"python3"}
 
 TEMP_DIRS=()
 
