@@ -5,13 +5,6 @@ on: [push, pull_request]
 jobs:
   test:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      max-parallel: 4
-      matrix:
-        check: [DOCS, TEST]
-        python-version: [3.7]
-
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v2
@@ -38,6 +31,20 @@ jobs:
         export SSH_TPM2_PYTSS_GH_PAGES=${{ secrets.SSH_TPM2_PYTSS_GH_PAGES }}
         export ${{ matrix.check }}=1
         ./.ci/run.sh
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Install Dependencies
+      run: docker build -t tpm2software/tpm2-tss-python -f .ci/Dockerfile.tpm2-tss-python .
+
+    - name: Check
+      env:
+        DOCS: 1
+      run: ./.ci/run.sh
 
   whitespace-check:
     runs-on: ubuntu-latest
