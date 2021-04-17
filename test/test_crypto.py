@@ -77,7 +77,7 @@ ecc_private_key_bytes = b"\xc2H\xf6\xe8\xe6\x95?\xea~\xd6\xd7ZS09*d\xc6%\x8b\x01
 class CryptoTest(TSS2_EsapiTest):
     def test_public_from_pem_rsa(self):
         pub = types.TPM2B_PUBLIC()
-        crypto.public_from_pem(rsa_public_key, pub)
+        crypto.public_from_pem(rsa_public_key, pub.publicArea)
 
         self.assertEqual(pub.publicArea.type, types.TPM2_ALG.RSA)
         self.assertEqual(pub.publicArea.parameters.rsaDetail.keyBits, 2048)
@@ -113,7 +113,7 @@ class CryptoTest(TSS2_EsapiTest):
 
     def test_public_from_pem_ecc(self):
         pub = types.TPM2B_PUBLIC()
-        crypto.public_from_pem(ecc_public_key, pub)
+        crypto.public_from_pem(ecc_public_key, pub.publicArea)
 
         self.assertEqual(pub.publicArea.type, types.TPM2_ALG.ECC)
         self.assertEqual(
@@ -156,13 +156,13 @@ class CryptoTest(TSS2_EsapiTest):
 
     def test_public_to_pem_rsa(self):
         pub = types.TPM2B_PUBLIC.fromPEM(rsa_public_key)
-        pem = crypto.public_to_pem(pub)
+        pem = crypto.public_to_pem(pub.publicArea)
 
         self.assertEqual(pem, rsa_public_key)
 
     def test_public_to_pem_ecc(self):
         pub = types.TPM2B_PUBLIC.fromPEM(ecc_public_key)
-        pem = crypto.public_to_pem(pub)
+        pem = crypto.public_to_pem(pub.publicArea)
 
         self.assertEqual(pem, ecc_public_key)
 

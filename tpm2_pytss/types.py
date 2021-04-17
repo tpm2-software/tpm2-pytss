@@ -1520,6 +1520,36 @@ class TPMT_PUBLIC(TPM_OBJECT):
 
         return templ
 
+    @classmethod
+    def fromPEM(
+        cls,
+        data,
+        nameAlg=TPM2_ALG.SHA256,
+        objectAttributes=(
+            TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH
+        ),
+        symmetric=None,
+        scheme=None,
+    ):
+        p = cls()
+        public_from_pem(data, p)
+        p.nameAlg = nameAlg
+        p.objectAttributes = objectAttributes
+        if symmetric is None:
+            p.parameters.asymDetail.symmetric.algorithm = TPM2_ALG.NULL
+        else:
+            p.parameters.asymDetail.symmetric = symmetric
+        if scheme is None:
+            p.parameters.asymDetail.scheme.scheme = TPM2_ALG.NULL
+        else:
+            p.parameters.asymDetail.scheme.scheme = scheme
+        if p.type == TPM2_ALG.ECC:
+            p.parameters.eccDetail.kdf.scheme = TPM2_ALG.NULL
+        return p
+
+    def toPEM(self):
+        return public_to_pem(self)
+
 
 class TPM2B_ATTEST(TPM2B_SIMPLE_OBJECT):
     pass
@@ -1609,24 +1639,12 @@ class TPM2B_PUBLIC(TPM_OBJECT):
         symmetric=None,
         scheme=None,
     ):
-        p = cls()
-        public_from_pem(data, p)
-        p.publicArea.nameAlg = nameAlg
-        p.publicArea.objectAttributes = objectAttributes
-        if symmetric is None:
-            p.publicArea.parameters.asymDetail.symmetric.algorithm = TPM2_ALG.NULL
-        else:
-            p.publicArea.parameters.asymDetail.symmetric = symmetric
-        if scheme is None:
-            p.publicArea.parameters.asymDetail.scheme.scheme = TPM2_ALG.NULL
-        else:
-            p.publicArea.parameters.asymDetail.scheme.scheme = scheme
-        if p.publicArea.type == TPM2_ALG.ECC:
-            p.publicArea.parameters.eccDetail.kdf.scheme = TPM2_ALG.NULL
+        pa = TPMT_PUBLIC.fromPEM(data, nameAlg, objectAttributes, symmetric, scheme)
+        p = cls(publicArea=pa)
         return p
 
     def toPEM(self):
-        return public_to_pem(self)
+        return self.publicArea.toPEM()
 
 
 class TPM2B_PUBLIC_KEY_RSA(TPM2B_SIMPLE_OBJECT):
