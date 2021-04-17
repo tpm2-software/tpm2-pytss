@@ -48,21 +48,21 @@ def public_from_pem(data, obj):
     key = load_pem_public_key(data, backend=default_backend())
     nums = key.public_numbers()
     if isinstance(key, rsa.RSAPublicKey):
-        obj.publicArea.type = lib.TPM2_ALG_RSA
-        obj.publicArea.parameters.rsaDetail.keyBits = key.key_size
-        _int_to_buffer(nums.n, obj.publicArea.unique.rsa)
+        obj.type = lib.TPM2_ALG_RSA
+        obj.parameters.rsaDetail.keyBits = key.key_size
+        _int_to_buffer(nums.n, obj.unique.rsa)
         if nums.e != 65537:
-            obj.publicArea.parameters.rsaDetail.exponent = nums.e
+            obj.parameters.rsaDetail.exponent = nums.e
         else:
-            obj.publicArea.parameters.rsaDetail.exponent = 0
+            obj.parameters.rsaDetail.exponent = 0
     elif isinstance(key, ec.EllipticCurvePublicKey):
-        obj.publicArea.type = lib.TPM2_ALG_ECC
+        obj.type = lib.TPM2_ALG_ECC
         curveid = _get_curveid(key.curve)
         if curveid is None:
             raise ValueError(f"unsupported curve: {key.curve.name}")
-        obj.publicArea.parameters.eccDetail.curveID = curveid
-        _int_to_buffer(nums.x, obj.publicArea.unique.ecc.x)
-        _int_to_buffer(nums.y, obj.publicArea.unique.ecc.y)
+        obj.parameters.eccDetail.curveID = curveid
+        _int_to_buffer(nums.x, obj.unique.ecc.x)
+        _int_to_buffer(nums.y, obj.unique.ecc.y)
     else:
         raise RuntimeError(f"unsupported key type: {key.__class__.__name__}")
 
@@ -82,22 +82,22 @@ def private_from_pem(data, obj):
 
 def public_to_pem(obj):
     key = None
-    if obj.publicArea.type == lib.TPM2_ALG_RSA:
-        b = obj.publicArea.unique.rsa.buffer
+    if obj.type == lib.TPM2_ALG_RSA:
+        b = obj.unique.rsa.buffer
         n = int.from_bytes(b, byteorder="big")
-        e = obj.publicArea.parameters.rsaDetail.exponent
+        e = obj.parameters.rsaDetail.exponent
         if e == 0:
             e = 65537
         nums = rsa.RSAPublicNumbers(e, n)
         key = nums.public_key(backend=default_backend())
-    elif obj.publicArea.type == lib.TPM2_ALG_ECC:
-        curve = _get_curve(obj.publicArea.parameters.eccDetail.curveID)
+    elif obj.type == lib.TPM2_ALG_ECC:
+        curve = _get_curve(obj.parameters.eccDetail.curveID)
         if curve is None:
             raise ValueError(
                 f"unsupported curve: {obj.publicArea.parameters.eccDetail.curveID}"
             )
-        x = int.from_bytes(obj.publicArea.unique.ecc.x, byteorder="big")
-        y = int.from_bytes(obj.publicArea.unique.ecc.y, byteorder="big")
+        x = int.from_bytes(obj.unique.ecc.x, byteorder="big")
+        y = int.from_bytes(obj.unique.ecc.y, byteorder="big")
         nums = ec.EllipticCurvePublicNumbers(x, y, curve())
         key = nums.public_key(backend=default_backend())
     else:
