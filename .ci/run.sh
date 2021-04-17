@@ -59,7 +59,7 @@ function run_whitespace() {
 }
 
 function run_style() {
-  "${PYTHON}" -m black --check "${SRC_ROOT}"
+  "${PYTHON}" -m black --diff --check "${SRC_ROOT}"
 }
 
 function run_docs() {
