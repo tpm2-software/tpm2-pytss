@@ -103,7 +103,8 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 def builder_finished_handler(app, exception):
     if exception is None:
-        subprocess.check_call("docs/sphinx-finished.sh", shell=True)
+        script = os.path.join(app.confdir, 'sphinx-finished.sh')
+        subprocess.check_call(script, shell=True)
 
 
 #
