@@ -16,8 +16,8 @@
 
 set -eo pipefail
 
-find pages/ -name \*.html -exec \
+find "${SPHINX_OUTDIR}" -name \*.html -exec \
   sed -i 's/<span class="gp">\&gt;\&gt;\&gt; <\/span>//g' {} \;
-touch pages/.nojekyll
+touch "${SPHINX_OUTDIR}"/.nojekyll
 
 exit 0
