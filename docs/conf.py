@@ -17,6 +17,10 @@ from unittest.mock import patch
 
 from setuptools_scm import get_version
 
+import builtins
+
+builtins.__sphinx_build__ = True
+
 
 # -- Project information -----------------------------------------------------
 
