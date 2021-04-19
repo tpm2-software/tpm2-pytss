@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: BSD-3
+# SPDX-License-Identifier: BSD-2
 
 #
 # This script is configured to run as part of the sphinx build
