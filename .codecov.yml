@@ -1,0 +1,2 @@
+fixes:
+  - "workspace/::"        # reduce root e.g., "before/path/" => "path/"

@@ -27,6 +27,10 @@ function run_test() {
     /bin/bash -c '/workspace/tpm2-pytss/.ci/docker.run'
 
   if [ -n "${ENABLE_COVERAGE}" ]; then
+    echo "DEBUG PWD: $PWD"
+    echo "DEBUG START DUMP"
+    "${PYTHON}" -m codecov --dump
+    echo "DEBUG END DUMP"
     "${PYTHON}" -m codecov
   fi
 
