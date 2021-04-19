@@ -13,6 +13,7 @@
 import os
 import sys
 import datetime
+import subprocess
 
 from setuptools_scm import get_version
 
@@ -98,3 +99,16 @@ templates_path = ["_templates"]
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+
+
+def builder_finished_handler(app, exception):
+    if exception is None:
+        subprocess.check_call("docs/sphinx-finished.sh", shell=True)
+
+
+#
+# Hook the setup of readthedocs so we can hook into events as defined in:
+# - https://www.sphinx-doc.org/en/master/extdev/appapi.html
+#
+def setup(app):
+    app.connect("build-finished", builder_finished_handler)
