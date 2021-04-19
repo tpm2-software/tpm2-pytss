@@ -20,6 +20,19 @@ from setuptools_scm import get_version
 from sphinx.util import logging
 
 logger = logging.getLogger(__name__)
+
+if os.environ.get("READTHEDOCS", False):
+    import git
+
+    logger.info("READTHEDOCS DETECTED")
+    cwd = os.getcwd()
+    repo = git.Repo(cwd, search_parent_directories=True)
+    root = repo.git.rev_parse("--show-toplevel")
+    logger.info(f"Adding to PATH: {root}")
+    sys.path.insert(0, root)
+    l = os.listdir(root)
+    logger.info(f"Root ls: {l}")
+
 logger.info("Mocking tpm2_pytss._libtpm2_pytss")
 from unittest.mock import MagicMock
 
@@ -37,6 +50,7 @@ class MyMagicMock(MagicMock):
 
 sys.modules["tpm2_pytss._libtpm2_pytss"] = MyMagicMock()
 
+import tpm2_pytss
 
 # -- Project information -----------------------------------------------------
 
