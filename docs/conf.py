@@ -13,7 +13,6 @@
 import os
 import sys
 import datetime
-from unittest.mock import patch
 
 from setuptools_scm import get_version
 
