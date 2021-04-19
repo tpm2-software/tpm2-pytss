@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-SPDX-License-Identifier: BSD-3
+SPDX-License-Identifier: BSD-2
 """
 
 import os
@@ -179,7 +179,7 @@ def prepare(indir, outfile):
             textwrap.dedent(
                 """
             /*
-             * SPDX-License-Identifier: BSD-3
+             * SPDX-License-Identifier: BSD-2
              * This file was automatically generated. Do not modify !
              */
             """
