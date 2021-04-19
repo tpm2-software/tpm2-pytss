@@ -2,28 +2,7 @@
 SPDX-License-Identifier: BSD-2
 """
 
-try:
-    from ._libtpm2_pytss import lib
-except ModuleNotFoundError as e:
-    import builtins
-
-    in_sphinx = getattr(builtins, "__sphinx_build__", False)
-    if not in_sphinx:
-        raise e
-    import sys
-    from unittest.mock import MagicMock
-
-    class MyMagicMock(MagicMock):
-        def __repr__(self):
-            name = self._extract_mock_name()
-            name = name.replace("mock.lib.", "")
-            if name.startswith("ESYS_TR_"):
-                end = name.replace("ESYS_TR_", "")
-                name = "ESYS_TR." + end
-
-            return name
-
-    sys.modules["tpm2_pytss._libtpm2_pytss"] = MyMagicMock()
+from ._libtpm2_pytss import lib
 
 from .types import *
 

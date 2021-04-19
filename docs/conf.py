@@ -17,9 +17,25 @@ import subprocess
 
 from setuptools_scm import get_version
 
-import builtins
+from sphinx.util import logging
 
-builtins.__sphinx_build__ = True
+logger = logging.getLogger(__name__)
+logger.info("Mocking tpm2_pytss._libtpm2_pytss")
+from unittest.mock import MagicMock
+
+
+class MyMagicMock(MagicMock):
+    def __repr__(self):
+        name = self._extract_mock_name()
+        name = name.replace("mock.lib.", "")
+        if name.startswith("ESYS_TR_"):
+            end = name.replace("ESYS_TR_", "")
+            name = "ESYS_TR." + end
+
+        return name
+
+
+sys.modules["tpm2_pytss._libtpm2_pytss"] = MyMagicMock()
 
 
 # -- Project information -----------------------------------------------------
@@ -103,8 +119,8 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 def builder_finished_handler(app, exception):
     if exception is None:
-        os.environ['SPHINX_OUTDIR'] = app.outdir
-        script = os.path.join(app.confdir, 'sphinx-finished.sh')
+        os.environ["SPHINX_OUTDIR"] = app.outdir
+        script = os.path.join(app.confdir, "sphinx-finished.sh")
         subprocess.check_call(script, shell=True)
 
 
