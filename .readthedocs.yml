@@ -2,6 +2,12 @@
 # See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
 
 version: 2
+
+# stable is ubuntu-18.04 image
+#   - https://hub.docker.com/r/readthedocs/build/
+build:
+  image: stable
+
 sphinx:
   builder: html
   configuration: docs/conf.py
