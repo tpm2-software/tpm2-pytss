@@ -23,20 +23,6 @@ jobs:
         ENABLE_COVERAGE: true
       run: ./.ci/run.sh
 
-  docs:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v2
-
-    - name: Install Dependencies
-      run: docker build -t tpm2software/tpm2-tss-python -f .ci/Dockerfile.tpm2-tss-python .
-
-    - name: Check
-      env:
-        DOCS: 1
-      run: ./.ci/run.sh
-
   whitespace-check:
     runs-on: ubuntu-latest
     steps:
