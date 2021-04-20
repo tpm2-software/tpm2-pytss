@@ -522,6 +522,36 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.ObjectChangeAuth(childHandle, parentHandle, "yetanotherone")
 
+    def test_createloaded(self):
+
+        alg = "rsa2048:aes128cfb"
+        attrs = TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS
+        inPublic = TPM2B_PUBLIC(TPMT_PUBLIC.parse(alg=alg, objectAttributes=attrs))
+        inSensitive = TPM2B_SENSITIVE_CREATE(
+            TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
+        )
+        outsideInfo = TPM2B_DATA()
+        creationPCR = TPML_PCR_SELECTION()
+
+        parentHandle, _, _, _, _ = self.ectx.CreatePrimary(
+            ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
+        )
+
+        templ = TPMT_PUBLIC.parse(
+            alg="rsa2048", objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS
+        )
+        childInPublic = TPM2B_TEMPLATE(templ.Marshal())
+        childInSensitive = TPM2B_SENSITIVE_CREATE(
+            TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("childpassword"))
+        )
+
+        childHandle, priv, pub = self.ectx.CreateLoaded(
+            parentHandle, childInSensitive, childInPublic
+        )
+        self.assertNotEqual(childHandle, 0)
+        self.assertNotEqual(priv, None)
+        self.assertNotEqual(pub, None)
+
 
 if __name__ == "__main__":
     unittest.main()
