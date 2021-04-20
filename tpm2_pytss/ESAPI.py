@@ -33,6 +33,11 @@ class ESAPI:
         auth_p = TPM2B_pack(auth, "TPM2B_AUTH")
         _chkrc(lib.Esys_TR_SetAuth(self.ctx, esys_tr, auth_p))
 
+    def TR_GetName(self, handle):
+        name = ffi.new("TPM2B_NAME **")
+        _chkrc(lib.Esys_TR_GetName(self.ctx, handle, name))
+        return TPM2B_NAME(_cdata=name[0])
+
     def Startup(self, startupType):
         _chkrc(lib.Esys_Startup(self.ctx, startupType))
 
