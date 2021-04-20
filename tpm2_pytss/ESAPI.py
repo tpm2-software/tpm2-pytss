@@ -574,7 +574,7 @@ class ESAPI:
         self,
         keyHandle,
         inPoint,
-        session1=ESYS_TR.NONE,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
@@ -582,10 +582,16 @@ class ESAPI:
         outPoint = ffi.new("TPM2B_ECC_POINT **")
         _chkrc(
             lib.Esys_ECDH_ZGen(
-                self.ctx, keyHandle, session1, session2, session3, inPoint, outPoint
+                self.ctx,
+                keyHandle,
+                session1,
+                session2,
+                session3,
+                inPoint._cdata,
+                outPoint,
             )
         )
-        return outPoint[0]
+        return TPM2B_ECC_POINT(outPoint[0])
 
     def ECC_Parameters(
         self,

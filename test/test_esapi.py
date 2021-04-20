@@ -604,6 +604,39 @@ class TestEsys(TSS2_EsapiTest):
         self.assertNotEqual(zPoint, None)
         self.assertNotEqual(pubPoint, None)
 
+    def test_ECDH_ZGen(self):
+
+        alg = "ecc256:ecdh"
+        attrs = (
+            TPMA_OBJECT.USERWITHAUTH
+            | TPMA_OBJECT.DECRYPT
+            | TPMA_OBJECT.FIXEDTPM
+            | TPMA_OBJECT.FIXEDPARENT
+            | TPMA_OBJECT.SENSITIVEDATAORIGIN
+        )
+        inPublic = TPM2B_PUBLIC(TPMT_PUBLIC.parse(alg=alg, objectAttributes=attrs))
+        inSensitive = TPM2B_SENSITIVE_CREATE(TPMS_SENSITIVE_CREATE())
+        outsideInfo = TPM2B_DATA()
+        creationPCR = TPML_PCR_SELECTION()
+
+        parentHandle, _, _, _, _ = self.ectx.CreatePrimary(
+            ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
+        )
+
+        inPoint = TPM2B_ECC_POINT(
+            TPMS_ECC_POINT(
+                x=binascii.unhexlify(
+                    "25db1f8bbcfabc31f8176acbb2f840a3b6a5d340659d37eed9fd5247f514d598"
+                ),
+                y=binascii.unhexlify(
+                    "ed623e3dd20908cf583c814bbf657e08ab9f40ffea51da21298ce24deb344ccc"
+                ),
+            )
+        )
+
+        outPoint = self.ectx.ECDH_ZGen(parentHandle, inPoint)
+        self.assertNotEqual(outPoint, None)
+
 
 if __name__ == "__main__":
     unittest.main()
