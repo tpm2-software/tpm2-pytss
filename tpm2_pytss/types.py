@@ -12,7 +12,7 @@ from tpm2_pytss.utils import (
     fixup_classname,
     convert_to_python_native,
 )
-from tpm2_pytss.crypto import public_from_pem, private_from_pem, public_to_pem
+from tpm2_pytss.crypto import public_from_pem, private_from_pem, public_to_pem, getname
 
 import binascii
 
@@ -1550,6 +1550,10 @@ class TPMT_PUBLIC(TPM_OBJECT):
     def toPEM(self):
         return public_to_pem(self)
 
+    def getName(self):
+        name = getname(self)
+        return TPM2B_NAME(name)
+
 
 class TPM2B_ATTEST(TPM2B_SIMPLE_OBJECT):
     pass
@@ -1612,7 +1616,8 @@ class TPM2B_NAME(TPM2B_SIMPLE_OBJECT):
 
 
 class TPM2B_NV_PUBLIC(TPM_OBJECT):
-    pass
+    def getName(self):
+        return self.nvPublic.getName()
 
 
 class TPM2B_PRIVATE(TPM2B_SIMPLE_OBJECT):
@@ -1645,6 +1650,9 @@ class TPM2B_PUBLIC(TPM_OBJECT):
 
     def toPEM(self):
         return self.publicArea.toPEM()
+
+    def getName(self):
+        return self.publicArea.getName()
 
 
 class TPM2B_PUBLIC_KEY_RSA(TPM2B_SIMPLE_OBJECT):
@@ -1860,7 +1868,9 @@ class TPMS_NV_PIN_COUNTER_PARAMETERS(TPM_OBJECT):
 
 
 class TPMS_NV_PUBLIC(TPM_OBJECT):
-    pass
+    def getName(self):
+        name = getname(self)
+        return TPM2B_NAME(name)
 
 
 class TPMS_PCR_SELECT(TPM_OBJECT):
