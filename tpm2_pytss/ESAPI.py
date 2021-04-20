@@ -568,7 +568,7 @@ class ESAPI:
                 self.ctx, keyHandle, session1, session2, session3, zPoint, pubPoint
             )
         )
-        return (zPoint[0], pubPoint[0])
+        return (TPM2B_ECC_POINT(zPoint[0]), TPM2B_ECC_POINT(pubPoint[0]))
 
     def ECDH_ZGen(
         self,
