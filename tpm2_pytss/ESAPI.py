@@ -371,7 +371,7 @@ class ESAPI:
         parentHandle,
         inSensitive,
         inPublic,
-        session1=ESYS_TR.NONE,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
@@ -386,15 +386,19 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                inSensitive,
-                inPublic,
+                inSensitive._cdata,
+                inPublic._cdata,
                 objectHandle,
                 outPrivate,
                 outPublic,
             )
         )
         objectHandleObject = objectHandle[0]
-        return (objectHandleObject, outPrivate[0], outPublic[0])
+        return (
+            objectHandleObject,
+            TPM2B_PRIVATE(outPrivate[0]),
+            TPM2B_PUBLIC(outPublic[0]),
+        )
 
     def Duplicate(
         self,
