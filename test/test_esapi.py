@@ -552,6 +552,41 @@ class TestEsys(TSS2_EsapiTest):
         self.assertNotEqual(priv, None)
         self.assertNotEqual(pub, None)
 
+    def test_rsa_enc_dec(self):
+
+        alg = "rsa2048:aes128cfb"
+        attrs = TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS
+        inPublic = TPM2B_PUBLIC(TPMT_PUBLIC.parse(alg=alg, objectAttributes=attrs))
+        inSensitive = TPM2B_SENSITIVE_CREATE(
+            TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
+        )
+        outsideInfo = TPM2B_DATA()
+        creationPCR = TPML_PCR_SELECTION()
+
+        parentHandle, _, _, _, _ = self.ectx.CreatePrimary(
+            ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
+        )
+
+        templ = TPMT_PUBLIC.parse(
+            alg="rsa2048", objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS
+        )
+        childInPublic = TPM2B_TEMPLATE(templ.Marshal())
+        childInSensitive = TPM2B_SENSITIVE_CREATE(
+            TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("childpassword"))
+        )
+
+        childHandle, _, _ = self.ectx.CreateLoaded(
+            parentHandle, childInSensitive, childInPublic
+        )
+
+        message = TPM2B_PUBLIC_KEY_RSA("hello world")
+        scheme = TPMT_RSA_DECRYPT(scheme=TPM2_ALG.RSAES)
+        outData = self.ectx.RSA_Encrypt(childHandle, message, scheme)
+
+        message2 = self.ectx.RSA_Decrypt(childHandle, outData, scheme)
+
+        self.assertEqual(bytes(message), bytes(message2))
+
 
 if __name__ == "__main__":
     unittest.main()

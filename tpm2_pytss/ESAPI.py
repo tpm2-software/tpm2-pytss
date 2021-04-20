@@ -498,11 +498,14 @@ class ESAPI:
         keyHandle,
         message,
         inScheme,
-        label,
+        label=None,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
+
+        if label is None:
+            label = TPM2B_DATA()
 
         outData = ffi.new("TPM2B_PUBLIC_KEY_RSA **")
         _chkrc(
@@ -512,24 +515,27 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                message,
-                inScheme,
-                label,
+                message._cdata,
+                inScheme._cdata,
+                label._cdata,
                 outData,
             )
         )
-        return outData[0]
+        return TPM2B_PUBLIC_KEY_RSA(outData[0])
 
     def RSA_Decrypt(
         self,
         keyHandle,
         cipherText,
         inScheme,
-        label,
-        session1=ESYS_TR.NONE,
+        label=None,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
+
+        if label is None:
+            label = TPM2B_DATA()
 
         message = ffi.new("TPM2B_PUBLIC_KEY_RSA **")
         _chkrc(
@@ -539,13 +545,13 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                cipherText,
-                inScheme,
-                label,
+                cipherText._cdata,
+                inScheme._cdata,
+                label._cdata,
                 message,
             )
         )
-        return message[0]
+        return TPM2B_PUBLIC_KEY_RSA(message[0])
 
     def ECDH_KeyGen(
         self,
