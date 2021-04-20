@@ -177,3 +177,30 @@ class CryptoTest(TSS2_EsapiTest):
         pem = pub.toPEM()
 
         self.assertEqual(pem, ecc_public_key)
+
+    def test_public_getname(self):
+        pub = types.TPM2B_PUBLIC.fromPEM(ecc_public_key)
+        priv = types.TPM2B_SENSITIVE.fromPEM(ecc_private_key)
+        handle = self.ectx.LoadExternal(priv, pub, types.ESYS_TR.RH_NULL)
+        ename = self.ectx.TR_GetName(handle)
+        oname = pub.getName()
+
+        self.assertEqual(ename.name, oname.name)
+
+    def test_nv_getname(self):
+        nv = TPMS_NV_PUBLIC(
+            nvIndex=0x1000000,
+            nameAlg=TPM2_ALG.SHA1,
+            attributes=TPMA_NV.AUTHREAD | TPMA_NV.AUTHWRITE,
+            dataSize=123,
+        )
+        oname = nv.getName()
+        nv2b = TPM2B_NV_PUBLIC(nvPublic=nv)
+
+        handle = self.ectx.NV_DefineSpace(
+            ESYS_TR.RH_OWNER, b"1234", nv2b, session1=ESYS_TR.PASSWORD
+        )
+
+        ename = self.ectx.TR_GetName(handle)
+
+        self.assertEqual(ename.name, oname.name)

@@ -5,6 +5,7 @@ SPDX-License-Identifier: BSD-2
 from math import ceil
 from ._libtpm2_pytss import lib
 from cryptography.hazmat.primitives.asymmetric import rsa, ec
+from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.serialization import (
     load_pem_private_key,
     load_pem_public_key,
@@ -24,6 +25,16 @@ _curvetable = (
     (lib.TPM2_ECC_SM2_P256, None),
 )
 
+_digesttable = (
+    (lib.TPM2_ALG_SHA1, hashes.SHA1),
+    (lib.TPM2_ALG_SHA256, hashes.SHA256),
+    (lib.TPM2_ALG_SHA384, hashes.SHA384),
+    (lib.TPM2_ALG_SHA512, hashes.SHA512),
+    (lib.TPM2_ALG_SHA3_256, hashes.SHA3_256),
+    (lib.TPM2_ALG_SHA3_384, hashes.SHA3_384),
+    (lib.TPM2_ALG_SHA3_512, hashes.SHA3_512),
+)
+
 
 def _get_curveid(curve):
     for (algid, c) in _curvetable:
@@ -36,6 +47,13 @@ def _get_curve(curveid):
     for (algid, c) in _curvetable:
         if algid == curveid:
             return c
+    return None
+
+
+def _get_digest(digestid):
+    for (algid, d) in _digesttable:
+        if algid == digestid:
+            return d
     return None
 
 
@@ -103,3 +121,16 @@ def public_to_pem(obj):
     else:
         raise RuntimeError(f"unsupported key type: {obj.publicArea.type}")
     return key.public_bytes(Encoding.PEM, PublicFormat.SubjectPublicKeyInfo)
+
+
+def getname(obj):
+    dt = _get_digest(obj.nameAlg)
+    if dt is None:
+        raise ValueError(f"unsupported digest algorithm: {d}")
+    d = hashes.Hash(dt())
+    mb = obj.Marshal()
+    d.update(mb)
+    b = d.finalize()
+    db = obj.nameAlg.to_bytes(length=2, byteorder="big")
+    name = db + b
+    return name
