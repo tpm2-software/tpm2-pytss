@@ -587,6 +587,23 @@ class TestEsys(TSS2_EsapiTest):
 
         self.assertEqual(bytes(message), bytes(message2))
 
+    def test_ECDH_KeyGen(self):
+
+        alg = "ecc256:aes128cfb"
+        attrs = TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS
+        inPublic = TPM2B_PUBLIC(TPMT_PUBLIC.parse(alg=alg, objectAttributes=attrs))
+        inSensitive = TPM2B_SENSITIVE_CREATE(TPMS_SENSITIVE_CREATE())
+        outsideInfo = TPM2B_DATA()
+        creationPCR = TPML_PCR_SELECTION()
+
+        parentHandle, _, _, _, _ = self.ectx.CreatePrimary(
+            ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
+        )
+
+        zPoint, pubPoint = self.ectx.ECDH_KeyGen(parentHandle)
+        self.assertNotEqual(zPoint, None)
+        self.assertNotEqual(pubPoint, None)
+
 
 if __name__ == "__main__":
     unittest.main()
