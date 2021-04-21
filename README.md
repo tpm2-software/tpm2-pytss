@@ -1,5 +1,6 @@
 # tpm2-pytss
 [![Tests](https://github.com/tpm2-software/tpm2-pytss/actions/workflows/tests.yaml/badge.svg)](https://github.com/tpm2-software/tpm2-pytss/actions/workflows/tests.yaml)
+[![codecov](https://codecov.io/gh/tpm2-software/tpm2-pytss/branch/master/graph/badge.svg?token=Nqs8anZr2B)](https://codecov.io/gh/tpm2-software/tpm2-pytss)
 [![Documentation Status](https://readthedocs.org/projects/tpm2-pytss/badge/?version=latest)](https://tpm2-pytss.readthedocs.io/en/latest/?badge=latest)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/tpm2-software/tpm2-pytss.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/tpm2-software/tpm2-pytss/alerts/)
 [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/tpm2-software/tpm2-pytss.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/tpm2-software/tpm2-pytss/context:python)
