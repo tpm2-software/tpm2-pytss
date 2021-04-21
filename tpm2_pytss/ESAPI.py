@@ -607,7 +607,7 @@ class ESAPI:
                 self.ctx, session1, session2, session3, curveID, parameters
             )
         )
-        return parameters[0]
+        return TPMS_ALGORITHM_DETAIL_ECC(parameters[0])
 
     def ZGen_2Phase(
         self,
