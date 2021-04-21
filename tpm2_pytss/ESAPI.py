@@ -616,7 +616,7 @@ class ESAPI:
         inQeB,
         inScheme,
         counter,
-        session1=ESYS_TR.NONE,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
@@ -630,15 +630,15 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                inQsB,
-                inQeB,
+                inQsB._cdata,
+                inQeB._cdata,
                 inScheme,
                 counter,
                 outZ1,
                 outZ2,
             )
         )
-        return (outZ1[0], outZ2[0])
+        return (TPM2B_ECC_POINT(outZ1[0]), TPM2B_ECC_POINT(outZ2[0]))
 
     def EncryptDecrypt(
         self,
@@ -1113,7 +1113,7 @@ class ESAPI:
                 self.ctx, session1, session2, session3, curveID, Q, counter
             )
         )
-        return (Q[0], counter[0])
+        return (TPM2B_ECC_POINT(Q[0]), counter[0])
 
     def VerifySignature(
         self,
