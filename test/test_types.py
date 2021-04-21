@@ -1127,6 +1127,32 @@ class TypesTest(unittest.TestCase):
 
         TPM2B_ECC_POINT(t.point)
 
+    def test_copy_constructor(self):
+
+        x = b"12345678"
+        y = b"87654321"
+        t1 = TPM2B_ECC_POINT(TPMS_ECC_POINT(x=x, y=y))
+
+        t2 = TPM2B_ECC_POINT(t1)
+
+        self.assertEqual(bytes(t1.point.x), bytes(t2.point.x))
+        self.assertEqual(bytes(t1.point.y), bytes(t2.point.y))
+        self.assertNotEqual(t1._cdata, t2._cdata)
+
+        templ = TPMT_PUBLIC.parse(alg="ecc")
+        templ2 = TPMT_PUBLIC(templ)
+
+        self.assertEqual(templ.type, TPM2_ALG.ECC)
+        self.assertEqual(templ2.type, TPM2_ALG.ECC)
+
+        templ.type = TPM2_ALG.RSA
+        self.assertEqual(templ.type, TPM2_ALG.RSA)
+        self.assertEqual(templ2.type, TPM2_ALG.ECC)
+
+        templ2.type = TPM2_ALG.KEYEDHASH
+        self.assertEqual(templ.type, TPM2_ALG.RSA)
+        self.assertEqual(templ2.type, TPM2_ALG.KEYEDHASH)
+
 
 if __name__ == "__main__":
     unittest.main()
