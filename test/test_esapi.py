@@ -665,11 +665,7 @@ class TestEsys(TSS2_EsapiTest):
 
         Q, counter = self.ectx.EC_Ephemeral(curveId)
 
-        # inQsB = outPublic.publicArea.unique.ecc
-        # inQeB = TPM2B_ECC_POINT(Q)
-        x = bytes(outPublic.publicArea.unique.ecc.x)
-        y = bytes(outPublic.publicArea.unique.ecc.y)
-        inQsB = TPM2B_ECC_POINT(TPMS_ECC_POINT(x=x, y=y))
+        inQsB = TPM2B_ECC_POINT(outPublic.publicArea.unique.ecc)
         inQeB = Q
         Z1, Z2 = self.ectx.ZGen_2Phase(eccHandle, inQsB, inQeB, TPM2_ALG.ECDH, counter)
         self.assertNotEqual(Z1, None)
