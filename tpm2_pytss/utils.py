@@ -91,12 +91,20 @@ def fixup_cdata_kwargs(this, _cdata, kwargs):
         # is _cdata actual ffi data?
         ffi.typeof(_cdata)
     except (TypeError, ffi.error):
-        # No, its some type of pyton data, so clear it from _cdata and call init
-        unknown = _cdata
-        _cdata = None
+        # No, its some type of Python data
+        # Is it the same instance and a coy constructor call?
+        # ie TPMS_ECC_POINT(TPMS_ECC_POINT(x=... , y=...))
+        if isinstance(_cdata, type(this)):
+            pyobj = _cdata
+            _cdata = ffi.new(f"{this.__class__.__name__} *", pyobj._cdata[0])
+        else:
+            # Its not a copy constructor, so it must be for a subfield,
+            # so clear it from _cdata and call init
+            unknown = _cdata
+            _cdata = None
 
-        if _cdata is None:
-            _cdata = ffi.new(f"{this.__class__.__name__} *")
+            if _cdata is None:
+                _cdata = ffi.new(f"{this.__class__.__name__} *")
 
     # if it's unknown, find the field it's destined for. This is easy for TPML_
     # and TPM2B_ types because their is only one field.
