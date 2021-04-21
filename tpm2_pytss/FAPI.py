@@ -13,7 +13,7 @@ from .callbacks import Callback, CallbackType, get_callback, unlock_callback
 from .fapi_info import FapiInfo
 from .TSS2_Exception import TSS2_Exception
 from .types import *
-from .utils import TPM2B_pack, TPM2B_unpack, _chkrc, to_bytes_or_null
+from .utils import _chkrc, to_bytes_or_null
 
 logger = logging.getLogger(__name__)
 
