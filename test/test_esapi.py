@@ -642,6 +642,39 @@ class TestEsys(TSS2_EsapiTest):
         params = self.ectx.ECC_Parameters(TPM2_ECC_CURVE.NIST_P256)
         self.assertNotEqual(params, None)
 
+    def test_ZGen_2Phase(self):
+
+        alg = "ecc256:ecdh-sha256"
+        attrs = (
+            TPMA_OBJECT.USERWITHAUTH
+            | TPMA_OBJECT.DECRYPT
+            | TPMA_OBJECT.FIXEDTPM
+            | TPMA_OBJECT.FIXEDPARENT
+            | TPMA_OBJECT.SENSITIVEDATAORIGIN
+        )
+        inPublic = TPM2B_PUBLIC(TPMT_PUBLIC.parse(alg=alg, objectAttributes=attrs))
+        inSensitive = TPM2B_SENSITIVE_CREATE(TPMS_SENSITIVE_CREATE())
+        outsideInfo = TPM2B_DATA()
+        creationPCR = TPML_PCR_SELECTION()
+
+        eccHandle, outPublic, _, _, _ = self.ectx.CreatePrimary(
+            ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
+        )
+
+        curveId = TPM2_ECC.NIST_P256
+
+        Q, counter = self.ectx.EC_Ephemeral(curveId)
+
+        # inQsB = outPublic.publicArea.unique.ecc
+        # inQeB = TPM2B_ECC_POINT(Q)
+        x = bytes(outPublic.publicArea.unique.ecc.x)
+        y = bytes(outPublic.publicArea.unique.ecc.y)
+        inQsB = TPM2B_ECC_POINT(TPMS_ECC_POINT(x=x, y=y))
+        inQeB = Q
+        Z1, Z2 = self.ectx.ZGen_2Phase(eccHandle, inQsB, inQeB, TPM2_ALG.ECDH, counter)
+        self.assertNotEqual(Z1, None)
+        self.assertNotEqual(Z2, None)
+
 
 if __name__ == "__main__":
     unittest.main()
