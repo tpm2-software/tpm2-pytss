@@ -339,7 +339,6 @@ class FAPI:
             certificate,
         )
         if ret == lib.TPM2_RC_SUCCESS:
-            signature_size = signature_size
             result = (
                 ffi.unpack(ffi.cast("char *", signature[0]), signature_size[0]),
                 ffi.string(public_key[0]),
