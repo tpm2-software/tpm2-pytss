@@ -637,6 +637,11 @@ class TestEsys(TSS2_EsapiTest):
         outPoint = self.ectx.ECDH_ZGen(parentHandle, inPoint)
         self.assertNotEqual(outPoint, None)
 
+    def test_ECC_Parameters(self):
+
+        params = self.ectx.ECC_Parameters(TPM2_ECC_CURVE.NIST_P256)
+        self.assertNotEqual(params, None)
+
 
 if __name__ == "__main__":
     unittest.main()
