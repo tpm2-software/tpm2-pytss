@@ -888,7 +888,11 @@ class TPM_OBJECT(object):
 
         _cdata = object.__getattribute__(self, "_cdata")
         if isinstance(value, TPM_OBJECT):
-            value = value._cdata[0]
+            tipe = ffi.typeof(value._cdata)
+            if tipe.kind in ["struct", "union"]:
+                value = value._cdata
+            else:
+                value = value._cdata[0]
         try:
             # Get _cdata without invoking getattr
             setattr(_cdata, key, value)

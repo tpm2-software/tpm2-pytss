@@ -1119,6 +1119,14 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(str(t.x), binascii.hexlify(x).decode())
         self.assertEqual(str(t.y), binascii.hexlify(y).decode())
 
+    def test_scalar_data(self):
+
+        x = b"12345678"
+        y = b"87654321"
+        t = TPM2B_ECC_POINT(TPMS_ECC_POINT(x=x, y=y))
+
+        TPM2B_ECC_POINT(t.point)
+
 
 if __name__ == "__main__":
     unittest.main()
