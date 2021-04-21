@@ -1385,7 +1385,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
             halg = hunks[1] if len(hunks) > 1 else ""
             templ.parameters.eccDetail.scheme.details.ecdaa.count = int(counter)
         elif scheme == "null":
-            templ.parameters.scheme.scheme = TPM2_ALG.NULL
+            templ.parameters.eccDetail.scheme.scheme = TPM2_ALG.NULL
         else:
             templ.parameters.asymDetail.scheme.scheme = TPM2_ALG.NULL
             raise RuntimeError(

@@ -862,6 +862,23 @@ class TypesTest(unittest.TestCase):
                 templ.parameters.asymDetail.symmetric.algorithm, TPM2_ALG.AES
             )
 
+    def test_TPMT_PUBLIC_parse_ecc_plain(self):
+
+        templ = TPMT_PUBLIC.parse(alg="ecc")
+
+        self.assertEqual(templ.nameAlg, TPM2_ALG.SHA256)
+
+        self.assertEqual(
+            templ.objectAttributes, TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS
+        )
+
+        self.assertEqual(templ.type, TPM2_ALG.ECC)
+        self.assertEqual(templ.parameters.eccDetail.curveID, TPM2_ECC_CURVE.NIST_P256)
+
+        self.assertEqual(templ.parameters.eccDetail.scheme.scheme, TPM2_ALG.NULL)
+
+        self.assertEqual(templ.parameters.asymDetail.symmetric.algorithm, TPM2_ALG.NULL)
+
     def test_TPML_ALG_parse_none(self):
         a = TPML_ALG.parse(None)
         self.assertEqual(len(a), 0)
