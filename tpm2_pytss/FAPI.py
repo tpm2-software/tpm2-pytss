@@ -751,10 +751,6 @@ class FAPI:
                 lib.Fapi_Free(tpm_2b_private[0])
                 lib.Fapi_Free(policy[0])
 
-            # cast cdata types and free memory
-            tpm_2b_private_bytes = bytes(
-                ffi.unpack(tpm_2b_private[0], tpm_2b_private_size[0])
-            )
             policy_str = ffi.string(policy[0]).decode(self.encoding)
 
             # unmarshal bytes to sapi data types
