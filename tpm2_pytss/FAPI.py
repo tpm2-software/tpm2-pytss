@@ -51,7 +51,7 @@ class FapiConfig(contextlib.ExitStack):
 
         # Return if no custom fapi config is used
         if not (config is not None or temp_dirs or kwargs):
-            return self
+            return
 
         if self.config is None:
             # Load the currently active fapi-config.json
