@@ -671,6 +671,72 @@ class TestEsys(TSS2_EsapiTest):
         self.assertNotEqual(Z1, None)
         self.assertNotEqual(Z2, None)
 
+    def test_EncryptDecrypt(self):
+
+        inPublic = TPM2B_PUBLIC(
+            TPMT_PUBLIC.parse(
+                alg="ecc",
+                objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS,
+            )
+        )
+        inSensitive = TPM2B_SENSITIVE_CREATE(TPMS_SENSITIVE_CREATE())
+        outsideInfo = TPM2B_DATA()
+        creationPCR = TPML_PCR_SELECTION()
+
+        parentHandle = self.ectx.CreatePrimary(
+            ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
+        )[0]
+
+        inPublic = TPM2B_TEMPLATE(TPMT_PUBLIC.parse(alg="aes").Marshal())
+        aesKeyHandle = self.ectx.CreateLoaded(parentHandle, inSensitive, inPublic)[0]
+
+        ivIn = TPM2B_IV(b"thisis16byteszxc")
+        inData = TPM2B_MAX_BUFFER(b"this is data to encrypt")
+        outCipherText, outIV = self.ectx.EncryptDecrypt(
+            aesKeyHandle, False, TPM2_ALG.CFB, ivIn, inData
+        )
+
+        self.assertEqual(len(outIV), len(ivIn))
+
+        outData, outIV2 = self.ectx.EncryptDecrypt(
+            aesKeyHandle, True, TPM2_ALG.CFB, ivIn, outCipherText
+        )
+        self.assertEqual(bytes(inData), bytes(outData))
+        self.assertEqual(bytes(outIV), bytes(outIV2))
+
+    def test_EncryptDecrypt2(self):
+
+        inPublic = TPM2B_PUBLIC(
+            TPMT_PUBLIC.parse(
+                alg="ecc",
+                objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS,
+            )
+        )
+        inSensitive = TPM2B_SENSITIVE_CREATE(TPMS_SENSITIVE_CREATE())
+        outsideInfo = TPM2B_DATA()
+        creationPCR = TPML_PCR_SELECTION()
+
+        parentHandle = self.ectx.CreatePrimary(
+            ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
+        )[0]
+
+        inPublic = TPM2B_TEMPLATE(TPMT_PUBLIC.parse(alg="aes").Marshal())
+        aesKeyHandle = self.ectx.CreateLoaded(parentHandle, inSensitive, inPublic)[0]
+
+        ivIn = TPM2B_IV(b"thisis16byteszxc")
+        inData = TPM2B_MAX_BUFFER(b"this is data to encrypt")
+        outCipherText, outIV = self.ectx.EncryptDecrypt2(
+            aesKeyHandle, False, TPM2_ALG.CFB, ivIn, inData
+        )
+
+        self.assertEqual(len(outIV), len(ivIn))
+
+        outData, outIV2 = self.ectx.EncryptDecrypt2(
+            aesKeyHandle, True, TPM2_ALG.CFB, ivIn, outCipherText
+        )
+        self.assertEqual(bytes(inData), bytes(outData))
+        self.assertEqual(bytes(outIV), bytes(outIV2))
+
 
 if __name__ == "__main__":
     unittest.main()
