@@ -1,4 +1,4 @@
-from .ESAPI import *
+from .ESAPI import ESAPI
 from .FAPI import *
 from .TctiLdr import *
 from .types import *
