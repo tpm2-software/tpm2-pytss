@@ -655,7 +655,7 @@ class ESAPI:
         mode,
         ivIn,
         inData,
-        session1=ESYS_TR.NONE,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
@@ -671,22 +671,22 @@ class ESAPI:
                 session3,
                 decrypt,
                 mode,
-                ivIn,
-                inData,
+                ivIn._cdata,
+                inData._cdata,
                 outData,
                 ivOut,
             )
         )
-        return (get_ptr(outData), get_ptr(ivOut))
+        return (TPM2B_MAX_BUFFER(get_ptr(outData)), TPM2B_IV(get_ptr(ivOut)))
 
     def EncryptDecrypt2(
         self,
         keyHandle,
-        inData,
         decrypt,
         mode,
         ivIn,
-        session1=ESYS_TR.NONE,
+        inData,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
@@ -700,15 +700,15 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                inData,
+                inData._cdata,
                 decrypt,
                 mode,
-                ivIn,
+                ivIn._cdata,
                 outData,
                 ivOut,
             )
         )
-        return (get_ptr(outData), get_ptr(ivOut))
+        return (TPM2B_MAX_BUFFER(get_ptr(outData)), TPM2B_IV(get_ptr(ivOut)))
 
     def Hash(
         self,
