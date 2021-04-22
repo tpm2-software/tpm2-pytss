@@ -6,7 +6,7 @@ from ._libtpm2_pytss import lib
 
 from .types import *
 
-from .utils import _chkrc, TPM2B_pack, TPM2B_unpack
+from .utils import _chkrc, TPM2B_pack
 
 
 def get_ptr(dptr):
@@ -770,7 +770,7 @@ class ESAPI:
             )
         )
 
-        return TPM2B_unpack(get_ptr(randomBytes))
+        return TPM2B_DIGEST(get_ptr(randomBytes))
 
     def StirRandom(
         self,
@@ -2320,7 +2320,7 @@ class ESAPI:
                 data,
             )
         )
-        return TPM2B_unpack(get_ptr(data))
+        return TPM2B_MAX_NV_BUFFER(get_ptr(data))
 
     def NV_ReadLock(
         self,
