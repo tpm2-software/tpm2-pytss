@@ -77,7 +77,7 @@ class TestEsys(TSS2_EsapiTest):
         self.ectx.NV_Write(nv_index, b"hello world")
 
         value = self.ectx.NV_Read(nv_index, 11)
-        self.assertEqual(value, b"hello world")
+        self.assertEqual(bytes(value), b"hello world")
 
         public, name = self.ectx.NV_ReadPublic(nv_index)
         self.assertEqual(public.nvPublic.nvIndex, TPM2_HC.NV_INDEX_FIRST)
