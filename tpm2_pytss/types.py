@@ -1282,23 +1282,23 @@ class TPMT_PUBLIC(TPM_OBJECT):
         return False
 
     @staticmethod
-    def _handle_xor(templ):
+    def _handle_xor(_, templ):
         templ.type = TPM2_ALG.KEYEDHASH
         templ.parameters.keyedHashDetail.scheme.scheme = TPM2_ALG.XOR
 
         return True
 
     @staticmethod
-    def _handle_hmac(templ):
+    def _handle_hmac(_, templ):
         templ.type = TPM2_ALG.KEYEDHASH
         templ.parameters.keyedHashDetail.scheme.scheme = TPM2_ALG.HMAC
 
         return True
 
     @staticmethod
-    def _handle_keyedhash(templ):
+    def _handle_keyedhash(_, templ):
         templ.type = TPM2_ALG.KEYEDHASH
-        templ.parameters.keyedHashDetail.scheme.scheme = TPM2_ALG.NONE
+        templ.parameters.keyedHashDetail.scheme.scheme = TPM2_ALG.NULL
 
         return False
 
@@ -1415,8 +1415,8 @@ class TPMT_PUBLIC(TPM_OBJECT):
         if templ.parameters.keyedHashDetail.scheme.scheme == TPM2_ALG.HMAC:
             templ.parameters.keyedHashDetail.scheme.details.hmac.hashAlg = halg
         elif templ.parameters.keyedHashDetail.scheme.scheme == TPM2_ALG.XOR:
-            templ.parameters.keyedHashDetail.scheme.details.xor.hashAlg = halg
-            templ.parameters.keyedHashDetail.scheme.details.xor.kdf = (
+            templ.parameters.keyedHashDetail.scheme.details.exclusiveOr.hashAlg = halg
+            templ.parameters.keyedHashDetail.scheme.details.exclusiveOr.kdf = (
                 TPM2_ALG.KDF1_SP800_108
             )
         else:
@@ -1440,6 +1440,13 @@ class TPMT_PUBLIC(TPM_OBJECT):
 
     @staticmethod
     def _handle_asymdetail(detail, templ):
+
+        if templ.type == TPM2_ALG.KEYEDHASH:
+            if detail is not None:
+                raise RuntimeError(
+                    f'Keyedhash objects cannot have asym detail, got: "{detail}"'
+                )
+            return
 
         if templ.type != TPM2_ALG.RSA and templ.type != TPM2_ALG.ECC:
             raise RuntimeError(
@@ -1511,6 +1518,10 @@ class TPMT_PUBLIC(TPM_OBJECT):
             )
 
         if not keep_processing:
+            if scheme:
+                raise RuntimeError(
+                    f'{prefix} objects cannot have additional specifiers, got: "{scheme}"'
+                )
             return templ
 
         # at this point we either have scheme as a scheme or an asym detail
