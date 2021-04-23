@@ -821,7 +821,7 @@ class TestEsys(TSS2_EsapiTest):
         self.ectx.StirRandom("1234")
         self.ectx.StirRandom(TPM2B_SENSITIVE_DATA("1234"))
 
-    def test_HMAC_Start(self):
+    def test_HMAC_Sequence(self):
 
         inPublic = TPM2B_PUBLIC(
             TPMT_PUBLIC.parse(
@@ -873,7 +873,7 @@ class TestEsys(TSS2_EsapiTest):
 
         self.assertEqual(len(digest), 32)
 
-    def test_HashSequenceStart(self):
+    def test_HashSequence(self):
 
         seqHandle = self.ectx.HashSequenceStart(None, TPM2_ALG.SHA256)
         self.assertNotEqual(seqHandle, 0)
