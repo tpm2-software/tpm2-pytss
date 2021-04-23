@@ -2077,3 +2077,11 @@ class TPMT_RSA_DECRYPT(TPM_OBJECT):
 
 class TPMT_TK_HASHCHECK(TPM_OBJECT):
     pass
+
+
+class TPMT_HA(TPM_OBJECT):
+    pass
+
+
+class TPMU_HA(TPM_OBJECT):
+    pass

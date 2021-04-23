@@ -910,6 +910,26 @@ class TestEsys(TSS2_EsapiTest):
         d = bytes(digest)
         self.assertEqual(e, d)
 
+    def test_EventSequenceComplete(self):
+
+        seqHandle = self.ectx.HashSequenceStart(TPM2B_AUTH(b"1234"), TPM2_ALG.NULL)
+        self.assertNotEqual(seqHandle, 0)
+
+        self.ectx.setAuth(seqHandle, b"1234")
+
+        self.ectx.SequenceUpdate(seqHandle, "here is some data")
+
+        self.ectx.SequenceUpdate(seqHandle, b"more data but byte string")
+
+        self.ectx.SequenceUpdate(seqHandle, TPM2B_MAX_BUFFER("native data format"))
+
+        self.ectx.SequenceUpdate(seqHandle, None)
+
+        pcrs = self.ectx.EventSequenceComplete(
+            ESYS_TR.PCR16, seqHandle, "AnotherBuffer"
+        )
+        self.assertEqual(type(pcrs), TPML_DIGEST_VALUES)
+
 
 if __name__ == "__main__":
     unittest.main()
