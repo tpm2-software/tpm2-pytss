@@ -821,6 +821,43 @@ class TestEsys(TSS2_EsapiTest):
         self.ectx.StirRandom("1234")
         self.ectx.StirRandom(TPM2B_SENSITIVE_DATA("1234"))
 
+    def test_HMAC_Start(self):
+
+        inPublic = TPM2B_PUBLIC(
+            TPMT_PUBLIC.parse(
+                alg="hmac",
+                objectAttributes=(
+                    TPMA_OBJECT.SIGN_ENCRYPT
+                    | TPMA_OBJECT.USERWITHAUTH
+                    | TPMA_OBJECT.SENSITIVEDATAORIGIN
+                ),
+            )
+        )
+
+        inSensitive = TPM2B_SENSITIVE_CREATE(TPMS_SENSITIVE_CREATE())
+        outsideInfo = TPM2B_DATA()
+        creationPCR = TPML_PCR_SELECTION()
+
+        handle = self.ectx.CreatePrimary(
+            ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
+        )[0]
+
+        seqHandle = self.ectx.HMAC_Start(handle, b"1234", TPM2_ALG.SHA256)
+        self.assertNotEqual(seqHandle, 0)
+        self.ectx.FlushContext(seqHandle)
+
+        seqHandle = self.ectx.HMAC_Start(handle, "1234", TPM2_ALG.SHA256)
+        self.assertNotEqual(seqHandle, 0)
+        self.ectx.FlushContext(seqHandle)
+
+        seqHandle = self.ectx.HMAC_Start(handle, TPM2B_AUTH(b"1234"), TPM2_ALG.SHA256)
+        self.assertNotEqual(seqHandle, 0)
+        self.ectx.FlushContext(seqHandle)
+
+        seqHandle = self.ectx.HMAC_Start(handle, None, TPM2_ALG.SHA256)
+        self.assertNotEqual(seqHandle, 0)
+        self.ectx.FlushContext(seqHandle)
+
 
 if __name__ == "__main__":
     unittest.main()
