@@ -815,6 +815,12 @@ class TestEsys(TSS2_EsapiTest):
         self.assertNotEqual(hmac, None)
         self.assertEqual(len(bytes(hmac)), 32)
 
+    def test_StirRandom(self):
+
+        self.ectx.StirRandom(b"1234")
+        self.ectx.StirRandom("1234")
+        self.ectx.StirRandom(TPM2B_SENSITIVE_DATA("1234"))
+
 
 if __name__ == "__main__":
     unittest.main()
