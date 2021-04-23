@@ -918,10 +918,15 @@ class ESAPI:
         pcrHandle,
         sequenceHandle,
         buffer,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
+        session1=ESYS_TR.PASSWORD,
+        session2=ESYS_TR.PASSWORD,
         session3=ESYS_TR.NONE,
     ):
+
+        if isinstance(buffer, (str, bytes)):
+            buffer = TPM2B_MAX_BUFFER(buffer)
+        elif buffer is None:
+            buffer = TPM2B_MAX_BUFFER()
 
         results = ffi.new("TPML_DIGEST_VALUES **")
         _chkrc(
@@ -932,11 +937,11 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                buffer,
+                buffer._cdata,
                 results,
             )
         )
-        return get_ptr(results)
+        return TPML_DIGEST_VALUES(get_ptr(results))
 
     def Certify(
         self,
