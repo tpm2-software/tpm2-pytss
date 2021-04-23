@@ -884,11 +884,16 @@ class ESAPI:
         self,
         sequenceHandle,
         buffer,
-        hierarchy,
-        session1=ESYS_TR.NONE,
+        hierarchy=ESYS_TR.OWNER,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
+
+        if isinstance(buffer, (str, bytes)):
+            buffer = TPM2B_MAX_BUFFER(buffer)
+        elif buffer is None:
+            buffer = TPM2B_MAX_BUFFER()
 
         result = ffi.new("TPM2B_DIGEST **")
         validation = ffi.new("TPMT_TK_HASHCHECK **")
@@ -899,13 +904,14 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                buffer,
+                buffer._cdata,
                 hierarchy,
                 result,
                 validation,
             )
         )
-        return (get_ptr(result), get_ptr(validation))
+
+        return (TPM2B_DIGEST(get_ptr(result)), TPMT_TK_HASHCHECK(get_ptr(validation)))
 
     def EventSequenceComplete(
         self,

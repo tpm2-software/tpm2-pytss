@@ -867,6 +867,12 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.SequenceUpdate(seqHandle, None)
 
+        digest, ticket = self.ectx.SequenceComplete(seqHandle, None)
+        self.assertNotEqual(digest, None)
+        self.assertNotEqual(ticket, None)
+
+        self.assertEqual(len(digest), 32)
+
     def test_HashSequenceStart(self):
 
         seqHandle = self.ectx.HashSequenceStart(None, TPM2_ALG.SHA256)
@@ -893,6 +899,16 @@ class TestEsys(TSS2_EsapiTest):
         self.ectx.SequenceUpdate(seqHandle, TPM2B_MAX_BUFFER("native data format"))
 
         self.ectx.SequenceUpdate(seqHandle, None)
+
+        digest, ticket = self.ectx.SequenceComplete(seqHandle, "AnotherBuffer")
+        self.assertNotEqual(digest, None)
+        self.assertNotEqual(ticket, None)
+
+        e = binascii.unhexlify(
+            "a02271d78e351c6e9e775b0570b440d3ac37ad6c02a3b69df940f3f893f80d41"
+        )
+        d = bytes(digest)
+        self.assertEqual(e, d)
 
 
 if __name__ == "__main__":
