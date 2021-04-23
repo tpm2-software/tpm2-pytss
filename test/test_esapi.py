@@ -858,6 +858,24 @@ class TestEsys(TSS2_EsapiTest):
         self.assertNotEqual(seqHandle, 0)
         self.ectx.FlushContext(seqHandle)
 
+    def test_HashSequenceStart(self):
+
+        seqHandle = self.ectx.HashSequenceStart(b"1234", TPM2_ALG.SHA256)
+        self.assertNotEqual(seqHandle, 0)
+        self.ectx.FlushContext(seqHandle)
+
+        seqHandle = self.ectx.HashSequenceStart("1234", TPM2_ALG.SHA256)
+        self.assertNotEqual(seqHandle, 0)
+        self.ectx.FlushContext(seqHandle)
+
+        seqHandle = self.ectx.HashSequenceStart(TPM2B_AUTH(b"1234"), TPM2_ALG.SHA256)
+        self.assertNotEqual(seqHandle, 0)
+        self.ectx.FlushContext(seqHandle)
+
+        seqHandle = self.ectx.HashSequenceStart(None, TPM2_ALG.SHA256)
+        self.assertNotEqual(seqHandle, 0)
+        self.ectx.FlushContext(seqHandle)
+
 
 if __name__ == "__main__":
     unittest.main()
