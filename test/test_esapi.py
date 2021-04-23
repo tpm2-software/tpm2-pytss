@@ -842,6 +842,10 @@ class TestEsys(TSS2_EsapiTest):
             ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
         )[0]
 
+        seqHandle = self.ectx.HMAC_Start(handle, None, TPM2_ALG.SHA256)
+        self.assertNotEqual(seqHandle, 0)
+        self.ectx.FlushContext(seqHandle)
+
         seqHandle = self.ectx.HMAC_Start(handle, b"1234", TPM2_ALG.SHA256)
         self.assertNotEqual(seqHandle, 0)
         self.ectx.FlushContext(seqHandle)
@@ -852,13 +856,22 @@ class TestEsys(TSS2_EsapiTest):
 
         seqHandle = self.ectx.HMAC_Start(handle, TPM2B_AUTH(b"1234"), TPM2_ALG.SHA256)
         self.assertNotEqual(seqHandle, 0)
-        self.ectx.FlushContext(seqHandle)
 
-        seqHandle = self.ectx.HMAC_Start(handle, None, TPM2_ALG.SHA256)
-        self.assertNotEqual(seqHandle, 0)
-        self.ectx.FlushContext(seqHandle)
+        # self.ectx.setAuth(seqHandle, b"1234")
+
+        self.ectx.SequenceUpdate(seqHandle, "here is some data")
+
+        self.ectx.SequenceUpdate(seqHandle, b"more data but byte string")
+
+        self.ectx.SequenceUpdate(seqHandle, TPM2B_MAX_BUFFER("native data format"))
+
+        self.ectx.SequenceUpdate(seqHandle, None)
 
     def test_HashSequenceStart(self):
+
+        seqHandle = self.ectx.HashSequenceStart(None, TPM2_ALG.SHA256)
+        self.assertNotEqual(seqHandle, 0)
+        self.ectx.FlushContext(seqHandle)
 
         seqHandle = self.ectx.HashSequenceStart(b"1234", TPM2_ALG.SHA256)
         self.assertNotEqual(seqHandle, 0)
@@ -870,11 +883,16 @@ class TestEsys(TSS2_EsapiTest):
 
         seqHandle = self.ectx.HashSequenceStart(TPM2B_AUTH(b"1234"), TPM2_ALG.SHA256)
         self.assertNotEqual(seqHandle, 0)
-        self.ectx.FlushContext(seqHandle)
 
-        seqHandle = self.ectx.HashSequenceStart(None, TPM2_ALG.SHA256)
-        self.assertNotEqual(seqHandle, 0)
-        self.ectx.FlushContext(seqHandle)
+        self.ectx.setAuth(seqHandle, b"1234")
+
+        self.ectx.SequenceUpdate(seqHandle, "here is some data")
+
+        self.ectx.SequenceUpdate(seqHandle, b"more data but byte string")
+
+        self.ectx.SequenceUpdate(seqHandle, TPM2B_MAX_BUFFER("native data format"))
+
+        self.ectx.SequenceUpdate(seqHandle, None)
 
 
 if __name__ == "__main__":
