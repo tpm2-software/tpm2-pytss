@@ -805,10 +805,15 @@ class ESAPI:
         handle,
         auth,
         hashAlg,
-        session1=ESYS_TR.NONE,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
+
+        if isinstance(auth, (str, bytes)):
+            auth = TPM2B_AUTH(auth)
+        elif auth is None:
+            auth = TPM2B_AUTH()
 
         sequenceHandle = ffi.new("ESYS_TR *")
         _chkrc(
@@ -818,7 +823,7 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                auth,
+                auth._cdata,
                 hashAlg,
                 sequenceHandle,
             )
