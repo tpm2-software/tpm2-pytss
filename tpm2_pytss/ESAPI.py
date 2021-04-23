@@ -714,7 +714,7 @@ class ESAPI:
         self,
         data,
         hashAlg,
-        hierarchy=ESYS_TR.NULL,
+        hierarchy=ESYS_TR.OWNER,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
