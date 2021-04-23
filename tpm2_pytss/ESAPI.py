@@ -714,11 +714,14 @@ class ESAPI:
         self,
         data,
         hashAlg,
-        hierarchy,
+        hierarchy=ESYS_TR.NULL,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
+
+        if isinstance(data, (bytes, str)):
+            data = TPM2B_MAX_BUFFER(data)
 
         outHash = ffi.new("TPM2B_DIGEST **")
         validation = ffi.new("TPMT_TK_HASHCHECK **")
@@ -728,14 +731,14 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                data,
+                data._cdata,
                 hashAlg,
                 hierarchy,
                 outHash,
                 validation,
             )
         )
-        return (get_ptr(outHash), get_ptr(validation))
+        return (TPM2B_DIGEST(get_ptr(outHash)), TPMT_TK_HASHCHECK(get_ptr(validation)))
 
     def HMAC(
         self,

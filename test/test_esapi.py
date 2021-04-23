@@ -737,6 +737,50 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(bytes(inData), bytes(outData))
         self.assertEqual(bytes(outIV), bytes(outIV2))
 
+    def test_Hash(self):
+
+        # Null hierarchy default
+        digest, ticket = self.ectx.Hash(b"1234", TPM2_ALG.SHA256)
+        self.assertNotEqual(digest, None)
+        self.assertNotEqual(ticket, None)
+        d = bytes(digest)
+        c = binascii.unhexlify(
+            "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"
+        )
+        self.assertEqual(c, d)
+
+        # Owner hierarchy set
+        digest, ticket = self.ectx.Hash(b"1234", TPM2_ALG.SHA256, ESYS_TR.OWNER)
+        self.assertNotEqual(digest, None)
+        self.assertNotEqual(ticket, None)
+        d = bytes(digest)
+        c = binascii.unhexlify(
+            "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"
+        )
+        self.assertEqual(c, d)
+
+        # Test TPM2B_MAX_BUFFER
+        inData = TPM2B_MAX_BUFFER(b"1234")
+        digest, ticket = self.ectx.Hash(inData, TPM2_ALG.SHA256)
+        self.assertNotEqual(digest, None)
+        self.assertNotEqual(ticket, None)
+        d = bytes(digest)
+        c = binascii.unhexlify(
+            "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"
+        )
+        self.assertEqual(c, d)
+
+        # Test str input
+        inData = TPM2B_MAX_BUFFER("1234")
+        digest, ticket = self.ectx.Hash(inData, TPM2_ALG.SHA256)
+        self.assertNotEqual(digest, None)
+        self.assertNotEqual(ticket, None)
+        d = bytes(digest)
+        c = binascii.unhexlify(
+            "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"
+        )
+        self.assertEqual(c, d)
+
 
 if __name__ == "__main__":
     unittest.main()
