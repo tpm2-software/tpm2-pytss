@@ -864,14 +864,19 @@ class ESAPI:
         self,
         sequenceHandle,
         buffer,
-        session1=ESYS_TR.NONE,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
+        if isinstance(buffer, (str, bytes)):
+            buffer = TPM2B_MAX_BUFFER(buffer)
+        elif buffer is None:
+            buffer = TPM2B_MAX_BUFFER()
+
         _chkrc(
             lib.Esys_SequenceUpdate(
-                self.ctx, sequenceHandle, session1, session2, session3, buffer
+                self.ctx, sequenceHandle, session1, session2, session3, buffer._cdata
             )
         )
 
