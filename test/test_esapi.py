@@ -781,6 +781,40 @@ class TestEsys(TSS2_EsapiTest):
         )
         self.assertEqual(c, d)
 
+    def test_HMAC(self):
+
+        attrs = (
+            TPMA_OBJECT.SIGN_ENCRYPT
+            | TPMA_OBJECT.USERWITHAUTH
+            | TPMA_OBJECT.SENSITIVEDATAORIGIN
+        )
+        templ = TPMT_PUBLIC.parse(alg="hmac", objectAttributes=attrs)
+        inPublic = TPM2B_PUBLIC(templ)
+
+        inSensitive = TPM2B_SENSITIVE_CREATE(TPMS_SENSITIVE_CREATE())
+        outsideInfo = TPM2B_DATA()
+        creationPCR = TPML_PCR_SELECTION()
+
+        primaryHandle = self.ectx.CreatePrimary(
+            ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
+        )[0]
+
+        # Test bytes
+        hmac = self.ectx.HMAC(primaryHandle, b"1234", TPM2_ALG.SHA256)
+        self.assertNotEqual(hmac, None)
+        self.assertEqual(len(bytes(hmac)), 32)
+
+        # Test str
+        hmac = self.ectx.HMAC(primaryHandle, "1234", TPM2_ALG.SHA256)
+        self.assertNotEqual(hmac, None)
+        self.assertEqual(len(bytes(hmac)), 32)
+
+        # Test Native
+        inData = TPM2B_MAX_BUFFER("1234")
+        hmac = self.ectx.HMAC(primaryHandle, inData, TPM2_ALG.SHA256)
+        self.assertNotEqual(hmac, None)
+        self.assertEqual(len(bytes(hmac)), 32)
+
 
 if __name__ == "__main__":
     unittest.main()

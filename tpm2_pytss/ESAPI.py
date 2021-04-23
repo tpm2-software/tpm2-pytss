@@ -745,18 +745,28 @@ class ESAPI:
         handle,
         buffer,
         hashAlg,
-        session1=ESYS_TR.NONE,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
+        if isinstance(buffer, (bytes, str)):
+            buffer = TPM2B_MAX_BUFFER(buffer)
+
         outHMAC = ffi.new("TPM2B_DIGEST **")
         _chkrc(
             lib.Esys_HMAC(
-                self.ctx, handle, session1, session2, session3, buffer, hashAlg, outHMAC
+                self.ctx,
+                handle,
+                session1,
+                session2,
+                session3,
+                buffer._cdata,
+                hashAlg,
+                outHMAC,
             )
         )
-        return get_ptr(outHMAC)
+        return TPM2B_DIGEST(get_ptr(outHMAC))
 
     def GetRandom(
         self,
