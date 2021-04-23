@@ -862,6 +862,58 @@ class TypesTest(unittest.TestCase):
                 templ.parameters.asymDetail.symmetric.algorithm, TPM2_ALG.AES
             )
 
+    def test_TPMT_PUBLIC_parse_xor(self):
+        templ = TPMT_PUBLIC.parse(alg="xor")
+        self.assertEqual(templ.type, TPM2_ALG.KEYEDHASH)
+        self.assertEqual(templ.parameters.keyedHashDetail.scheme.scheme, TPM2_ALG.XOR)
+        self.assertEqual(
+            templ.parameters.keyedHashDetail.scheme.details.exclusiveOr.hashAlg,
+            TPM2_ALG.SHA256,
+        )
+        self.assertEqual(
+            templ.parameters.keyedHashDetail.scheme.details.exclusiveOr.kdf,
+            TPM2_ALG.KDF1_SP800_108,
+        )
+
+        templ = TPMT_PUBLIC.parse(alg="xor:sha512")
+        self.assertEqual(templ.type, TPM2_ALG.KEYEDHASH)
+        self.assertEqual(templ.parameters.keyedHashDetail.scheme.scheme, TPM2_ALG.XOR)
+        self.assertEqual(
+            templ.parameters.keyedHashDetail.scheme.details.exclusiveOr.hashAlg,
+            TPM2_ALG.SHA512,
+        )
+        self.assertEqual(
+            templ.parameters.keyedHashDetail.scheme.details.exclusiveOr.kdf,
+            TPM2_ALG.KDF1_SP800_108,
+        )
+
+    def test_TPMT_PUBLIC_parse_keyedhash(self):
+
+        templ = TPMT_PUBLIC.parse(alg="keyedhash")
+        self.assertEqual(templ.type, TPM2_ALG.KEYEDHASH)
+        self.assertEqual(templ.parameters.keyedHashDetail.scheme.scheme, TPM2_ALG.NULL)
+
+        # should fail, cannot have additional specifiers
+        with self.assertRaises(RuntimeError):
+            templ = TPMT_PUBLIC.parse(alg="keyedhash:sha512")
+
+    def test_TPMT_PUBLIC_parse_hmac(self):
+        templ = TPMT_PUBLIC.parse(alg="hmac")
+        self.assertEqual(templ.type, TPM2_ALG.KEYEDHASH)
+        self.assertEqual(templ.parameters.keyedHashDetail.scheme.scheme, TPM2_ALG.HMAC)
+        self.assertEqual(
+            templ.parameters.keyedHashDetail.scheme.details.hmac.hashAlg,
+            TPM2_ALG.SHA256,
+        )
+
+        templ = TPMT_PUBLIC.parse(alg="hmac:sha512")
+        self.assertEqual(templ.type, TPM2_ALG.KEYEDHASH)
+        self.assertEqual(templ.parameters.keyedHashDetail.scheme.scheme, TPM2_ALG.HMAC)
+        self.assertEqual(
+            templ.parameters.keyedHashDetail.scheme.details.hmac.hashAlg,
+            TPM2_ALG.SHA512,
+        )
+
     def test_TPMT_PUBLIC_parse_ecc_plain(self):
 
         templ = TPMT_PUBLIC.parse(alg="ecc")
