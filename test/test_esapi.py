@@ -930,6 +930,20 @@ class TestEsys(TSS2_EsapiTest):
         )
         self.assertEqual(type(pcrs), TPML_DIGEST_VALUES)
 
+    def test_Vendor_TCG_Test(self):
+        with self.assertRaises(TSS2_Exception):
+            data = self.ectx.Vendor_TCG_Test(b"random data")
+
+        in_cdata = TPM2B_DATA(b"other bytes")._cdata
+        with self.assertRaises(TSS2_Exception):
+            data = self.ectx.Vendor_TCG_Test(in_cdata)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Vendor_TCG_Test(None)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Vendor_TCG_Test(TPM2B_PUBLIC())
+
 
 if __name__ == "__main__":
     unittest.main()
