@@ -13,6 +13,32 @@ def get_ptr(dptr):
     return ffi.gc(dptr[0], lib.Esys_Free)
 
 
+def get_cdata(value, expected, allow_none=False):
+    tname = expected.__name__
+
+    if value is None and allow_none:
+        return ffi.NULL
+    elif value is None:
+        raise TypeError(f"expected {tname} got None")
+
+    if isinstance(value, ffi.CData):
+        tipe = ffi.typeof(value)
+        if tipe.kind == "pointer":
+            tipe = tipe.item
+        if tipe.cname != tname:
+            raise TypeError(f"expected {tname} got {tipe.cname}")
+        return value
+
+    vname = type(value).__name__
+    if isinstance(value, bytes) and issubclass(expected, TPM2B_SIMPLE_OBJECT):
+        bo = expected(value)
+        return bo._cdata
+    elif not isinstance(value, expected):
+        raise TypeError(f"expected {tname} got {vname}")
+
+    return value._cdata
+
+
 class ESAPI:
     def __init__(self, tcti=None):
 
@@ -229,7 +255,8 @@ class ESAPI:
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
-
+        inPrivate_cdata = get_cdata(inPrivate, TPM2B_SENSITIVE, allow_none=True)
+        inPublic_cdata = get_cdata(inPublic, TPM2B_PUBLIC)
         objectHandle = ffi.new("ESYS_TR *")
         _chkrc(
             lib.Esys_LoadExternal(
@@ -237,8 +264,8 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                inPrivate._cdata,
-                inPublic._cdata,
+                inPrivate_cdata,
+                inPublic_cdata,
                 hierarchy,
                 objectHandle,
             )
@@ -2444,11 +2471,11 @@ class ESAPI:
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
-
+        inputData_cdata = get_cdata(inputData, TPM2B_DATA)
         outputData = ffi.new("TPM2B_DATA **")
         _chkrc(
             lib.Esys_Vendor_TCG_Test(
-                self.ctx, session1, session2, session3, inputData, outputData
+                self.ctx, session1, session2, session3, inputData_cdata, outputData
             )
         )
-        return get_ptr(outputData)
+        return TPM2B_DATA(get_ptr(outputData))

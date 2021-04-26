@@ -154,6 +154,10 @@ class CryptoTest(TSS2_EsapiTest):
 
         self.ectx.LoadExternal(priv, pub, types.ESYS_TR.RH_NULL)
 
+    def test_loadexternal_public_rsa(self):
+        pub = types.TPM2B_PUBLIC.fromPEM(rsa_public_key)
+        self.ectx.LoadExternal(None, pub, types.ESYS_TR.RH_NULL)
+
     def test_public_to_pem_rsa(self):
         pub = types.TPM2B_PUBLIC.fromPEM(rsa_public_key)
         pem = crypto.public_to_pem(pub.publicArea)
