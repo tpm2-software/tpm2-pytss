@@ -969,6 +969,31 @@ class TestEsys(TSS2_EsapiTest):
         counter = int.from_bytes(data.buffer, byteorder="big")
         self.assertEqual(counter, 1)
 
+    def test_NV_Extend(self):
+        nvpub = TPM2B_NV_PUBLIC(
+            nvPublic=TPMS_NV_PUBLIC(
+                nvIndex=0x1000000,
+                nameAlg=TPM2_ALG.SHA256,
+                attributes=TPMA_NV.OWNERWRITE
+                | TPMA_NV.OWNERREAD
+                | (TPM2_NT.EXTEND << TPMA_NV.TPM2_NT_SHIFT),
+                authPolicy=b"",
+                dataSize=32,
+            )
+        )
+
+        nvhandle = self.ectx.NV_DefineSpace(ESYS_TR.RH_OWNER, b"", nvpub)
+
+        edata = b"\xFF" * 32
+        self.ectx.NV_Extend(
+            ESYS_TR.RH_OWNER, nvhandle, edata, session1=ESYS_TR.PASSWORD
+        )
+
+        data = self.ectx.NV_Read(nvhandle, 32, 0, authHandle=ESYS_TR.RH_OWNER)
+
+        edigest = b"\xbb\xa9\x1c\xa8]\xc9\x14\xb2\xec>\xfb\x9e\x16\xe7&{\xf9\x19;\x145\r \xfb\xa8\xa8\xb4\x06s\n\xe3\n"
+        self.assertEqual(edigest, bytes(data))
+
     def test_NV_SetBits(self):
         nvpub = TPM2B_NV_PUBLIC(
             nvPublic=TPMS_NV_PUBLIC(
