@@ -25,7 +25,8 @@ def get_cdata(value, expected, allow_none=False):
         tipe = ffi.typeof(value)
         if tipe.kind == "pointer":
             tipe = tipe.item
-        if tipe.cname != tname:
+        classname = fixup_classname(tipe)
+        if classname != tname:
             raise TypeError(f"expected {tname} got {tipe.cname}")
         return value
 
