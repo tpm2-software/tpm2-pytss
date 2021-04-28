@@ -1017,6 +1017,27 @@ class TestEsys(TSS2_EsapiTest):
 
         self.assertEqual(e.exception.error, TPM2_RC.NV_LOCKED)
 
+    def test_NV_GlobalWriteLock(self):
+        nvpub = TPM2B_NV_PUBLIC(
+            nvPublic=TPMS_NV_PUBLIC(
+                nvIndex=0x1000000,
+                nameAlg=TPM2_ALG.SHA256,
+                attributes=TPMA_NV.OWNERWRITE | TPMA_NV.OWNERREAD | TPMA_NV.GLOBALLOCK,
+                authPolicy=b"",
+                dataSize=8,
+            )
+        )
+
+        nvhandle = self.ectx.NV_DefineSpace(ESYS_TR.RH_OWNER, b"", nvpub)
+
+        self.ectx.NV_GlobalWriteLock(ESYS_TR.RH_OWNER, session1=ESYS_TR.PASSWORD)
+
+        indata = b"12345678"
+        with self.assertRaises(TSS2_Exception) as e:
+            self.ectx.NV_Write(nvhandle, indata, authHandle=ESYS_TR.RH_OWNER)
+
+        self.assertEqual(e.exception.error, TPM2_RC.NV_LOCKED)
+
     def test_Vendor_TCG_Test(self):
         with self.assertRaises(TSS2_Exception):
             data = self.ectx.Vendor_TCG_Test(b"random data")
