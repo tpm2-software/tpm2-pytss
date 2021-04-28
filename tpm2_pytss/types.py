@@ -2085,3 +2085,11 @@ class TPMT_HA(TPM_OBJECT):
 
 class TPMU_HA(TPM_OBJECT):
     pass
+
+
+class TPMT_SIG_SCHEME(TPM_OBJECT):
+    pass
+
+
+class TPMT_SIGNATURE(TPM_OBJECT):
+    pass

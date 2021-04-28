@@ -39,6 +39,13 @@ def get_cdata(value, expected, allow_none=False):
     return value._cdata
 
 
+def check_handle_type(handle, varname):
+    if not isinstance(handle, int):
+        raise TypeError(
+            f"expected {varname} to be type int aka ESYS_TR, got {type(handle)}"
+        )
+
+
 class ESAPI:
     def __init__(self, tcti=None):
 
@@ -976,10 +983,19 @@ class ESAPI:
         signHandle,
         qualifyingData,
         inScheme,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
+        session1=ESYS_TR.PASSWORD,
+        session2=ESYS_TR.PASSWORD,
         session3=ESYS_TR.NONE,
     ):
+
+        check_handle_type(objectHandle, "objectHandle")
+        check_handle_type(signHandle, "signHandle")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        qualifyingData_cdata = get_cdata(qualifyingData, TPM2B_DATA)
+        inScheme_cdata = get_cdata(inScheme, TPMT_SIG_SCHEME)
 
         certifyInfo = ffi.new("TPM2B_ATTEST **")
         signature = ffi.new("TPMT_SIGNATURE **")
@@ -991,13 +1007,13 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                qualifyingData,
-                inScheme,
+                qualifyingData_cdata,
+                inScheme_cdata,
                 certifyInfo,
                 signature,
             )
         )
-        return (get_ptr(certifyInfo), get_ptr(signature))
+        return (TPM2B_ATTEST(get_ptr(certifyInfo)), TPMT_SIGNATURE(get_ptr(signature)))
 
     def CertifyCreation(
         self,
