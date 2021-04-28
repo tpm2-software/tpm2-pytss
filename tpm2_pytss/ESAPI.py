@@ -2200,6 +2200,8 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        auth_cdata = get_cdata(auth, TPM2B_AUTH, allow_none=True)
+        publicInfo_cdata = get_cdata(publicInfo, TPM2B_NV_PUBLIC)
         nvHandle = ffi.new("ESYS_TR *")
         _chkrc(
             lib.Esys_NV_DefineSpace(
@@ -2208,8 +2210,8 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                TPM2B_pack(auth, t="TPM2B_AUTH"),
-                publicInfo._cdata,
+                auth_cdata,
+                publicInfo_cdata,
                 nvHandle,
             )
         )
