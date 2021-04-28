@@ -2320,9 +2320,10 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        data_cdata = get_cdata(data, TPM2B_MAX_NV_BUFFER)
         _chkrc(
             lib.Esys_NV_Extend(
-                self.ctx, authHandle, nvIndex, session1, session2, session3, data
+                self.ctx, authHandle, nvIndex, session1, session2, session3, data_cdata
             )
         )
 
