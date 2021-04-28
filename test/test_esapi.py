@@ -969,6 +969,31 @@ class TestEsys(TSS2_EsapiTest):
         counter = int.from_bytes(data.buffer, byteorder="big")
         self.assertEqual(counter, 1)
 
+    def test_NV_SetBits(self):
+        nvpub = TPM2B_NV_PUBLIC(
+            nvPublic=TPMS_NV_PUBLIC(
+                nvIndex=0x1000000,
+                nameAlg=TPM2_ALG.SHA256,
+                attributes=TPMA_NV.OWNERWRITE
+                | TPMA_NV.OWNERREAD
+                | (TPM2_NT.BITS << TPMA_NV.TPM2_NT_SHIFT),
+                authPolicy=b"",
+                dataSize=8,
+            )
+        )
+
+        nvhandle = self.ectx.NV_DefineSpace(ESYS_TR.RH_OWNER, b"", nvpub)
+
+        bits = 0b1010
+        self.ectx.NV_SetBits(
+            ESYS_TR.RH_OWNER, nvhandle, bits, session1=ESYS_TR.PASSWORD
+        )
+
+        data = self.ectx.NV_Read(nvhandle, 8, 0, authHandle=ESYS_TR.RH_OWNER)
+
+        b = bits.to_bytes(length=8, byteorder="big")
+        self.assertEqual(b, bytes(data))
+
     def test_Vendor_TCG_Test(self):
         with self.assertRaises(TSS2_Exception):
             data = self.ectx.Vendor_TCG_Test(b"random data")
