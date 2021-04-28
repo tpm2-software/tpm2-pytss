@@ -1135,6 +1135,54 @@ class TestEsys(TSS2_EsapiTest):
                 eccHandle, eccHandle, qualifyingData, TPM2B_PRIVATE()
             )
 
+    def test_CertifyCreation(self):
+        inPublic = TPM2B_PUBLIC(
+            TPMT_PUBLIC.parse(
+                alg="rsa:rsassa-sha256",
+                objectAttributes=TPMA_OBJECT.USERWITHAUTH
+                | TPMA_OBJECT.SIGN_ENCRYPT
+                | TPMA_OBJECT.FIXEDTPM
+                | TPMA_OBJECT.FIXEDPARENT
+                | TPMA_OBJECT.SENSITIVEDATAORIGIN,
+            )
+        )
+        inSensitive = TPM2B_SENSITIVE_CREATE()
+        outsideInfo = TPM2B_DATA()
+        creationPCR = TPML_PCR_SELECTION()
+
+        eccHandle, _, _, creationHash, creationTicket = self.ectx.CreatePrimary(
+            ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
+        )
+
+        qualifyingData = TPM2B_DATA()
+        inScheme = TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL)
+        certifyInfo, signature = self.ectx.CertifyCreation(
+            eccHandle, eccHandle, qualifyingData, creationHash, inScheme, creationTicket
+        )
+        self.assertEqual(type(certifyInfo), TPM2B_ATTEST)
+        self.assertNotEqual(len(certifyInfo), 0)
+        self.assertEqual(type(signature), TPMT_SIGNATURE)
+
+        with self.assertRaises(TypeError):
+            certifyInfo, signature = self.ectx.Certify(
+                TPM2B_ATTEST(), eccHandle, qualifyingData, inScheme
+            )
+
+        with self.assertRaises(TypeError):
+            certifyInfo, signature = self.ectx.Certify(
+                eccHandle, 2.0, qualifyingData, inScheme
+            )
+
+        with self.assertRaises(TypeError):
+            certifyInfo, signature = self.ectx.Certify(
+                eccHandle, eccHandle, TPM2B_PUBLIC(), inScheme
+            )
+
+        with self.assertRaises(TypeError):
+            certifyInfo, signature = self.ectx.Certify(
+                eccHandle, eccHandle, qualifyingData, TPM2B_PRIVATE()
+            )
+
     def test_Vendor_TCG_Test(self):
         with self.assertRaises(TSS2_Exception):
             self.ectx.Vendor_TCG_Test(b"random data")
