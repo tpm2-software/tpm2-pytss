@@ -930,6 +930,23 @@ class TestEsys(TSS2_EsapiTest):
         )
         self.assertEqual(type(pcrs), TPML_DIGEST_VALUES)
 
+    def test_NV_ReadPublic(self):
+        nvpub = TPM2B_NV_PUBLIC(
+            nvPublic=TPMS_NV_PUBLIC(
+                nvIndex=0x1000000,
+                nameAlg=TPM2_ALG.SHA256,
+                attributes=TPMA_NV.OWNERWRITE | TPMA_NV.OWNERREAD,
+                authPolicy=b"",
+                dataSize=8,
+            )
+        )
+
+        nvhandle = self.ectx.NV_DefineSpace(ESYS_TR.RH_OWNER, b"", nvpub)
+
+        pubout, name = self.ectx.NV_ReadPublic(nvhandle)
+
+        self.assertEqual(nvpub.getName().name, name.name)
+
     def test_Vendor_TCG_Test(self):
         with self.assertRaises(TSS2_Exception):
             data = self.ectx.Vendor_TCG_Test(b"random data")
