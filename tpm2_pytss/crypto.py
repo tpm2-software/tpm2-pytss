@@ -127,7 +127,7 @@ def getname(obj):
     dt = _get_digest(obj.nameAlg)
     if dt is None:
         raise ValueError(f"unsupported digest algorithm: {d}")
-    d = hashes.Hash(dt())
+    d = hashes.Hash(dt(), backend=default_backend())
     mb = obj.Marshal()
     d.update(mb)
     b = d.finalize()
