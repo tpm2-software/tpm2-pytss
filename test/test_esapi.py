@@ -1087,6 +1087,39 @@ class TestEsys(TSS2_EsapiTest):
 
         self.assertEqual(e.exception.error, TPM2_RC.NV_LOCKED)
 
+    def test_NV_ChangeAuth(self):
+        # pre-generated TPM2_PolicyCommandCode(TPM2_CC_NV_ChangeAuth)
+        pol = b"D^\xd9S`\x1a\x04U\x04U\t\x99\xbf,\xbb)\x92\xcb\xa2\xdb\xb5\x12\x1b\xcf\x03\x86\x9fe\xb5\x0c&\xe5"
+        nvpub = TPM2B_NV_PUBLIC(
+            nvPublic=TPMS_NV_PUBLIC(
+                nvIndex=0x1000000,
+                nameAlg=TPM2_ALG.SHA256,
+                attributes=TPMA_NV.OWNERWRITE | TPMA_NV.OWNERREAD | TPMA_NV.AUTHREAD,
+                authPolicy=pol,
+                dataSize=8,
+            )
+        )
+
+        nvhandle = self.ectx.NV_DefineSpace(ESYS_TR.RH_OWNER, b"first", nvpub)
+        self.ectx.NV_Write(nvhandle, b"sometest", authHandle=ESYS_TR.RH_OWNER)
+
+        self.ectx.NV_Read(nvhandle, 8, authHandle=nvhandle)
+
+        session = self.ectx.StartAuthSession(
+            ESYS_TR.NONE,
+            ESYS_TR.NONE,
+            None,
+            TPM2_SE.POLICY,
+            TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL),
+            TPM2_ALG.SHA256,
+        )
+
+        self.ectx.PolicyCommandCode(session, TPM2_CC.NV_ChangeAuth)
+
+        self.ectx.NV_ChangeAuth(nvhandle, b"second", session1=session)
+
+        self.ectx.NV_Read(nvhandle, 8, authHandle=nvhandle)
+
     def test_Certify(self):
         inPublic = TPM2B_PUBLIC(
             TPMT_PUBLIC.parse(
