@@ -13,13 +13,13 @@ def get_ptr(dptr):
     return ffi.gc(dptr[0], lib.Esys_Free)
 
 
-def get_cdata(value, expected, allow_none=False):
+def get_cdata(value, expected, varname, allow_none=False):
     tname = expected.__name__
 
     if value is None and allow_none:
         return ffi.NULL
     elif value is None:
-        raise TypeError(f"expected {tname} got None")
+        raise TypeError(f"expected {varname} to be {tname}, got None")
 
     if isinstance(value, ffi.CData):
         tipe = ffi.typeof(value)
@@ -27,7 +27,7 @@ def get_cdata(value, expected, allow_none=False):
             tipe = tipe.item
         classname = fixup_classname(tipe)
         if classname != tname:
-            raise TypeError(f"expected {tname} got {tipe.cname}")
+            raise TypeError(f"expected {varname} to be {tname}, got {tipe.cname}")
         return value
 
     vname = type(value).__name__
@@ -35,7 +35,7 @@ def get_cdata(value, expected, allow_none=False):
         bo = expected(value)
         return bo._cdata
     elif not isinstance(value, expected):
-        raise TypeError(f"expected {tname} got {vname}")
+        raise TypeError(f"expected {varname} to be {tname}, got {vname}")
 
     return value._cdata
 
@@ -263,8 +263,10 @@ class ESAPI:
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
-        inPrivate_cdata = get_cdata(inPrivate, TPM2B_SENSITIVE, allow_none=True)
-        inPublic_cdata = get_cdata(inPublic, TPM2B_PUBLIC)
+        inPrivate_cdata = get_cdata(
+            inPrivate, TPM2B_SENSITIVE, "inPrivate", allow_none=True
+        )
+        inPublic_cdata = get_cdata(inPublic, TPM2B_PUBLIC, "inPublic")
         objectHandle = ffi.new("ESYS_TR *")
         _chkrc(
             lib.Esys_LoadExternal(
@@ -995,8 +997,8 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        qualifyingData_cdata = get_cdata(qualifyingData, TPM2B_DATA)
-        inScheme_cdata = get_cdata(inScheme, TPMT_SIG_SCHEME)
+        qualifyingData_cdata = get_cdata(qualifyingData, TPM2B_DATA, "qualifyingData")
+        inScheme_cdata = get_cdata(inScheme, TPMT_SIG_SCHEME, "inScheme")
 
         certifyInfo = ffi.new("TPM2B_ATTEST **")
         signature = ffi.new("TPMT_SIGNATURE **")
@@ -1035,10 +1037,12 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        qualifyingData_cdata = get_cdata(qualifyingData, TPM2B_DATA)
-        inScheme_cdata = get_cdata(inScheme, TPMT_SIG_SCHEME)
-        creationHash_cdata = get_cdata(creationHash, TPM2B_DIGEST)
-        creationTicket_cdata = get_cdata(creationTicket, TPMT_TK_CREATION)
+        qualifyingData_cdata = get_cdata(qualifyingData, TPM2B_DATA, "qualifyingData")
+        inScheme_cdata = get_cdata(inScheme, TPMT_SIG_SCHEME, "inScheme")
+        creationHash_cdata = get_cdata(creationHash, TPM2B_DIGEST, "creationHash")
+        creationTicket_cdata = get_cdata(
+            creationTicket, TPMT_TK_CREATION, "creationTicket"
+        )
 
         certifyInfo = ffi.new("TPM2B_ATTEST **")
         signature = ffi.new("TPMT_SIGNATURE **")
@@ -2228,8 +2232,8 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
-        auth_cdata = get_cdata(auth, TPM2B_AUTH, allow_none=True)
-        publicInfo_cdata = get_cdata(publicInfo, TPM2B_NV_PUBLIC)
+        auth_cdata = get_cdata(auth, TPM2B_AUTH, "auth", allow_none=True)
+        publicInfo_cdata = get_cdata(publicInfo, TPM2B_NV_PUBLIC, "publicInfo")
         nvHandle = ffi.new("ESYS_TR *")
         _chkrc(
             lib.Esys_NV_DefineSpace(
@@ -2348,7 +2352,7 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
-        data_cdata = get_cdata(data, TPM2B_MAX_NV_BUFFER)
+        data_cdata = get_cdata(data, TPM2B_MAX_NV_BUFFER, "data")
         _chkrc(
             lib.Esys_NV_Extend(
                 self.ctx, authHandle, nvIndex, session1, session2, session3, data_cdata
@@ -2502,7 +2506,7 @@ class ESAPI:
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
-        inputData_cdata = get_cdata(inputData, TPM2B_DATA)
+        inputData_cdata = get_cdata(inputData, TPM2B_DATA, "inputData")
         outputData = ffi.new("TPM2B_DATA **")
         _chkrc(
             lib.Esys_Vendor_TCG_Test(
