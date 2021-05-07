@@ -12,10 +12,7 @@ TPM2 TSS Python bindings for Enhanced System API (ESYS).
 ## Documentation
 
 Documentation for the latest release is hosted at
-https://tpm2-software.github.io/tpm2-pytss
-
-Documentation for the master branch is hosted at
-https://tpm2-software.github.io/tpm2-pytss/master
+https://tpm2-pytss.readthedocs.io/en/latest/index.html
 
 ## Contributing
 
