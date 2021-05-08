@@ -2480,6 +2480,11 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(signHandle, "signHandle")
+        check_handle_type(authHandle, "authHandle")
+        check_handle_type(nvIndex, "nvIndex")
+        qualifyingData_cdata = get_cdata(qualifyingData, TPM2B_DATA, "qualifyingData")
+        inScheme_cdata = get_cdata(inScheme, TPMT_SIG_SCHEME, "inScheme")
         certifyInfo = ffi.new("TPM2B_ATTEST **")
         signature = ffi.new("TPMT_SIGNATURE **")
         _chkrc(
@@ -2491,15 +2496,15 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                qualifyingData,
-                inScheme,
+                qualifyingData_cdata,
+                inScheme_cdata,
                 size,
                 offset,
                 certifyInfo,
                 signature,
             )
         )
-        return (get_ptr(certifyInfo), get_ptr(signature))
+        return (TPM2B_ATTEST(get_ptr(certifyInfo)), TPMT_SIGNATURE(get_ptr(signature)))
 
     def Vendor_TCG_Test(
         self,

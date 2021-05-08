@@ -1810,6 +1810,10 @@ class TPMS_ASYM_PARMS(TPM_OBJECT):
     pass
 
 
+class TPMU_ATTEST(TPM_OBJECT):
+    pass
+
+
 class TPMS_ATTEST(TPM_OBJECT):
     pass
 

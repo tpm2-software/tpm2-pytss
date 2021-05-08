@@ -1120,6 +1120,61 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.NV_Read(nvhandle, 8, authHandle=nvhandle)
 
+    def test_NV_Certify(self):
+        nvpub = TPM2B_NV_PUBLIC(
+            nvPublic=TPMS_NV_PUBLIC(
+                nvIndex=0x1000000,
+                nameAlg=TPM2_ALG.SHA256,
+                attributes=TPMA_NV.OWNERWRITE | TPMA_NV.OWNERREAD,
+                authPolicy=b"",
+                dataSize=8,
+            )
+        )
+
+        nvhandle = self.ectx.NV_DefineSpace(ESYS_TR.RH_OWNER, b"", nvpub)
+        self.ectx.NV_Write(nvhandle, b"sometest", authHandle=ESYS_TR.RH_OWNER)
+
+        inPublic = TPM2B_PUBLIC(
+            TPMT_PUBLIC.parse(
+                alg="rsa:rsassa-sha256",
+                objectAttributes=TPMA_OBJECT.USERWITHAUTH
+                | TPMA_OBJECT.SIGN_ENCRYPT
+                | TPMA_OBJECT.FIXEDTPM
+                | TPMA_OBJECT.FIXEDPARENT
+                | TPMA_OBJECT.SENSITIVEDATAORIGIN,
+            )
+        )
+        inSensitive = TPM2B_SENSITIVE_CREATE()
+        outsideInfo = TPM2B_DATA()
+        creationPCR = TPML_PCR_SELECTION()
+
+        eccHandle, signPub, _, _, _ = self.ectx.CreatePrimary(
+            ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
+        )
+
+        qualifyingData = TPM2B_DATA(b"qdata")
+        inScheme = TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL)
+
+        certifyInfo, signature = self.ectx.NV_Certify(
+            eccHandle,
+            ESYS_TR.RH_OWNER,
+            nvhandle,
+            qualifyingData,
+            inScheme,
+            8,
+            0,
+            session1=ESYS_TR.PASSWORD,
+            session2=ESYS_TR.PASSWORD,
+        )
+        att, _ = TPMS_ATTEST.Unmarshal(bytes(certifyInfo))
+        self.assertEqual(att.magic, TPM2_GENERATED_VALUE(0xFF544347))
+        self.assertEqual(att.type, TPM2_ST.ATTEST_NV)
+        self.assertEqual(bytes(att.extraData), b"qdata")
+        nvpub.nvPublic.attributes = nvpub.nvPublic.attributes | TPMA_NV.WRITTEN
+        self.assertEqual(bytes(att.attested.nv.indexName), bytes(nvpub.getName()))
+        self.assertEqual(att.attested.nv.offset, 0)
+        self.assertEqual(att.attested.nv.nvContents.buffer, b"sometest")
+
     def test_Certify(self):
         inPublic = TPM2B_PUBLIC(
             TPMT_PUBLIC.parse(
