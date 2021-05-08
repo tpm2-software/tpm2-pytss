@@ -2274,6 +2274,8 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(nvIndex, "nvIndex")
+        check_handle_type(platform, "platform")
         _chkrc(
             lib.Esys_NV_UndefineSpaceSpecial(
                 self.ctx, nvIndex, platform, session1, session2, session3
