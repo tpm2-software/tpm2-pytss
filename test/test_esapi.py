@@ -930,6 +930,39 @@ class TestEsys(TSS2_EsapiTest):
         )
         self.assertEqual(type(pcrs), TPML_DIGEST_VALUES)
 
+    def test_NV_UndefineSpaceSpecial(self):
+        # pre-generated TPM2_PolicyCommandCode(TPM2_CC_NV_UndefineSpaceSpecial)
+        pol = b"\x1d-\xc4\x85\xe1w\xdd\xd0\xa4\n4I\x13\xce\xebB\x0c\xaa\t<BX}.\x1b\x13+\x15|\xcb]\xb0"
+        nvpub = TPM2B_NV_PUBLIC(
+            nvPublic=TPMS_NV_PUBLIC(
+                nvIndex=0x1000000,
+                nameAlg=TPM2_ALG.SHA256,
+                attributes=TPMA_NV.PPWRITE
+                | TPMA_NV.PPREAD
+                | TPMA_NV.PLATFORMCREATE
+                | TPMA_NV.POLICY_DELETE,
+                authPolicy=pol,
+                dataSize=8,
+            )
+        )
+
+        nvhandle = self.ectx.NV_DefineSpace(ESYS_TR.RH_PLATFORM, b"", nvpub)
+
+        session = self.ectx.StartAuthSession(
+            ESYS_TR.NONE,
+            ESYS_TR.NONE,
+            None,
+            TPM2_SE.POLICY,
+            TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL),
+            TPM2_ALG.SHA256,
+        )
+
+        self.ectx.PolicyCommandCode(session, TPM2_CC.NV_UndefineSpaceSpecial)
+
+        self.ectx.NV_UndefineSpaceSpecial(
+            nvhandle, ESYS_TR.RH_PLATFORM, session1=session, session2=ESYS_TR.PASSWORD
+        )
+
     def test_NV_ReadPublic(self):
         nvpub = TPM2B_NV_PUBLIC(
             nvPublic=TPMS_NV_PUBLIC(
