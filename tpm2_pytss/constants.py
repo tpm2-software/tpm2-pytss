@@ -1,5 +1,5 @@
 """
-SPDX-License-Identifier: BSD-3
+SPDX-License-Identifier: BSD-2
 """
 
 from enum import Enum, auto
