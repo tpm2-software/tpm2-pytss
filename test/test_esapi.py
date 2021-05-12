@@ -959,6 +959,16 @@ class TestEsys(TSS2_EsapiTest):
         self.assertGreater(ctime.time, 0)
         self.assertGreater(ctime.clockInfo.clock, 0)
 
+    def test_ClockSet(self):
+        newtime = 0xFA1AFE1
+        self.ectx.ClockSet(ESYS_TR.OWNER, newtime, session1=ESYS_TR.PASSWORD)
+        ntime = self.ectx.ReadClock()
+        self.assertGreaterEqual(ntime.clockInfo.clock, newtime)
+
+        with self.assertRaises(TSS2_Exception) as e:
+            self.ectx.ClockSet(ESYS_TR.OWNER, 0, session1=ESYS_TR.PASSWORD)
+        self.assertEqual(e.exception.error, TPM2_RC.VALUE)
+
     def test_NV_UndefineSpaceSpecial(self):
         # pre-generated TPM2_PolicyCommandCode(TPM2_CC_NV_UndefineSpaceSpecial)
         pol = b"\x1d-\xc4\x85\xe1w\xdd\xd0\xa4\n4I\x13\xce\xebB\x0c\xaa\t<BX}.\x1b\x13+\x15|\xcb]\xb0"
