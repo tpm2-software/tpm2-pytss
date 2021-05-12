@@ -2205,7 +2205,7 @@ class ESAPI:
 
         currentTime = ffi.new("TPMS_TIME_INFO **")
         _chkrc(lib.Esys_ReadClock(self.ctx, session1, session2, session3, currentTime))
-        return get_ptr(currentTime)
+        return TPMS_TIME_INFO(get_ptr(currentTime))
 
     def ClockSet(
         self,

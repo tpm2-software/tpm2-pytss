@@ -954,6 +954,11 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(e.exception.error, TPM2_RC.VALUE)
         self.assertEqual(e.exception.parameter, 1)
 
+    def test_ReadClock(self):
+        ctime = self.ectx.ReadClock()
+        self.assertGreater(ctime.time, 0)
+        self.assertGreater(ctime.clockInfo.clock, 0)
+
     def test_NV_UndefineSpaceSpecial(self):
         # pre-generated TPM2_PolicyCommandCode(TPM2_CC_NV_UndefineSpaceSpecial)
         pol = b"\x1d-\xc4\x85\xe1w\xdd\xd0\xa4\n4I\x13\xce\xebB\x0c\xaa\t<BX}.\x1b\x13+\x15|\xcb]\xb0"
@@ -1295,212 +1300,37 @@ class TestEsys(TSS2_EsapiTest):
         outsideInfo = TPM2B_DATA()
         creationPCR = TPML_PCR_SELECTION()
 
-        primaryHandle, _, _, creationHash, creationTicket = self.ectx.CreatePrimary(
+        eccHandle, _, _, creationHash, creationTicket = self.ectx.CreatePrimary(
             ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
         )
 
         qualifyingData = TPM2B_DATA()
         inScheme = TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL)
         certifyInfo, signature = self.ectx.CertifyCreation(
-            primaryHandle,
-            primaryHandle,
-            qualifyingData,
-            creationHash,
-            inScheme,
-            creationTicket,
+            eccHandle, eccHandle, qualifyingData, creationHash, inScheme, creationTicket
         )
         self.assertEqual(type(certifyInfo), TPM2B_ATTEST)
         self.assertNotEqual(len(certifyInfo), 0)
         self.assertEqual(type(signature), TPMT_SIGNATURE)
 
         with self.assertRaises(TypeError):
-            certifyInfo, signature = self.ectx.CertifyCreation(
-                TPM2B_ATTEST(),
-                primaryHandle,
-                qualifyingData,
-                creationHash,
-                inScheme,
-                creationTicket,
+            certifyInfo, signature = self.ectx.Certify(
+                TPM2B_ATTEST(), eccHandle, qualifyingData, inScheme
             )
 
         with self.assertRaises(TypeError):
-            certifyInfo, signature = self.ectx.CertifyCreation(
-                primaryHandle,
-                2.0,
-                qualifyingData,
-                creationHash,
-                inScheme,
-                creationTicket,
+            certifyInfo, signature = self.ectx.Certify(
+                eccHandle, 2.0, qualifyingData, inScheme
             )
 
         with self.assertRaises(TypeError):
-            certifyInfo, signature = self.ectx.CertifyCreation(
-                primaryHandle,
-                primaryHandle,
-                TPM2B_PUBLIC(),
-                creationHash,
-                inScheme,
-                creationTicket,
+            certifyInfo, signature = self.ectx.Certify(
+                eccHandle, eccHandle, TPM2B_PUBLIC(), inScheme
             )
 
         with self.assertRaises(TypeError):
-            certifyInfo, signature = self.ectx.CertifyCreation(
-                primaryHandle,
-                primaryHandle,
-                qualifyingData,
-                TPM2B_PRIVATE(),
-                inScheme,
-                creationTicket,
-            )
-
-        with self.assertRaises(TypeError):
-            certifyInfo, signature = self.ectx.CertifyCreation(
-                primaryHandle,
-                primaryHandle,
-                qualifyingData,
-                creationHash,
-                TPM2B_DATA(),
-                creationTicket,
-            )
-
-        with self.assertRaises(TypeError):
-            certifyInfo, signature = self.ectx.CertifyCreation(
-                primaryHandle,
-                primaryHandle,
-                qualifyingData,
-                creationHash,
-                inScheme,
-                TPM2B_SENSITIVE_CREATE(),
-            )
-
-    def test_Quote(self):
-        inPublic = TPM2B_PUBLIC(
-            TPMT_PUBLIC.parse(
-                alg="rsa:rsassa-sha256",
-                objectAttributes=TPMA_OBJECT.USERWITHAUTH
-                | TPMA_OBJECT.SIGN_ENCRYPT
-                | TPMA_OBJECT.FIXEDTPM
-                | TPMA_OBJECT.FIXEDPARENT
-                | TPMA_OBJECT.SENSITIVEDATAORIGIN,
-            )
-        )
-        inSensitive = TPM2B_SENSITIVE_CREATE()
-        outsideInfo = TPM2B_DATA()
-        creationPCR = TPML_PCR_SELECTION()
-
-        primaryHandle = self.ectx.CreatePrimary(
-            ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
-        )[0]
-
-        sigScheme = TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL)
-        PCRselection = TPML_PCR_SELECTION.parse("sha256:7,9,12")
-        quoted, signature = self.ectx.Quote(
-            primaryHandle, None, sigScheme, PCRselection
-        )
-
-        self.assertEqual(type(quoted), TPM2B_ATTEST)
-        self.assertNotEqual(len(quoted), 0)
-        self.assertEqual(type(signature), TPMT_SIGNATURE)
-
-        with self.assertRaises(TypeError):
-            quoted, signature = self.ectx.Quote(
-                TPM2B_PUBLIC(), None, sigScheme, PCRselection
-            )
-
-        with self.assertRaises(TypeError):
-            quoted, signature = self.ectx.Quote(
-                primaryHandle, TPM2B_PRIVATE(), sigScheme, PCRselection
-            )
-
-        with self.assertRaises(TypeError):
-            quoted, signature = self.ectx.Quote(
-                primaryHandle, TPM2B_DATA(), 1, PCRselection
-            )
-
-        with self.assertRaises(TypeError):
-            quoted, signature = self.ectx.Quote(
-                primaryHandle, None, sigScheme, TPM2B_ATTEST()
-            )
-
-    def test_GetSessionAuditDigest(self):
-        inPublic = TPM2B_PUBLIC(
-            TPMT_PUBLIC.parse(
-                alg="rsa:rsassa-sha256",
-                objectAttributes=TPMA_OBJECT.USERWITHAUTH
-                | TPMA_OBJECT.SIGN_ENCRYPT
-                | TPMA_OBJECT.FIXEDTPM
-                | TPMA_OBJECT.FIXEDPARENT
-                | TPMA_OBJECT.SENSITIVEDATAORIGIN,
-            )
-        )
-        inSensitive = TPM2B_SENSITIVE_CREATE()
-        outsideInfo = TPM2B_DATA()
-        creationPCR = TPML_PCR_SELECTION()
-
-        signHandle = self.ectx.CreatePrimary(
-            ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
-        )[0]
-
-        sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL,)
-
-        session = self.ectx.StartAuthSession(
-            tpmKey=ESYS_TR.NONE,
-            bind=ESYS_TR.NONE,
-            nonceCaller=None,
-            sessionType=TPM2_SE.HMAC,
-            symmetric=sym,
-            authHash=TPM2_ALG.SHA256,
-        )
-
-        self.ectx.TRSess_SetAttributes(
-            session, TPMA_SESSION.CONTINUESESSION | TPMA_SESSION.AUDIT
-        )
-
-        # audit this command
-        self.ectx.GetCapability(
-            TPM2_CAP.TPM_PROPERTIES, TPM2_PT.LOCKOUT_COUNTER, session1=session
-        )
-
-        sigScheme = TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL)
-        auditInfo, signature = self.ectx.GetSessionAuditDigest(
-            ESYS_TR.RH_ENDORSEMENT, signHandle, session, None, sigScheme
-        )
-        self.assertEqual(type(auditInfo), TPM2B_ATTEST)
-        self.assertNotEqual(len(auditInfo), 0)
-        self.assertEqual(type(signature), TPMT_SIGNATURE)
-
-        with self.assertRaises(ValueError):
-            self.ectx.GetSessionAuditDigest(
-                ESYS_TR.OWNER, signHandle, session, None, sigScheme
-            )
-
-        with self.assertRaises(TypeError):
-            self.ectx.GetSessionAuditDigest(
-                object(), signHandle, session, None, sigScheme
-            )
-
-        with self.assertRaises(TypeError):
-            self.ectx.GetSessionAuditDigest(
-                ESYS_TR.RH_ENDORSEMENT, 42.0, session, None, sigScheme
-            )
-
-        with self.assertRaises(TypeError):
-            self.ectx.GetSessionAuditDigest(
-                ESYS_TR.RH_ENDORSEMENT, signHandle, TPM2B_PUBLIC(), None, sigScheme
-            )
-
-        with self.assertRaises(TypeError):
-            self.ectx.GetSessionAuditDigest(
-                ESYS_TR.RH_ENDORSEMENT, signHandle, session, object(), sigScheme
-            )
-
-        with self.assertRaises(TypeError):
-            self.ectx.GetSessionAuditDigest(
-                ESYS_TR.RH_ENDORSEMENT,
-                signHandle,
-                session,
-                TPM2B_DATA(),
-                TPM2B_PRIVATE(),
+            certifyInfo, signature = self.ectx.Certify(
+                eccHandle, eccHandle, qualifyingData, TPM2B_PRIVATE()
             )
 
     def test_Vendor_TCG_Test(self):
@@ -1516,25 +1346,6 @@ class TestEsys(TSS2_EsapiTest):
 
         with self.assertRaises(TypeError):
             self.ectx.Vendor_TCG_Test(TPM2B_PUBLIC())
-
-    def test_TR_FromTPMPublic(self):
-        nvpub = TPM2B_NV_PUBLIC(
-            nvPublic=TPMS_NV_PUBLIC(
-                nvIndex=0x1000000,
-                nameAlg=TPM2_ALG.SHA256,
-                attributes=TPMA_NV.OWNERWRITE
-                | TPMA_NV.OWNERREAD
-                | TPMA_NV.WRITE_STCLEAR,
-                authPolicy=b"",
-                dataSize=8,
-            )
-        )
-
-        self.ectx.NV_DefineSpace(ESYS_TR.RH_OWNER, b"", nvpub)
-        handle = self.ectx.TR_FromTPMPublic(nvpub.nvPublic.nvIndex)
-
-        _, name = self.ectx.NV_ReadPublic(handle)
-        self.assertEqual(bytes(nvpub.getName()), bytes(name))
 
 
 if __name__ == "__main__":
