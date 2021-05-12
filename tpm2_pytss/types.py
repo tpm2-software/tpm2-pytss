@@ -1198,6 +1198,10 @@ class TPMU_PUBLIC_PARMS(TPM_OBJECT):
     pass
 
 
+class TPMT_PUBLIC_PARMS(TPM_OBJECT):
+    pass
+
+
 class TPMT_PUBLIC(TPM_OBJECT):
     @staticmethod
     def _handle_rsa(objstr, templ):

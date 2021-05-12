@@ -939,6 +939,21 @@ class TestEsys(TSS2_EsapiTest):
             for c in capdata.data.command:
                 pass
 
+    def test_TestParms(self):
+        parms = TPMT_PUBLIC_PARMS(type=TPM2_ALG.RSA)
+        parms.parameters.rsaDetail.symmetric.algorithm = TPM2_ALG.NULL
+        parms.parameters.rsaDetail.scheme.scheme = TPM2_ALG.NULL
+        parms.parameters.rsaDetail.keyBits = 2048
+        parms.parameters.rsaDetail.exponent = 0
+
+        self.ectx.TestParms(parms)
+
+        parms.parameters.rsaDetail.keyBits = 1234
+        with self.assertRaises(TSS2_Exception) as e:
+            self.ectx.TestParms(parms)
+        self.assertEqual(e.exception.error, TPM2_RC.VALUE)
+        self.assertEqual(e.exception.parameter, 1)
+
     def test_NV_UndefineSpaceSpecial(self):
         # pre-generated TPM2_PolicyCommandCode(TPM2_CC_NV_UndefineSpaceSpecial)
         pol = b"\x1d-\xc4\x85\xe1w\xdd\xd0\xa4\n4I\x13\xce\xebB\x0c\xaa\t<BX}.\x1b\x13+\x15|\xcb]\xb0"
