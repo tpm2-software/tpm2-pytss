@@ -930,6 +930,11 @@ class TestEsys(TSS2_EsapiTest):
         )
         self.assertEqual(type(pcrs), TPML_DIGEST_VALUES)
 
+    def test_ReadClock(self):
+        ctime = self.ectx.ReadClock()
+        self.assertGreater(ctime.time, 0)
+        self.assertGreater(ctime.clockInfo.clock, 0)
+
     def test_NV_UndefineSpaceSpecial(self):
         # pre-generated TPM2_PolicyCommandCode(TPM2_CC_NV_UndefineSpaceSpecial)
         pol = b"\x1d-\xc4\x85\xe1w\xdd\xd0\xa4\n4I\x13\xce\xebB\x0c\xaa\t<BX}.\x1b\x13+\x15|\xcb]\xb0"
