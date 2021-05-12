@@ -969,6 +969,11 @@ class TestEsys(TSS2_EsapiTest):
             self.ectx.ClockSet(ESYS_TR.OWNER, 0, session1=ESYS_TR.PASSWORD)
         self.assertEqual(e.exception.error, TPM2_RC.VALUE)
 
+    def test_ClockRateAdjust(self):
+        self.ectx.ClockRateAdjust(
+            ESYS_TR.OWNER, TPM2_CLOCK.COARSE_SLOWER, session1=ESYS_TR.PASSWORD
+        )
+
     def test_NV_UndefineSpaceSpecial(self):
         # pre-generated TPM2_PolicyCommandCode(TPM2_CC_NV_UndefineSpaceSpecial)
         pol = b"\x1d-\xc4\x85\xe1w\xdd\xd0\xa4\n4I\x13\xce\xebB\x0c\xaa\t<BX}.\x1b\x13+\x15|\xcb]\xb0"

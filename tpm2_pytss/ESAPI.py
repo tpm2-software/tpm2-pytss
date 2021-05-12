@@ -2228,6 +2228,7 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(auth, "auth")
         _chkrc(
             lib.Esys_ClockRateAdjust(
                 self.ctx, auth, session1, session2, session3, rateAdjust
