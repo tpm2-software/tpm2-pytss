@@ -2220,7 +2220,10 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
-        _chkrc(lib.Esys_TestParms(self.ctx, session1, session2, session3, parameters))
+        parameters_cdata = get_cdata(parameters, TPMT_PUBLIC_PARMS, "parameters")
+        _chkrc(
+            lib.Esys_TestParms(self.ctx, session1, session2, session3, parameters_cdata)
+        )
 
     def NV_DefineSpace(
         self,
