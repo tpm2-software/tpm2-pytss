@@ -2210,7 +2210,7 @@ class ESAPI:
                 capabilityData,
             )
         )
-        return (moreData[0], get_ptr(capabilityData))
+        return (bool(moreData[0]), TPMS_CAPABILITY_DATA(get_ptr(capabilityData)))
 
     def TestParms(
         self,

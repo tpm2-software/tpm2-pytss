@@ -930,6 +930,15 @@ class TestEsys(TSS2_EsapiTest):
         )
         self.assertEqual(type(pcrs), TPML_DIGEST_VALUES)
 
+    def test_GetCapability(self):
+        more = True
+        while more:
+            more, capdata = self.ectx.GetCapability(
+                TPM2_CAP.COMMANDS, TPM2_CC.FIRST, lib.TPM2_MAX_CAP_CC
+            )
+            for c in capdata.data.command:
+                pass
+
     def test_NV_UndefineSpaceSpecial(self):
         # pre-generated TPM2_PolicyCommandCode(TPM2_CC_NV_UndefineSpaceSpecial)
         pol = b"\x1d-\xc4\x85\xe1w\xdd\xd0\xa4\n4I\x13\xce\xebB\x0c\xaa\t<BX}.\x1b\x13+\x15|\xcb]\xb0"

@@ -1826,6 +1826,10 @@ class TPMS_AUTH_RESPONSE(TPM_OBJECT):
     pass
 
 
+class TPMU_CAPABILITIES(TPM_OBJECT):
+    pass
+
+
 class TPMS_CAPABILITY_DATA(TPM_OBJECT):
     pass
 
