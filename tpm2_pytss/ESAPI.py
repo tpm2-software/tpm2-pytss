@@ -2160,13 +2160,15 @@ class ESAPI:
         return get_ptr(fuData)
 
     def ContextSave(self, saveHandle):
+        check_handle_type(saveHandle, "saveHandle")
         context = ffi.new("TPMS_CONTEXT **")
         _chkrc(lib.Esys_ContextSave(self.ctx, saveHandle, context))
-        return get_ptr(context)
+        return TPMS_CONTEXT(get_ptr(context))
 
     def ContextLoad(self, context):
+        context_cdata = get_cdata(context, TPMS_CONTEXT, "context")
         loadedHandle = ffi.new("ESYS_TR *")
-        _chkrc(lib.Esys_ContextLoad(self.ctx, context, loadedHandle))
+        _chkrc(lib.Esys_ContextLoad(self.ctx, context_cdata, loadedHandle))
         loadedHandleObject = loadedHandle[0]
         return loadedHandleObject
 
