@@ -930,6 +930,32 @@ class TestEsys(TSS2_EsapiTest):
         )
         self.assertEqual(type(pcrs), TPML_DIGEST_VALUES)
 
+    def test_ContextSave_ContextLoad(self):
+        inPublic = TPM2B_PUBLIC(
+            TPMT_PUBLIC.parse(
+                alg="rsa:rsassa-sha256",
+                objectAttributes=TPMA_OBJECT.USERWITHAUTH
+                | TPMA_OBJECT.SIGN_ENCRYPT
+                | TPMA_OBJECT.FIXEDTPM
+                | TPMA_OBJECT.FIXEDPARENT
+                | TPMA_OBJECT.SENSITIVEDATAORIGIN,
+            )
+        )
+        inSensitive = TPM2B_SENSITIVE_CREATE()
+        outsideInfo = TPM2B_DATA()
+        creationPCR = TPML_PCR_SELECTION()
+
+        handle, outpub, _, _, _ = self.ectx.CreatePrimary(
+            ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
+        )
+
+        ctx = self.ectx.ContextSave(handle)
+
+        nhandle = self.ectx.ContextLoad(ctx)
+        name = self.ectx.TR_GetName(nhandle)
+
+        self.assertEqual(bytes(outpub.getName()), bytes(name))
+
     def test_GetCapability(self):
         more = True
         while more:
