@@ -2173,6 +2173,7 @@ class ESAPI:
         return loadedHandleObject
 
     def FlushContext(self, flushHandle):
+        check_handle_type(flushHandle, "flushHandle")
         _chkrc(lib.Esys_FlushContext(self.ctx, flushHandle))
 
     def EvictControl(

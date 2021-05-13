@@ -956,6 +956,30 @@ class TestEsys(TSS2_EsapiTest):
 
         self.assertEqual(bytes(outpub.getName()), bytes(name))
 
+    def test_FlushContext(self):
+        inPublic = TPM2B_PUBLIC(
+            TPMT_PUBLIC.parse(
+                alg="rsa:rsassa-sha256",
+                objectAttributes=TPMA_OBJECT.USERWITHAUTH
+                | TPMA_OBJECT.SIGN_ENCRYPT
+                | TPMA_OBJECT.FIXEDTPM
+                | TPMA_OBJECT.FIXEDPARENT
+                | TPMA_OBJECT.SENSITIVEDATAORIGIN,
+            )
+        )
+        inSensitive = TPM2B_SENSITIVE_CREATE()
+        outsideInfo = TPM2B_DATA()
+        creationPCR = TPML_PCR_SELECTION()
+
+        handle, _, _, _, _ = self.ectx.CreatePrimary(
+            ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
+        )
+
+        self.ectx.FlushContext(handle)
+        with self.assertRaises(TSS2_Exception) as e:
+            self.ectx.TR_GetName(handle)
+        self.assertEqual(e.exception.error, lib.TSS2_ESYS_RC_BAD_TR)
+
     def test_GetCapability(self):
         more = True
         while more:
