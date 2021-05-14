@@ -1131,10 +1131,27 @@ class ESAPI:
         sessionHandle,
         qualifyingData,
         inScheme,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
+        session1=ESYS_TR.PASSWORD,
+        session2=ESYS_TR.PASSWORD,
         session3=ESYS_TR.NONE,
     ):
+
+        check_handle_type(privacyAdminHandle, "privacyAdminHandle")
+        check_handle_type(signHandle, "signHandle")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        if privacyAdminHandle != ESYS_TR.RH_ENDORSEMENT:
+            raise ValueError(
+                f"Expected privacyAdminHandle to be ESYS_TR.TPM_RH_ENDORSEMENT, got {privacyAdminHandle}"
+            )
+
+        qualifyingData_cdata = get_cdata(
+            qualifyingData, TPM2B_DATA, "qualifyingData", allow_none=True
+        )
+
+        inScheme_cdata = get_cdata(inScheme, TPMT_SIG_SCHEME, "inScheme")
 
         auditInfo = ffi.new("TPM2B_ATTEST **")
         signature = ffi.new("TPMT_SIGNATURE **")
@@ -1147,13 +1164,13 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                qualifyingData,
-                inScheme,
+                qualifyingData_cdata,
+                inScheme_cdata,
                 auditInfo,
                 signature,
             )
         )
-        return (get_ptr(auditInfo), get_ptr(signature))
+        return (TPM2B_ATTEST(get_ptr(auditInfo)), TPMT_SIGNATURE(get_ptr(signature)))
 
     def GetCommandAuditDigest(
         self,
@@ -2220,11 +2237,26 @@ class ESAPI:
         self,
         capability,
         prop,
-        propertyCount,
+        propertyCount=1,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
+
+        if not isinstance(capability, int):
+            raise TypeError(f"Expected capability to be an int, got {type(capability)}")
+
+        if not isinstance(prop, int):
+            raise TypeError(f"Expected prop to be an int, got {type(prop)}")
+
+        if not isinstance(propertyCount, int):
+            raise TypeError(
+                f"Expected propertyCount to be an int, got {type(propertyCount)}"
+            )
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
 
         moreData = ffi.new("TPMI_YES_NO *")
         capabilityData = ffi.new("TPMS_CAPABILITY_DATA **")

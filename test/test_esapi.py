@@ -1422,6 +1422,87 @@ class TestEsys(TSS2_EsapiTest):
                 primaryHandle, None, sigScheme, TPM2B_ATTEST()
             )
 
+    def test_GetSessionAuditDigest(self):
+        inPublic = TPM2B_PUBLIC(
+            TPMT_PUBLIC.parse(
+                alg="rsa:rsassa-sha256",
+                objectAttributes=TPMA_OBJECT.USERWITHAUTH
+                | TPMA_OBJECT.SIGN_ENCRYPT
+                | TPMA_OBJECT.FIXEDTPM
+                | TPMA_OBJECT.FIXEDPARENT
+                | TPMA_OBJECT.SENSITIVEDATAORIGIN,
+            )
+        )
+        inSensitive = TPM2B_SENSITIVE_CREATE()
+        outsideInfo = TPM2B_DATA()
+        creationPCR = TPML_PCR_SELECTION()
+
+        signHandle = self.ectx.CreatePrimary(
+            ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
+        )[0]
+
+        sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL,)
+
+        session = self.ectx.StartAuthSession(
+            tpmKey=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            nonceCaller=None,
+            sessionType=TPM2_SE.HMAC,
+            symmetric=sym,
+            authHash=TPM2_ALG.SHA256,
+        )
+
+        self.ectx.TRSess_SetAttributes(
+            session, TPMA_SESSION.CONTINUESESSION | TPMA_SESSION.AUDIT
+        )
+
+        # audit this command
+        self.ectx.GetCapability(
+            TPM2_CAP.TPM_PROPERTIES, TPM2_PT.LOCKOUT_COUNTER, session1=session
+        )
+
+        sigScheme = TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL)
+        auditInfo, signature = self.ectx.GetSessionAuditDigest(
+            ESYS_TR.RH_ENDORSEMENT, signHandle, session, None, sigScheme
+        )
+        self.assertEqual(type(auditInfo), TPM2B_ATTEST)
+        self.assertNotEqual(len(auditInfo), 0)
+        self.assertEqual(type(signature), TPMT_SIGNATURE)
+
+        with self.assertRaises(ValueError):
+            self.ectx.GetSessionAuditDigest(
+                ESYS_TR.OWNER, signHandle, session, None, sigScheme
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.GetSessionAuditDigest(
+                object(), signHandle, session, None, sigScheme
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.GetSessionAuditDigest(
+                ESYS_TR.RH_ENDORSEMENT, 42.0, session, None, sigScheme
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.GetSessionAuditDigest(
+                ESYS_TR.RH_ENDORSEMENT, signHandle, TPM2B_PUBLIC(), None, sigScheme
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.GetSessionAuditDigest(
+                ESYS_TR.RH_ENDORSEMENT, signHandle, session, object(), sigScheme
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.GetSessionAuditDigest(
+                ESYS_TR.RH_ENDORSEMENT,
+                signHandle,
+                session,
+                TPM2B_DATA(),
+                TPM2B_PRIVATE(),
+            )
+
     def test_Vendor_TCG_Test(self):
         with self.assertRaises(TSS2_Exception):
             self.ectx.Vendor_TCG_Test(b"random data")
