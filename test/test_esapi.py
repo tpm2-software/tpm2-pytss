@@ -1295,14 +1295,19 @@ class TestEsys(TSS2_EsapiTest):
         outsideInfo = TPM2B_DATA()
         creationPCR = TPML_PCR_SELECTION()
 
-        eccHandle, _, _, creationHash, creationTicket = self.ectx.CreatePrimary(
+        primaryHandle, _, _, creationHash, creationTicket = self.ectx.CreatePrimary(
             ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
         )
 
         qualifyingData = TPM2B_DATA()
         inScheme = TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL)
         certifyInfo, signature = self.ectx.CertifyCreation(
-            eccHandle, eccHandle, qualifyingData, creationHash, inScheme, creationTicket
+            primaryHandle,
+            primaryHandle,
+            qualifyingData,
+            creationHash,
+            inScheme,
+            creationTicket,
         )
         self.assertEqual(type(certifyInfo), TPM2B_ATTEST)
         self.assertNotEqual(len(certifyInfo), 0)
@@ -1311,7 +1316,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             certifyInfo, signature = self.ectx.CertifyCreation(
                 TPM2B_ATTEST(),
-                eccHandle,
+                primaryHandle,
                 qualifyingData,
                 creationHash,
                 inScheme,
@@ -1320,13 +1325,18 @@ class TestEsys(TSS2_EsapiTest):
 
         with self.assertRaises(TypeError):
             certifyInfo, signature = self.ectx.CertifyCreation(
-                eccHandle, 2.0, qualifyingData, creationHash, inScheme, creationTicket
+                primaryHandle,
+                2.0,
+                qualifyingData,
+                creationHash,
+                inScheme,
+                creationTicket,
             )
 
         with self.assertRaises(TypeError):
             certifyInfo, signature = self.ectx.CertifyCreation(
-                eccHandle,
-                eccHandle,
+                primaryHandle,
+                primaryHandle,
                 TPM2B_PUBLIC(),
                 creationHash,
                 inScheme,
@@ -1335,8 +1345,8 @@ class TestEsys(TSS2_EsapiTest):
 
         with self.assertRaises(TypeError):
             certifyInfo, signature = self.ectx.CertifyCreation(
-                eccHandle,
-                eccHandle,
+                primaryHandle,
+                primaryHandle,
                 qualifyingData,
                 TPM2B_PRIVATE(),
                 inScheme,
@@ -1345,8 +1355,8 @@ class TestEsys(TSS2_EsapiTest):
 
         with self.assertRaises(TypeError):
             certifyInfo, signature = self.ectx.CertifyCreation(
-                eccHandle,
-                eccHandle,
+                primaryHandle,
+                primaryHandle,
                 qualifyingData,
                 creationHash,
                 TPM2B_DATA(),
@@ -1355,8 +1365,8 @@ class TestEsys(TSS2_EsapiTest):
 
         with self.assertRaises(TypeError):
             certifyInfo, signature = self.ectx.CertifyCreation(
-                eccHandle,
-                eccHandle,
+                primaryHandle,
+                primaryHandle,
                 qualifyingData,
                 creationHash,
                 inScheme,
