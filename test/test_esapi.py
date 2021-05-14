@@ -1309,23 +1309,58 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(type(signature), TPMT_SIGNATURE)
 
         with self.assertRaises(TypeError):
-            certifyInfo, signature = self.ectx.Certify(
-                TPM2B_ATTEST(), eccHandle, qualifyingData, inScheme
+            certifyInfo, signature = self.ectx.CertifyCreation(
+                TPM2B_ATTEST(),
+                eccHandle,
+                qualifyingData,
+                creationHash,
+                inScheme,
+                creationTicket,
             )
 
         with self.assertRaises(TypeError):
-            certifyInfo, signature = self.ectx.Certify(
-                eccHandle, 2.0, qualifyingData, inScheme
+            certifyInfo, signature = self.ectx.CertifyCreation(
+                eccHandle, 2.0, qualifyingData, creationHash, inScheme, creationTicket
             )
 
         with self.assertRaises(TypeError):
-            certifyInfo, signature = self.ectx.Certify(
-                eccHandle, eccHandle, TPM2B_PUBLIC(), inScheme
+            certifyInfo, signature = self.ectx.CertifyCreation(
+                eccHandle,
+                eccHandle,
+                TPM2B_PUBLIC(),
+                creationHash,
+                inScheme,
+                creationTicket,
             )
 
         with self.assertRaises(TypeError):
-            certifyInfo, signature = self.ectx.Certify(
-                eccHandle, eccHandle, qualifyingData, TPM2B_PRIVATE()
+            certifyInfo, signature = self.ectx.CertifyCreation(
+                eccHandle,
+                eccHandle,
+                qualifyingData,
+                TPM2B_PRIVATE(),
+                inScheme,
+                creationTicket,
+            )
+
+        with self.assertRaises(TypeError):
+            certifyInfo, signature = self.ectx.CertifyCreation(
+                eccHandle,
+                eccHandle,
+                qualifyingData,
+                creationHash,
+                TPM2B_DATA(),
+                creationTicket,
+            )
+
+        with self.assertRaises(TypeError):
+            certifyInfo, signature = self.ectx.CertifyCreation(
+                eccHandle,
+                eccHandle,
+                qualifyingData,
+                creationHash,
+                inScheme,
+                TPM2B_SENSITIVE_CREATE(),
             )
 
     def test_Vendor_TCG_Test(self):
