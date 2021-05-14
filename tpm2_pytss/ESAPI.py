@@ -2186,6 +2186,9 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(auth, "auth")
+        check_handle_type(objectHandle, "objectHandle")
+        check_handle_type(persistentHandle, "persistentHandle")
         newObjectHandle = ffi.new("ESYS_TR *")
         _chkrc(
             lib.Esys_EvictControl(

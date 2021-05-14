@@ -980,6 +980,36 @@ class TestEsys(TSS2_EsapiTest):
             self.ectx.TR_GetName(handle)
         self.assertEqual(e.exception.error, lib.TSS2_ESYS_RC_BAD_TR)
 
+    def test_EvictControl(self):
+        inPublic = TPM2B_PUBLIC(
+            TPMT_PUBLIC.parse(
+                alg="rsa:rsassa-sha256",
+                objectAttributes=TPMA_OBJECT.USERWITHAUTH
+                | TPMA_OBJECT.SIGN_ENCRYPT
+                | TPMA_OBJECT.FIXEDTPM
+                | TPMA_OBJECT.FIXEDPARENT
+                | TPMA_OBJECT.SENSITIVEDATAORIGIN,
+            )
+        )
+        inSensitive = TPM2B_SENSITIVE_CREATE()
+        outsideInfo = TPM2B_DATA()
+        creationPCR = TPML_PCR_SELECTION()
+
+        handle, _, _, _, _ = self.ectx.CreatePrimary(
+            ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
+        )
+
+        self.ectx.EvictControl(
+            ESYS_TR.OWNER, handle, 0x81000081, session1=ESYS_TR.PASSWORD
+        )
+        phandle = self.ectx.TR_FromTPMPublic(0x81000081)
+        self.ectx.EvictControl(
+            ESYS_TR.OWNER, phandle, 0x81000081, session1=ESYS_TR.PASSWORD
+        )
+        with self.assertRaises(TSS2_Exception) as e:
+            self.ectx.TR_FromTPMPublic(0x81000081)
+        self.assertEqual(e.exception.error, TPM2_RC.HANDLE)
+
     def test_GetCapability(self):
         more = True
         while more:
