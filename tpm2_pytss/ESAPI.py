@@ -66,6 +66,26 @@ class ESAPI:
         lib.Esys_Finalize(self.ctx_pp)
         self.ctx = ffi.NULL
 
+    def TR_FromTPMPublic(
+        self,
+        handle,
+        optionalSession1=ESYS_TR.NONE,
+        optionalSession2=ESYS_TR.NONE,
+        optionalSession3=ESYS_TR.NONE,
+    ):
+        obj = ffi.new("ESYS_TR *")
+        _chkrc(
+            lib.Esys_TR_FromTPMPublic(
+                self.ctx,
+                handle,
+                optionalSession1,
+                optionalSession2,
+                optionalSession3,
+                obj,
+            )
+        )
+        return obj[0]
+
     def setAuth(self, esys_tr, auth):
 
         auth_p = TPM2B_pack(auth, "TPM2B_AUTH")
