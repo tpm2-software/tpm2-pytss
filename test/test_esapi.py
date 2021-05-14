@@ -1363,6 +1363,55 @@ class TestEsys(TSS2_EsapiTest):
                 TPM2B_SENSITIVE_CREATE(),
             )
 
+    def test_Quote(self):
+        inPublic = TPM2B_PUBLIC(
+            TPMT_PUBLIC.parse(
+                alg="rsa:rsassa-sha256",
+                objectAttributes=TPMA_OBJECT.USERWITHAUTH
+                | TPMA_OBJECT.SIGN_ENCRYPT
+                | TPMA_OBJECT.FIXEDTPM
+                | TPMA_OBJECT.FIXEDPARENT
+                | TPMA_OBJECT.SENSITIVEDATAORIGIN,
+            )
+        )
+        inSensitive = TPM2B_SENSITIVE_CREATE()
+        outsideInfo = TPM2B_DATA()
+        creationPCR = TPML_PCR_SELECTION()
+
+        primaryHandle = self.ectx.CreatePrimary(
+            ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
+        )[0]
+
+        sigScheme = TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL)
+        PCRselection = TPML_PCR_SELECTION.parse("sha256:7,9,12")
+        quoted, signature = self.ectx.Quote(
+            primaryHandle, None, sigScheme, PCRselection
+        )
+
+        self.assertEqual(type(quoted), TPM2B_ATTEST)
+        self.assertNotEqual(len(quoted), 0)
+        self.assertEqual(type(signature), TPMT_SIGNATURE)
+
+        with self.assertRaises(TypeError):
+            quoted, signature = self.ectx.Quote(
+                TPM2B_PUBLIC(), None, sigScheme, PCRselection
+            )
+
+        with self.assertRaises(TypeError):
+            quoted, signature = self.ectx.Quote(
+                primaryHandle, TPM2B_PRIVATE(), sigScheme, PCRselection
+            )
+
+        with self.assertRaises(TypeError):
+            quoted, signature = self.ectx.Quote(
+                primaryHandle, TPM2B_DATA(), 1, PCRselection
+            )
+
+        with self.assertRaises(TypeError):
+            quoted, signature = self.ectx.Quote(
+                primaryHandle, None, sigScheme, TPM2B_ATTEST()
+            )
+
     def test_Vendor_TCG_Test(self):
         with self.assertRaises(TSS2_Exception):
             self.ectx.Vendor_TCG_Test(b"random data")
