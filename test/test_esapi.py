@@ -1342,6 +1342,25 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.Vendor_TCG_Test(TPM2B_PUBLIC())
 
+    def test_TR_FromTPMPublic(self):
+        nvpub = TPM2B_NV_PUBLIC(
+            nvPublic=TPMS_NV_PUBLIC(
+                nvIndex=0x1000000,
+                nameAlg=TPM2_ALG.SHA256,
+                attributes=TPMA_NV.OWNERWRITE
+                | TPMA_NV.OWNERREAD
+                | TPMA_NV.WRITE_STCLEAR,
+                authPolicy=b"",
+                dataSize=8,
+            )
+        )
+
+        self.ectx.NV_DefineSpace(ESYS_TR.RH_OWNER, b"", nvpub)
+        handle = self.ectx.TR_FromTPMPublic(nvpub.nvPublic.nvIndex)
+
+        _, name = self.ectx.NV_ReadPublic(handle)
+        self.assertEqual(bytes(nvpub.getName()), bytes(name))
+
 
 if __name__ == "__main__":
     unittest.main()
