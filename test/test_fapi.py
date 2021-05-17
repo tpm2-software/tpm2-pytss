@@ -68,7 +68,7 @@ def init_fapi(request, fapi):
 class TestFapi:
     @pytest.fixture
     def cryptography_key(self):
-        key = ec.generate_private_key(ec.SECP256R1())
+        key = ec.generate_private_key(ec.SECP256R1(), backend=default_backend())
         key_public_pem = key.public_key().public_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PublicFormat.SubjectPublicKeyInfo,
