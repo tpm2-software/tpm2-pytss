@@ -47,6 +47,17 @@ def check_handle_type(handle, varname):
         )
 
 
+def check_friendly_int(friendly, varname, clazz):
+
+    if not isinstance(friendly, int):
+        raise TypeError(f"expected {varname} to be type int, got {type(friendly)}")
+
+    if not clazz.contains(friendly):
+        raise ValueError(
+            f"expected {varname} value of {friendly} in class {str(clazz)}, however it's not found."
+        )
+
+
 class ESAPI:
     def __init__(self, tcti=None):
 
@@ -494,6 +505,19 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(objectHandle, "objectHandle")
+        check_handle_type(newParentHandle, "newParentHandle")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        encryptionKeyIn_cdata = get_cdata(
+            encryptionKeyIn, TPM2B_DATA, "encryptionKeyIn"
+        )
+        symmetricAlg_cdata = get_cdata(
+            symmetricAlg, TPMT_SYM_DEF_OBJECT, "symmetricAlg"
+        )
+
         encryptionKeyOut = ffi.new("TPM2B_DATA **")
         duplicate = ffi.new("TPM2B_PRIVATE **")
         outSymSeed = ffi.new("TPM2B_ENCRYPTED_SECRET **")
@@ -505,14 +529,19 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                encryptionKeyIn,
-                symmetricAlg,
+                encryptionKeyIn_cdata,
+                symmetricAlg_cdata,
                 encryptionKeyOut,
                 duplicate,
                 outSymSeed,
             )
         )
-        return (get_ptr(encryptionKeyOut), get_ptr(duplicate), get_ptr(outSymSeed))
+
+        return (
+            TPM2B_DATA(get_ptr(encryptionKeyOut)),
+            TPM2B_PRIVATE(get_ptr(duplicate)),
+            TPM2B_ENCRYPTED_SECRET(get_ptr(outSymSeed)),
+        )
 
     def Rewrap(
         self,
@@ -1718,6 +1747,12 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(policySession, "policySession")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+        check_friendly_int(code, "code", TPM2_CC)
+
         _chkrc(
             lib.Esys_PolicyCommandCode(
                 self.ctx, policySession, session1, session2, session3, code
@@ -1826,6 +1861,11 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(policySession, "policySession")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
         _chkrc(
             lib.Esys_PolicyAuthValue(
                 self.ctx, policySession, session1, session2, session3
@@ -1854,13 +1894,18 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(policySession, "policySession")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
         policyDigest = ffi.new("TPM2B_DIGEST **")
         _chkrc(
             lib.Esys_PolicyGetDigest(
                 self.ctx, policySession, session1, session2, session3, policyDigest
             )
         )
-        return get_ptr(policyDigest)
+        return TPM2B_DIGEST(get_ptr(policyDigest))
 
     def PolicyNvWritten(
         self,
