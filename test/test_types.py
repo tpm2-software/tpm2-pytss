@@ -1205,6 +1205,12 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(templ.type, TPM2_ALG.RSA)
         self.assertEqual(templ2.type, TPM2_ALG.KEYEDHASH)
 
+    def test_TPM_FRIENDLY_INT_iterator(self):
+        self.assertNotEqual(len(list(TPM2_CC.iterator())), 0)
+
+    def test_TPM_FRIENDLY_INT_contains(self):
+        self.assertTrue(TPM2_CC.contains(TPM2_CC.AC_Send))
+
 
 if __name__ == "__main__":
     unittest.main()
