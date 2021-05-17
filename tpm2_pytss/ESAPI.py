@@ -2170,7 +2170,7 @@ class ESAPI:
                 self.ctx, session1, session2, session3, sequenceNumber, fuData
             )
         )
-        return get_ptr(fuData)
+        return TPM2B_MAX_BUFFER(get_ptr(fuData))
 
     def ContextSave(self, saveHandle):
         context = ffi.new("TPMS_CONTEXT **")
