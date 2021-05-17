@@ -8,7 +8,7 @@ import unittest
 
 from tpm2_pytss import *
 from .TSS2_BaseTest import TSS2_EsapiTest
-
+from base64 import b64decode
 
 rsa_private_key = b"""
 -----BEGIN RSA PRIVATE KEY-----
@@ -73,11 +73,65 @@ ecc_public_key_bytes = b"\x80\xef\xed\x1f\x1a\x7f`\xeb\x8f\xe3\x00\x15\xdf\x0e\x
 
 ecc_private_key_bytes = b"\xc2H\xf6\xe8\xe6\x95?\xea~\xd6\xd7ZS09*d\xc6%\x8b\x01\xbc\x881a\x05<\xea\x93mv\x0c"
 
+rsa_cert = b"""
+-----BEGIN CERTIFICATE-----
+MIIFqzCCA5OgAwIBAgIBAzANBgkqhkiG9w0BAQsFADB3MQswCQYDVQQGEwJERTEh
+MB8GA1UECgwYSW5maW5lb24gVGVjaG5vbG9naWVzIEFHMRswGQYDVQQLDBJPUFRJ
+R0EoVE0pIERldmljZXMxKDAmBgNVBAMMH0luZmluZW9uIE9QVElHQShUTSkgUlNB
+IFJvb3QgQ0EwHhcNMTMwNzI2MDAwMDAwWhcNNDMwNzI1MjM1OTU5WjB3MQswCQYD
+VQQGEwJERTEhMB8GA1UECgwYSW5maW5lb24gVGVjaG5vbG9naWVzIEFHMRswGQYD
+VQQLDBJPUFRJR0EoVE0pIERldmljZXMxKDAmBgNVBAMMH0luZmluZW9uIE9QVElH
+QShUTSkgUlNBIFJvb3QgQ0EwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoIC
+AQC7E+gc0B5T7awzux66zMMZMTtCkPqGv6a3NVx73ICg2DSwnipFwBiUl9soEodn
+25SVVN7pqmvKA2gMTR5QexuYS9PPerfRZrBY00xyFx84V+mIRPg4YqUMLtZBcAwr
+R3GO6cffHp20SBH5ITpuqKciwb0v5ueLdtZHYRPq1+jgy58IFY/vACyF/ccWZxUS
+JRNSe4ruwBgI7NMWicxiiWQmz1fE3e0mUGQ1tu4M6MpZPxTZxWzN0mMz9noj1oIT
+ZUnq/drN54LHzX45l+2b14f5FkvtcXxJ7OCkI7lmWIt8s5fE4HhixEgsR2RX5hzl
+8XiHiS7uD3pQhBYSBN5IBbVWREex1IUat5eAOb9AXjnZ7ivxJKiY/BkOmrNgN8k2
+7vOS4P81ix1GnXsjyHJ6mOtWRC9UHfvJcvM3U9tuU+3dRfib03NGxSPnKteL4SP1
+bdHfiGjV3LIxzFHOfdjM2cvFJ6jXg5hwXCFSdsQm5e2BfT3dWDBSfR4h3Prpkl6d
+cAyb3nNtMK3HR5yl6QBuJybw8afHT3KRbwvOHOCR0ZVJTszclEPcM3NQdwFlhqLS
+ghIflaKSPv9yHTKeg2AB5q9JSG2nwSTrjDKRab225+zJ0yylH5NwxIBLaVHDyAEu
+81af+wnm99oqgvJuDKSQGyLf6sCeuy81wQYO46yNa+xJwQIDAQABo0IwQDAdBgNV
+HQ4EFgQU3LtWq/EY/KaadREQZYQSntVBkrkwDgYDVR0PAQH/BAQDAgAGMA8GA1Ud
+EwEB/wQFMAMBAf8wDQYJKoZIhvcNAQELBQADggIBAGHTBUx3ETIXYJsaAgb2pyyN
+UltVL2bKzGMVSsnTCrXUU8hKrDQh3jNIMrS0d6dU/fGaGJvehxmmJfjaN/IFWA4M
+BdZEnpAe2fJEP8vbLa/QHVfsAVuotLD6QWAqeaC2txpxkerveoV2JAwj1jrprT4y
+rkS8SxZuKS05rYdlG30GjOKTq81amQtGf2NlNiM0lBB/SKTt0Uv5TK0jIWbz2WoZ
+gGut7mF0md1rHRauWRcoHQdxWSQTCTtgoQzeBj4IS6N3QxQBKV9LL9UWm+CMIT7Y
+np8bSJ8oW4UdpSuYWe1ZwSjZyzDiSzpuc4gTS6aHfMmEfoVwC8HN03/HD6B1Lwo2
+DvEaqAxkya9IYWrDqkMrEErJO6cqx/vfIcfY/8JYmUJGTmvVlaODJTwYwov/2rjr
+la5gR+xrTM7dq8bZimSQTO8h6cdL6u+3c8mGriCQkNZIZEac/Gdn+KwydaOZIcnf
+Rdp3SalxsSp6cWwJGE4wpYKB2ClM2QF3yNQoTGNwMlpsxnU72ihDi/RxyaRTz9OR
+pubNq8Wuq7jQUs5U00ryrMCZog1cxLzyfZwwCYh6O2CmbvMoydHNy5CU3ygxaLWv
+JpgZVHN103npVMR3mLNa3QE+5MFlBlP3Mmystu8iVAKJas39VO5y5jad4dRLkwtM
+6sJa8iBpdRjZrBp5sJBI
+-----END CERTIFICATE-----
+"""
+
+ecc_cert = b"""
+-----BEGIN CERTIFICATE-----
+MIICWzCCAeKgAwIBAgIBBDAKBggqhkjOPQQDAzB3MQswCQYDVQQGEwJERTEhMB8G
+A1UECgwYSW5maW5lb24gVGVjaG5vbG9naWVzIEFHMRswGQYDVQQLDBJPUFRJR0Eo
+VE0pIERldmljZXMxKDAmBgNVBAMMH0luZmluZW9uIE9QVElHQShUTSkgRUNDIFJv
+b3QgQ0EwHhcNMTMwNzI2MDAwMDAwWhcNNDMwNzI1MjM1OTU5WjB3MQswCQYDVQQG
+EwJERTEhMB8GA1UECgwYSW5maW5lb24gVGVjaG5vbG9naWVzIEFHMRswGQYDVQQL
+DBJPUFRJR0EoVE0pIERldmljZXMxKDAmBgNVBAMMH0luZmluZW9uIE9QVElHQShU
+TSkgRUNDIFJvb3QgQ0EwdjAQBgcqhkjOPQIBBgUrgQQAIgNiAAQm1HxLVgvAu1q2
+GM+ymTz12zdTEu0JBVG9CdsVEJv/pE7pSWOlsG3YwU792YAvjSy7zL+WtDK40KGe
+Om8bSWt46QJ00MQUkYxz6YqXbb14BBr06hWD6u6IMBupNkPd9pKjQjBAMB0GA1Ud
+DgQWBBS0GIXISkrFEnryQDnexPWLHn5K0TAOBgNVHQ8BAf8EBAMCAAYwDwYDVR0T
+AQH/BAUwAwEB/zAKBggqhkjOPQQDAwNnADBkAjA6QZcV8DjjbPuKjKDZQmTRywZk
+MAn8wE6kuW3EouVvBt+/2O+szxMe4vxj8R6TDCYCMG7c9ov86ll/jDlJb/q0L4G+
++O3Bdel9P5+cOgzIGANkOPEzBQM3VfJegfnriT/kaA==
+-----END CERTIFICATE-----
+"""
+
 
 class CryptoTest(TSS2_EsapiTest):
     def test_public_from_pem_rsa(self):
         pub = types.TPM2B_PUBLIC()
-        crypto.public_from_pem(rsa_public_key, pub.publicArea)
+        crypto.public_from_encoding(rsa_public_key, pub.publicArea)
 
         self.assertEqual(pub.publicArea.type, types.TPM2_ALG.RSA)
         self.assertEqual(pub.publicArea.parameters.rsaDetail.keyBits, 2048)
@@ -113,7 +167,7 @@ class CryptoTest(TSS2_EsapiTest):
 
     def test_public_from_pem_ecc(self):
         pub = types.TPM2B_PUBLIC()
-        crypto.public_from_pem(ecc_public_key, pub.publicArea)
+        crypto.public_from_encoding(ecc_public_key, pub.publicArea)
 
         self.assertEqual(pub.publicArea.type, types.TPM2_ALG.ECC)
         self.assertEqual(
@@ -208,3 +262,50 @@ class CryptoTest(TSS2_EsapiTest):
         ename = self.ectx.TR_GetName(handle)
 
         self.assertEqual(ename.name, oname.name)
+
+    def test_public_from_pem_rsa_pem_cert(self):
+        pub = TPMT_PUBLIC()
+        crypto.public_from_encoding(rsa_cert, pub)
+
+    def test_public_from_pem_rsa_der_cert(self):
+        sl = rsa_cert.strip().splitlines()
+        b64 = b"".join(sl[1:-1])
+        der = b64decode(b64)
+
+        pub = TPMT_PUBLIC()
+        crypto.public_from_encoding(der, pub)
+
+    def test_public_from_pem_ecc_pem_cert(self):
+        pub = TPMT_PUBLIC()
+        crypto.public_from_encoding(ecc_cert, pub)
+
+    def test_public_from_pem_ecc_der_cert(self):
+        sl = ecc_cert.strip().splitlines()
+        b64 = b"".join(sl[1:-1])
+        der = b64decode(b64)
+
+        pub = TPMT_PUBLIC()
+        crypto.public_from_encoding(der, pub)
+
+    def test_public_from_pem_rsa_der(self):
+        sl = rsa_public_key.strip().splitlines()
+        b64 = b"".join(sl[1:-1])
+        der = b64decode(b64)
+
+        pub = TPMT_PUBLIC()
+        crypto.public_from_encoding(der, pub)
+
+    def test_public_from_pem_ecc_der(self):
+        sl = ecc_public_key.strip().splitlines()
+        b64 = b"".join(sl[1:-1])
+        der = b64decode(b64)
+
+        pub = TPMT_PUBLIC()
+        crypto.public_from_encoding(der, pub)
+
+    def test_public_from_pem_bad_der(self):
+        der = b"" * 1024
+        pub = TPMT_PUBLIC()
+        with self.assertRaises(ValueError) as e:
+            crypto.public_from_encoding(der, pub)
+        self.assertEqual(str(e.exception), "Unsupported key format")

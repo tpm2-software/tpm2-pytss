@@ -12,7 +12,12 @@ from tpm2_pytss.utils import (
     fixup_classname,
     convert_to_python_native,
 )
-from tpm2_pytss.crypto import public_from_pem, private_from_pem, public_to_pem, getname
+from tpm2_pytss.crypto import (
+    public_from_encoding,
+    private_from_pem,
+    public_to_pem,
+    getname,
+)
 
 import binascii
 
@@ -1576,7 +1581,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
         scheme=None,
     ):
         p = cls()
-        public_from_pem(data, p)
+        public_from_encoding(data, p)
         p.nameAlg = nameAlg
         p.objectAttributes = objectAttributes
         if symmetric is None:

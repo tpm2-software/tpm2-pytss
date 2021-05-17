@@ -9,9 +9,11 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.serialization import (
     load_pem_private_key,
     load_pem_public_key,
+    load_der_public_key,
     Encoding,
     PublicFormat,
 )
+from cryptography.x509 import load_pem_x509_certificate, load_der_x509_certificate
 from cryptography.hazmat.backends import default_backend
 
 _curvetable = (
@@ -62,8 +64,33 @@ def _int_to_buffer(i, b):
     b.buffer = i.to_bytes(length=s, byteorder="big")
 
 
-def public_from_pem(data, obj):
-    key = load_pem_public_key(data, backend=default_backend())
+def key_from_encoding(data):
+    sdata = data.strip()
+    key = None
+    if sdata.startswith(b"-----BEGIN CERTIFICATE-----"):
+        cert = load_pem_x509_certificate(data, backend=default_backend())
+        key = cert.public_key()
+    elif sdata.startswith(b"-----BEGIN PUBLIC KEY-----"):
+        key = load_pem_public_key(data, backend=default_backend())
+    else:
+        try:
+            cert = load_der_x509_certificate(data, backend=default_backend())
+            key = cert.public_key()
+            return key
+        except ValueError:
+            pass
+        try:
+            key = load_der_public_key(data, backend=default_backend())
+        except ValueError:
+            pass
+
+    if key is None:
+        raise ValueError("Unsupported key format")
+    return key
+
+
+def public_from_encoding(data, obj):
+    key = key_from_encoding(data)
     nums = key.public_numbers()
     if isinstance(key, rsa.RSAPublicKey):
         obj.type = lib.TPM2_ALG_RSA
