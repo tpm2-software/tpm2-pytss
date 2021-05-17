@@ -1691,6 +1691,28 @@ class TestEsys(TSS2_EsapiTest):
                 session3="foo",
             )
 
+    def test_PolicyAuthValue(self):
+
+        sym = TPMT_SYM_DEF(
+            algorithm=TPM2_ALG.XOR,
+            keyBits=TPMU_SYM_KEY_BITS(exclusiveOr=TPM2_ALG.SHA256),
+            mode=TPMU_SYM_MODE(aes=TPM2_ALG.CFB),
+        )
+
+        session = self.ectx.StartAuthSession(
+            tpmKey=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            nonceCaller=None,
+            sessionType=TPM2_SE.TRIAL,
+            symmetric=sym,
+            authHash=TPM2_ALG.SHA256,
+        )
+
+        self.ectx.PolicyAuthValue(session)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyAuthValue(b"1234")
+
 
 if __name__ == "__main__":
     unittest.main()
