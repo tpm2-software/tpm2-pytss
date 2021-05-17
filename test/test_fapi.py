@@ -250,7 +250,7 @@ class TestFapi:
     def test_sign(self, sign_key):
         # create signature
         message = b"Hello World"
-        digest = hashes.Hash(hashes.SHA256())
+        digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
         digest.update(message)
         digest = digest.finalize()
 
