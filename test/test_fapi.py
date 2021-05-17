@@ -6,6 +6,8 @@ SPDX-License-Identifier: BSD-2
 import random
 import string
 
+import pkgconfig
+
 import pytest
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
@@ -312,9 +314,12 @@ class TestFapi:
         assert imported is True
         assert key_path in self.fapi.list()
 
-        self.fapi.import_object(path=key_path, import_data=key_public_pem)
         # assert imported is False  # TODO bug: tpm2-tss #2028, fixed in master
-        assert imported is True
+        if pkgconfig.installed("tss2-fapi", ">=3.1.0"):
+            with pytest.raises(TSS2_Exception):
+                self.fapi.import_object(path=key_path, import_data=key_public_pem)
+        else:
+            self.fapi.import_object(path=key_path, import_data=key_public_pem)
 
     def test_import_policy_double_ok(self):
         policy = """
@@ -343,9 +348,12 @@ class TestFapi:
         assert imported is True
         assert policy_path in self.fapi.list()
 
-        self.fapi.import_object(path=policy_path, import_data=policy)
         # assert imported is False  # TODO bug: tpm2-tss #2028, fixed in master
-        assert imported is True
+        if pkgconfig.installed("tss2-fapi", ">=3.1.0"):
+            with pytest.raises(TSS2_Exception):
+                self.fapi.import_object(path=policy_path, import_data=policy)
+        else:
+            self.fapi.import_object(path=policy_path, import_data=policy)
 
     def test_import_exported_key(self, sign_key):
         exported_data = self.fapi.export_key(path=sign_key)
