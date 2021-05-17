@@ -36,3 +36,5 @@ pages/
 public/
 *.h
 .coverage
+*.orig
+*.rej
