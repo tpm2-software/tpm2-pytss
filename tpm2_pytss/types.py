@@ -40,6 +40,14 @@ class TPM_FRIENDLY_INT(int):
 
         return value
 
+    @classmethod
+    def iterator(cls):
+        return filter(lambda x: isinstance(x, int), vars(cls).values())
+
+    @classmethod
+    def contains(cls, value):
+        return value in cls.iterator()
+
 
 class TPM_FRIENDLY_INTLIST(TPM_FRIENDLY_INT):
     @classmethod
