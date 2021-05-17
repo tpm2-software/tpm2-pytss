@@ -9,6 +9,7 @@ import string
 import pytest
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.backends import default_backend
 
 from tpm2_pytss import *
 
@@ -45,7 +46,7 @@ def random_uid() -> str:
 
 def sha256(data: bytes) -> bytes:
     """Calculate the SHA256 digest of given data."""
-    digest = hashes.Hash(hashes.SHA256())
+    digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
     digest.update(data)
     digest = digest.finalize()
     return digest
