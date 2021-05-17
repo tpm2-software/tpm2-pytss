@@ -2140,14 +2140,21 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        fuData_cdata = get_cdata(fuData, TPM2B_MAX_BUFFER, "fuData")
         nextDigest = ffi.new("TPMT_HA **")
         firstDigest = ffi.new("TPMT_HA **")
         _chkrc(
             lib.Esys_FieldUpgradeData(
-                self.ctx, session1, session2, session3, fuData, nextDigest, firstDigest
+                self.ctx,
+                session1,
+                session2,
+                session3,
+                fuData_cdata,
+                nextDigest,
+                firstDigest,
             )
         )
-        return (get_ptr(nextDigest), get_ptr(firstDigest))
+        return (TPMT_HA(get_ptr(nextDigest)), TPMT_HA(get_ptr(firstDigest)))
 
     def FirmwareRead(
         self,

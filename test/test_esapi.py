@@ -1471,6 +1471,11 @@ class TestEsys(TSS2_EsapiTest):
             )
         self.assertEqual(e.exception.error, TPM2_RC.COMMAND_CODE)
 
+    def test_FieldUpgradeData(self):
+        with self.assertRaises(TSS2_Exception) as e:
+            self.ectx.FieldUpgradeData(b"")
+        self.assertEqual(e.exception.error, TPM2_RC.COMMAND_CODE)
+
 
 if __name__ == "__main__":
     unittest.main()
