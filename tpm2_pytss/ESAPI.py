@@ -2113,6 +2113,12 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(authorization, "authorization")
+        check_handle_type(keyHandle, "keyHandle")
+        fuDigest_cdata = get_cdata(fuDigest, TPM2B_DIGEST, "fuDigest")
+        manifestSignature_cdata = get_cdata(
+            manifestSignature, TPMT_SIGNATURE, "manifestSignature"
+        )
         _chkrc(
             lib.Esys_FieldUpgradeStart(
                 self.ctx,
@@ -2121,8 +2127,8 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                fuDigest,
-                manifestSignature,
+                fuDigest_cdata,
+                manifestSignature_cdata,
             )
         )
 
