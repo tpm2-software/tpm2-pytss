@@ -265,7 +265,9 @@ class TestFapi:
         self.fapi.verify_signature(sign_key, digest, signature)
 
         # verify via openssl
-        public_key = serialization.load_pem_public_key(key_public_pem)
+        public_key = serialization.load_pem_public_key(
+            key_public_pem, backend=default_backend()
+        )
         public_key.verify(signature, message, ec.ECDSA(hashes.SHA256()))
 
     def test_verify(self, ext_key):
