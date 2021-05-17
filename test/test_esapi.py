@@ -1524,6 +1524,37 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.Shutdown(session3=object())
 
+    def test_policyrestart(self):
+
+        sym = TPMT_SYM_DEF(
+            algorithm=TPM2_ALG.XOR,
+            keyBits=TPMU_SYM_KEY_BITS(exclusiveOr=TPM2_ALG.SHA256),
+            mode=TPMU_SYM_MODE(aes=TPM2_ALG.CFB),
+        )
+
+        session = self.ectx.StartAuthSession(
+            tpmKey=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            nonceCaller=None,
+            sessionType=TPM2_SE.TRIAL,
+            symmetric=sym,
+            authHash=TPM2_ALG.SHA256,
+        )
+
+        self.ectx.PolicyRestart(session)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyRestart(object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyRestart(session, session1=4.5)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyRestart(session, session2=object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyRestart(session, session3=33.666)
+
 
 if __name__ == "__main__":
     unittest.main()
