@@ -1481,6 +1481,31 @@ class TestEsys(TSS2_EsapiTest):
             self.ectx.FirmwareRead(0)
         self.assertEqual(e.exception.error, TPM2_RC.COMMAND_CODE)
 
+    def test_shutdown_no_arg(self):
+        self.ectx.Shutdown(TPM2_SU.STATE)
+
+    def test_shutdown_state(self):
+        self.ectx.Shutdown(TPM2_SU.STATE)
+
+    def test_shutdown_clear(self):
+        self.ectx.Shutdown(TPM2_SU.CLEAR)
+
+    def test_shutdown_bad(self):
+        with self.assertRaises(TypeError):
+            self.ectx.Shutdown(object())
+
+        with self.assertRaises(ValueError):
+            self.ectx.Shutdown(42)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Shutdown(session1=object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.Shutdown(session2=object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.Shutdown(session3=object())
+
 
 if __name__ == "__main__":
     unittest.main()

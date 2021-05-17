@@ -101,11 +101,25 @@ class ESAPI:
 
     def Shutdown(
         self,
-        shutdownType,
+        shutdownType=TPM2_SU.STATE,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
+
+        if not isinstance(shutdownType, int):
+            raise TypeError(
+                f"Expected shutdownType to be int, got {type(shutdownType)}"
+            )
+
+        if shutdownType not in [TPM2_SU.STATE, TPM2_SU.CLEAR]:
+            raise ValueError(
+                f"Expected shutdownType to be TPM2_SU.STATE or TPM2_SU.CLEAR, got {shutdownType}"
+            )
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
 
         _chkrc(lib.Esys_Shutdown(self.ctx, session1, session2, session3, shutdownType))
 
