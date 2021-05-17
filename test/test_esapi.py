@@ -268,6 +268,24 @@ class TestEsys(TSS2_EsapiTest):
         random = self.ectx.GetRandom(4, session1=session)
         self.assertEqual(len(random), 4)
 
+    def test_start_authSession_noncecaller_bad(self):
+
+        sym = TPMT_SYM_DEF(
+            algorithm=TPM2_ALG.XOR,
+            keyBits=TPMU_SYM_KEY_BITS(exclusiveOr=TPM2_ALG.SHA256),
+            mode=TPMU_SYM_MODE(aes=TPM2_ALG.CFB),
+        )
+
+        with self.assertRaises(TypeError):
+            self.ectx.StartAuthSession(
+                tpmKey=ESYS_TR.NONE,
+                bind=ESYS_TR.NONE,
+                nonceCaller=object(),
+                sessionType=TPM2_SE.HMAC,
+                symmetric=sym,
+                authHash=TPM2_ALG.SHA256,
+            )
+
     def test_create(self):
 
         alg = "rsa2048:aes128cfb"
