@@ -31,9 +31,12 @@ def get_cdata(value, expected, varname, allow_none=False):
         return value
 
     vname = type(value).__name__
+    parse_method = getattr(expected, "parse", None)
     if isinstance(value, (bytes, str)) and issubclass(expected, TPM2B_SIMPLE_OBJECT):
         bo = expected(value)
         return bo._cdata
+    elif isinstance(value, str) and parse_method and callable(parse_method):
+        return expected.parse(value)._cdata
     elif not isinstance(value, expected):
         raise TypeError(f"expected {varname} to be {tname}, got {vname}")
 
@@ -1181,9 +1184,9 @@ class ESAPI:
     def Quote(
         self,
         signHandle,
-        qualifyingData,
-        inScheme,
         PCRselect,
+        qualifyingData=None,
+        inScheme=TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL),
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
@@ -1197,7 +1200,9 @@ class ESAPI:
         qualifyingData_cdata = get_cdata(
             qualifyingData, TPM2B_DATA, "qualifyingData", allow_none=True
         )
+
         inScheme_cdata = get_cdata(inScheme, TPMT_SIG_SCHEME, "inScheme")
+
         PCRselect_cdata = get_cdata(PCRselect, TPML_PCR_SELECTION, "PCRselect")
 
         quoted = ffi.new("TPM2B_ATTEST **")
