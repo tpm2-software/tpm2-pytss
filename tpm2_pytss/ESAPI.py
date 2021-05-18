@@ -512,7 +512,7 @@ class ESAPI:
         check_handle_type(session3, "session3")
 
         encryptionKeyIn_cdata = get_cdata(
-            encryptionKeyIn, TPM2B_DATA, "encryptionKeyIn"
+            encryptionKeyIn, TPM2B_DATA, "encryptionKeyIn", allow_none=True
         )
         symmetricAlg_cdata = get_cdata(
             symmetricAlg, TPMT_SYM_DEF_OBJECT, "symmetricAlg"
