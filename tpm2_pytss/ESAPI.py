@@ -550,10 +550,22 @@ class ESAPI:
         inDuplicate,
         name,
         inSymSeed,
-        session1=ESYS_TR.NONE,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
+
+        check_handle_type(oldParent, "oldParent")
+        check_handle_type(newParent, "newParent")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        inDuplicate_cdata = get_cdata(inDuplicate, TPM2B_PRIVATE, "inDuplicate")
+
+        inSymSeed_cdata = get_cdata(inSymSeed, TPM2B_ENCRYPTED_SECRET, "inSymSeed")
+
+        name_cdata = get_cdata(name, TPM2B_NAME, "name")
 
         outDuplicate = ffi.new("TPM2B_PRIVATE **")
         outSymSeed = ffi.new("TPM2B_ENCRYPTED_SECRET **")
@@ -565,14 +577,17 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                inDuplicate,
-                name,
-                inSymSeed,
+                inDuplicate_cdata,
+                name_cdata,
+                inSymSeed_cdata,
                 outDuplicate,
                 outSymSeed,
             )
         )
-        return (get_ptr(outDuplicate), get_ptr(outSymSeed))
+        return (
+            TPM2B_PRIVATE(get_ptr(outDuplicate)),
+            TPM2B_ENCRYPTED_SECRET(get_ptr(outSymSeed)),
+        )
 
     def Import(
         self,

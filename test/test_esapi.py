@@ -1763,6 +1763,117 @@ class TestEsys(TSS2_EsapiTest):
         policyDigest = self.ectx.PolicyGetDigest(session)
         self.assertTrue(type(policyDigest), TPM2B_DIGEST)
 
+    def test_rewrap(self):
+
+        sym = TPMT_SYM_DEF(
+            algorithm=TPM2_ALG.XOR,
+            keyBits=TPMU_SYM_KEY_BITS(exclusiveOr=TPM2_ALG.SHA256),
+            mode=TPMU_SYM_MODE(aes=TPM2_ALG.CFB),
+        )
+
+        session = self.ectx.StartAuthSession(
+            tpmKey=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            nonceCaller=None,
+            sessionType=TPM2_SE.TRIAL,
+            symmetric=sym,
+            authHash=TPM2_ALG.SHA256,
+        )
+
+        self.ectx.PolicyAuthValue(session)
+        self.ectx.PolicyCommandCode(session, TPM2_CC.Duplicate)
+        policyDigest = self.ectx.PolicyGetDigest(session)
+        self.ectx.FlushContext(session)
+        session = None
+
+        inPublic = TPM2B_PUBLIC(
+            TPMT_PUBLIC.parse(
+                alg="rsa2048",
+                objectAttributes=TPMA_OBJECT.USERWITHAUTH
+                | TPMA_OBJECT.RESTRICTED
+                | TPMA_OBJECT.DECRYPT
+                | TPMA_OBJECT.FIXEDTPM
+                | TPMA_OBJECT.FIXEDPARENT
+                | TPMA_OBJECT.SENSITIVEDATAORIGIN,
+            )
+        )
+
+        inSensitive = TPM2B_SENSITIVE_CREATE()
+
+        outsideInfo = TPM2B_DATA()
+        creationPCR = TPML_PCR_SELECTION()
+
+        primary1, _, _, _, _ = self.ectx.CreatePrimary(
+            ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
+        )
+
+        primary2, _, _, _, _ = self.ectx.CreatePrimary(
+            ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
+        )
+
+        inPublic = TPM2B_PUBLIC(
+            TPMT_PUBLIC.parse(
+                alg="rsa2048:aes128cfb",
+                objectAttributes=TPMA_OBJECT.USERWITHAUTH
+                | TPMA_OBJECT.RESTRICTED
+                | TPMA_OBJECT.DECRYPT
+                | TPMA_OBJECT.SENSITIVEDATAORIGIN,
+            )
+        )
+        inPublic.publicArea.authPolicy = policyDigest
+
+        priv, pub, _, _, _ = self.ectx.Create(
+            primary1, inSensitive, inPublic, outsideInfo, creationPCR
+        )
+
+        childHandle = self.ectx.Load(primary1, priv, pub)
+
+        session = self.ectx.StartAuthSession(
+            tpmKey=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            nonceCaller=None,
+            sessionType=TPM2_SE.POLICY,
+            symmetric=sym,
+            authHash=TPM2_ALG.SHA256,
+        )
+
+        self.ectx.PolicyAuthValue(session)
+        self.ectx.PolicyCommandCode(session, TPM2_CC.Duplicate)
+
+        encryptionKey = TPM2B_DATA("is sixteen bytes")
+
+        sym = TPMT_SYM_DEF_OBJECT(
+            algorithm=TPM2_ALG.AES,
+            keyBits=TPMU_SYM_KEY_BITS(aes=128),
+            mode=TPMU_SYM_MODE(aes=TPM2_ALG.CFB),
+        )
+
+        _, duplicate, symSeed = self.ectx.Duplicate(
+            childHandle, primary2, encryptionKey, sym, session1=session
+        )
+
+        keyName = pub.publicArea.getName()
+        duplicate, symSeed = self.ectx.Rewrap(
+            primary2, primary1, duplicate, keyName, symSeed
+        )
+        self.assertEqual(type(duplicate), TPM2B_PRIVATE)
+        self.assertEqual(type(symSeed), TPM2B_ENCRYPTED_SECRET)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Rewrap(67.3, primary1, duplicate, keyName, symSeed)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Rewrap(primary2, object(), duplicate, keyName, symSeed)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Rewrap(primary2, primary1, TPM2B_NAME(), keyName, symSeed)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Rewrap(primary2, primary1, duplicate, TPM2B_PRIVATE(), symSeed)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Rewrap(primary2, primary1, duplicate, keyName, TPMT_PUBLIC())
+
 
 if __name__ == "__main__":
     unittest.main()
