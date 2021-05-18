@@ -39,7 +39,6 @@ class TestEsys(TSS2_EsapiTest):
         inPublic.publicArea.parameters.eccDetail.kdf.scheme = TPM2_ALG.NULL
         inPublic.publicArea.parameters.eccDetail.curveID = TPM2_ECC.NIST_P256
 
-        self.ectx.setAuth(ESYS_TR.OWNER, "")
 
         x, _, _, _, _ = self.ectx.CreatePrimary(
             ESYS_TR.OWNER,
@@ -2023,6 +2022,57 @@ class TestEsys(TSS2_EsapiTest):
             self.ectx.Import(
                 primary1, encryptionKey, pub, duplicate, symSeed, TPM2B_PUBLIC()
             )
+
+    def test_Quote(self):
+
+        inPublic = TPM2B_PUBLIC(
+            TPMT_PUBLIC.parse(
+                alg="ecc:ecdsa",
+                objectAttributes=TPMA_OBJECT.SIGN_ENCRYPT
+                | TPMA_OBJECT.FIXEDPARENT
+                | TPMA_OBJECT.FIXEDTPM
+                | TPMA_OBJECT.USERWITHAUTH
+                | TPMA_OBJECT.SENSITIVEDATAORIGIN,
+            )
+        )
+
+        inSensitive = TPM2B_SENSITIVE_CREATE(TPMS_SENSITIVE_CREATE())
+        outsideInfo = TPM2B_DATA()
+        creationPCR = TPML_PCR_SELECTION()
+
+        parentHandle = self.ectx.CreatePrimary(
+            ESYS_TR.OWNER, inSensitive, inPublic, outsideInfo, creationPCR
+        )[0]
+
+        quote, signature = self.ectx.Quote(parentHandle, "sha256:1,2,3,4", TPM2B_DATA(b'123456789'))
+        self.assertTrue(type(quote), TPM2B_ATTEST)
+        self.assertTrue(type(signature), TPMT_SIGNATURE)
+
+        quote, signature = self.ectx.Quote(
+            parentHandle, TPML_PCR_SELECTION.parse("sha256:1,2,3,4"), TPM2B_DATA()
+        )
+        self.assertTrue(type(quote), TPM2B_ATTEST)
+        self.assertTrue(type(signature), TPMT_SIGNATURE)
+
+        quote, signature = self.ectx.Quote(
+            parentHandle,
+            "sha256:1,2,3,4",
+            TPM2B_DATA(),
+            inScheme=TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL),
+        )
+        self.assertTrue(type(quote), TPM2B_ATTEST)
+        self.assertTrue(type(signature), TPMT_SIGNATURE)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Quote(42.0, "sha256:1,2,3,4", TPM2B_DATA())
+
+        with self.assertRaises(TypeError):
+            self.ectx.Quote(parentHandle, b"sha256:1,2,3,4")
+
+        with self.assertRaises(TypeError):
+            self.ectx.Quote(parentHandle, "sha256:1,2,3,4", qualifyingData=object())
+        with self.assertRaises(TypeError):
+            self.ectx.Quote(parentHandle, "sha256:1,2,3,4", inScheme=87)
 
 
 if __name__ == "__main__":
