@@ -648,8 +648,14 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
-        if label is None:
-            label = TPM2B_DATA()
+        check_handle_type(keyHandle, "keyHandle")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        inScheme_cdata = get_cdata(inScheme, TPMT_RSA_DECRYPT, "inScheme")
+        message_cdata = get_cdata(message, TPM2B_PUBLIC_KEY_RSA, "message")
+        label_cdata = get_cdata(label, TPM2B_DATA, "label", allow_none=True)
 
         outData = ffi.new("TPM2B_PUBLIC_KEY_RSA **")
         _chkrc(
@@ -659,9 +665,9 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                message._cdata,
-                inScheme._cdata,
-                label._cdata,
+                message_cdata,
+                inScheme_cdata,
+                label_cdata,
                 outData,
             )
         )
@@ -678,8 +684,14 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
-        if label is None:
-            label = TPM2B_DATA()
+        check_handle_type(keyHandle, "keyHandle")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        inScheme_cdata = get_cdata(inScheme, TPMT_RSA_DECRYPT, "inScheme")
+        cipherText_cdata = get_cdata(cipherText, TPM2B_PUBLIC_KEY_RSA, "cipherText")
+        label_cdata = get_cdata(label, TPM2B_DATA, "label", allow_none=True)
 
         message = ffi.new("TPM2B_PUBLIC_KEY_RSA **")
         _chkrc(
@@ -689,9 +701,9 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                cipherText._cdata,
-                inScheme._cdata,
-                label._cdata,
+                cipherText_cdata,
+                inScheme_cdata,
+                label_cdata,
                 message,
             )
         )
