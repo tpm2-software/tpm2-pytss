@@ -11,6 +11,7 @@ from tpm2_pytss.utils import (
     cpointer_to_ctype,
     fixup_classname,
     convert_to_python_native,
+    mock_bail,
 )
 from tpm2_pytss.crypto import (
     public_from_encoding,
@@ -862,6 +863,12 @@ class TPMA_MEMORY(TPM_FRIENDLY_INT):
 
 class TPM_OBJECT(object):
     def __init__(self, _cdata=None, **kwargs):
+
+        # Rather than trying to mock the FFI interface, just avoid it and return
+        # the base object. This is really only needed for documentation, and it
+        # makes it work. Why Yes, this is a terrible hack (cough cough).
+        if mock_bail():
+            return
 
         _cdata, kwargs = fixup_cdata_kwargs(self, _cdata, kwargs)
         object.__setattr__(self, "_cdata", _cdata)
