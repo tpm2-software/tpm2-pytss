@@ -2,8 +2,13 @@
 SPDX-License-Identifier: BSD-2
 """
 
+import sys
+
 from ._libtpm2_pytss import ffi
 from .TSS2_Exception import TSS2_Exception
+
+# Peek into the loaded modules, if mock is loaded, set __MOCK__ to True, else False
+__MOCK__ = "unittest.mock" in sys.modules
 
 
 def _chkrc(rc):
@@ -157,3 +162,7 @@ def fixup_classname(tipe):
         return tipe.cname[len(tipe.kind) + 1 :]
 
     return tipe.cname
+
+
+def mock_bail():
+    return __MOCK__
