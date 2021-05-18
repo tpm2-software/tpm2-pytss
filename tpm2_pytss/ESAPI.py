@@ -597,10 +597,27 @@ class ESAPI:
         duplicate,
         inSymSeed,
         symmetricAlg,
-        session1=ESYS_TR.NONE,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
+
+        check_handle_type(parentHandle, "parentHandle")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        encryptionKey_cdata = get_cdata(encryptionKey, TPM2B_DATA, "encryptionKey")
+
+        objectPublic_cdata = get_cdata(objectPublic, TPM2B_PUBLIC, "objectPublic")
+
+        duplicate_cdata = get_cdata(duplicate, TPM2B_PRIVATE, "duplicate")
+
+        inSymSeed_cdata = get_cdata(inSymSeed, TPM2B_ENCRYPTED_SECRET, "inSymSeed")
+
+        symmetricAlg_cdata = get_cdata(
+            symmetricAlg, TPMT_SYM_DEF_OBJECT, "symmetricAlg"
+        )
 
         outPrivate = ffi.new("TPM2B_PRIVATE **")
         _chkrc(
@@ -610,15 +627,15 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                encryptionKey,
-                objectPublic,
-                duplicate,
-                inSymSeed,
-                symmetricAlg,
+                encryptionKey_cdata,
+                objectPublic_cdata,
+                duplicate_cdata,
+                inSymSeed_cdata,
+                symmetricAlg_cdata,
                 outPrivate,
             )
         )
-        return get_ptr(outPrivate)
+        return TPM2B_PRIVATE(get_ptr(outPrivate))
 
     def RSA_Encrypt(
         self,
