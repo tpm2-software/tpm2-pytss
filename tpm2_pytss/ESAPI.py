@@ -31,7 +31,7 @@ def get_cdata(value, expected, varname, allow_none=False):
         return value
 
     vname = type(value).__name__
-    if isinstance(value, bytes) and issubclass(expected, TPM2B_SIMPLE_OBJECT):
+    if isinstance(value, (bytes, str)) and issubclass(expected, TPM2B_SIMPLE_OBJECT):
         bo = expected(value)
         return bo._cdata
     elif not isinstance(value, expected):
