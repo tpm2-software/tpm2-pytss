@@ -1710,6 +1710,16 @@ class TPM2B_PUBLIC(TPM_OBJECT):
     def getName(self):
         return self.publicArea.getName()
 
+    @classmethod
+    def parse(
+        cls,
+        alg="rsa",
+        objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS,
+        nameAlg="sha256",
+    ):
+
+        return cls(TPMT_PUBLIC.parse(alg, objectAttributes, nameAlg))
+
 
 class TPM2B_PUBLIC_KEY_RSA(TPM2B_SIMPLE_OBJECT):
     pass

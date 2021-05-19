@@ -13,7 +13,7 @@ def get_ptr(dptr):
     return ffi.gc(dptr[0], lib.Esys_Free)
 
 
-def get_cdata(value, expected, varname, allow_none=False):
+def get_cdata(value, expected, varname, allow_none=False, *args, **kwargs):
     tname = expected.__name__
 
     if value is None and allow_none:
@@ -36,7 +36,7 @@ def get_cdata(value, expected, varname, allow_none=False):
         bo = expected(value)
         return bo._cdata
     elif isinstance(value, str) and parse_method and callable(parse_method):
-        return expected.parse(value)._cdata
+        return expected.parse(value, *args, **kwargs)._cdata
     elif not isinstance(value, expected):
         raise TypeError(f"expected {varname} to be {tname}, got {vname}")
 
@@ -1197,9 +1197,7 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        qualifyingData_cdata = get_cdata(
-            qualifyingData, TPM2B_DATA, "qualifyingData"
-        )
+        qualifyingData_cdata = get_cdata(qualifyingData, TPM2B_DATA, "qualifyingData")
 
         inScheme_cdata = get_cdata(inScheme, TPMT_SIG_SCHEME, "inScheme")
 
@@ -2012,15 +2010,32 @@ class ESAPI:
 
     def CreatePrimary(
         self,
-        primaryHandle,
         inSensitive,
-        inPublic,
-        outsideInfo,
-        creationPCR,
+        inPublic="rsa2048",
+        primaryHandle=ESYS_TR.OWNER,
+        outsideInfo=TPM2B_DATA(),
+        creationPCR=TPML_PCR_SELECTION(),
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        inPublic_cdata = get_cdata(
+            inPublic,
+            TPM2B_PUBLIC,
+            "inPublic",
+            objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS,
+        )
+        inSensitive_cdata = get_cdata(
+            inSensitive, TPM2B_SENSITIVE_CREATE, "inSensitive"
+        )
+        outsideInfo_cdata = get_cdata(outsideInfo, TPM2B_DATA, "outsideInfo")
+        creationPCR_cdata = get_cdata(creationPCR, TPML_PCR_SELECTION, "creationPCR")
+
         objectHandle = ffi.new("ESYS_TR *")
         outPublic = ffi.new("TPM2B_PUBLIC **")
         creationData = ffi.new("TPM2B_CREATION_DATA **")
@@ -2033,10 +2048,10 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                inSensitive._cdata,
-                inPublic._cdata,
-                outsideInfo._cdata,
-                creationPCR._cdata,
+                inSensitive_cdata,
+                inPublic_cdata,
+                outsideInfo_cdata,
+                creationPCR_cdata,
                 objectHandle,
                 outPublic,
                 creationData,

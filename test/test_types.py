@@ -1211,6 +1211,23 @@ class TypesTest(unittest.TestCase):
     def test_TPM_FRIENDLY_INT_contains(self):
         self.assertTrue(TPM2_CC.contains(TPM2_CC.AC_Send))
 
+    def test_TPM2B_PUBLIC_parse(self):
+
+        tpm2b = TPM2B_PUBLIC.parse("rsa")
+        templ = tpm2b.publicArea
+        self.assertEqual(templ.nameAlg, TPM2_ALG.SHA256)
+        self.assertEqual(
+            templ.objectAttributes, TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS
+        )
+
+        self.assertEqual(templ.type, TPM2_ALG.RSA)
+
+        self.assertEqual(templ.type, TPM2_ALG.RSA)
+        self.assertEqual(templ.parameters.rsaDetail.keyBits, 2048)
+        self.assertEqual(templ.parameters.asymDetail.scheme.scheme, TPM2_ALG.NULL)
+
+        self.assertEqual(templ.parameters.rsaDetail.symmetric.algorithm, TPM2_ALG.NULL)
+
 
 if __name__ == "__main__":
     unittest.main()
