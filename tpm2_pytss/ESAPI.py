@@ -1442,16 +1442,17 @@ class ESAPI:
 
     def GetSessionAuditDigest(
         self,
-        privacyAdminHandle,
         signHandle,
         sessionHandle,
         qualifyingData,
-        inScheme,
+        inScheme=TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL),
+        privacyAdminHandle=ESYS_TR.RH_ENDORSEMENT,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.PASSWORD,
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(sessionHandle, "sessionHandle")
         check_handle_type(privacyAdminHandle, "privacyAdminHandle")
         check_handle_type(signHandle, "signHandle")
         check_handle_type(session1, "session1")

@@ -2767,6 +2767,82 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.Quote(parentHandle, "sha256:1,2,3,4", session3=object())
 
+    def test_GetSessionAuditDigest(self):
+
+        inPublic = TPM2B_PUBLIC(
+            TPMT_PUBLIC.parse(
+                alg="rsa2048:rsassa:null",
+                objectAttributes=TPMA_OBJECT.SIGN_ENCRYPT
+                | TPMA_OBJECT.FIXEDPARENT
+                | TPMA_OBJECT.FIXEDTPM
+                | TPMA_OBJECT.USERWITHAUTH
+                | TPMA_OBJECT.SENSITIVEDATAORIGIN
+                | TPMA_OBJECT.RESTRICTED,
+            )
+        )
+        inSensitive = TPM2B_SENSITIVE_CREATE(TPMS_SENSITIVE_CREATE())
+
+        signHandle = self.ectx.CreatePrimary(inSensitive, inPublic)[0]
+
+        sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL,)
+
+        session = self.ectx.StartAuthSession(
+            tpmKey=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            nonceCaller=None,
+            sessionType=TPM2_SE.HMAC,
+            symmetric=sym,
+            authHash=TPM2_ALG.SHA256,
+        )
+
+        self.ectx.TRSess_SetAttributes(
+            session, TPMA_SESSION.AUDIT | TPMA_SESSION.CONTINUESESSION
+        )
+
+        self.ectx.GetCapability(
+            TPM2_CAP.COMMANDS, TPM2_CC.FIRST, lib.TPM2_MAX_CAP_CC, session1=session
+        )
+
+        auditInfo, signature = self.ectx.GetSessionAuditDigest(
+            signHandle, session, b"1234"
+        )
+        self.assertEqual(type(auditInfo), TPM2B_ATTEST)
+        self.assertEqual(type(signature), TPMT_SIGNATURE)
+
+        with self.assertRaises(TypeError):
+            self.ectx.GetSessionAuditDigest(45.89, session, b"1234")
+
+        with self.assertRaises(TypeError):
+            self.ectx.GetSessionAuditDigest(signHandle, object(), b"1234")
+
+        with self.assertRaises(TypeError):
+            self.ectx.GetSessionAuditDigest(signHandle, session, list())
+
+        with self.assertRaises(TypeError):
+            self.ectx.GetSessionAuditDigest(
+                signHandle, session, b"1234", privacyAdminHandle=45.6
+            )
+
+        with self.assertRaises(ValueError):
+            self.ectx.GetSessionAuditDigest(
+                signHandle, session, b"1234", privacyAdminHandle=ESYS_TR.LOCKOUT
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.GetSessionAuditDigest(
+                signHandle, session, b"1234", session1="baz"
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.GetSessionAuditDigest(
+                signHandle, session, b"1234", session2=object()
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.GetSessionAuditDigest(
+                signHandle, session, b"1234", session3=12.723
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
