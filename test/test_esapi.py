@@ -1221,6 +1221,57 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(bytes(inData), bytes(outData))
         self.assertEqual(bytes(outIV), bytes(outIV2))
 
+        ivIn = b"thisis16byteszxc"
+        inData = b"this is data to encrypt"
+        outCipherText, outIV = self.ectx.EncryptDecrypt2(
+            aesKeyHandle, False, TPM2_ALG.CFB, ivIn, inData
+        )
+
+        self.assertEqual(len(outIV), len(ivIn))
+
+        outData, outIV2 = self.ectx.EncryptDecrypt2(
+            aesKeyHandle, True, TPM2_ALG.CFB, ivIn, outCipherText
+        )
+        self.assertEqual(inData, bytes(outData))
+        self.assertEqual(bytes(outIV), bytes(outIV2))
+
+        with self.assertRaises(TypeError):
+            self.ectx.EncryptDecrypt(42.5, True, TPM2_ALG.CFB, ivIn, outCipherText)
+
+        with self.assertRaises(TypeError):
+            self.ectx.EncryptDecrypt(
+                aesKeyHandle, object(), TPM2_ALG.CFB, ivIn, outCipherText
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.EncryptDecrypt(aesKeyHandle, True, object(), ivIn, outCipherText)
+
+        with self.assertRaises(ValueError):
+            self.ectx.EncryptDecrypt(aesKeyHandle, True, 42, ivIn, outCipherText)
+
+        with self.assertRaises(TypeError):
+            self.ectx.EncryptDecrypt(
+                aesKeyHandle, True, TPM2_ALG.CFB, TPM2B_PUBLIC(), outCipherText
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.EncryptDecrypt(aesKeyHandle, True, TPM2_ALG.CFB, ivIn, None)
+
+        with self.assertRaises(TypeError):
+            self.ectx.EncryptDecrypt(
+                aesKeyHandle, True, TPM2_ALG.CFB, ivIn, outCipherText, session1=object()
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.EncryptDecrypt(
+                aesKeyHandle, True, TPM2_ALG.CFB, ivIn, outCipherText, session2="foo"
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.EncryptDecrypt(
+                aesKeyHandle, True, TPM2_ALG.CFB, ivIn, outCipherText, session3=12.3
+            )
+
     def test_Hash(self):
 
         # Null hierarchy default
@@ -1264,6 +1315,24 @@ class TestEsys(TSS2_EsapiTest):
             "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"
         )
         self.assertEqual(c, d)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Hash(object(), TPM2_ALG.SHA256)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Hash(inData, "baz")
+
+        with self.assertRaises(ValueError):
+            self.ectx.Hash(inData, 42)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Hash(inData, TPM2_ALG.SHA256, session1=56.7)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Hash(inData, TPM2_ALG.SHA256, session2="baz")
+
+        with self.assertRaises(TypeError):
+            self.ectx.Hash(inData, TPM2_ALG.SHA256, session3=object())
 
     def test_HMAC(self):
 
