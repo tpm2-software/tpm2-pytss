@@ -241,6 +241,52 @@ class TestEsys(TSS2_EsapiTest):
                 ESYS_TR.OWNER, "anotherpasswd", session1=hmac_session
             )
 
+        # test some bad params
+        with self.assertRaises(TypeError):
+            self.ectx.StartAuthSession(
+                object, ESYS_TR.NONE, None, TPM2_SE.HMAC, sym, TPM2_ALG.SHA256
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.StartAuthSession(
+                ESYS_TR.NONE, object(), None, TPM2_SE.HMAC, sym, TPM2_ALG.SHA256
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.StartAuthSession(
+                ESYS_TR.NONE,
+                ESYS_TR.NONE,
+                TPM2B_PUBLIC(),
+                TPM2_SE.HMAC,
+                sym,
+                TPM2_ALG.SHA256,
+            )
+
+        with self.assertRaises(ValueError):
+            self.ectx.StartAuthSession(
+                ESYS_TR.NONE, ESYS_TR.NONE, None, 8745635, sym, TPM2_ALG.SHA256
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.StartAuthSession(
+                ESYS_TR.NONE, ESYS_TR.NONE, None, object(), sym, TPM2_ALG.SHA256
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.StartAuthSession(
+                ESYS_TR.NONE, ESYS_TR.NONE, None, TPM2_SE.HMAC, 42, TPM2_ALG.SHA256
+            )
+
+        with self.assertRaises(ValueError):
+            self.ectx.StartAuthSession(
+                ESYS_TR.NONE, ESYS_TR.NONE, None, TPM2_SE.HMAC, sym, 8395847
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.StartAuthSession(
+                ESYS_TR.NONE, ESYS_TR.NONE, None, TPM2_SE.HMAC, sym, TPM2B_SYM_KEY()
+            )
+
     def test_start_authSession_enckey(self):
 
         inSensitive = TPM2B_SENSITIVE_CREATE()
