@@ -562,6 +562,18 @@ class TestEsys(TSS2_EsapiTest):
         self.assertTrue(name.size, 32)
         self.assertTrue(qname.size, 32)
 
+        with self.assertRaises(TypeError):
+            self.ectx.ReadPublic(object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.ReadPublic(childHandle, session1=object)
+
+        with self.assertRaises(TypeError):
+            self.ectx.ReadPublic(childHandle, session2="foo")
+
+        with self.assertRaises(TypeError):
+            self.ectx.ReadPublic(childHandle, session3=42.5)
+
     def test_makecredential(self):
 
         inSensitive = TPM2B_SENSITIVE_CREATE(
