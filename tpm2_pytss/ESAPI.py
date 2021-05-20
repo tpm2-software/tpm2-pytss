@@ -958,6 +958,20 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(keyHandle, "keyHandle")
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        check_friendly_int(mode, "mode", TPM2_ALG)
+
+        ivIn_cdata = get_cdata(ivIn, TPM2B_IV, "ivIn")
+        inData_cdata = get_cdata(inData, TPM2B_MAX_BUFFER, "inData")
+
+        if not isinstance(decrypt, bool):
+            raise TypeError("Expected decrypt to be type bool, got {type(decrypt)}")
+
         outData = ffi.new("TPM2B_MAX_BUFFER **")
         ivOut = ffi.new("TPM2B_IV **")
         _chkrc(
@@ -969,8 +983,8 @@ class ESAPI:
                 session3,
                 decrypt,
                 mode,
-                ivIn._cdata,
-                inData._cdata,
+                ivIn_cdata,
+                inData_cdata,
                 outData,
                 ivOut,
             )
