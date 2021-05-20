@@ -1554,6 +1554,27 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.SequenceUpdate(seqHandle, "here is some data", sequence3=78.23)
 
+        with self.assertRaises(TypeError):
+            self.ectx.SequenceComplete(78.25, "AnotherBuffer")
+
+        with self.assertRaises(TypeError):
+            self.ectx.SequenceComplete(seqHandle, [])
+
+        with self.assertRaises(TypeError):
+            self.ectx.SequenceComplete(seqHandle, "AnotherBuffer", hierarchy=object())
+
+        with self.assertRaises(ValueError):
+            self.ectx.SequenceComplete(seqHandle, "AnotherBuffer", hierarchy=42)
+
+        with self.assertRaises(TypeError):
+            self.ectx.SequenceComplete(seqHandle, "AnotherBuffer", session1=42.67)
+
+        with self.assertRaises(TypeError):
+            self.ectx.SequenceComplete(seqHandle, "AnotherBuffer", session2="baz")
+
+        with self.assertRaises(TypeError):
+            self.ectx.SequenceComplete(seqHandle, "AnotherBuffer", session3=object())
+
     def test_EventSequenceComplete(self):
 
         seqHandle = self.ectx.HashSequenceStart(TPM2B_AUTH(b"1234"), TPM2_ALG.NULL)
