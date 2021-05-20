@@ -907,6 +907,25 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(session1, "keyA")
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        check_friendly_int(inScheme, "inScheme", TPM2_ALG)
+
+        if not isinstance(counter, int):
+            raise TypeError(f"Expected counter to be type int, got {type(counter)}")
+
+        if counter < 0 or counter > 65535:
+            raise ValueError(
+                f"Expected counter to be in range of uint16_t, got {counter}"
+            )
+
+        inQsB_cdata = get_cdata(inQsB, TPM2B_ECC_POINT, "inQsB")
+        inQeB_cdata = get_cdata(inQeB, TPM2B_ECC_POINT, "inQeB")
+
         outZ1 = ffi.new("TPM2B_ECC_POINT **")
         outZ2 = ffi.new("TPM2B_ECC_POINT **")
         _chkrc(
@@ -916,8 +935,8 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                inQsB._cdata,
-                inQeB._cdata,
+                inQsB_cdata,
+                inQeB_cdata,
                 inScheme,
                 counter,
                 outZ1,
