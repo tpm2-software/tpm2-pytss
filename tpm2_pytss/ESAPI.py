@@ -829,6 +829,11 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(keyHandle, "keyHandle")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
         zPoint = ffi.new("TPM2B_ECC_POINT **")
         pubPoint = ffi.new("TPM2B_ECC_POINT **")
         _chkrc(
