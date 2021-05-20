@@ -518,6 +518,15 @@ class TestEsys(TSS2_EsapiTest):
         childHandle = self.ectx.Load(parentHandle, priv, pub)
         self.assertTrue(childHandle)
 
+        with self.assertRaises(TypeError):
+            self.ectx.Load(42.5, priv, pub)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Load(parentHandle, TPM2B_DATA(), pub)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Load(parentHandle, priv, object())
+
     def test_readpublic(self):
 
         inSensitive = TPM2B_SENSITIVE_CREATE(

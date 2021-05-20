@@ -330,6 +330,14 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(parentHandle, "parentHandle")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        inPublic_cdata = get_cdata(inPublic, TPM2B_PUBLIC, "inPublic")
+        inPrivate_cdata = get_cdata(inPrivate, TPM2B_PRIVATE, "inPrivate")
+
         objectHandle = ffi.new("ESYS_TR *")
         _chkrc(
             lib.Esys_Load(
@@ -338,8 +346,8 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                inPrivate._cdata,
-                inPublic._cdata,
+                inPrivate_cdata,
+                inPublic_cdata,
                 objectHandle,
             )
         )
