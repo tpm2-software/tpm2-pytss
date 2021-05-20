@@ -1260,6 +1260,8 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
+        check_friendly_int(hierarchy, "hierarchy", ESYS_TR)
+
         buffer_cdata = get_cdata(buffer, TPM2B_MAX_BUFFER, "buffer", allow_none=True)
 
         result = ffi.new("TPM2B_DIGEST **")
