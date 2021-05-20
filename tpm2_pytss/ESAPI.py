@@ -400,6 +400,11 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(objectHandle, "objectHandle")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
         outPublic = ffi.new("TPM2B_PUBLIC **")
         name = ffi.new("TPM2B_NAME **")
         qualifiedName = ffi.new("TPM2B_NAME **")
