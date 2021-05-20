@@ -475,6 +475,15 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(handle, "handle")
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        credential_cdata = get_cdata(credential, TPM2B_DIGEST, "credential")
+        objectName_cdata = get_cdata(objectName, TPM2B_NAME, "objectName")
+
         credentialBlob = ffi.new("TPM2B_ID_OBJECT **")
         secret = ffi.new("TPM2B_ENCRYPTED_SECRET **")
         _chkrc(
@@ -484,8 +493,8 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                credential._cdata,
-                objectName._cdata,
+                credential_cdata,
+                objectName_cdata,
                 credentialBlob,
                 secret,
             )
