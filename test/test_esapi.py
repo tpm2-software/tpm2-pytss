@@ -2117,7 +2117,19 @@ class TestEsys(TSS2_EsapiTest):
             self.ectx.Rewrap(primary2, primary1, duplicate, TPM2B_PRIVATE(), symSeed)
 
         with self.assertRaises(TypeError):
-            self.ectx.Rewrap(primary2, primary1, duplicate, keyName, TPMT_PUBLIC())
+            self.ectx.Rewrap(
+                primary2, primary1, duplicate, keyName, symSeed, session1="goo"
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.Rewrap(
+                primary2, primary1, duplicate, keyName, symSeed, session2=45.6
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.Rewrap(
+                primary2, primary1, duplicate, keyName, symSeed, sesion3=object()
+            )
 
     def test_Import(self):
 
