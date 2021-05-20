@@ -1539,6 +1539,21 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.HashSequenceStart(b"1234", TPM2_ALG.SHA256, session3=TPM2B_DATA())
 
+        with self.assertRaises(TypeError):
+            self.ectx.SequenceUpdate(56.7, "here is some data")
+
+        with self.assertRaises(TypeError):
+            self.ectx.SequenceUpdate(seqHandle, [])
+
+        with self.assertRaises(TypeError):
+            self.ectx.SequenceUpdate(seqHandle, "here is some data", sequence1="foo")
+
+        with self.assertRaises(TypeError):
+            self.ectx.SequenceUpdate(seqHandle, "here is some data", sequence2=object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.SequenceUpdate(seqHandle, "here is some data", sequence3=78.23)
+
     def test_EventSequenceComplete(self):
 
         seqHandle = self.ectx.HashSequenceStart(TPM2B_AUTH(b"1234"), TPM2_ALG.NULL)
