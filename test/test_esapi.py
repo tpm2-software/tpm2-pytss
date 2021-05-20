@@ -762,6 +762,18 @@ class TestEsys(TSS2_EsapiTest):
         secret = self.ectx.Unseal(childHandle)
         self.assertEqual(bytes(secret), b"sealedsecret")
 
+        with self.assertRaises(TypeError):
+            self.ectx.Unseal(45.2)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Unseal(childHandle, session1=object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.Unseal(childHandle, session2=67.4)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Unseal(childHandle, session3="bar")
+
     def test_objectChangeAuth(self):
 
         inSensitive = TPM2B_SENSITIVE_CREATE(
