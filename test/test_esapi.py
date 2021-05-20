@@ -1067,7 +1067,7 @@ class TestEsys(TSS2_EsapiTest):
         inPublic = TPM2B_PUBLIC(TPMT_PUBLIC.parse(alg=alg, objectAttributes=attrs))
         inSensitive = TPM2B_SENSITIVE_CREATE(TPMS_SENSITIVE_CREATE())
 
-        eccHandle, outPublic, _, _, _ = self.ectx.CreatePrimary(inSensitive, inPublic,)
+        eccHandle, outPublic, _, _, _ = self.ectx.CreatePrimary(inSensitive, inPublic)
 
         curveId = TPM2_ECC.NIST_P256
 
