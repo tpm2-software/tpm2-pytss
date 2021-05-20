@@ -533,8 +533,15 @@ class ESAPI:
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
-        if isinstance(newAuth, (str, bytes)):
-            newAuth = TPM2B_AUTH(newAuth)
+
+        check_handle_type(objectHandle, "objectHandle")
+        check_handle_type(parentHandle, "parentHandle")
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        newAuth_cdata = get_cdata(newAuth, TPM2B_AUTH, "newAuth")
 
         outPrivate = ffi.new("TPM2B_PRIVATE **")
         _chkrc(
@@ -545,7 +552,7 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                newAuth._cdata,
+                newAuth_cdata,
                 outPrivate,
             )
         )
