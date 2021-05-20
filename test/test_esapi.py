@@ -574,7 +574,78 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.ReadPublic(childHandle, session3=42.5)
 
-    def test_makecredential(self):
+    def test_MakeCredential(self):
+
+        inSensitive = TPM2B_SENSITIVE_CREATE(
+            TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
+        )
+
+        parentHandle, _, _, _, _ = self.ectx.CreatePrimary(
+            inSensitive, "rsa2048:aes128cfb"
+        )
+
+        alg = "rsa2048"
+        attrs = (
+            TPMA_OBJECT.RESTRICTED
+            | TPMA_OBJECT.DECRYPT
+            | TPMA_OBJECT.USERWITHAUTH
+            | TPMA_OBJECT.SENSITIVEDATAORIGIN
+        )
+        childInPublic = TPM2B_PUBLIC(TPMT_PUBLIC.parse(alg=alg, objectAttributes=attrs))
+        childInSensitive = TPM2B_SENSITIVE_CREATE(
+            TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("childpassword"))
+        )
+
+        priv, pub, _, _, _ = self.ectx.Create(
+            parentHandle, childInSensitive, childInPublic
+        )
+
+        childHandle = self.ectx.Load(parentHandle, priv, pub)
+
+        primaryKeyName = self.ectx.ReadPublic(parentHandle)[1]
+
+        credential = TPM2B_DIGEST("this is my credential")
+
+        # this can be done without a key as in tpm2-tools project, but for simpplicity
+        # use the TPM command, which uses the PUBLIC portion of the object and thus
+        # needs no auth.
+        credentialBlob, secret = self.ectx.MakeCredential(
+            childHandle, credential, primaryKeyName
+        )
+        self.assertEqual(type(credentialBlob), TPM2B_ID_OBJECT)
+        self.assertEqual(type(secret), TPM2B_ENCRYPTED_SECRET)
+
+        credentialBlob, secret = self.ectx.MakeCredential(
+            childHandle, "this is my credential", bytes(primaryKeyName)
+        )
+        self.assertEqual(type(credentialBlob), TPM2B_ID_OBJECT)
+        self.assertEqual(type(secret), TPM2B_ENCRYPTED_SECRET)
+
+        with self.assertRaises(TypeError):
+            self.ectx.MakeCredential(42.5, credential, primaryKeyName)
+
+        with self.assertRaises(TypeError):
+            self.ectx.MakeCredential(childHandle, object(), primaryKeyName)
+
+        with self.assertRaises(TypeError):
+            self.ectx.MakeCredential(childHandle, credential, object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.MakeCredential(
+                childHandle, credential, primaryKeyName, session1="bar"
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.MakeCredential(
+                childHandle, credential, primaryKeyName, session2=54.6
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.MakeCredential(
+                childHandle, credential, primaryKeyName, session3=object()
+            )
+
+    def test_ActivateCredential(self):
 
         inSensitive = TPM2B_SENSITIVE_CREATE(
             TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
