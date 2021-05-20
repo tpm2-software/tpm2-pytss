@@ -173,6 +173,10 @@ class ESAPI:
         self, session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE
     ):
 
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
         outData = ffi.new("TPM2B_MAX_BUFFER **")
         testResult = ffi.new("TPM2_RC *")
         _chkrc(

@@ -202,11 +202,17 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.IncrementalSelfTest(algs)
         toDo, rc = self.ectx.GetTestResult()
-        self.assertTrue(
-            isinstance(toDo, TPM2B_MAX_BUFFER),
-            f"Expected TODO list to be TPM2B_MAX_BUFFER, got: {type(toDo)}",
-        )
+        self.assertEqual(type(toDo), TPM2B_MAX_BUFFER)
         self.assertEqual(rc, TPM2_RC.SUCCESS)
+
+        with self.assertRaises(TypeError):
+            self.ectx.GetTestResult(session1=45.7)
+
+        with self.assertRaises(TypeError):
+            self.ectx.GetTestResult(session2=TPM2B_DATA())
+
+        with self.assertRaises(TypeError):
+            self.ectx.GetTestResult(session3=object())
 
     def test_hmac_session(self):
 
