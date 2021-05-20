@@ -2233,6 +2233,21 @@ class TestEsys(TSS2_EsapiTest):
                 primary1, encryptionKey, pub, duplicate, symSeed, TPM2B_PUBLIC()
             )
 
+        with self.assertRaises(TypeError):
+            self.ectx.Import(
+                primary1, encryptionKey, pub, duplicate, symSeed, sym, session1="boo"
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.Import(
+                primary1, encryptionKey, pub, duplicate, symSeed, sym, session2=object()
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.Import(
+                primary1, encryptionKey, pub, duplicate, symSeed, sym, session3=4.5
+            )
+
     def test_Quote(self):
 
         inPublic = TPM2B_PUBLIC(
