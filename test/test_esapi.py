@@ -1574,6 +1574,33 @@ class TestEsys(TSS2_EsapiTest):
         )
         self.assertEqual(type(pcrs), TPML_DIGEST_VALUES)
 
+        with self.assertRaises(TypeError):
+            self.ectx.EventSequenceComplete(object(), seqHandle, None)
+
+        with self.assertRaises(ValueError):
+            self.ectx.EventSequenceComplete(42, seqHandle, None)
+
+        with self.assertRaises(TypeError):
+            self.ectx.EventSequenceComplete(ESYS_TR.PCR16, 46.5, None)
+
+        with self.assertRaises(TypeError):
+            self.ectx.EventSequenceComplete(ESYS_TR.PCR16, seqHandle, object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.EventSequenceComplete(
+                ESYS_TR.PCR16, seqHandle, None, sequence1=67.34
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.EventSequenceComplete(
+                ESYS_TR.PCR16, seqHandle, None, sequence2="boo"
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.EventSequenceComplete(
+                ESYS_TR.PCR16, seqHandle, None, sequence3=object()
+            )
+
     def test_ContextSave_ContextLoad(self):
         inPublic = TPM2B_PUBLIC(
             TPMT_PUBLIC.parse(
