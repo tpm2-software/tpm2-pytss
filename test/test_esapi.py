@@ -1521,6 +1521,24 @@ class TestEsys(TSS2_EsapiTest):
         d = bytes(digest)
         self.assertEqual(e, d)
 
+        with self.assertRaises(TypeError):
+            self.ectx.HashSequenceStart(object(), TPM2_ALG.SHA256)
+
+        with self.assertRaises(TypeError):
+            self.ectx.HashSequenceStart(b"1234", "dssdf")
+
+        with self.assertRaises(ValueError):
+            self.ectx.HashSequenceStart(b"1234", 42)
+
+        with self.assertRaises(TypeError):
+            self.ectx.HashSequenceStart(b"1234", TPM2_ALG.SHA256, session1="baz")
+
+        with self.assertRaises(TypeError):
+            self.ectx.HashSequenceStart(b"1234", TPM2_ALG.SHA256, session2=56.7)
+
+        with self.assertRaises(TypeError):
+            self.ectx.HashSequenceStart(b"1234", TPM2_ALG.SHA256, session3=TPM2B_DATA())
+
     def test_EventSequenceComplete(self):
 
         seqHandle = self.ectx.HashSequenceStart(TPM2B_AUTH(b"1234"), TPM2_ALG.NULL)
