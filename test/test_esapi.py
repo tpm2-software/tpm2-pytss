@@ -2101,23 +2101,76 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(type(signature), TPMT_SIGNATURE)
 
         with self.assertRaises(TypeError):
-            certifyInfo, signature = self.ectx.Certify(
-                TPM2B_ATTEST(), eccHandle, qualifyingData, inScheme
+            self.ectx.CertifyCreation(
+                45.6, eccHandle, qualifyingData, creationHash, inScheme, creationTicket
             )
 
         with self.assertRaises(TypeError):
-            certifyInfo, signature = self.ectx.Certify(
-                eccHandle, 2.0, qualifyingData, inScheme
+            self.ectx.CertifyCreation(
+                eccHandle,
+                object(),
+                qualifyingData,
+                creationHash,
+                inScheme,
+                creationTicket,
             )
 
         with self.assertRaises(TypeError):
-            certifyInfo, signature = self.ectx.Certify(
-                eccHandle, eccHandle, TPM2B_PUBLIC(), inScheme
+            self.ectx.CertifyCreation(
+                eccHandle,
+                eccHandle,
+                TPM2B_PUBLIC(),
+                creationHash,
+                inScheme,
+                creationTicket,
             )
 
         with self.assertRaises(TypeError):
-            certifyInfo, signature = self.ectx.Certify(
-                eccHandle, eccHandle, qualifyingData, TPM2B_PRIVATE()
+            self.ectx.CertifyCreation(
+                eccHandle, eccHandle, qualifyingData, object(), inScheme, creationTicket
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.CertifyCreation(
+                eccHandle, eccHandle, qualifyingData, creationHash, [], creationTicket
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.CertifyCreation(
+                eccHandle, eccHandle, qualifyingData, creationHash, inScheme, 56.7
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.CertifyCreation(
+                eccHandle,
+                eccHandle,
+                qualifyingData,
+                creationHash,
+                inScheme,
+                creationTicket,
+                session1=56.7,
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.CertifyCreation(
+                eccHandle,
+                eccHandle,
+                qualifyingData,
+                creationHash,
+                inScheme,
+                creationTicket,
+                session2=object(),
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.CertifyCreation(
+                eccHandle,
+                eccHandle,
+                qualifyingData,
+                creationHash,
+                inScheme,
+                creationTicket,
+                session3="baz",
             )
 
     def test_Vendor_TCG_Test(self):
