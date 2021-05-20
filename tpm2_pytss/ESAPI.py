@@ -881,6 +881,12 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        check_friendly_int(curveID, "curveID", TPM2_ECC_CURVE)
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
         parameters = ffi.new("TPMS_ALGORITHM_DETAIL_ECC **")
         _chkrc(
             lib.Esys_ECC_Parameters(
