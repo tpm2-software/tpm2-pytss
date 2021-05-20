@@ -1052,7 +1052,22 @@ class TestEsys(TSS2_EsapiTest):
     def test_ECC_Parameters(self):
 
         params = self.ectx.ECC_Parameters(TPM2_ECC_CURVE.NIST_P256)
-        self.assertNotEqual(params, None)
+        self.assertEqual(type(params), TPMS_ALGORITHM_DETAIL_ECC)
+
+        with self.assertRaises(ValueError):
+            self.ectx.ECC_Parameters(42)
+
+        with self.assertRaises(TypeError):
+            self.ectx.ECC_Parameters(TPM2B_DATA())
+
+        with self.assertRaises(TypeError):
+            self.ectx.ECC_Parameters(TPM2_ECC_CURVE.NIST_P256, session1="foo")
+
+        with self.assertRaises(TypeError):
+            self.ectx.ECC_Parameters(TPM2_ECC_CURVE.NIST_P256, session2=object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.ECC_Parameters(TPM2_ECC_CURVE.NIST_P256, session3=TPM2B_DATA())
 
     def test_ZGen_2Phase(self):
 
