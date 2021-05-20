@@ -155,10 +155,16 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        toTest_cdata = get_cdata(toTest, TPML_ALG, "toTest")
+
         toDoList = ffi.new("TPML_ALG **")
         _chkrc(
             lib.Esys_IncrementalSelfTest(
-                self.ctx, session1, session2, session3, toTest._cdata, toDoList
+                self.ctx, session1, session2, session3, toTest_cdata, toDoList
             )
         )
         return TPML_ALG(get_ptr(toDoList))

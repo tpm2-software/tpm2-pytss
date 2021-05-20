@@ -181,6 +181,22 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.IncrementalSelfTest(algs)
 
+        self.ectx.IncrementalSelfTest("rsa,ecc,xor,aes,cbc")
+
+        with self.assertRaises(TypeError):
+            self.ectx.IncrementalSelfTest(None)
+        with self.assertRaises(TypeError):
+            self.ectx.IncrementalSelfTest(object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.IncrementalSelfTest(session1=45.9)
+
+        with self.assertRaises(TypeError):
+            self.ectx.IncrementalSelfTest(session2=object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.IncrementalSelfTest(session3=TPM2B_PUBLIC())
+
     def test_incremental_resume_test(self):
         algs = TPML_ALG.parse("rsa,ecc,xor,aes,cbc")
 
