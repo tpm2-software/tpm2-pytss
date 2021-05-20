@@ -620,6 +620,37 @@ class TestEsys(TSS2_EsapiTest):
         )
         self.assertEqual(bytes(certInfo), b"this is my credential")
 
+        with self.assertRaises(TypeError):
+            self.ectx.ActivateCredential(object(), childHandle, credentialBlob, secret)
+
+        with self.assertRaises(TypeError):
+            self.ectx.ActivateCredential(parentHandle, 76.4, credentialBlob, secret)
+
+        with self.assertRaises(TypeError):
+            self.ectx.ActivateCredential(
+                parentHandle, childHandle, TPM2B_PUBLIC(), secret
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.ActivateCredential(
+                parentHandle, childHandle, credentialBlob, object()
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.ActivateCredential(
+                parentHandle, childHandle, credentialBlob, secret, session1="foo"
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.ActivateCredential(
+                parentHandle, childHandle, credentialBlob, secret, session2=object()
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.ActivateCredential(
+                parentHandle, childHandle, credentialBlob, secret, session3=65.4
+            )
+
     def test_unseal(self):
 
         inSensitive = TPM2B_SENSITIVE_CREATE(
