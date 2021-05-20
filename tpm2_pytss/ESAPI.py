@@ -1003,6 +1003,20 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(keyHandle, "keyHandle")
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        check_friendly_int(mode, "mode", TPM2_ALG)
+
+        ivIn_cdata = get_cdata(ivIn, TPM2B_IV, "ivIn")
+        inData_cdata = get_cdata(inData, TPM2B_MAX_BUFFER, "inData")
+
+        if not isinstance(decrypt, bool):
+            raise TypeError("Expected decrypt to be type bool, got {type(decrypt)}")
+
         outData = ffi.new("TPM2B_MAX_BUFFER **")
         ivOut = ffi.new("TPM2B_IV **")
         _chkrc(
@@ -1012,10 +1026,10 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                inData._cdata,
+                inData_cdata,
                 decrypt,
                 mode,
-                ivIn._cdata,
+                ivIn_cdata,
                 outData,
                 ivOut,
             )
@@ -1032,8 +1046,13 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
-        if isinstance(data, (bytes, str)):
-            data = TPM2B_MAX_BUFFER(data)
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        check_friendly_int(hashAlg, "hashAlg", TPM2_ALG)
+
+        data_cdata = get_cdata(data, TPM2B_MAX_BUFFER, "data")
 
         outHash = ffi.new("TPM2B_DIGEST **")
         validation = ffi.new("TPMT_TK_HASHCHECK **")
@@ -1043,7 +1062,7 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                data._cdata,
+                data_cdata,
                 hashAlg,
                 hierarchy,
                 outHash,
