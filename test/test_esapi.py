@@ -816,13 +816,13 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.ObjectChangeAuth(childHandle, parentHandle, "yetanotherone")
 
-        with self.assertEqual(TypeError):
+        with self.assertRaises(TypeError):
             self.ectx.ObjectChangeAuth("bad", parentHandle, "yetanotherone")
 
-        with self.assertEqual(TypeError):
+        with self.assertRaises(TypeError):
             self.ectx.ObjectChangeAuth(childHandle, 56.7, "yetanotherone")
 
-        with self.assertEqual(TypeError):
+        with self.assertRaises(TypeError):
             self.ectx.ObjectChangeAuth(childHandle, parentHandle, object())
 
     def test_createloaded(self):
