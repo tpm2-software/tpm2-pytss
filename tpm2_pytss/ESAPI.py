@@ -1139,11 +1139,14 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
-        if isinstance(inData, (bytes, str)):
-            inData = TPM2B_SENSITIVE_DATA(inData)
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        inData_cdata = get_cdata(inData, TPM2B_SENSITIVE_DATA, "inData")
 
         _chkrc(
-            lib.Esys_StirRandom(self.ctx, session1, session2, session3, inData._cdata)
+            lib.Esys_StirRandom(self.ctx, session1, session2, session3, inData_cdata)
         )
 
     def HMAC_Start(
