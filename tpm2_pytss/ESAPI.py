@@ -1197,10 +1197,16 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
-        if isinstance(auth, (str, bytes)):
-            auth = TPM2B_AUTH(auth)
-        elif auth is None:
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        check_friendly_int(hashAlg, "hashAlg", TPM2_ALG)
+
+        if auth is None:
             auth = TPM2B_AUTH()
+
+        auth_cdata = get_cdata(auth, TPM2B_AUTH, "auth")
 
         sequenceHandle = ffi.new("ESYS_TR *")
         _chkrc(
@@ -1209,7 +1215,7 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                auth._cdata,
+                auth_cdata,
                 hashAlg,
                 sequenceHandle,
             )
