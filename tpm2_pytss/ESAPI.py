@@ -1113,6 +1113,15 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        if not isinstance(bytesRequested, int):
+            raise TypeError(
+                f"Expected bytesRequested type to be int, got {type(bytesRequested)}"
+            )
+
         randomBytes = ffi.new("TPM2B_DIGEST **")
         _chkrc(
             lib.Esys_GetRandom(

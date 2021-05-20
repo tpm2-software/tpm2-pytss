@@ -14,6 +14,18 @@ class TestEsys(TSS2_EsapiTest):
         r = self.ectx.GetRandom(5)
         self.assertEqual(len(r), 5)
 
+        with self.assertRaises(TypeError):
+            self.ectx.GetRandom("foo")
+
+        with self.assertRaises(TypeError):
+            self.ectx.GetRandom(5, session1="baz")
+
+        with self.assertRaises(TypeError):
+            self.ectx.GetRandom(5, session2=object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.GetRandom(5, session3=56.7)
+
     def testCreatePrimary(self):
         inSensitive = TPM2B_SENSITIVE_CREATE()
         inPublic = TPM2B_PUBLIC()
