@@ -847,8 +847,31 @@ class TestEsys(TSS2_EsapiTest):
             parentHandle, childInSensitive, childInPublic
         )
         self.assertNotEqual(childHandle, 0)
-        self.assertNotEqual(priv, None)
-        self.assertNotEqual(pub, None)
+        self.assertEqual(type(priv), TPM2B_PRIVATE)
+        self.assertEqual(type(pub), TPM2B_PUBLIC)
+
+        childHandle, priv, pub = self.ectx.CreateLoaded(parentHandle, childInSensitive)
+        self.assertNotEqual(childHandle, 0)
+        self.assertEqual(type(priv), TPM2B_PRIVATE)
+        self.assertEqual(type(pub), TPM2B_PUBLIC)
+
+        with self.assertRaises(TypeError):
+            self.ectx.CreateLoaded(65.4, childInSensitive, childInPublic)
+
+        with self.assertRaises(TypeError):
+            self.ectx.CreateLoaded(parentHandle, "1223", childInPublic)
+
+        with self.assertRaises(TypeError):
+            self.ectx.CreateLoaded(parentHandle, childInSensitive, object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.CreateLoaded(parentHandle, childInSensitive, session1=56.7)
+
+        with self.assertRaises(TypeError):
+            self.ectx.CreateLoaded(parentHandle, childInSensitive, session2=b"baz")
+
+        with self.assertRaises(TypeError):
+            self.ectx.CreateLoaded(parentHandle, childInSensitive, session3=object())
 
     def test_rsa_enc_dec(self):
 
