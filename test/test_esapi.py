@@ -816,6 +816,15 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.ObjectChangeAuth(childHandle, parentHandle, "yetanotherone")
 
+        with self.assertEqual(TypeError):
+            self.ectx.ObjectChangeAuth("bad", parentHandle, "yetanotherone")
+
+        with self.assertEqual(TypeError):
+            self.ectx.ObjectChangeAuth(childHandle, 56.7, "yetanotherone")
+
+        with self.assertEqual(TypeError):
+            self.ectx.ObjectChangeAuth(childHandle, parentHandle, object())
+
     def test_createloaded(self):
 
         inSensitive = TPM2B_SENSITIVE_CREATE(
