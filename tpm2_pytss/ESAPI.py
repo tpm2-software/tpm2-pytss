@@ -852,6 +852,13 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(keyHandle, "keyHandle")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        inPoint_cdata = get_cdata(inPoint, TPM2B_ECC_POINT, "inPoint")
+
         outPoint = ffi.new("TPM2B_ECC_POINT **")
         _chkrc(
             lib.Esys_ECDH_ZGen(
@@ -860,7 +867,7 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                inPoint._cdata,
+                inPoint_cdata,
                 outPoint,
             )
         )
