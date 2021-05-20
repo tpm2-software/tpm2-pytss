@@ -163,7 +163,31 @@ class CryptoTest(TSS2_EsapiTest):
 
         priv = types.TPM2B_SENSITIVE.fromPEM(rsa_private_key)
 
-        self.ectx.LoadExternal(priv, pub, types.ESYS_TR.RH_NULL)
+        # test without Hierarchy
+        handle = self.ectx.LoadExternal(priv, pub)
+        self.assertNotEqual(handle, 0)
+
+        # negative test
+        with self.assertRaises(TypeError):
+            self.ectx.LoadExternal(TPM2B_PUBLIC(), pub)
+
+        with self.assertRaises(TypeError):
+            self.ectx.LoadExternal(priv, priv)
+
+        with self.assertRaises(ValueError):
+            self.ectx.LoadExternal(priv, pub, 7467644)
+
+        with self.assertRaises(TypeError):
+            self.ectx.LoadExternal(priv, pub, object)
+
+        with self.assertRaises(TypeError):
+            self.ectx.LoadExternal(priv, pub, session1=76.5)
+
+        with self.assertRaises(TypeError):
+            self.ectx.LoadExternal(priv, pub, session2=object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.LoadExternal(priv, pub, session3=TPM2B_PUBLIC())
 
     def test_public_from_pem_ecc(self):
         pub = types.TPM2B_PUBLIC()

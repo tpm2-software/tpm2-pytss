@@ -358,15 +358,24 @@ class ESAPI:
         self,
         inPrivate,
         inPublic,
-        hierarchy,
+        hierarchy=ESYS_TR.NULL,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
+
+        check_friendly_int(hierarchy, "hierarchy", ESYS_TR)
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
         inPrivate_cdata = get_cdata(
             inPrivate, TPM2B_SENSITIVE, "inPrivate", allow_none=True
         )
+
         inPublic_cdata = get_cdata(inPublic, TPM2B_PUBLIC, "inPublic")
+
         objectHandle = ffi.new("ESYS_TR *")
         _chkrc(
             lib.Esys_LoadExternal(
