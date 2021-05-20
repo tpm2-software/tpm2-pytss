@@ -2754,8 +2754,18 @@ class TestEsys(TSS2_EsapiTest):
 
         with self.assertRaises(TypeError):
             self.ectx.Quote(parentHandle, "sha256:1,2,3,4", qualifyingData=object())
+
         with self.assertRaises(TypeError):
             self.ectx.Quote(parentHandle, "sha256:1,2,3,4", inScheme=87)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Quote(parentHandle, "sha256:1,2,3,4", session1="foo")
+
+        with self.assertRaises(TypeError):
+            self.ectx.Quote(parentHandle, "sha256:1,2,3,4", session2=25.68)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Quote(parentHandle, "sha256:1,2,3,4", session3=object())
 
 
 if __name__ == "__main__":
