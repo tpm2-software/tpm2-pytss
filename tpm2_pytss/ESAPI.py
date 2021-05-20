@@ -1232,14 +1232,16 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
-        if isinstance(buffer, (str, bytes)):
-            buffer = TPM2B_MAX_BUFFER(buffer)
-        elif buffer is None:
-            buffer = TPM2B_MAX_BUFFER()
+        check_handle_type(sequenceHandle, "sequenceHandle")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        buffer_cdata = get_cdata(buffer, TPM2B_MAX_BUFFER, "buffer", allow_none=True)
 
         _chkrc(
             lib.Esys_SequenceUpdate(
-                self.ctx, sequenceHandle, session1, session2, session3, buffer._cdata
+                self.ctx, sequenceHandle, session1, session2, session3, buffer_cdata
             )
         )
 
