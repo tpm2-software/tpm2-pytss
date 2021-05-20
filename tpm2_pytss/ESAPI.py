@@ -242,13 +242,25 @@ class ESAPI:
         self,
         parentHandle,
         inSensitive,
-        inPublic,
-        outsideInfo,
-        creationPCR,
+        inPublic="rsa2048",
+        outsideInfo=TPM2B_DATA(),
+        creationPCR=TPML_PCR_SELECTION(),
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
+
+        check_handle_type(parentHandle, "parentHandle")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        inPublic_cdata = get_cdata(inPublic, TPM2B_PUBLIC, "inPublic")
+        inSensitive_cdata = get_cdata(
+            inSensitive, TPM2B_SENSITIVE_CREATE, "inSensitive"
+        )
+        outsideInfo_cdata = get_cdata(outsideInfo, TPM2B_DATA, "outsideInfo")
+        creationPCR_cdata = get_cdata(creationPCR, TPML_PCR_SELECTION, "creationPCR")
 
         outPrivate = ffi.new("TPM2B_PRIVATE **")
         outPublic = ffi.new("TPM2B_PUBLIC **")
@@ -262,10 +274,10 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                inSensitive._cdata,
-                inPublic._cdata,
-                outsideInfo._cdata,
-                creationPCR._cdata,
+                inSensitive_cdata,
+                inPublic_cdata,
+                outsideInfo_cdata,
+                creationPCR_cdata,
                 outPrivate,
                 outPublic,
                 creationData,
