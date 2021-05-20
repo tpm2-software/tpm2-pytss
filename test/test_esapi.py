@@ -1463,6 +1463,27 @@ class TestEsys(TSS2_EsapiTest):
 
         self.assertEqual(len(digest), 32)
 
+        with self.assertRaises(TypeError):
+            self.ectx.HMAC_Start(45.6, "1234", TPM2_ALG.SHA256)
+
+        with self.assertRaises(TypeError):
+            self.ectx.HMAC_Start(handle, dict(), TPM2_ALG.SHA256)
+
+        with self.assertRaises(TypeError):
+            self.ectx.HMAC_Start(handle, "1234", object())
+
+        with self.assertRaises(ValueError):
+            self.ectx.HMAC_Start(handle, "1234", 42)
+
+        with self.assertRaises(TypeError):
+            self.ectx.HMAC_Start(handle, "1234", TPM2_ALG.SHA256, session1="baz")
+
+        with self.assertRaises(TypeError):
+            self.ectx.HMAC_Start(handle, "1234", TPM2_ALG.SHA256, session2=object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.HMAC_Start(handle, "1234", TPM2_ALG.SHA256, session3=45.6)
+
     def test_HashSequence(self):
 
         seqHandle = self.ectx.HashSequenceStart(None, TPM2_ALG.SHA256)
