@@ -1364,6 +1364,27 @@ class TestEsys(TSS2_EsapiTest):
         self.assertNotEqual(hmac, None)
         self.assertEqual(len(bytes(hmac)), 32)
 
+        with self.assertRaises(TypeError):
+            self.ectx.HMAC(45.6, inData, TPM2_ALG.SHA256)
+
+        with self.assertRaises(TypeError):
+            self.ectx.HMAC(primaryHandle, object(), TPM2_ALG.SHA256)
+
+        with self.assertRaises(TypeError):
+            self.ectx.HMAC(primaryHandle, inData, "baz")
+
+        with self.assertRaises(ValueError):
+            self.ectx.HMAC(primaryHandle, inData, 42)
+
+        with self.assertRaises(TypeError):
+            self.ectx.HMAC(primaryHandle, inData, TPM2_ALG.SHA256, session1=object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.HMAC(primaryHandle, inData, TPM2_ALG.SHA256, session2="object")
+
+        with self.assertRaises(TypeError):
+            self.ectx.HMAC(primaryHandle, inData, TPM2_ALG.SHA256, session3=45.6)
+
     def test_StirRandom(self):
 
         self.ectx.StirRandom(b"1234")

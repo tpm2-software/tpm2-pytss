@@ -1081,8 +1081,14 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
-        if isinstance(buffer, (bytes, str)):
-            buffer = TPM2B_MAX_BUFFER(buffer)
+        check_handle_type(handle, "handle")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        check_friendly_int(hashAlg, "hashAlg", TPM2_ALG)
+
+        buffer_cdata = get_cdata(buffer, TPM2B_MAX_BUFFER, "buffer")
 
         outHMAC = ffi.new("TPM2B_DIGEST **")
         _chkrc(
@@ -1092,7 +1098,7 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                buffer._cdata,
+                buffer_cdata,
                 hashAlg,
                 outHMAC,
             )
