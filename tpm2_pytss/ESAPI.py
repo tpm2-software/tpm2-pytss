@@ -199,12 +199,19 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
-        if nonceCaller is None:
-            nonceCaller = ffi.NULL
-        elif isinstance(nonceCaller, TPM2B_NONCE):
-            nonceCaller = nonceCaller._cdata
-        else:
-            raise TypeError("Expected nonceCaller to be None or TPM2B_NONCE")
+        check_handle_type(tpmKey, "tpmKey")
+        check_handle_type(bind, "bind")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        check_friendly_int(sessionType, "sessionType", TPM2_SE)
+        check_friendly_int(authHash, "authHash", TPM2_ALG)
+
+        nonceCaller_cdata = get_cdata(
+            nonceCaller, TPM2B_NONCE, "nonceCaller", allow_none=True
+        )
+        symmetric_cdata = get_cdata(symmetric, TPMT_SYM_DEF, "symmetric")
 
         sessionHandle = ffi.new("ESYS_TR *")
         _chkrc(
@@ -215,9 +222,9 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                nonceCaller,
+                nonceCaller_cdata,
                 sessionType,
-                symmetric._cdata,
+                symmetric_cdata,
                 authHash,
                 sessionHandle,
             )
