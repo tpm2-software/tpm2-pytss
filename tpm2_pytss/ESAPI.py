@@ -562,11 +562,25 @@ class ESAPI:
         self,
         parentHandle,
         inSensitive,
-        inPublic,
+        inPublic="rsa2048",
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
+
+        check_handle_type(parentHandle, "parentHandle")
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        if isinstance(inPublic, str):
+            inPublic = TPM2B_TEMPLATE(TPMT_PUBLIC.parse(inPublic).Marshal())
+
+        inSensitive_cdata = get_cdata(
+            inSensitive, TPM2B_SENSITIVE_CREATE, "inSensitive"
+        )
+        inPublic_cdata = get_cdata(inPublic, TPM2B_TEMPLATE, "inPublic")
 
         objectHandle = ffi.new("ESYS_TR *")
         outPrivate = ffi.new("TPM2B_PRIVATE **")
@@ -578,8 +592,8 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                inSensitive._cdata,
-                inPublic._cdata,
+                inSensitive_cdata,
+                inPublic_cdata,
                 objectHandle,
                 outPrivate,
                 outPublic,
