@@ -903,6 +903,50 @@ class TestEsys(TSS2_EsapiTest):
 
         self.assertEqual(bytes(message), bytes(message2))
 
+        outData = self.ectx.RSA_Encrypt(childHandle, "hello world", scheme)
+
+        message2 = self.ectx.RSA_Decrypt(childHandle, outData, scheme)
+
+        self.assertEqual(bytes(message), bytes(message2))
+
+        # negative test RSA_Encrypt
+        with self.assertRaises(TypeError):
+            self.ectx.RSA_Encrypt(45.6, message, scheme)
+
+        with self.assertRaises(TypeError):
+            self.ectx.RSA_Encrypt(childHandle, TPM2B_PUBLIC(), scheme)
+
+        with self.assertRaises(TypeError):
+            self.ectx.RSA_Encrypt(childHandle, message, "foo")
+
+        with self.assertRaises(TypeError):
+            self.ectx.RSA_Encrypt(childHandle, message, scheme, session1=object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.RSA_Encrypt(childHandle, message, scheme, session2="foo")
+
+        with self.assertRaises(TypeError):
+            self.ectx.RSA_Encrypt(childHandle, message, scheme, session3=52.6)
+
+        # negative test RSA_Decrypt
+        with self.assertRaises(TypeError):
+            self.ectx.RSA_Decrypt(56.2, outData, scheme)
+
+        with self.assertRaises(TypeError):
+            self.ectx.RSA_Decrypt(childHandle, object(), scheme)
+
+        with self.assertRaises(TypeError):
+            self.ectx.RSA_Decrypt(childHandle, outData, TPM2_ALG.RSAES)
+
+        with self.assertRaises(TypeError):
+            self.ectx.RSA_Decrypt(childHandle, outData, scheme, session1=67.9)
+
+        with self.assertRaises(TypeError):
+            self.ectx.RSA_Decrypt(childHandle, outData, scheme, session2="foo")
+
+        with self.assertRaises(TypeError):
+            self.ectx.RSA_Decrypt(childHandle, outData, scheme, session3=object())
+
     def test_rsa_enc_dec_with_label(self):
 
         inSensitive = TPM2B_SENSITIVE_CREATE(
