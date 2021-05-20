@@ -234,6 +234,16 @@ class ESAPI:
 
     def TRSess_SetAttributes(self, session, attributes, mask=0xFF):
 
+        check_handle_type(session, "session")
+
+        if not isinstance(attributes, int):
+            raise TypeError(
+                f"Expected attributes to be type int, got {type(attributes)}"
+            )
+
+        if not isinstance(mask, int):
+            raise TypeError(f"Expected mask to be type int, got {type(attributes)}")
+
         _chkrc(lib.Esys_TRSess_SetAttributes(self.ctx, session, attributes, mask))
 
     def PolicyRestart(

@@ -345,6 +345,41 @@ class TestEsys(TSS2_EsapiTest):
         random = self.ectx.GetRandom(4, session1=session)
         self.assertEqual(len(random), 4)
 
+    def test_TRSess_SetAttributes(self):
+
+        inSensitive = TPM2B_SENSITIVE_CREATE(
+            TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
+        )
+
+        handle, _, _, _, _ = self.ectx.CreatePrimary(inSensitive, "rsa2048:aes128cfb")
+
+        sym = TPMT_SYM_DEF(
+            algorithm=TPM2_ALG.XOR,
+            keyBits=TPMU_SYM_KEY_BITS(exclusiveOr=TPM2_ALG.SHA256),
+            mode=TPMU_SYM_MODE(aes=TPM2_ALG.CFB),
+        )
+
+        session = self.ectx.StartAuthSession(
+            tpmKey=handle,
+            bind=handle,
+            nonceCaller=None,
+            sessionType=TPM2_SE.POLICY,
+            symmetric=sym,
+            authHash=TPM2_ALG.SHA256,
+        )
+
+        self.ectx.TRSess_SetAttributes(
+            session, (TPMA_SESSION.ENCRYPT | TPMA_SESSION.DECRYPT)
+        )
+
+        with self.assertRaises(TypeError):
+            self.ectx.TRSess_SetAttributes(
+                object(), (TPMA_SESSION.ENCRYPT | TPMA_SESSION.DECRYPT)
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.TRSess_SetAttributes(session, 67.5)
+
     def test_start_authSession_noncecaller(self):
 
         inSensitive = TPM2B_SENSITIVE_CREATE(
