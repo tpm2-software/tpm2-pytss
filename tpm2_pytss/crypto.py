@@ -135,11 +135,11 @@ def private_from_encoding(data, obj):
     key = private_key_from_encoding(data)
     nums = key.private_numbers()
     if isinstance(key, rsa.RSAPrivateKey):
-        obj.sensitiveArea.sensitiveType = lib.TPM2_ALG_RSA
-        _int_to_buffer(nums.p, obj.sensitiveArea.sensitive.rsa)
+        obj.sensitiveType = lib.TPM2_ALG_RSA
+        _int_to_buffer(nums.p, obj.sensitive.rsa)
     elif isinstance(key, ec.EllipticCurvePrivateKey):
-        obj.sensitiveArea.sensitiveType = lib.TPM2_ALG_ECC
-        _int_to_buffer(nums.private_value, obj.sensitiveArea.sensitive.ecc)
+        obj.sensitiveType = lib.TPM2_ALG_ECC
+        _int_to_buffer(nums.private_value, obj.sensitive.ecc)
     else:
         raise RuntimeError(f"unsupported key type: {key.__class__.__name__}")
 
