@@ -8,6 +8,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa, ec
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.serialization import (
     load_pem_private_key,
+    load_der_private_key,
     load_pem_public_key,
     load_der_public_key,
     Encoding,
@@ -112,8 +113,26 @@ def public_from_encoding(data, obj):
         raise RuntimeError(f"unsupported key type: {key.__class__.__name__}")
 
 
-def private_from_pem(data, obj):
-    key = load_pem_private_key(data, None, backend=default_backend())
+def private_key_from_encoding(data):
+    sdata = data.strip()
+    key = None
+    if sdata.startswith(b"-----BEGIN RSA PRIVATE KEY-----") or sdata.startswith(
+        b"-----BEGIN EC PRIVATE KEY-----"
+    ):
+        key = load_pem_private_key(sdata, password=None)
+    else:
+        try:
+            key = load_der_private_key(data, password=None)
+        except ValueError:
+            pass
+
+    if key is None:
+        raise ValueError("Unsupported key format")
+    return key
+
+
+def private_from_encoding(data, obj):
+    key = private_key_from_encoding(data)
     nums = key.private_numbers()
     if isinstance(key, rsa.RSAPrivateKey):
         obj.sensitiveArea.sensitiveType = lib.TPM2_ALG_RSA

@@ -140,7 +140,7 @@ class CryptoTest(TSS2_EsapiTest):
 
     def test_private_from_pem_rsa(self):
         priv = types.TPM2B_SENSITIVE()
-        crypto.private_from_pem(rsa_private_key, priv)
+        crypto.private_from_encoding(rsa_private_key, priv)
 
         self.assertEqual(priv.sensitiveArea.sensitiveType, types.TPM2_ALG.RSA)
         self.assertEqual(
@@ -206,7 +206,7 @@ class CryptoTest(TSS2_EsapiTest):
 
     def test_private_from_pem_ecc(self):
         priv = types.TPM2B_SENSITIVE()
-        crypto.private_from_pem(ecc_private_key, priv)
+        crypto.private_from_encoding(ecc_private_key, priv)
 
         self.assertEqual(priv.sensitiveArea.sensitiveType, types.TPM2_ALG.ECC)
         self.assertEqual(
@@ -332,4 +332,27 @@ class CryptoTest(TSS2_EsapiTest):
         pub = TPMT_PUBLIC()
         with self.assertRaises(ValueError) as e:
             crypto.public_from_encoding(der, pub)
+        self.assertEqual(str(e.exception), "Unsupported key format")
+
+    def test_private_from_pem_rsa_der(self):
+        sl = rsa_private_key.strip().splitlines()
+        b64 = b"".join(sl[1:-1])
+        der = b64decode(b64)
+
+        sens = TPM2B_SENSITIVE()
+        crypto.private_from_encoding(der, sens)
+
+    def test_private_from_pem_ecc_der(self):
+        sl = ecc_private_key.strip().splitlines()
+        b64 = b"".join(sl[1:-1])
+        der = b64decode(b64)
+
+        sens = TPM2B_SENSITIVE()
+        crypto.private_from_encoding(der, sens)
+
+    def test_private_from_pem_bad_der(self):
+        der = b"" * 1024
+        pub = TPM2B_PUBLIC()
+        with self.assertRaises(ValueError) as e:
+            crypto.private_from_encoding(der, pub)
         self.assertEqual(str(e.exception), "Unsupported key format")
