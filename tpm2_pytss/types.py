@@ -1728,9 +1728,8 @@ class TPM2B_PUBLIC_KEY_RSA(TPM2B_SIMPLE_OBJECT):
 class TPM2B_SENSITIVE(TPM_OBJECT):
     @classmethod
     def fromPEM(cls, data):
-        p = cls()
-        private_from_encoding(data, p)
-        return p
+        p = TPMT_SENSITIVE.fromPEM(data)
+        return cls(sensitiveArea=p)
 
 
 class TPM2B_SENSITIVE_CREATE(TPM_OBJECT):
@@ -2115,7 +2114,11 @@ class TPMU_PUBLIC_ID(TPM_OBJECT):
 
 
 class TPMT_SENSITIVE(TPM_OBJECT):
-    pass
+    @classmethod
+    def fromPEM(cls, data):
+        p = cls()
+        private_from_encoding(data, p)
+        return p
 
 
 class TPMU_SENSITIVE_COMPOSITE(TPM_OBJECT):
