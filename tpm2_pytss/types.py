@@ -15,7 +15,7 @@ from tpm2_pytss.utils import (
 )
 from tpm2_pytss.crypto import (
     public_from_encoding,
-    private_from_pem,
+    private_from_encoding,
     public_to_pem,
     getname,
 )
@@ -1729,7 +1729,7 @@ class TPM2B_SENSITIVE(TPM_OBJECT):
     @classmethod
     def fromPEM(cls, data):
         p = cls()
-        private_from_pem(data, p)
+        private_from_encoding(data, p)
         return p
 
 
