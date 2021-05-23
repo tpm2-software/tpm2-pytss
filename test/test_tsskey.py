@@ -7,7 +7,7 @@ import itertools
 import unittest
 
 from tpm2_pytss import *
-from tpm2_pytss.tsskey import TSSPrivKey
+from tpm2_pytss.tsskey import TSSPrivKey, parent_rsa_template, parent_ecc_template
 from .TSS2_BaseTest import TSS2_EsapiTest
 
 
@@ -43,3 +43,27 @@ class TSSKeyTest(TSS2_EsapiTest):
     def test_create_load_ecc(self):
         key = TSSPrivKey.create_ecc(self.ectx)
         key.load(self.ectx)
+
+    def test_persistent_parent_rsa(self):
+        insens = TPM2B_SENSITIVE_CREATE()
+        inpublic = TPM2B_PUBLIC(publicArea=parent_rsa_template)
+        parent, _, _, _, _ = self.ectx.CreatePrimary(insens, inpublic)
+        phandle = self.ectx.EvictControl(
+            ESYS_TR.RH_OWNER, parent, 0x81000081, session1=ESYS_TR.PASSWORD
+        )
+
+        key = TSSPrivKey.create_rsa(self.ectx, parent=0x81000081)
+        key.load(self.ectx)
+        self.assertEqual(key.parent, 0x81000081)
+
+    def test_persistent_parent_ecc(self):
+        insens = TPM2B_SENSITIVE_CREATE()
+        inpublic = TPM2B_PUBLIC(publicArea=parent_ecc_template)
+        parent, _, _, _, _ = self.ectx.CreatePrimary(insens, inpublic)
+        phandle = self.ectx.EvictControl(
+            ESYS_TR.RH_OWNER, parent, 0x81000081, session1=ESYS_TR.PASSWORD
+        )
+
+        key = TSSPrivKey.create_ecc(self.ectx, parent=0x81000081)
+        key.load(self.ectx)
+        self.assertEqual(key.parent, 0x81000081)

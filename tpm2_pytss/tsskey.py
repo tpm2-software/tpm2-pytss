@@ -176,7 +176,7 @@ class TSSPrivKey(object):
         if parent == lib.TPM2_RH_OWNER:
             template = TSSPrivKey._getparenttemplate(ectx)
         else:
-            return ectx.TR_GetTpmPublic(parent)
+            return ectx.TR_FromTPMPublic(parent)
         if template is None:
             raise RuntimeError("Unable to find supported parent key typ")
         inpub = TPM2B_PUBLIC(publicArea=template)
