@@ -279,9 +279,7 @@ class CryptoTest(TSS2_EsapiTest):
         oname = nv.getName()
         nv2b = TPM2B_NV_PUBLIC(nvPublic=nv)
 
-        handle = self.ectx.NV_DefineSpace(
-            ESYS_TR.RH_OWNER, b"1234", nv2b, session1=ESYS_TR.PASSWORD
-        )
+        handle = self.ectx.NV_DefineSpace(b"1234", nv2b)
 
         ename = self.ectx.TR_GetName(handle)
 

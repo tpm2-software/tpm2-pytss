@@ -2661,15 +2661,18 @@ class ESAPI:
 
     def NV_DefineSpace(
         self,
-        authHandle,
         auth,
         publicInfo,
+        authHandle=ESYS_TR.OWNER,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
         check_handle_type(authHandle, "authHandle")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
         auth_cdata = get_cdata(auth, TPM2B_AUTH, "auth", allow_none=True)
         publicInfo_cdata = get_cdata(publicInfo, TPM2B_NV_PUBLIC, "publicInfo")
         nvHandle = ffi.new("ESYS_TR *")
@@ -2690,8 +2693,8 @@ class ESAPI:
 
     def NV_UndefineSpace(
         self,
-        authHandle,
         nvIndex,
+        authHandle=ESYS_TR.RH_OWNER,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
@@ -2699,6 +2702,9 @@ class ESAPI:
 
         check_handle_type(authHandle, "authHandle")
         check_handle_type(nvIndex, "nvIndex")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
         _chkrc(
             lib.Esys_NV_UndefineSpace(
                 self.ctx, authHandle, nvIndex, session1, session2, session3
@@ -2708,7 +2714,7 @@ class ESAPI:
     def NV_UndefineSpaceSpecial(
         self,
         nvIndex,
-        platform,
+        platform=ESYS_TR.RH_PLATFORM,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
@@ -2716,6 +2722,9 @@ class ESAPI:
 
         check_handle_type(nvIndex, "nvIndex")
         check_handle_type(platform, "platform")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
         _chkrc(
             lib.Esys_NV_UndefineSpaceSpecial(
                 self.ctx, nvIndex, platform, session1, session2, session3
@@ -2731,6 +2740,9 @@ class ESAPI:
     ):
 
         check_handle_type(nvIndex, "nvIndex")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
         nvPublic = ffi.new("TPM2B_NV_PUBLIC **")
         nvName = ffi.new("TPM2B_NAME **")
         _chkrc(
@@ -2758,6 +2770,9 @@ class ESAPI:
             authHandle = nvIndex
         check_handle_type(nvIndex, "nvIndex")
         check_handle_type(authHandle, "authHandle")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
         data_cdata = get_cdata(data, TPM2B_MAX_NV_BUFFER, "data")
         _chkrc(
             lib.Esys_NV_Write(
@@ -2774,15 +2789,20 @@ class ESAPI:
 
     def NV_Increment(
         self,
-        authHandle,
         nvIndex,
-        session1=ESYS_TR.NONE,
+        authHandle=0,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
+        if authHandle == 0:
+            authHandle = nvIndex
         check_handle_type(authHandle, "authHandle")
         check_handle_type(nvIndex, "nvIndex")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
         _chkrc(
             lib.Esys_NV_Increment(
                 self.ctx, authHandle, nvIndex, session1, session2, session3
@@ -2791,16 +2811,21 @@ class ESAPI:
 
     def NV_Extend(
         self,
-        authHandle,
         nvIndex,
         data,
-        session1=ESYS_TR.NONE,
+        authHandle=0,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
+        if authHandle == 0:
+            authHandle = nvIndex
         check_handle_type(authHandle, "authHandle")
         check_handle_type(nvIndex, "nvIndex")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
         data_cdata = get_cdata(data, TPM2B_MAX_NV_BUFFER, "data")
         _chkrc(
             lib.Esys_NV_Extend(
@@ -2810,16 +2835,21 @@ class ESAPI:
 
     def NV_SetBits(
         self,
-        authHandle,
         nvIndex,
         bits,
-        session1=ESYS_TR.NONE,
+        authHandle=0,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
+        if authHandle == 0:
+            authHandle = nvIndex
         check_handle_type(authHandle, "authHandle")
         check_handle_type(nvIndex, "nvIndex")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
         _chkrc(
             lib.Esys_NV_SetBits(
                 self.ctx, authHandle, nvIndex, session1, session2, session3, bits
@@ -2828,15 +2858,20 @@ class ESAPI:
 
     def NV_WriteLock(
         self,
-        authHandle,
         nvIndex,
-        session1=ESYS_TR.NONE,
+        authHandle=0,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
+        if authHandle == 0:
+            authHandle = nvIndex
         check_handle_type(authHandle, "authHandle")
         check_handle_type(nvIndex, "nvIndex")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
         _chkrc(
             lib.Esys_NV_WriteLock(
                 self.ctx, authHandle, nvIndex, session1, session2, session3
@@ -2845,13 +2880,16 @@ class ESAPI:
 
     def NV_GlobalWriteLock(
         self,
-        authHandle,
-        session1=ESYS_TR.NONE,
+        authHandle=ESYS_TR.RH_OWNER,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
         check_handle_type(authHandle, "authHandle")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
         _chkrc(
             lib.Esys_NV_GlobalWriteLock(
                 self.ctx, authHandle, session1, session2, session3
@@ -2873,6 +2911,9 @@ class ESAPI:
             authHandle = nvIndex
         check_handle_type(nvIndex, "nvIndex")
         check_handle_type(authHandle, "authHandle")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
         data = ffi.new("TPM2B_MAX_NV_BUFFER **")
         _chkrc(
             lib.Esys_NV_Read(
@@ -2891,15 +2932,20 @@ class ESAPI:
 
     def NV_ReadLock(
         self,
-        authHandle,
         nvIndex,
-        session1=ESYS_TR.NONE,
+        authHandle=0,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
+        if authHandle == 0:
+            authHandle = nvIndex
         check_handle_type(nvIndex, "nvIndex")
         check_handle_type(authHandle, "authHandle")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
         _chkrc(
             lib.Esys_NV_ReadLock(
                 self.ctx, authHandle, nvIndex, session1, session2, session3
@@ -2916,6 +2962,9 @@ class ESAPI:
     ):
 
         check_handle_type(nvIndex, "nvIndex")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
         newAuth_cdata = get_cdata(newAuth, TPM2B_DIGEST, "newAuth")
         _chkrc(
             lib.Esys_NV_ChangeAuth(
@@ -2926,20 +2975,25 @@ class ESAPI:
     def NV_Certify(
         self,
         signHandle,
-        authHandle,
         nvIndex,
         qualifyingData,
         inScheme,
         size,
-        offset,
+        offset=0,
+        authHandle=0,
         session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
+        session2=ESYS_TR.PASSWORD,
         session3=ESYS_TR.NONE,
     ):
 
+        if authHandle == 0:
+            authHandle = nvIndex
         check_handle_type(signHandle, "signHandle")
         check_handle_type(authHandle, "authHandle")
         check_handle_type(nvIndex, "nvIndex")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
         qualifyingData_cdata = get_cdata(qualifyingData, TPM2B_DATA, "qualifyingData")
         inScheme_cdata = get_cdata(inScheme, TPMT_SIG_SCHEME, "inScheme")
         certifyInfo = ffi.new("TPM2B_ATTEST **")

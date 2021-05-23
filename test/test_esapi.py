@@ -145,7 +145,7 @@ class TestEsys(TSS2_EsapiTest):
         )
 
         # No password NV index
-        nv_index = self.ectx.NV_DefineSpace(ESYS_TR.OWNER, None, nv_public)
+        nv_index = self.ectx.NV_DefineSpace(None, nv_public)
         self.ectx.NV_Write(nv_index, b"hello world")
 
         value = self.ectx.NV_Read(nv_index, 11)
@@ -167,7 +167,7 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(len(n), 68)
         self.assertTrue(isinstance(n, str))
 
-        self.ectx.NV_UndefineSpace(ESYS_TR.OWNER, nv_index)
+        self.ectx.NV_UndefineSpace(nv_index)
 
         with self.assertRaises(TSS2_Exception):
             public, name = self.ectx.NV_ReadPublic(nv_index)
@@ -1750,7 +1750,7 @@ class TestEsys(TSS2_EsapiTest):
             )
         )
 
-        nvhandle = self.ectx.NV_DefineSpace(ESYS_TR.RH_PLATFORM, b"", nvpub)
+        nvhandle = self.ectx.NV_DefineSpace(b"", nvpub, authHandle=ESYS_TR.RH_PLATFORM)
 
         session = self.ectx.StartAuthSession(
             ESYS_TR.NONE,
@@ -1764,7 +1764,7 @@ class TestEsys(TSS2_EsapiTest):
         self.ectx.PolicyCommandCode(session, TPM2_CC.NV_UndefineSpaceSpecial)
 
         self.ectx.NV_UndefineSpaceSpecial(
-            nvhandle, ESYS_TR.RH_PLATFORM, session1=session, session2=ESYS_TR.PASSWORD
+            nvhandle, session1=session, session2=ESYS_TR.PASSWORD
         )
 
     def test_NV_ReadPublic(self):
@@ -1778,7 +1778,7 @@ class TestEsys(TSS2_EsapiTest):
             )
         )
 
-        nvhandle = self.ectx.NV_DefineSpace(ESYS_TR.RH_OWNER, b"", nvpub)
+        nvhandle = self.ectx.NV_DefineSpace(b"", nvpub)
 
         pubout, name = self.ectx.NV_ReadPublic(nvhandle)
 
@@ -1797,9 +1797,9 @@ class TestEsys(TSS2_EsapiTest):
             )
         )
 
-        nvhandle = self.ectx.NV_DefineSpace(ESYS_TR.RH_OWNER, b"", nvpub)
+        nvhandle = self.ectx.NV_DefineSpace(b"", nvpub)
 
-        self.ectx.NV_Increment(ESYS_TR.RH_OWNER, nvhandle, session1=ESYS_TR.PASSWORD)
+        self.ectx.NV_Increment(nvhandle, authHandle=ESYS_TR.RH_OWNER)
 
         data = self.ectx.NV_Read(nvhandle, 8, 0, authHandle=ESYS_TR.RH_OWNER)
 
@@ -1819,12 +1819,10 @@ class TestEsys(TSS2_EsapiTest):
             )
         )
 
-        nvhandle = self.ectx.NV_DefineSpace(ESYS_TR.RH_OWNER, b"", nvpub)
+        nvhandle = self.ectx.NV_DefineSpace(b"", nvpub)
 
         edata = b"\xFF" * 32
-        self.ectx.NV_Extend(
-            ESYS_TR.RH_OWNER, nvhandle, edata, session1=ESYS_TR.PASSWORD
-        )
+        self.ectx.NV_Extend(nvhandle, edata, authHandle=ESYS_TR.RH_OWNER)
 
         data = self.ectx.NV_Read(nvhandle, 32, 0, authHandle=ESYS_TR.RH_OWNER)
 
@@ -1844,12 +1842,10 @@ class TestEsys(TSS2_EsapiTest):
             )
         )
 
-        nvhandle = self.ectx.NV_DefineSpace(ESYS_TR.RH_OWNER, b"", nvpub)
+        nvhandle = self.ectx.NV_DefineSpace(b"", nvpub)
 
         bits = 0b1010
-        self.ectx.NV_SetBits(
-            ESYS_TR.RH_OWNER, nvhandle, bits, session1=ESYS_TR.PASSWORD
-        )
+        self.ectx.NV_SetBits(nvhandle, bits, authHandle=ESYS_TR.RH_OWNER)
 
         data = self.ectx.NV_Read(nvhandle, 8, 0, authHandle=ESYS_TR.RH_OWNER)
 
@@ -1869,9 +1865,9 @@ class TestEsys(TSS2_EsapiTest):
             )
         )
 
-        nvhandle = self.ectx.NV_DefineSpace(ESYS_TR.RH_OWNER, b"", nvpub)
+        nvhandle = self.ectx.NV_DefineSpace(b"", nvpub)
 
-        self.ectx.NV_WriteLock(ESYS_TR.RH_OWNER, nvhandle, session1=ESYS_TR.PASSWORD)
+        self.ectx.NV_WriteLock(nvhandle, authHandle=ESYS_TR.RH_OWNER)
 
         indata = b"12345678"
         with self.assertRaises(TSS2_Exception) as e:
@@ -1890,9 +1886,9 @@ class TestEsys(TSS2_EsapiTest):
             )
         )
 
-        nvhandle = self.ectx.NV_DefineSpace(ESYS_TR.RH_OWNER, b"", nvpub)
+        nvhandle = self.ectx.NV_DefineSpace(b"", nvpub)
 
-        self.ectx.NV_GlobalWriteLock(ESYS_TR.RH_OWNER, session1=ESYS_TR.PASSWORD)
+        self.ectx.NV_GlobalWriteLock()
 
         indata = b"12345678"
         with self.assertRaises(TSS2_Exception) as e:
@@ -1913,12 +1909,12 @@ class TestEsys(TSS2_EsapiTest):
             )
         )
 
-        nvhandle = self.ectx.NV_DefineSpace(ESYS_TR.RH_OWNER, b"", nvpub)
+        nvhandle = self.ectx.NV_DefineSpace(b"", nvpub)
 
         indata = b"12345678"
         self.ectx.NV_Write(nvhandle, indata, authHandle=ESYS_TR.RH_OWNER)
 
-        self.ectx.NV_ReadLock(ESYS_TR.RH_OWNER, nvhandle, session1=ESYS_TR.PASSWORD)
+        self.ectx.NV_ReadLock(nvhandle, authHandle=ESYS_TR.RH_OWNER)
         with self.assertRaises(TSS2_Exception) as e:
             self.ectx.NV_Read(nvhandle, 8, authHandle=ESYS_TR.RH_OWNER)
 
@@ -1937,7 +1933,7 @@ class TestEsys(TSS2_EsapiTest):
             )
         )
 
-        nvhandle = self.ectx.NV_DefineSpace(ESYS_TR.RH_OWNER, b"first", nvpub)
+        nvhandle = self.ectx.NV_DefineSpace(b"first", nvpub)
         self.ectx.NV_Write(nvhandle, b"sometest", authHandle=ESYS_TR.RH_OWNER)
 
         self.ectx.NV_Read(nvhandle, 8, authHandle=nvhandle)
@@ -1968,7 +1964,7 @@ class TestEsys(TSS2_EsapiTest):
             )
         )
 
-        nvhandle = self.ectx.NV_DefineSpace(ESYS_TR.RH_OWNER, b"", nvpub)
+        nvhandle = self.ectx.NV_DefineSpace(b"", nvpub)
         self.ectx.NV_Write(nvhandle, b"sometest", authHandle=ESYS_TR.RH_OWNER)
 
         inPublic = TPM2B_PUBLIC(
@@ -1990,12 +1986,11 @@ class TestEsys(TSS2_EsapiTest):
 
         certifyInfo, _ = self.ectx.NV_Certify(
             eccHandle,
-            ESYS_TR.RH_OWNER,
             nvhandle,
             qualifyingData,
             inScheme,
             8,
-            0,
+            authHandle=ESYS_TR.RH_OWNER,
             session1=ESYS_TR.PASSWORD,
             session2=ESYS_TR.PASSWORD,
         )
