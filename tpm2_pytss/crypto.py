@@ -15,6 +15,10 @@ from cryptography.hazmat.primitives.serialization import (
     PublicFormat,
 )
 from cryptography.x509 import load_pem_x509_certificate, load_der_x509_certificate
+from cryptography.hazmat.primitives.kdf.kbkdf import CounterLocation, KBKDFHMAC, Mode
+from cryptography.hazmat.primitives.kdf.concatkdf import ConcatKDFHash
+from cryptography.hazmat.primitives.ciphers.algorithms import AES
+from cryptography.hazmat.primitives.ciphers import modes
 from cryptography.hazmat.backends import default_backend
 
 _curvetable = (
@@ -38,6 +42,11 @@ _digesttable = (
     (lib.TPM2_ALG_SHA3_512, hashes.SHA3_512),
 )
 
+_algtable = (
+    (lib.TPM2_ALG_AES, AES),
+    (lib.TPM2_ALG_CFB, modes.CFB),
+)
+
 
 def _get_curveid(curve):
     for (algid, c) in _curvetable:
@@ -57,6 +66,13 @@ def _get_digest(digestid):
     for (algid, d) in _digesttable:
         if algid == digestid:
             return d
+    return None
+
+
+def _get_alg(alg):
+    for (algid, a) in _algtable:
+        if algid == alg:
+            return a
     return None
 
 
@@ -186,3 +202,51 @@ def getname(obj):
     db = obj.nameAlg.to_bytes(length=2, byteorder="big")
     name = db + b
     return name
+
+
+def kdfa(hashAlg, key, label, contextU, contextV, bits):
+    halg = _get_digest(hashAlg)
+    if halg is None:
+        raise ValueError(f"unsupported digest algorithm: {hashAlg}")
+    if bits % 8:
+        raise ValueError(f"bad key length {bits}, not a multiple of 8")
+    klen = int(bits / 8)
+    context = contextU + contextV
+    kdf = KBKDFHMAC(
+        algorithm=halg(),
+        mode=Mode.CounterMode,
+        length=klen,
+        rlen=4,
+        llen=4,
+        location=CounterLocation.BeforeFixed,
+        label=label,
+        context=context,
+        fixed=None,
+        backend=default_backend(),
+    )
+    return kdf.derive(key)
+
+
+def kdfe(hashAlg, z, use, partyuinfo, partyvinfo, bits):
+    halg = _get_digest(hashAlg)
+    if halg is None:
+        raise ValueError(f"unsupported digest algorithm: {hashAlg}")
+    if bits % 8:
+        raise ValueError(f"bad key length {bits}, not a multiple of 8")
+    klen = int(bits / 8)
+    otherinfo = use + partyuinfo + partyvinfo
+    kdf = ConcatKDFHash(
+        algorithm=halg(), length=klen, otherinfo=otherinfo, backend=default_backend()
+    )
+    return kdf.derive(z)
+
+
+def symdef_to_crypt(symdef):
+    alg = _get_alg(symdef.algorithm)
+    if alg is None:
+        raise ValueError(f"unsupported symmetric algorithm {symdef.algorithm}")
+    mode = _get_alg(symdef.mode.sym)
+    if mode is None:
+        raise ValueError(f"unsupported symmetric mode {symdef.mode.sym}")
+    bits = symdef.keyBits.sym
+    return (alg, mode, bits)

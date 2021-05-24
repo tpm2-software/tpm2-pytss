@@ -362,3 +362,106 @@ class CryptoTest(TSS2_EsapiTest):
         with self.assertRaises(ValueError) as e:
             crypto.private_from_encoding(der, pub)
         self.assertEqual(str(e.exception), "Unsupported key format")
+
+    def test_kdfa(self):
+        ekey = b"a\xe2\xb8{@f\xc0\x94\xa3Pt\x08\xf5\xaf\x01[\xce\x85t\x843\xf8\xb3\x03%q\xe5\x84x\xdc`\x81E \xf5\xa9\xe8\x9f\xc8\xc9\x96U\xbe\x1b\x07\xd9\x8f\x97*~\xf7\x9bX\x99\xbe\x86\xe7\x10g$\x9cUQT\x97\x00\x9a\x97\xfd\xf0]\xec.\xedw\xb4\xf5\x8a/)\x18D\x13W6?`{!f\xf5\xa7\xd9>E\xf7\xd66\x11j\x8aZ\x06\xe1\nJJ\x99\xb4\x9e\x15\xea\xed\xb0\x98i\xcd\xa5cI4Pq\xae\xe8\x0c6\xbae\xb1t\xe1ku\x94\x06,\xe6'\x1b\xedn\xf2T\xf7\xbd\xb4\xfeu\x7f\xacD\x9e\xcb[rHN\xf4g1C\xb3\xd9ML\xd2:\x06\xea\xb1I\x98\xa7\xe2\xa0\x99\x8b\x82\xb9n\xad\xb6\x1cZ\xa8>!\xb9\x81\xf9\x03w\x88F\n\x19\xb1^\xd8\x801\xd6\x9dF\xf3\xc3\x05\x91\x92L\xc1\xd0\xaei;\x18n\xad=v'e\xa7\xcc6\xa7\xa2\"PB\x9f\xfb\xad\xebA\x00\x8d\xee\x99\x10\xafA\xc3\xc9\xe6\xd7\xaaIe\xdf/:\xf3C{"
+        key = crypto.kdfa(
+            TPM2_ALG.SHA256,
+            b"key data",
+            b"label data",
+            b"contextU data",
+            b"contextV data",
+            2048,
+        )
+        self.assertEqual(key, ekey)
+
+        with self.assertRaises(ValueError) as e:
+            key = crypto.kdfa(
+                TPM2_ALG.SHA256,
+                b"key data",
+                b"label data",
+                b"contextU data",
+                b"contextV data",
+                123,
+            )
+        self.assertEqual(str(e.exception), "bad key length 123, not a multiple of 8")
+
+        with self.assertRaises(ValueError) as e:
+            key = crypto.kdfa(
+                TPM2_ALG.LAST + 1,
+                b"key data",
+                b"label data",
+                b"contextU data",
+                b"contextV data",
+                2048,
+            )
+        self.assertEqual(
+            str(e.exception), f"unsupported digest algorithm: {TPM2_ALG.LAST + 1}"
+        )
+
+    def test_kdfe(self):
+        ekey = b"@|\x8bb\x92\x1c\x85\x06~\xc5d!\x14^\xb44\x01\xaf\xa2\xac(\xb98T3\x91m\x83L\xa9\xdcX"
+        key = crypto.kdfe(
+            TPM2_ALG.SHA256,
+            b"z data",
+            b"use data",
+            b"partyuinfo data",
+            b"partyvinfo data",
+            256,
+        )
+        self.assertEqual(key, ekey)
+
+        with self.assertRaises(ValueError) as e:
+            key = crypto.kdfe(
+                TPM2_ALG.SHA256,
+                b"z data",
+                b"use data",
+                b"partyuinfo data",
+                b"partyvinfo data",
+                123,
+            )
+        self.assertEqual(str(e.exception), "bad key length 123, not a multiple of 8")
+
+        with self.assertRaises(ValueError) as e:
+            key = crypto.kdfe(
+                TPM2_ALG.LAST + 1,
+                b"z data",
+                b"use data",
+                b"partyuinfo data",
+                b"partyvinfo data",
+                256,
+            )
+        self.assertEqual(
+            str(e.exception), f"unsupported digest algorithm: {TPM2_ALG.LAST + 1}"
+        )
+
+    def test_get_alg(self):
+        alg = crypto._get_alg(TPM2_ALG.AES)
+        self.assertEqual(alg, crypto.AES)
+
+        nalg = crypto._get_alg(TPM2_ALG.LAST + 1)
+        self.assertEqual(nalg, None)
+
+    def test_symdef_to_crypt(self):
+        symdef = TPMT_SYM_DEF_OBJECT(algorithm=TPM2_ALG.AES)
+        symdef.mode.sym = TPM2_ALG.CFB
+        symdef.keyBits.sym = 128
+
+        (alg, mode, bits) = crypto.symdef_to_crypt(symdef)
+        self.assertEqual(alg, crypto.AES)
+        self.assertEqual(mode, crypto.modes.CFB)
+        self.assertEqual(bits, 128)
+
+        symdef.mode.sym = TPM2_ALG.LAST + 1
+        with self.assertRaises(ValueError) as e:
+            crypto.symdef_to_crypt(symdef)
+        self.assertEqual(
+            str(e.exception), f"unsupported symmetric mode {TPM2_ALG.LAST + 1}"
+        )
+
+        symdef.algorithm = TPM2_ALG.LAST + 1
+        with self.assertRaises(ValueError) as e:
+            crypto.symdef_to_crypt(symdef)
+        self.assertEqual(
+            str(e.exception), f"unsupported symmetric algorithm {TPM2_ALG.LAST + 1}"
+        )
