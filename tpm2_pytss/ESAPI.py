@@ -2423,17 +2423,29 @@ class ESAPI:
 
     def PP_Commands(
         self,
-        auth,
         setList,
         clearList,
+        auth=ESYS_TR.PLATFORM,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(auth, "auth")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+        setList_cdata = get_cdata(setList, TPML_CC, "setList")
+        clearList_cdata = get_cdata(clearList, TPML_CC, "clearList")
         _chkrc(
             lib.Esys_PP_Commands(
-                self.ctx, auth, session1, session2, session3, setList, clearList
+                self.ctx,
+                auth,
+                session1,
+                session2,
+                session3,
+                setList_cdata,
+                clearList_cdata,
             )
         )
 

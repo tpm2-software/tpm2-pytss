@@ -2838,6 +2838,30 @@ class TestEsys(TSS2_EsapiTest):
                 signHandle, session, b"1234", session3=12.723
             )
 
+    def test_PP_Commands(self):
+        with self.assertRaises(TSS2_Exception) as e:
+            self.ectx.PP_Commands(TPML_CC(), TPML_CC(), session1=ESYS_TR.PASSWORD)
+        self.assertEqual(e.exception.error, TPM2_RC.PP)
+        self.assertEqual(e.exception.session, 1)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PP_Commands(b"bad setList", TPML_CC(), session1=ESYS_TR.PASSWORD)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PP_Commands(TPML_CC(), None, session1=ESYS_TR.PASSWORD)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PP_Commands(TPML_CC(), TPML_CC(), session1=b"0xF1F1")
+
+        with self.assertRaises(TypeError):
+            self.ectx.PP_Commands(TPML_CC(), TPML_CC(), session2=b"0xF1F1")
+
+        with self.assertRaises(TypeError):
+            self.ectx.PP_Commands(TPML_CC(), TPML_CC(), session3=b"0xF1F1")
+
+        with self.assertRaises(TypeError):
+            self.ectx.PP_Commands(TPML_CC(), TPML_CC(), authHandle="platform")
+
 
 if __name__ == "__main__":
     unittest.main()
