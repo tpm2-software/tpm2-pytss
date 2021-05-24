@@ -2867,6 +2867,24 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.PP_Commands(TPML_CC(), TPML_CC(), authHandle="platform")
 
+    def test_SetAlgorithmSet(self):
+        self.ectx.SetAlgorithmSet(0)
+
+        with self.assertRaises(TypeError):
+            self.ectx.SetAlgorithmSet([1, 2, 3])
+
+        with self.assertRaises(TypeError):
+            self.ectx.SetAlgorithmSet(session2=set(3, 2, 1))
+
+        with self.assertRaises(TypeError):
+            self.ectx.SetAlgorithmSet(session1=set(4, 3, 2))
+
+        with self.assertRaises(TypeError):
+            self.ectx.SetAlgorithmSet(session3=set(5, 4, 3))
+
+        with self.assertRaises(TypeError):
+            self.ectx.SetAlgorithmSet(authHandle=None)
+
 
 if __name__ == "__main__":
     unittest.main()
