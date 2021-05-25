@@ -144,7 +144,7 @@ def private_from_encoding(data, obj):
         raise RuntimeError(f"unsupported key type: {key.__class__.__name__}")
 
 
-def public_to_pem(obj):
+def public_to_key(obj):
     key = None
     if obj.type == lib.TPM2_ALG_RSA:
         b = obj.unique.rsa.buffer
@@ -165,7 +165,13 @@ def public_to_pem(obj):
         nums = ec.EllipticCurvePublicNumbers(x, y, curve())
         key = nums.public_key(backend=default_backend())
     else:
-        raise RuntimeError(f"unsupported key type: {obj.publicArea.type}")
+        raise ValueError(f"unsupported key type: {obj.type}")
+
+    return key
+
+
+def public_to_pem(obj):
+    key = public_to_key(obj)
     return key.public_bytes(Encoding.PEM, PublicFormat.SubjectPublicKeyInfo)
 
 
