@@ -13,6 +13,7 @@ from cryptography.hazmat.primitives.asymmetric.ec import (
 )
 from cryptography.hazmat.primitives.hmac import HMAC
 from cryptography.hazmat.primitives.ciphers import modes, Cipher
+from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
 import secrets
 
@@ -96,3 +97,40 @@ def MakeCredential(public, credential, name):
     credblob = TPM2B_ID_OBJECT(credential=hmacdata + enc_cred)
     secret = TPM2B_ENCRYPTED_SECRET(secret=enc_seed)
     return (credblob, secret)
+
+
+def Wrap(newparent, public, sensitive, symkey, symdef):
+    enckeyout = TPM2B_DATA()
+    outsymseed = TPM2B_ENCRYPTED_SECRET()
+    sensb = sensitive.Marshal()
+    name = bytes(public.getName())
+    if symdef and symdef.algorithm != TPM2_ALG.NULL:
+        cipher, mode, bits = symdef_to_crypt(symdef)
+        if not symkey:
+            klen = int(bits / 8)
+            symkey = secrets.token_bytes(klen)
+        halg = _get_digest(public.publicArea.nameAlg)
+        h = hashes.Hash(halg(), backend=default_backend())
+        h.update(sensb)
+        h.update(name)
+        innerint = TPM2B_DIGEST(buffer=h.finalize()).Marshal()
+        encsens = encrypt(cipher, symkey, innerint + sensb)
+        enckeyout.buffer = symkey
+    else:
+        encsens = sensb
+
+    seed, outsymseed.secret = generate_seed(newparent, b"DUPLICATE\x00")
+    cipher, _, bits = symdef_to_crypt(newparent.parameters.asymDetail.symmetric)
+    outerkey = kdfa(newparent.nameAlg, seed, b"STORAGE", name, b"", bits)
+    dupsens = encrypt(cipher, outerkey, encsens)
+
+    halg = _get_digest(newparent.nameAlg)
+    hmackey = kdfa(
+        newparent.nameAlg, seed, b"INTEGRITY", b"", b"", halg.digest_size * 8
+    )
+    outerhmac = hmac(halg, hmackey, dupsens, name)
+    hmacdata = TPM2B_DIGEST(buffer=outerhmac).Marshal()
+
+    duplicate = TPM2B_PRIVATE(buffer=hmacdata + dupsens)
+
+    return (enckeyout, duplicate, outsymseed)
