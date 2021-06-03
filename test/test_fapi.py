@@ -155,6 +155,8 @@ class TestFapi:
         with pytest.raises(TSS2_Exception):
             self.fapi.provision(is_provisioned_ok=False)
 
+    # TODO provision second (RSA) profile
+
     def test_get_random(self):
         random_bytes = self.fapi.get_random(42)
         assert type(random_bytes) == bytes
@@ -489,10 +491,10 @@ class TestFapi:
         with pytest.raises(TSS2_Exception):
             self.fapi.get_platform_certificates()
 
-    # TODO bug in TSS?
-    # def test_get_empty_platform_certificates_ok(self):
-    #    certificates = self.fapi.get_platform_certificates(no_cert_ok=True)
-    #    assert certificates is None
+    @pytest.mark.skipif(pkgconfig.installed("tss2-fapi", "<3.1.0"), reason="tpm2-tss bug")
+    def test_get_empty_platform_certificates_ok(self):
+       certificates = self.fapi.get_platform_certificates(no_cert_ok=True)
+       assert certificates is b''
 
     def test_pcr_read(self):
         value, log = self.fapi.pcr_read(7)

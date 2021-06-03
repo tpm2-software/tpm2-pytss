@@ -457,14 +457,18 @@ class FAPI:
         Returns:
             bool: True if the sealed object was created. False otherwise.
         """
-        # TODO if data is none, user should be able to give a size (of the random data)
         path = to_bytes_or_null(path)
+        if data is None:
+            # TODO if data is none, user should be able to give a size (of the random data)
+            data_len = 0
+        else:
+            data_len = len(data)
         data = to_bytes_or_null(data)
         type = to_bytes_or_null(type)
         policy_path = to_bytes_or_null(policy_path)
         auth_value = to_bytes_or_null(auth_value)
         ret = lib.Fapi_CreateSeal(
-            self.ctx, path, type, len(data), policy_path, auth_value, data
+            self.ctx, path, type, data_len, policy_path, auth_value, data
         )
         if ret == lib.TPM2_RC_SUCCESS:
             return True
@@ -635,9 +639,12 @@ class FAPI:
             TSS2_Exception: If Fapi returned an error code.
         """
         path = to_bytes_or_null(path)
+        if app_data is None:
+            app_data_len = 0
+        else:
+            app_data_len = len(app_data)
         app_data = to_bytes_or_null(app_data)
-        app_data_size = len(app_data)
-        ret = lib.Fapi_SetAppData(self.ctx, path, app_data, app_data_size)
+        ret = lib.Fapi_SetAppData(self.ctx, path, app_data, app_data_len)
         if ret == lib.TPM2_RC_SUCCESS:
             return
         raise TSS2_Exception(ret)
@@ -709,7 +716,17 @@ class FAPI:
         raise TSS2_Exception(ret)
 
     def get_platform_certificates(self, no_cert_ok: bool = False) -> bytes:
-        # TODO doc
+        """Get the platform certificate and the so-called delta certificates.
+
+        Args:
+            no_cert_ok (bool, optional): If True, an empty byte string is returned if no certificate is found. If False, in this case a TSS2_Exception is raised. Defaults to False.
+
+        Raises:
+            TSS2_Exception:  If Fapi returned an error code.
+
+        Returns:
+            bytes: The platform certificates
+        """
         # TODO split certificates into list
         # TODO why bytes? is this DER?
         certificate = ffi.new("uint8_t **")
@@ -720,7 +737,7 @@ class FAPI:
             lib.Fapi_Free(certificate[0])
             return result
         if no_cert_ok and ret == lib.TSS2_FAPI_RC_NO_CERT:
-            return None
+            return b""
         raise TSS2_Exception(ret)
 
     def get_tpm_blobs(self, path: Union[bytes, str]) -> Tuple[Any, Any, str]:
@@ -734,7 +751,6 @@ class FAPI:
 
         Returns:
             Tuple[Any, Any, str]: (tpm_2b_public, tpm_2b_private, policy)
-        # TODO cdata types
         """
         path = to_bytes_or_null(path)
         tpm_2b_public = ffi.new("uint8_t **")
@@ -754,7 +770,7 @@ class FAPI:
         if ret == lib.TPM2_RC_SUCCESS:
 
             def cleanup():
-                # free memory
+                """Free allocated memory."""
                 lib.Fapi_Free(tpm_2b_public[0])
                 lib.Fapi_Free(tpm_2b_private[0])
                 lib.Fapi_Free(policy[0])
