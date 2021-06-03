@@ -1341,8 +1341,7 @@ class FAPI:
         callback: Optional[
             Callable[[str, str, str, str, int, bytes, Optional[bytes]], bytes]
         ] = None,
-        user_data: Optional[Union[bytes, str]] = None
-
+        user_data: Optional[Union[bytes, str]] = None,
     ):
         """Set the Fapi signing callback which is called to satisfy the policy Signed. If `callback` is None, the callback function is reset.
 
@@ -1383,10 +1382,7 @@ class FAPI:
                 user_data = None
             else:
                 user_data = bytes(
-                    ffi.unpack(
-                        ffi.cast("uint8_t *", user_data),
-                        user_data_len,
-                    )
+                    ffi.unpack(ffi.cast("uint8_t *", user_data), user_data_len,)
                 )
             try:
                 signature_value = callback(

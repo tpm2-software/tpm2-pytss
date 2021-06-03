@@ -80,10 +80,14 @@ class TestFapi:
     @pytest.fixture
     def cryptography_key(self):
         key = ec.generate_private_key(ec.SECP256R1(), backend=default_backend())
-        key_public_pem = key.public_key().public_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PublicFormat.SubjectPublicKeyInfo,
-        ).decode()
+        key_public_pem = (
+            key.public_key()
+            .public_bytes(
+                encoding=serialization.Encoding.PEM,
+                format=serialization.PublicFormat.SubjectPublicKeyInfo,
+            )
+            .decode()
+        )
         return key, key_public_pem
 
     @pytest.fixture
@@ -314,7 +318,9 @@ class TestFapi:
 
     # TODO test encrypt with RSA profile. Needs to be provisioned separately.
 
-    @pytest.mark.skipif(pkgconfig.installed("tss2-fapi", "<3.1.0"), reason="tpm2-tss bug, see #2028")
+    @pytest.mark.skipif(
+        pkgconfig.installed("tss2-fapi", "<3.1.0"), reason="tpm2-tss bug, see #2028"
+    )
     def test_import_key_double_ok(self, cryptography_key):
         key, key_public_pem = cryptography_key
         key_path = f"/ext/key_{random_uid()}"
@@ -326,7 +332,9 @@ class TestFapi:
         )
         assert imported is False
 
-    @pytest.mark.skipif(pkgconfig.installed("tss2-fapi", "<3.1.0"), reason="tpm2-tss bug, see #2028")
+    @pytest.mark.skipif(
+        pkgconfig.installed("tss2-fapi", "<3.1.0"), reason="tpm2-tss bug, see #2028"
+    )
     def test_import_key_double_fail(self, cryptography_key):
         key, key_public_pem = cryptography_key
         key_path = f"/ext/key_{random_uid()}"
@@ -336,7 +344,9 @@ class TestFapi:
         with pytest.raises(TSS2_Exception):
             self.fapi.import_object(path=key_path, import_data=key_public_pem)
 
-    @pytest.mark.skipif(pkgconfig.installed("tss2-fapi", "<3.1.0"), reason="tpm2-tss bug, see #2028")
+    @pytest.mark.skipif(
+        pkgconfig.installed("tss2-fapi", "<3.1.0"), reason="tpm2-tss bug, see #2028"
+    )
     def test_import_policy_double_ok(self):
         policy = """
 {
@@ -348,10 +358,14 @@ class TestFapi:
         imported = self.fapi.import_object(path=policy_path, import_data=policy)
         assert imported is True
         assert policy_path in self.fapi.list()
-        imported = self.fapi.import_object(path=policy_path, import_data=policy, exists_ok=True)
+        imported = self.fapi.import_object(
+            path=policy_path, import_data=policy, exists_ok=True
+        )
         assert imported is False
 
-    @pytest.mark.skipif(pkgconfig.installed("tss2-fapi", "<3.1.0"), reason="tpm2-tss bug, see #2028")
+    @pytest.mark.skipif(
+        pkgconfig.installed("tss2-fapi", "<3.1.0"), reason="tpm2-tss bug, see #2028"
+    )
     def test_import_policy_double_fail(self):
         policy = """
 {
@@ -491,10 +505,12 @@ class TestFapi:
         with pytest.raises(TSS2_Exception):
             self.fapi.get_platform_certificates()
 
-    @pytest.mark.skipif(pkgconfig.installed("tss2-fapi", "<3.1.0"), reason="tpm2-tss bug")
+    @pytest.mark.skipif(
+        pkgconfig.installed("tss2-fapi", "<3.1.0"), reason="tpm2-tss bug"
+    )
     def test_get_empty_platform_certificates_ok(self):
-       certificates = self.fapi.get_platform_certificates(no_cert_ok=True)
-       assert certificates is b''
+        certificates = self.fapi.get_platform_certificates(no_cert_ok=True)
+        assert certificates is b""
 
     def test_pcr_read(self):
         value, log = self.fapi.pcr_read(7)
@@ -583,7 +599,9 @@ class TestFapi:
         self.fapi.set_auth_callback(callback=None)
         self.fapi.sign(key_path, b"\x22" * 32)
 
-    @pytest.mark.skipif(pkgconfig.installed("tss2-fapi", "<3.1.0"), reason="tpm2-tss bug, see #2084")
+    @pytest.mark.skipif(
+        pkgconfig.installed("tss2-fapi", "<3.1.0"), reason="tpm2-tss bug, see #2084"
+    )
     def test_write_authorize_nv(self, esys):
         # write CommandCode policy for sign key into nv index
         nv_path = f"/nv/Owner/nv_policy_{random_uid()}"
@@ -627,7 +645,9 @@ class TestFapi:
         with pytest.raises(TSS2_Exception):
             self.fapi.quote(path=key_path, pcrs=[7, 9])
 
-    @pytest.mark.skipif(pkgconfig.installed("tss2-fapi", "<3.1.0"), reason="tpm2-tss bug, see #2084")
+    @pytest.mark.skipif(
+        pkgconfig.installed("tss2-fapi", "<3.1.0"), reason="tpm2-tss bug, see #2084"
+    )
     def test_authorize_policy(self, sign_key):
         # create policy Authorize, which is satisfied via a signature by sign_key
         policy_authorize_path = f"/policy/policy_{random_uid()}"
@@ -689,7 +709,9 @@ class TestFapi:
         with pytest.raises(TSS2_Exception):
             self.fapi.quote(path=key_path, pcrs=[7, 9])
 
-    @pytest.mark.skipif(pkgconfig.installed("tss2-fapi", "<3.1.0"), reason="tpm2-tss bug, see #2080")
+    @pytest.mark.skipif(
+        pkgconfig.installed("tss2-fapi", "<3.1.0"), reason="tpm2-tss bug, see #2080"
+    )
     def test_policy_signed(self, cryptography_key):
         # create external signing key used by the signing authority external to the TPM
         sign_key, sign_key_public_pem = cryptography_key
@@ -719,19 +741,27 @@ class TestFapi:
         with pytest.raises(TSS2_Exception):
             self.fapi.sign(path=key_path, digest=b"\x11" * 32)
 
-        def sign_callback(path, description, public_key, public_key_hint, hash_alg, data_to_sign, user_data):
+        def sign_callback(
+            path,
+            description,
+            public_key,
+            public_key_hint,
+            hash_alg,
+            data_to_sign,
+            user_data,
+        ):
             assert key_path.endswith(path)
             assert description == "PolicySigned"
             assert public_key == sign_key_public_pem
             assert public_key_hint == "Test key hint"
             assert hash_alg == lib.TPM2_ALG_SHA256
-            assert user_data == b'123456'
+            assert user_data == b"123456"
 
             # signing authority signs external to TPM (via openssl) to authorize usage of key (policy Signed)
             return sign_key.sign(data_to_sign, ec.ECDSA(hashes.SHA256()))
 
         # set signing callback, will be called if policy Signed is to be satisfied
-        self.fapi.set_sign_callback(callback=sign_callback, user_data=b'123456')
+        self.fapi.set_sign_callback(callback=sign_callback, user_data=b"123456")
 
         # use key for signing: success
         self.fapi.sign(path=key_path, digest=b"\x11" * 32)
@@ -739,7 +769,7 @@ class TestFapi:
     def test_policy_branched(self):
         pcr_index = 15
         pcr_data = b"ABCDEF"
-        pcr_digest = b'\x00' * 32
+        pcr_digest = b"\x00" * 32
         pcr_digest = sha256(pcr_digest + sha256(pcr_data))
 
         # create policy Signed, which is satisfied via a signature by sign_key
@@ -797,16 +827,16 @@ class TestFapi:
         def branch_callback(path, description, branch_names, user_data):
             assert path == nv_path
             assert description == "PolicyOR"
-            assert branch_names == ['Read', 'Write']
-            assert user_data == b'123456'
+            assert branch_names == ["Read", "Write"]
+            assert user_data == b"123456"
 
             return policy_coice(branch_names)
 
         # set branch callback, will be called if the nv index is accessed
-        self.fapi.set_branch_callback(callback=branch_callback, user_data=b'123456')
+        self.fapi.set_branch_callback(callback=branch_callback, user_data=b"123456")
 
         # at first, we will choose the 'Write' branch
-        policy_coice = lambda options: options.index('Write')
+        policy_coice = lambda options: options.index("Write")
 
         # write to nv index: fail
         with pytest.raises(TSS2_Exception):
@@ -819,24 +849,31 @@ class TestFapi:
         self.fapi.nv_write(path=nv_path, data="Hello World")
 
         # extend PCR so policy PCR cannot be satisfied anymore
-        self.fapi.pcr_extend(index=pcr_index, data="nobody expects the spanish inquisition!")
+        self.fapi.pcr_extend(
+            index=pcr_index, data="nobody expects the spanish inquisition!"
+        )
 
         # secondly, we will choose the 'Read' branch
-        policy_coice = lambda options: options.index('Read')
+        policy_coice = lambda options: options.index("Read")
 
         # use the 'Read' branch (satisfied via policy CommandCode)
         nv_data, _ = self.fapi.nv_read(nv_path)
-        assert nv_data == b'Hello World'
+        assert nv_data == b"Hello World"
 
         policy_coice = None
 
         # thirdly, we set different branch callback function (here lambda) and read again
-        self.fapi.set_branch_callback(callback=lambda _path, _description, branch_names, _user_data: branch_names.index('Read'))
+        self.fapi.set_branch_callback(
+            callback=lambda _path, _description, branch_names, _user_data: branch_names.index(
+                "Read"
+            )
+        )
         nv_data, _ = self.fapi.nv_read(nv_path)
-        assert nv_data == b'Hello World'
+        assert nv_data == b"Hello World"
 
         # clean up
         self.fapi.delete(path=nv_path)
+
 
 # if __name__ == "__main__":
 #    unittest.main()
