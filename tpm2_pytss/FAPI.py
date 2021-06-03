@@ -788,54 +788,30 @@ class FAPI:
             )
         raise TSS2_Exception(ret)
 
-    def get_esys_blob(self, path):
-        """Not implemented yet."""
-        raise NotImplementedError()
-        # path = to_bytes_or_null(path)
-        # type = ffi.new("uint8_t *")
-        # data = ffi.new("uint8_t **")
-        # length = ffi.new("size_t *")
-        # ret = lib.Fapi_GetEsysBlob(self.ctx, path, type, data, length)
-        # if ret == lib.TPM2_RC_SUCCESS:
-        #
-        #     def cleanup():
-        #         # free memory
-        #         lib.Fapi_Free(data[0])
-        #
-        #     data_bytes = bytes(ffi.unpack(data[0], length[0]))
-        #
-        #     esys_ctx = ffi.cast("uint8_t *", esys_ctx)
-        #     esys_ctx = ffi.cast(
-        #         "ESYS_CONTEXT *", self.ctx + 2
-        #     )  # TODO is there a way to get esys ctx from fapi ctx?
-        #     bla_l = length[0]  # TODO
-        #     bla_d = bytes(ffi.unpack(data[0], length[0]))  # TODO
-        #     bla_t = type[0]
-        #     bla_s = bytes(ffi.unpack(ffi.cast("uint8_t *", esys_ctx), 16))
-        #     esys_handle = ffi.new("ESYS_TR *")
-        #     if type[0] == lib.FAPI_ESYSBLOB_CONTEXTLOAD:
-        #         offs = ffi.new("size_t *", 0)
-        #         key_ctx = ffi.new("TPMS_CONTEXT *")
-        #         ret = lib.Tss2_MU_TPMS_CONTEXT_Unmarshal(
-        #             data[0], length[0], offs, key_ctx
-        #         )
-        #         if ret != lib.TPM2_RC_SUCCESS:
-        #             cleanup()
-        #             raise TSS2_Exception(ret)
-        #
-        #         ret = lib.Esys_ContextLoad(esys_ctx, key_ctx, esys_handle)
-        #         if ret != lib.TPM2_RC_SUCCESS:
-        #             cleanup()
-        #             raise TSS2_Exception(ret)
-        #     elif type[0] == lib.FAPI_ESYSBLOB_DESERIALIZE:
-        #         ret = lib.Esys_TR_Deserialize(esys_ctx, data[0], length[0], esys_handle)
-        #         if ret != lib.TPM2_RC_SUCCESS:
-        #             cleanup()
-        #             raise TSS2_Exception(ret)
-        #
-        #     cleanup()
-        #     return esys_handle
-        # raise TSS2_Exception(ret)
+    def get_esys_blob(self, path: Union[bytes, str]) -> Tuple[bytes, Any]:
+        """Return the ESAPI binary blob associated with a Fapi object.
+
+        This blob can be easily loaded with :meth:`~tpm2_pytss.ESAPI.load_blob()`.
+
+        Args:
+            path (bytes or str): Path to the Fapi object.
+
+        Raises:
+            TSS2_Exception: If Fapi returned an error code.
+
+        Returns:
+            Tuple[bytes, Any]: A tuple of the binary blob and its type (:const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_CONTEXTLOAD` or :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_DESERIALIZE)`
+        """
+        path = to_bytes_or_null(path)
+        type = ffi.new("uint8_t *")
+        data = ffi.new("uint8_t **")
+        length = ffi.new("size_t *")
+        ret = lib.Fapi_GetEsysBlob(self.ctx, path, type, data, length)
+        if ret == lib.TPM2_RC_SUCCESS:
+            result = (bytes(ffi.unpack(data[0], length[0])), type[0])
+            lib.Fapi_Free(data[0])
+            return result
+        raise TSS2_Exception(ret)
 
     def export_policy(self, path: Union[bytes, str]) -> str:
         """Export a policy from the key store as a JSON-encoded string.

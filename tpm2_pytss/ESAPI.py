@@ -3048,3 +3048,24 @@ class ESAPI:
             )
         )
         return TPM2B_DATA(get_ptr(outputData))
+
+    def load_blob(self, data: bytes, type: int = lib.FAPI_ESYSBLOB_CONTEXTLOAD) -> int:
+        """Load binary ESAPI object as binary blob. Supported are the types :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_CONTEXTLOAD` and :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_DESERIALIZE`.
+
+        Args:
+            data (bytes): Binary blob of the ESAPI object to load.
+            type (int, optional): :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_CONTEXTLOAD` or :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_DESERIALIZE`. Defaults to :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_CONTEXTLOAD`.
+
+        Returns:
+            int: The ESAPI handle to the loaded object.
+        """
+        esys_handle = ffi.new("ESYS_TR *")
+        if type == lib.FAPI_ESYSBLOB_CONTEXTLOAD:
+            offs = ffi.new("size_t *", 0)
+            key_ctx = ffi.new("TPMS_CONTEXT *")
+            _chkrc(lib.Tss2_MU_TPMS_CONTEXT_Unmarshal(data, len(data), offs, key_ctx))
+            _chkrc(lib.Esys_ContextLoad(self.ctx, key_ctx, esys_handle))
+        elif type == lib.FAPI_ESYSBLOB_DESERIALIZE:
+            _chkrc(lib.Esys_TR_Deserialize(self.ctx, data, len(data), esys_handle))
+
+        return esys_handle[0]
