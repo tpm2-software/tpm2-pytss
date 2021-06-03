@@ -310,39 +310,31 @@ class TestFapi:
                 key_path, digest=b"A" * 32, signature=b"bad signature"
             )
 
-    def test_import_key(self, cryptography_key):
-        key, key_public_pem = cryptography_key
-        key_path = f"/ext/key_{random_uid()}"
-        imported = self.fapi.import_object(path=key_path, import_data=key_public_pem)
-        assert imported is True
-        assert key_path in self.fapi.list()
+    # TODO test encrypt with RSA profile. Needs to be provisioned separately.
 
+    @pytest.mark.skipif(pkgconfig.installed("tss2-fapi", "<3.1.0"), reason="tpm2-tss bug, see #2028")
     def test_import_key_double_ok(self, cryptography_key):
         key, key_public_pem = cryptography_key
         key_path = f"/ext/key_{random_uid()}"
         imported = self.fapi.import_object(path=key_path, import_data=key_public_pem)
         assert imported is True
         assert key_path in self.fapi.list()
-
-        self.fapi.import_object(
+        imported = self.fapi.import_object(
             path=key_path, import_data=key_public_pem, exists_ok=True
         )
-        assert imported is True
+        assert imported is False
 
+    @pytest.mark.skipif(pkgconfig.installed("tss2-fapi", "<3.1.0"), reason="tpm2-tss bug, see #2028")
     def test_import_key_double_fail(self, cryptography_key):
         key, key_public_pem = cryptography_key
         key_path = f"/ext/key_{random_uid()}"
         imported = self.fapi.import_object(path=key_path, import_data=key_public_pem)
         assert imported is True
         assert key_path in self.fapi.list()
-
-        # assert imported is False  # TODO bug: tpm2-tss #2028, fixed in master
-        if pkgconfig.installed("tss2-fapi", ">=3.1.0"):
-            with pytest.raises(TSS2_Exception):
-                self.fapi.import_object(path=key_path, import_data=key_public_pem)
-        else:
+        with pytest.raises(TSS2_Exception):
             self.fapi.import_object(path=key_path, import_data=key_public_pem)
 
+    @pytest.mark.skipif(pkgconfig.installed("tss2-fapi", "<3.1.0"), reason="tpm2-tss bug, see #2028")
     def test_import_policy_double_ok(self):
         policy = """
 {
@@ -354,10 +346,10 @@ class TestFapi:
         imported = self.fapi.import_object(path=policy_path, import_data=policy)
         assert imported is True
         assert policy_path in self.fapi.list()
+        imported = self.fapi.import_object(path=policy_path, import_data=policy, exists_ok=True)
+        assert imported is False
 
-        self.fapi.import_object(path=policy_path, import_data=policy, exists_ok=True)
-        assert imported is True
-
+    @pytest.mark.skipif(pkgconfig.installed("tss2-fapi", "<3.1.0"), reason="tpm2-tss bug, see #2028")
     def test_import_policy_double_fail(self):
         policy = """
 {
@@ -369,12 +361,7 @@ class TestFapi:
         imported = self.fapi.import_object(path=policy_path, import_data=policy)
         assert imported is True
         assert policy_path in self.fapi.list()
-
-        # assert imported is False  # TODO bug: tpm2-tss #2028, fixed in master
-        if pkgconfig.installed("tss2-fapi", ">=3.1.0"):
-            with pytest.raises(TSS2_Exception):
-                self.fapi.import_object(path=policy_path, import_data=policy)
-        else:
+        with pytest.raises(TSS2_Exception):
             self.fapi.import_object(path=policy_path, import_data=policy)
 
     def test_import_exported_key(self, sign_key):
