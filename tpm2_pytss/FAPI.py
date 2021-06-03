@@ -6,7 +6,7 @@ import json
 import logging
 import os
 import tempfile
-from typing import Any, Callable, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from ._libtpm2_pytss import lib
 from .callbacks import Callback, CallbackType, get_callback, unlock_callback
@@ -127,8 +127,7 @@ class FAPI:
         _chkrc(ret)
 
         # set callbacks
-        self.auth_callback: Optional[Callback] = None
-        self.auth_callback_user_data_len = 0
+        self.callbacks: Dict[CallbackType, Optional[Callback]] = {}
 
     @property
     def ctx(self):
@@ -145,14 +144,14 @@ class FAPI:
     def __exit__(self, _type, value, traceback):
         self.close()
 
-    def close(self):
+    def close(self) -> None:
         """Finalize the Feature API. This frees allocated memory and invalidates the FAPI object."""
         lib.Fapi_Finalize(self.ctx_pp)
 
-        if self.auth_callback:
-            unlock_callback(CallbackType.FAPI_AUTH, self.auth_callback.name)
-            self.auth_callback = None
-            self.auth_callback_user_data_len = 0
+        for callback_type, callback in self.callbacks.items():
+            if callback is not None:
+                unlock_callback(callback_type, callback.name)
+                self.callbacks[callback_type] = None
 
     # TODO flesh out info class
     @property
@@ -170,6 +169,15 @@ class FAPI:
     def config(self):  # TODO doc, test
         info = json.loads(self.info())
         return FapiInfo(info).fapi_config
+
+    @property
+    def tcti(self):  # TODO doc, test
+        tcti = ffi.new("TSS2_TCTI_CONTEXT **")
+        # returns the actual tcti context, not a copy (so no extra memory is allocated by the fapi)
+        ret = lib.Fapi_GetTcti(self.ctx, tcti)
+        if ret == lib.TPM2_RC_SUCCESS:
+            return tcti[0]
+        raise TSS2_Exception(ret)
 
     def provision(
         self,
@@ -847,7 +855,7 @@ class FAPI:
         if ret == lib.TPM2_RC_SUCCESS:
             result = ffi.string(policy[0]).decode()
             lib.Fapi_Free(policy[0])
-            return result  # TODO parse json?
+            return result
         raise TSS2_Exception(ret)
 
     def authorize_policy(
@@ -1193,75 +1201,233 @@ class FAPI:
             return
         raise TSS2_Exception(ret)
 
-    # TODO use correct callback signature
-    def set_auth_callback(
+    def _register_callback(
         self,
-        callback: Callable[[str, str, Optional[Any]], bytes],
-        user_data: Optional[bytes] = None,
-    ) -> None:
-        """Register a callback that provides the password for Fapi objects when
-        needed. Typically, this callback implements a password prompt.
+        callback_type: CallbackType,
+        callback_wrapper: Callable,
+        unlock: bool = False,
+    ) -> Callable:
+        """(Un)register a C callback and tie it to a python wrapper. Does not call Fapi API calls.
 
         Args:
-            callback (Callable[[str, str, Optional[Any]], bytes]): A callback function which takes the object path (str), the object description (str) and optionally custom user data (any python object). The callback returns the password (bytes).
-            user_data (byte, optional): Bytes that will be handed to the callback. Defaults to None. # TODO size
+            callback_type (CallbackType): Type of callback. Each type can have up to one callback.
+            callback_wrapper (Callable): Python wrapper which is called by the C callback and will call a user-defined function.
+            unlock (bool, optional): True if the callback is to be freed again. Defaults to False.
+
+        Returns:
+            str: CFFI binding function
+        """
+        if unlock and self.callbacks[callback_type] is not None:
+            # unlock c callback
+            unlock_callback(CallbackType.FAPI_AUTH, self.callbacks[callback_type].name)  # type: ignore
+            self.callbacks[callback_type] = None
+
+            c_callback = ffi.NULL
+        else:
+            if (
+                callback_type not in self.callbacks
+                or self.callbacks[callback_type] is None
+            ):
+                # get c callback and lock it
+                self.callbacks[callback_type] = get_callback(callback_type)
+
+            # link callback wrapper to c function
+            callback_wrapper.__name__ = self.callbacks[callback_type].name  # type: ignore
+            ffi.def_extern()(callback_wrapper)
+
+            c_callback = self.callbacks[callback_type].c_function  # type: ignore
+
+        return c_callback
+
+    def set_auth_callback(
+        self,
+        callback: Optional[Callable[[str, str, Optional[bytes]], bytes]] = None,
+        user_data: Optional[Union[bytes, str]] = None,
+    ) -> None:
+        """Register a callback that provides the password for Fapi objects when
+        needed. Typically, this callback implements a password prompt. If `callback` is None, the callback function is reset.
+
+        Args:
+            callback (Callable[[str, str, Optional[bytes]], bytes], optional): A callback function `callback(path, description, user_data=None)` which returns the password (:class:`bytes`). Defaults to None.
+            user_data (byte, optional): Bytes that will be handed to the callback. Defaults to None.
+
+        Raises:
+            TSS2_Exception: If Fapi returned an error code.
+        """
+        if callback is None and user_data is not None:
+            raise RuntimeError("If callback is None, user_data must be None, too.")
+
+        if user_data is None:
+            user_data_len = 0
+        else:
+            user_data_len = len(user_data)
+        user_data = to_bytes_or_null(user_data)
+
+        def callback_wrapper(path, description, auth, user_data):
+            path = ffi.string(path).decode()
+            description = ffi.string(description).decode()
+            if user_data == ffi.NULL:
+                user_data = None
+            else:
+                user_data = bytes(
+                    ffi.unpack(ffi.cast("uint8_t *", user_data), user_data_len)
+                )
+            try:
+                auth_value = callback(path, description, user_data)
+            except Exception:
+                return lib.TSS2_FAPI_RC_CB_FAILURE
+
+            # auth value is cleaned up by the FAPI
+            auth[0] = ffi_malloc("char[]", auth_value)
+            return lib.TPM2_RC_SUCCESS
+
+        c_callback = self._register_callback(
+            CallbackType.FAPI_AUTH, callback_wrapper, unlock=callback is None
+        )
+
+        ret = lib.Fapi_SetAuthCB(self.ctx, c_callback, user_data)
+        if ret != lib.TPM2_RC_SUCCESS:
+            raise TSS2_Exception(ret)
+
+    def set_branch_callback(
+        self,
+        callback: Optional[
+            Callable[[str, str, List[str], Optional[bytes]], int]
+        ] = None,
+        user_data: Optional[Union[bytes, str]] = None,
+    ):
+        """Set the Fapi policy branch callback, called to decide which policy path to take in a policy Or. If `callback` is None, the callback function is reset.
+
+        Args:
+            callback (Callable[[str, str, List[str], Optional[bytes]], int], optional): A callback function `callback(path, description, branch_names, user_data=None)` which returns the index (:class:`int`) of the selected branch in `branch_names`. Defaults to None.
+            user_data (bytes or str, optional): Custom data passed to the callback function. Defaults to None.
 
         Raises:
             TSS2_Exception: If Fapi returned an error code.
         """
 
-        def callback_wrapper(object_path, description, auth, user_data):
-            object_path = ffi.string(object_path).decode()
+        if callback is None and user_data is not None:
+            raise ValueError("If callback is None, user_data must be None, too.")
+
+        if user_data is None:
+            user_data_len = 0
+        else:
+            user_data_len = len(user_data)
+        user_data = to_bytes_or_null(user_data)
+
+        def callback_wrapper(
+            path, description, branch_names, num_branches, selected_branch, user_data
+        ):
+            path = ffi.string(path).decode()
             description = ffi.string(description).decode()
+            branch_names = [
+                ffi.string(branch_names[i]).decode() for i in range(0, num_branches)
+            ]
+            if user_data == ffi.NULL:
+                user_data = None
+            else:
+                user_data = bytes(
+                    ffi.unpack(ffi.cast("uint8_t *", user_data), user_data_len)
+                )
+            try:
+                selected_branch[0] = callback(
+                    path, description, branch_names, user_data
+                )
+            except Exception:
+                return lib.TSS2_FAPI_RC_GENERAL_FAILURE
+            return lib.TPM2_RC_SUCCESS
+
+        c_callback = self._register_callback(
+            CallbackType.FAPI_BRANCH, callback_wrapper, unlock=callback is None
+        )
+        ret = lib.Fapi_SetBranchCB(self.ctx, c_callback, user_data)
+        if ret != lib.TPM2_RC_SUCCESS:
+            raise TSS2_Exception(ret)
+
+    def set_sign_callback(
+        self,
+        callback: Optional[
+            Callable[[str, str, str, str, int, bytes, Optional[bytes]], bytes]
+        ] = None,
+        user_data: Optional[Union[bytes, str]] = None
+
+    ):
+        """Set the Fapi signing callback which is called to satisfy the policy Signed. If `callback` is None, the callback function is reset.
+
+        Args:
+            callback (Callable[[str, str, str, str, int, bytes, Optional[bytes]], bytes], optional): A callback function `callback(path, description, public_key, public_key_hint, hash_alg, data_to_sign, user_data=None)` which returns a signature (:class:`bytes`) of `data_to_sign`. Defaults to None.
+            user_data (bytes or str, optional): Custom data passed to the callback function. Defaults to None.
+
+        Raises:
+            TSS2_Exception: If Fapi returned an error code.
+        """
+        if callback is None and user_data is not None:
+            raise RuntimeError("If callback is None, user_data must be None, too.")
+
+        if user_data is None:
+            user_data_len = 0
+        else:
+            user_data_len = len(user_data)
+        user_data = to_bytes_or_null(user_data)
+
+        def callback_wrapper(
+            path,
+            description,
+            public_key,
+            public_key_hint,
+            hash_alg,
+            data_to_sign,
+            data_to_sign_len,
+            signature,
+            signature_len,
+            user_data,
+        ):
+            path = ffi.string(path).decode()
+            description = ffi.string(description).decode()
+            public_key = ffi.string(public_key).decode()
+            public_key_hint = ffi.string(public_key_hint).decode()
+            data_to_sign = bytes(ffi.unpack(data_to_sign, data_to_sign_len))
             if user_data == ffi.NULL:
                 user_data = None
             else:
                 user_data = bytes(
                     ffi.unpack(
                         ffi.cast("uint8_t *", user_data),
-                        self.auth_callback_user_data_len,
+                        user_data_len,
                     )
                 )
-            auth_value = callback(object_path, description, user_data)
-            # auth value is cleaned up by the FAPI
-            auth[0] = ffi_malloc("char[]", auth_value)
+            try:
+                signature_value = callback(
+                    path,
+                    description,
+                    public_key,
+                    public_key_hint,
+                    hash_alg,
+                    data_to_sign,
+                    user_data,
+                )
+            except Exception:
+                return lib.TSS2_FAPI_RC_CB_FAILURE
+
+            # signature is cleaned up by the FAPI
+            signature[0] = ffi_malloc("char[]", signature_value)
+            signature_len[0] = len(signature_value)
             return lib.TPM2_RC_SUCCESS
 
-        if callback is None:
-            c_callback = ffi.NULL
-            user_data = ffi.NULL
-
-            # unlock c callback
-            unlock_callback(CallbackType.FAPI_AUTH, self.auth_callback.name)
-            self.auth_callback = None
-            self.auth_callback_user_data_len = 0
-        else:
-            if self.auth_callback is None:
-                # get c callback and lock it
-                self.auth_callback = get_callback(CallbackType.FAPI_AUTH)
-
-                # link callback wrapper to c function
-                callback_wrapper.__name__ = self.auth_callback.name
-                ffi.def_extern()(callback_wrapper)
-
-            if user_data is not None:
-                self.auth_callback_user_data_len = len(user_data)
-
-            c_callback = self.auth_callback.c_function
-            user_data = to_bytes_or_null(user_data)
-
-        ret = lib.Fapi_SetAuthCB(self.ctx, c_callback, user_data)
+        c_callback = self._register_callback(
+            CallbackType.FAPI_SIGN, callback_wrapper, unlock=callback is None
+        )
+        ret = lib.Fapi_SetSignCB(self.ctx, c_callback, user_data)
         if ret != lib.TPM2_RC_SUCCESS:
             raise TSS2_Exception(ret)
 
-    def set_branch_callback(self, callback, user_data):
-        """Not implemented yet."""
-        raise NotImplementedError()
+    def set_policy_action_callback(
+        self,
+        callback: Optional[Callable[[str, str, Optional[bytes]], None]] = None,
+        user_data: Optional[Union[bytes, str]] = None,
+    ):
+        """Not implemented yet.
 
-    def set_sign_callback(self, callback, user_data):
-        """Not implemented yet."""
-        raise NotImplementedError()
-
-    def set_policy_action_callback(self, callback, user_data):
-        """Not implemented yet."""
-        raise NotImplementedError()
+        Raises:
+            NotImplementedError: Policy Action is not supported, yet."""
+        raise NotImplementedError()  # TODO

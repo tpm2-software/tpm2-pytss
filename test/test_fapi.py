@@ -2,7 +2,7 @@
 """
 SPDX-License-Identifier: BSD-2
 """
-
+import binascii
 import random
 import string
 
@@ -74,7 +74,7 @@ class TestFapi:
         key_public_pem = key.public_key().public_bytes(
             encoding=serialization.Encoding.PEM,
             format=serialization.PublicFormat.SubjectPublicKeyInfo,
-        )
+        ).decode()
         return key, key_public_pem
 
     @pytest.fixture
@@ -555,7 +555,25 @@ class TestFapi:
         self.fapi.set_auth_callback(callback, user_data=b"ABCDEF")
         self.fapi.sign(key_path, b"\x22" * 32)
 
-    def test_write_authorize_nv(self):
+    def test_unset_auth_callback(self, sign_key):
+        def callback(path, descr, user_data):
+            print(f"Callback: path={path}, descr={descr}, user_data={user_data}")
+            return user_data
+
+        profile_name = self.fapi.config.profile_name
+        key_path = f"/{profile_name}/HS/SRK/key_{random_uid()}"
+
+        self.fapi.create_key(path=key_path, auth_value=b"123456")
+
+        self.fapi.set_auth_callback(callback, user_data=b"123456")
+        self.fapi.sign(key_path, b"\x11" * 32)
+
+        self.fapi.change_auth(path=key_path, auth_value=None)
+        self.fapi.set_auth_callback(callback=None)
+        self.fapi.sign(key_path, b"\x22" * 32)
+
+    @pytest.mark.skipif(pkgconfig.installed("tss2-fapi", "<3.1.0"), reason="tpm2-tss bug, see #2084")
+    def test_write_authorize_nv(self, esys):
         # write CommandCode policy for sign key into nv index
         nv_path = f"/nv/Owner/nv_policy_{random_uid()}"
         policy = """
@@ -598,6 +616,7 @@ class TestFapi:
         with pytest.raises(TSS2_Exception):
             self.fapi.quote(path=key_path, pcrs=[7, 9])
 
+    @pytest.mark.skipif(pkgconfig.installed("tss2-fapi", "<3.1.0"), reason="tpm2-tss bug, see #2084")
     def test_authorize_policy(self, sign_key):
         # create policy Authorize, which is satisfied via a signature by sign_key
         policy_authorize_path = f"/policy/policy_{random_uid()}"
@@ -659,6 +678,154 @@ class TestFapi:
         with pytest.raises(TSS2_Exception):
             self.fapi.quote(path=key_path, pcrs=[7, 9])
 
+    @pytest.mark.skipif(pkgconfig.installed("tss2-fapi", "<3.1.0"), reason="tpm2-tss bug, see #2080")
+    def test_policy_signed(self, cryptography_key):
+        # create external signing key used by the signing authority external to the TPM
+        sign_key, sign_key_public_pem = cryptography_key
+
+        # create policy Signed, which is satisfied via a signature by sign_key
+        policy = f"""
+        {{
+            "description": "Description pol_signed",
+            "policy": [
+                {{
+                    "type": "PolicySigned",
+                    "publicKeyHint": "Test key hint",
+                    "keyPEM": "{sign_key_public_pem}",
+                }}
+            ]
+        }}
+        """
+        policy_path = f"/policy/policy_{random_uid()}"
+        self.fapi.import_object(path=policy_path, import_data=policy)
+
+        # create key which can only be used if policy Signed is satisfied
+        profile_name = self.fapi.config.profile_name
+        key_path = f"/{profile_name}/HS/SRK/key_{random_uid()}"
+        self.fapi.create_key(path=key_path, type="sign", policy_path=policy_path)
+
+        # try to use key without satisfying policy Signed: fail
+        with pytest.raises(TSS2_Exception):
+            self.fapi.sign(path=key_path, digest=b"\x11" * 32)
+
+        def sign_callback(path, description, public_key, public_key_hint, hash_alg, data_to_sign, user_data):
+            assert key_path.endswith(path)
+            assert description == "PolicySigned"
+            assert public_key == sign_key_public_pem
+            assert public_key_hint == "Test key hint"
+            assert hash_alg == lib.TPM2_ALG_SHA256
+            assert user_data == b'123456'
+
+            # signing authority signs external to TPM (via openssl) to authorize usage of key (policy Signed)
+            return sign_key.sign(data_to_sign, ec.ECDSA(hashes.SHA256()))
+
+        # set signing callback, will be called if policy Signed is to be satisfied
+        self.fapi.set_sign_callback(callback=sign_callback, user_data=b'123456')
+
+        # use key for signing: success
+        self.fapi.sign(path=key_path, digest=b"\x11" * 32)
+
+    def test_policy_branched(self):
+        pcr_index = 15
+        pcr_data = b"ABCDEF"
+        pcr_digest = b'\x00' * 32
+        pcr_digest = sha256(pcr_digest + sha256(pcr_data))
+
+        # create policy Signed, which is satisfied via a signature by sign_key
+        policy = f"""
+        {{
+          "description": "Read, Password for write",
+          "policy": [
+            {{
+              "type": "PolicyOR",
+              "branches": [
+                {{
+                  "name": "Read",
+                  "description": "des",
+                  "policy": [
+                    {{
+                      "type": "CommandCode",
+                      "code": "NV_READ"
+                    }}
+                  ]
+                }},
+                {{
+                  "name": "Write",
+                  "description": "dgf",
+                  "policy": [
+                    {{
+                      "type": "CommandCode",
+                      "code": "NV_WRITE"
+                    }},
+                    {{
+                        "type": "PolicyPCR",
+                        "pcrs":[
+                            {{
+                                "pcr": {pcr_index},
+                                "hashAlg": "TPM2_ALG_SHA256",
+                                "digest": "{binascii.hexlify(pcr_digest).decode()}"
+                            }}
+                        ]
+                    }}
+                  ]
+                }}
+              ]
+            }}
+          ]
+        }}
+        """
+        print(policy)
+
+        policy_path = f"/policy/policy_{random_uid()}"
+        self.fapi.import_object(path=policy_path, import_data=policy)
+
+        # create key which can only be used if policy Signed is satisfied
+        nv_path = f"/nv/Owner/nv_{random_uid()}"
+        self.fapi.create_nv(path=nv_path, size=11, policy_path=policy_path)
+
+        def branch_callback(path, description, branch_names, user_data):
+            assert path == nv_path
+            assert description == "PolicyOR"
+            assert branch_names == ['Read', 'Write']
+            assert user_data == b'123456'
+
+            return policy_coice(branch_names)
+
+        # set branch callback, will be called if the nv index is accessed
+        self.fapi.set_branch_callback(callback=branch_callback, user_data=b'123456')
+
+        # at first, we will choose the 'Write' branch
+        policy_coice = lambda options: options.index('Write')
+
+        # write to nv index: fail
+        with pytest.raises(TSS2_Exception):
+            self.fapi.nv_write(path=nv_path, data="Hello World")
+
+        # satisfy policy PCR (and thus policy OR)
+        self.fapi.pcr_extend(index=pcr_index, data=pcr_data)
+
+        # write to nv index: success
+        self.fapi.nv_write(path=nv_path, data="Hello World")
+
+        # extend PCR so policy PCR cannot be satisfied anymore
+        self.fapi.pcr_extend(index=pcr_index, data="nobody expects the spanish inquisition!")
+
+        # secondly, we will choose the 'Read' branch
+        policy_coice = lambda options: options.index('Read')
+
+        # use the 'Read' branch (satisfied via policy CommandCode)
+        nv_data, _ = self.fapi.nv_read(nv_path)
+        assert nv_data == b'Hello World'
+
+        policy_coice = None
+
+        # thirdly, we set different branch callback function (here lambda) and read again
+        self.fapi.set_branch_callback(callback=lambda _path, _description, branch_names, _user_data: branch_names.index('Read'))
+        nv_data, _ = self.fapi.nv_read(nv_path)
+        assert nv_data == b'Hello World'
+
+        # clean up
+        self.fapi.delete(path=nv_path)
 
 # if __name__ == "__main__":
 #    unittest.main()

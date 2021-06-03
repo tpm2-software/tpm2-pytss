@@ -66,6 +66,28 @@ ffibuilder.cdef(
         char     const *description,
         char    const **auth,
         void           *userData);
+    extern "Python" TSS2_RC {constants.CALLBACK_BASE_NAME[constants.CallbackType.FAPI_BRANCH]}{i}(
+        char     const *objectPath,
+        char     const *description,
+        char    const **branchNames,
+        size_t          numBranches,
+        size_t         *selectedBranch,
+        void           *userData);
+    extern "Python" TSS2_RC {constants.CALLBACK_BASE_NAME[constants.CallbackType.FAPI_SIGN]}{i}(
+        char     const *objectPath,
+        char     const *description,
+        char     const *publicKey,
+        char     const *publicKeyHint,
+        uint32_t        hashAlg,
+        uint8_t  const *dataToSign,
+        size_t          dataToSignSize,
+        uint8_t const **signature,
+        size_t         *signatureSize,
+        void           *userData);
+    extern "Python" TSS2_RC {constants.CALLBACK_BASE_NAME[constants.CallbackType.FAPI_POLICYACTION]}{i}(
+        char     const *objectPath,
+        char     const *action,
+        void           *userData);
 """
         for i in range(0, constants.CALLBACK_COUNT)
     )
