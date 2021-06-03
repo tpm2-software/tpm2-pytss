@@ -5,6 +5,7 @@ SPDX-License-Identifier: BSD-2
 import binascii
 import random
 import string
+from types import SimpleNamespace
 
 import pkgconfig
 
@@ -68,6 +69,14 @@ def init_fapi(request, fapi):
 # @pytest.mark.forked
 @pytest.mark.usefixtures("init_fapi")
 class TestFapi:
+    @pytest.fixture
+    def esys(self):
+        # TODO ESAPI should accept either a cdata obj or a dedicated TCTI class, not TctiLdr!
+        tcti = SimpleNamespace()
+        tcti.ctx = self.fapi.tcti
+        with ESAPI(tcti=tcti) as esys:
+            yield esys
+
     @pytest.fixture
     def cryptography_key(self):
         key = ec.generate_private_key(ec.SECP256R1(), backend=default_backend())
@@ -248,6 +257,19 @@ class TestFapi:
         )
         assert tpm_2b_private.size == 0x7E
         assert policy == ""
+
+    def test_get_esys_blob_contextload(self, esys, sign_key):
+        blob_data, blob_type = self.fapi.get_esys_blob(path=sign_key)
+        assert blob_type == lib.FAPI_ESYSBLOB_CONTEXTLOAD
+        esys_handle = esys.load_blob(blob_data, blob_type)
+        esys.ReadPublic(esys_handle)
+        esys.FlushContext(esys_handle)
+
+    def test_get_esys_blob_deserialize(self, esys, nv_ordinary):
+        blob_data, blob_type = self.fapi.get_esys_blob(path=nv_ordinary)
+        assert blob_type == lib.FAPI_ESYSBLOB_DESERIALIZE
+        esys_handle = esys.load_blob(blob_data, blob_type)
+        esys.NV_ReadPublic(esys_handle)
 
     def test_sign(self, sign_key):
         # create signature
