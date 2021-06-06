@@ -2,6 +2,7 @@
 SPDX-License-Identifier: BSD-2
 """
 
+import os
 import sys
 
 from ._libtpm2_pytss import ffi
@@ -166,3 +167,55 @@ def fixup_classname(tipe):
 
 def mock_bail():
     return __MOCK__
+
+
+def get_logging():
+    curlog = dict()
+
+    curenv = os.environ.get("TSS2_LOG")
+    if not curenv:
+        return curlog
+    pairs = curenv.split(",")
+    for p in pairs:
+        try:
+            module, level = p.split("+", 1)
+        except ValueError:
+            continue
+        module = module.lower()
+        level = level.lower()
+        curlog[module] = level
+
+    return curlog
+
+
+def set_logging(**kwargs):
+    levels = ("none", "error", "warning", "info", "debug", "trace")
+    modules = (
+        "esys",
+        "esys_crypto",
+        "fapi",
+        "fapijson",
+        "log",
+        "marshal",
+        "sys",
+        "tcti",
+        "all",
+    )
+
+    curlog = get_logging()
+    for module, level in kwargs.items():
+        module = module.lower()
+        if level is None and module:
+            curlog.pop(module, None)
+            continue
+        level = level.lower()
+        if module not in modules:
+            raise ValueError(f"unknown logging module: {module}")
+        elif level is not None and level not in levels:
+            raise ValueError(f"unknown logging level: {level}")
+        else:
+            curlog[module] = level
+
+    l = [f"{m}+{l}" for m, l in curlog.items()]
+    newenv = ",".join(l)
+    os.environ["TSS2_LOG"] = newenv
