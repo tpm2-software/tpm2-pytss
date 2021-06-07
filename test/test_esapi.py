@@ -2903,6 +2903,30 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.DictionaryAttackLockReset(lockHandle=None)
 
+    def test_DictionaryAttackParameters(self):
+        self.ectx.DictionaryAttackParameters(1, 2, 3)
+
+        with self.assertRaises(TypeError):
+            self.ectx.DictionaryAttackParameters(None, 2, 3)
+
+        with self.assertRaises(TypeError):
+            self.ectx.DictionaryAttackParameters(1, None, 3)
+
+        with self.assertRaises(TypeError):
+            self.ectx.DictionaryAttackParameters(1, 2, None)
+
+        with self.assertRaises(TypeError):
+            self.ectx.DictionaryAttackParameters(1, 2, 3, session2=set(3, 2, 1))
+
+        with self.assertRaises(TypeError):
+            self.ectx.DictionaryAttackParameters(1, 2, 3, session1=set(4, 3, 2))
+
+        with self.assertRaises(TypeError):
+            self.ectx.DictionaryAttackParameters(1, 2, 3, session3=set(5, 4, 3))
+
+        with self.assertRaises(TypeError):
+            self.ectx.DictionaryAttackParameters(1, 2, 3, lockHandle=None)
+
 
 if __name__ == "__main__":
     unittest.main()
