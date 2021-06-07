@@ -2403,15 +2403,19 @@ class ESAPI:
 
     def DictionaryAttackParameters(
         self,
-        lockHandle,
         newMaxTries,
         newRecoveryTime,
         lockoutRecovery,
-        session1=ESYS_TR.NONE,
+        lockHandle=ESYS_TR.RH_LOCKOUT,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(lockHandle, "lockHandle")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
         _chkrc(
             lib.Esys_DictionaryAttackParameters(
                 self.ctx,
