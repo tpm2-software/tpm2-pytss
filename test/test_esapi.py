@@ -2880,6 +2880,29 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.SetAlgorithmSet(authHandle=None)
 
+    def test_DictionaryAttackLockReset(self):
+        self.ectx.DictionaryAttackLockReset()
+
+        with self.assertRaises(TSS2_Exception) as e:
+            self.ectx.DictionaryAttackLockReset(lockHandle=ESYS_TR.RH_OWNER)
+        self.assertEqual(e.exception.error, 132)
+        self.assertEqual(e.exception.handle, 1)
+
+        with self.assertRaises(TypeError):
+            self.ectx.DictionaryAttackLockReset([1, 2, 3])
+
+        with self.assertRaises(TypeError):
+            self.ectx.DictionaryAttackLockReset(session2=set(3, 2, 1))
+
+        with self.assertRaises(TypeError):
+            self.ectx.DictionaryAttackLockReset(session1=set(4, 3, 2))
+
+        with self.assertRaises(TypeError):
+            self.ectx.DictionaryAttackLockReset(session3=set(5, 4, 3))
+
+        with self.assertRaises(TypeError):
+            self.ectx.DictionaryAttackLockReset(lockHandle=None)
+
 
 if __name__ == "__main__":
     unittest.main()
