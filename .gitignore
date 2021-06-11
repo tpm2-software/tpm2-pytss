@@ -39,3 +39,4 @@ public/
 *.orig
 *.rej
 htmlcov
+/.pytest_cache/
