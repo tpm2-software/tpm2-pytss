@@ -874,6 +874,52 @@ class TestFapi:
         # clean up
         self.fapi.delete(path=nv_path)
 
+    @pytest.mark.skipif(
+        pkgconfig.installed("tss2-fapi", "<3.1.0"), reason="tpm2-tss bug, see #2089"
+    )
+    def test_policy_action(self):
+        # create policy Action, which is satisfied via the callback
+        policy = f"""
+                {{
+                    "description":"The description",
+                    "policy":[
+                        {{
+                            "type": "POLICYACTION",
+                            "action": "myaction"
+                        }}
+                    ]
+                }}
+                """
+        policy_path = f"/policy/policy_{random_uid()}"
+        self.fapi.import_object(path=policy_path, import_data=policy)
 
-# if __name__ == "__main__":
-#    unittest.main()
+        # create key which can only be used if policy Action is satisfied
+        profile_name = self.fapi.config.profile_name
+        key_path = f"/{profile_name}/HS/SRK/key_{random_uid()}"
+        self.fapi.create_key(path=key_path, type="sign", policy_path=policy_path)
+
+        # try to use key without satisfying policy Action: fail
+        with pytest.raises(TSS2_Exception):
+            self.fapi.sign(path=key_path, digest=b"\x11" * 32)
+
+        def policy_action_callback_error(path, action, user_data) -> None:
+            assert f"/{path}" == key_path
+            assert action == "myaction"
+            assert user_data == b"123456"
+
+            raise ValueError("Policy Action: Invalid action.")
+
+        # set policy Action callback, will be called if policy Action is to be satisfied
+        self.fapi.set_policy_action_callback(
+            callback=policy_action_callback_error, user_data=b"123456"
+        )
+
+        # try to use key with policy Action that raises an exception: fail
+        with pytest.raises(TSS2_Exception):
+            self.fapi.sign(path=key_path, digest=b"\x11" * 32)
+
+        # set policy Action callback to lambda, returning success
+        self.fapi.set_policy_action_callback(callback=lambda *_: None)
+
+        # use key for signing: success
+        self.fapi.sign(path=key_path, digest=b"\x11" * 32)
