@@ -501,16 +501,13 @@ class TestFapi:
         certificate = self.fapi.get_certificate(path=sign_key)
         assert certificate == ""
 
-    def test_get_empty_platform_certificates_fail(self):
-        with pytest.raises(TSS2_Exception):
-            self.fapi.get_platform_certificates()
-
-    @pytest.mark.skipif(
-        pkgconfig.installed("tss2-fapi", "<3.1.0"), reason="tpm2-tss bug"
-    )
     def test_get_empty_platform_certificates_ok(self):
         certificates = self.fapi.get_platform_certificates(no_cert_ok=True)
         assert certificates is b""
+
+    def test_get_empty_platform_certificates_fail(self):
+        with pytest.raises(TSS2_Exception):
+            self.fapi.get_platform_certificates()
 
     def test_pcr_read(self):
         value, log = self.fapi.pcr_read(7)
