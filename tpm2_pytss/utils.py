@@ -4,16 +4,19 @@ SPDX-License-Identifier: BSD-2
 
 import sys
 
-from ._libtpm2_pytss import ffi
+from ._libtpm2_pytss import ffi, lib
 from .TSS2_Exception import TSS2_Exception
 
 # Peek into the loaded modules, if mock is loaded, set __MOCK__ to True, else False
 __MOCK__ = "unittest.mock" in sys.modules
 
 
-def _chkrc(rc):
-    if rc != 0:
-        raise TSS2_Exception(rc)
+def _chkrc(rc, acceptable=None):
+    if rc == lib.TPM2_RC_SUCCESS:
+        return
+    if acceptable is not None and (rc == acceptable or rc in acceptable):
+        return
+    raise TSS2_Exception(rc)
 
 
 def to_bytes_or_null(value, allow_null=True, encoding=None):
