@@ -392,6 +392,9 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.TRSess_SetAttributes(session, 67.5)
 
+        with self.assertRaises(TypeError):
+            self.ectx.TRSess_SetAttributes(session, 1, 75.6)
+
     def test_start_authSession_noncecaller(self):
 
         inSensitive = TPM2B_SENSITIVE_CREATE(
