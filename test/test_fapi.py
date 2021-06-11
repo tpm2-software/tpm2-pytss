@@ -179,8 +179,8 @@ class TestFapi:
         with pytest.raises(OverflowError):
             self.fapi.get_random(-1)
 
-    def test_info(self):
-        info = self.fapi.info()
+    def test_get_info(self):
+        info = self.fapi.get_info()
         assert type(info) is str
         json.loads(info)
         assert "capabilities" in info
