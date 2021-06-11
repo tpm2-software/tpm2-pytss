@@ -135,10 +135,10 @@ def private_key_from_encoding(data):
     if sdata.startswith(b"-----BEGIN RSA PRIVATE KEY-----") or sdata.startswith(
         b"-----BEGIN EC PRIVATE KEY-----"
     ):
-        key = load_pem_private_key(sdata, password=None)
+        key = load_pem_private_key(sdata, password=None, backend=default_backend())
     else:
         try:
-            key = load_der_private_key(data, password=None)
+            key = load_der_private_key(data, password=None, backend=default_backend())
         except ValueError:
             pass
 
