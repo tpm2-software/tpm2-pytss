@@ -1214,6 +1214,11 @@ class TestEsys(TSS2_EsapiTest):
                 aesKeyHandle, True, TPM2_ALG.CFB, ivIn, outCipherText, session3=12.3
             )
 
+        with self.assertRaises(TypeError):
+            self.ectx.EncryptDecrypt(
+                aesKeyHandle, "bad Bool", TPM2_ALG.CFB, ivIn, inData
+            )
+
     def test_EncryptDecrypt2(self):
 
         inSensitive = TPM2B_SENSITIVE_CREATE()
