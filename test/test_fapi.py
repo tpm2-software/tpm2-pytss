@@ -31,8 +31,8 @@ def simulator():
 def fapi_config(simulator):
     with FapiConfig(
         temp_dirs=True, tcti=simulator.tcti_name_conf, ek_cert_less="yes"
-    ) as fapi_confi:
-        yield fapi_confi
+    ) as fapi_config:
+        yield fapi_config
 
 
 @pytest.fixture(scope="module")
