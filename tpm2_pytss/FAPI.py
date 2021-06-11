@@ -162,12 +162,12 @@ class FAPI:
         Returns:
             str: The Feature API C context.
         """
-        info = json.loads(self.info())
+        info = json.loads(self.get_info())
         return FapiInfo(info).version
 
     @property
     def config(self):  # TODO doc, test
-        info = json.loads(self.info())
+        info = json.loads(self.get_info())
         return FapiInfo(info).fapi_config
 
     @property
@@ -237,7 +237,7 @@ class FAPI:
             return bytes(result)
         raise TSS2_Exception(ret)
 
-    def info(self) -> str:  # TODO other type? json?
+    def get_info(self) -> str:
         """Get Fapi information, containing library info, TPM capabilities and more.
 
         Raises:
