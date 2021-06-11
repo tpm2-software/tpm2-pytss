@@ -26,6 +26,10 @@ FAPI_CONFIG_PATHS = [
 ]
 
 
+def get_ptr(dptr):
+    return ffi.gc(dptr[0], lib.Fapi_Free)
+
+
 class FapiConfig(contextlib.ExitStack):
     """Context to create a temporary Fapi environment."""
 
@@ -232,9 +236,7 @@ class FAPI:
         data = ffi.new("uint8_t **")
         ret = lib.Fapi_GetRandom(self.ctx, num_bytes, data)
         if ret == lib.TPM2_RC_SUCCESS:
-            result = ffi.unpack(data[0], num_bytes)
-            lib.Fapi_Free(data[0])
-            return bytes(result)
+            return bytes(ffi.unpack(get_ptr(data), num_bytes))
         raise TSS2_Exception(ret)
 
     def get_info(self) -> str:
@@ -249,9 +251,7 @@ class FAPI:
         info = ffi.new("char **")
         ret = lib.Fapi_GetInfo(self.ctx, info)
         if ret == lib.TPM2_RC_SUCCESS:
-            result = ffi.string(info[0]).decode(self.encoding)
-            lib.Fapi_Free(info[0])
-            return result
+            return ffi.string(get_ptr(info)).decode(self.encoding)
         raise TSS2_Exception(ret)
 
     def list(self, search_path: Optional[Union[bytes, str]] = None) -> List[str]:
@@ -270,9 +270,7 @@ class FAPI:
         path_list = ffi.new("char **")
         ret = lib.Fapi_List(self.ctx, search_path, path_list)
         if ret == lib.TPM2_RC_SUCCESS:
-            result = ffi.string(path_list[0]).decode(self.encoding)
-            lib.Fapi_Free(path_list[0])
-            return result.split(":")
+            return ffi.string(get_ptr(path_list)).decode(self.encoding).split(":")
         raise TSS2_Exception(ret)
 
     def create_key(
@@ -347,15 +345,11 @@ class FAPI:
             certificate,
         )
         if ret == lib.TPM2_RC_SUCCESS:
-            result = (
-                ffi.unpack(ffi.cast("char *", signature[0]), signature_size[0]),
-                ffi.string(public_key[0]),
-                ffi.string(certificate[0]),
+            return (
+                bytes(ffi.unpack(get_ptr(signature), signature_size[0])),
+                ffi.string(get_ptr(public_key)),
+                ffi.string(get_ptr(certificate)),
             )
-            lib.Fapi_Free(signature[0])
-            lib.Fapi_Free(public_key[0])
-            lib.Fapi_Free(certificate[0])
-            return result
         raise TSS2_Exception(ret)
 
     def verify_signature(
@@ -402,9 +396,7 @@ class FAPI:
             self.ctx, path, plaintext, len(plaintext), ciphertext, ciphertext_size
         )
         if ret == lib.TPM2_RC_SUCCESS:
-            result = bytes(ffi.unpack(ciphertext[0], ciphertext_size[0]))
-            lib.Fapi_Free(ciphertext[0])
-            return result
+            return bytes(ffi.unpack(get_ptr(ciphertext), ciphertext_size[0]))
         raise TSS2_Exception(ret)
 
     def decrypt(self, path: Union[bytes, str], ciphertext: bytes) -> bytes:
@@ -427,9 +419,7 @@ class FAPI:
             self.ctx, path, ciphertext, len(ciphertext), plaintext, plaintext_size
         )
         if ret == lib.TPM2_RC_SUCCESS:
-            result = bytes(ffi.unpack(plaintext[0], plaintext_size[0]))
-            lib.Fapi_Free(plaintext[0])
-            return result
+            return bytes(ffi.unpack(plaintext[0], plaintext_size[0]))
         raise TSS2_Exception(ret)
 
     def create_seal(
@@ -493,9 +483,7 @@ class FAPI:
         data_size = ffi.new("size_t *")
         ret = lib.Fapi_Unseal(self.ctx, path, data, data_size)
         if ret == lib.TPM2_RC_SUCCESS:
-            result = bytes(ffi.unpack(data[0], data_size[0]))
-            lib.Fapi_Free(data[0])
-            return result
+            return bytes(ffi.unpack(get_ptr(data), data_size[0]))
         raise TSS2_Exception(ret)
 
     def import_object(
@@ -580,9 +568,7 @@ class FAPI:
         exported_data = ffi.new("char **")
         ret = lib.Fapi_ExportKey(self.ctx, path, new_path, exported_data)
         if ret == lib.TPM2_RC_SUCCESS:
-            result = ffi.string(exported_data[0]).decode(self.encoding)
-            lib.Fapi_Free(exported_data[0])
-            return result
+            return ffi.string(get_ptr(exported_data)).decode(self.encoding)
         raise TSS2_Exception(ret)
 
     def set_description(
@@ -621,9 +607,7 @@ class FAPI:
         ret = lib.Fapi_GetDescription(self.ctx, path, description)
         if ret == lib.TPM2_RC_SUCCESS:
             # description is guaranteed to be a null-terminated string
-            result = ffi.string(description[0]).decode()
-            lib.Fapi_Free(description[0])
-            return result
+            return ffi.string(get_ptr(description)).decode()
         raise TSS2_Exception(ret)
 
     def set_app_data(
@@ -667,11 +651,8 @@ class FAPI:
         ret = lib.Fapi_GetAppData(self.ctx, path, app_data, app_data_size)
         if ret == lib.TPM2_RC_SUCCESS:
             if app_data[0] == ffi.NULL:
-                result = None
-            else:
-                result = bytes(ffi.unpack(app_data[0], app_data_size[0]))
-                lib.Fapi_Free(app_data[0])
-            return result
+                return None
+            return bytes(ffi.unpack(get_ptr(app_data), app_data_size[0]))
         raise TSS2_Exception(ret)
 
     def set_certificate(
@@ -710,9 +691,7 @@ class FAPI:
         ret = lib.Fapi_GetCertificate(self.ctx, path, certificate)
         if ret == lib.TPM2_RC_SUCCESS:
             # certificate is guaranteed to be a null-terminated string
-            result = ffi.string(certificate[0]).decode()
-            lib.Fapi_Free(certificate[0])
-            return result
+            return ffi.string(get_ptr(certificate)).decode()
         raise TSS2_Exception(ret)
 
     def get_platform_certificates(self, no_cert_ok: bool = False) -> bytes:
@@ -733,9 +712,7 @@ class FAPI:
         certificates_size = ffi.new("size_t *")
         ret = lib.Fapi_GetPlatformCertificates(self.ctx, certificate, certificates_size)
         if ret == lib.TPM2_RC_SUCCESS:
-            result = ffi.unpack(certificate[0], certificates_size)
-            lib.Fapi_Free(certificate[0])
-            return result
+            return bytes(ffi.unpack(get_ptr(certificate), certificates_size))
         if no_cert_ok and ret == lib.TSS2_FAPI_RC_NO_CERT:
             return b""
         raise TSS2_Exception(ret)
@@ -768,34 +745,26 @@ class FAPI:
             policy,
         )
         if ret == lib.TPM2_RC_SUCCESS:
-
-            def cleanup():
-                """Free allocated memory."""
-                lib.Fapi_Free(tpm_2b_public[0])
-                lib.Fapi_Free(tpm_2b_private[0])
-                lib.Fapi_Free(policy[0])
-
             policy_str = ffi.string(policy[0]).decode(self.encoding)
 
             # unmarshal bytes to sapi data types
             offs = ffi.new("size_t *", 0)
             tpm_2b_public_unmarsh = ffi.new("TPM2B_PUBLIC *")
             ret = lib.Tss2_MU_TPM2B_PUBLIC_Unmarshal(
-                tpm_2b_public[0], tpm_2b_public_size[0], offs, tpm_2b_public_unmarsh
+                get_ptr(tpm_2b_public), tpm_2b_public_size[0], offs, tpm_2b_public_unmarsh
             )
             if ret != lib.TPM2_RC_SUCCESS:
-                cleanup()
                 raise TSS2_Exception(ret)
             offs[0] = 0
             tpm_2b_private_unmarsh = ffi.new("TPM2B_PRIVATE *")
             ret = lib.Tss2_MU_TPM2B_PRIVATE_Unmarshal(
-                tpm_2b_private[0], tpm_2b_private_size[0], offs, tpm_2b_private_unmarsh
+                get_ptr(tpm_2b_private),
+                tpm_2b_private_size[0],
+                offs,
+                tpm_2b_private_unmarsh,
             )
             if ret != lib.TPM2_RC_SUCCESS:
-                cleanup()
                 raise TSS2_Exception(ret)
-
-            cleanup()
 
             return (
                 tpm_2b_public_unmarsh,
@@ -824,9 +793,7 @@ class FAPI:
         length = ffi.new("size_t *")
         ret = lib.Fapi_GetEsysBlob(self.ctx, path, type, data, length)
         if ret == lib.TPM2_RC_SUCCESS:
-            result = (bytes(ffi.unpack(data[0], length[0])), type[0])
-            lib.Fapi_Free(data[0])
-            return result
+            return bytes(ffi.unpack(get_ptr(data), length[0])), type[0]
         raise TSS2_Exception(ret)
 
     def export_policy(self, path: Union[bytes, str]) -> str:
@@ -845,9 +812,7 @@ class FAPI:
         policy = ffi.new("char **")
         ret = lib.Fapi_ExportPolicy(self.ctx, path, policy)
         if ret == lib.TPM2_RC_SUCCESS:
-            result = ffi.string(policy[0]).decode()
-            lib.Fapi_Free(policy[0])
-            return result
+            return ffi.string(get_ptr(policy)).decode()
         raise TSS2_Exception(ret)
 
     def authorize_policy(
@@ -898,13 +863,10 @@ class FAPI:
         log = ffi.new("char **")
         ret = lib.Fapi_PcrRead(self.ctx, index, value, value_size, log)
         if ret == lib.TPM2_RC_SUCCESS:
-            result = (
-                bytes(ffi.unpack(value[0], value_size[0])),
-                ffi.string(log[0]).decode(),
+            return (
+                bytes(ffi.unpack(get_ptr(value), value_size[0])),
+                ffi.string(get_ptr(log)).decode(),
             )
-            lib.Fapi_Free(log[0])
-            lib.Fapi_Free(value[0])
-            return result
         raise TSS2_Exception(ret)
 
     def pcr_extend(
@@ -988,17 +950,12 @@ class FAPI:
             certificate,
         )
         if ret == lib.TPM2_RC_SUCCESS:
-            result = (
-                ffi.string(quote_info[0]).decode(),
-                bytes(ffi.unpack(signature[0], signature_len[0])),
-                ffi.string(pcr_log[0]).decode(),
-                ffi.string(certificate[0]).decode(),
+            return (
+                ffi.string(get_ptr(quote_info)).decode(),
+                bytes(ffi.unpack(get_ptr(signature), signature_len[0])),
+                ffi.string(get_ptr(pcr_log)).decode(),
+                ffi.string(get_ptr(certificate)).decode(),
             )
-            lib.Fapi_Free(quote_info[0])
-            lib.Fapi_Free(signature[0])
-            lib.Fapi_Free(pcr_log[0])
-            lib.Fapi_Free(certificate[0])
-            return result
         raise TSS2_Exception(ret)
 
     def verify_quote(
@@ -1091,13 +1048,10 @@ class FAPI:
         log = ffi.new("char **")
         ret = lib.Fapi_NvRead(self.ctx, path, data, data_size, log)
         if ret == lib.TPM2_RC_SUCCESS:
-            result = (
-                bytes(ffi.unpack(data[0], data_size[0])),
-                ffi.string(log[0]).decode(),
+            return (
+                bytes(ffi.unpack(get_ptr(data), data_size[0])),
+                ffi.string(get_ptr(log)).decode(),
             )
-            lib.Fapi_Free(data[0])
-            lib.Fapi_Free(log[0])
-            return result
         raise TSS2_Exception(ret)
 
     def nv_write(self, path: Union[bytes, str], data: Union[bytes, str]) -> None:
