@@ -1414,8 +1414,42 @@ class FAPI:
         callback: Optional[Callable[[str, str, Optional[bytes]], None]] = None,
         user_data: Optional[Union[bytes, str]] = None,
     ):
-        """Not implemented yet.
+        """Set the policy Action callback which is called to satisfy the policy Action. If `callback` is None, the callback function is reset.
+
+        Args:
+            callback (Callable[[str, str, Optional[bytes]], None], optional): A callback function `callback(path, action, user_data=None)`. Defaults to None.
+            user_data (bytes or str, optional): Custom data passed to the callback function. Defaults to None.
 
         Raises:
-            NotImplementedError: Policy Action is not supported, yet."""
-        raise NotImplementedError()  # TODO
+            TSS2_Exception: If Fapi returned an error code.
+        """
+        if callback is None and user_data is not None:
+            raise ValueError("If callback is None, user_data must be None, too.")
+
+        if user_data is None:
+            user_data_len = 0
+        else:
+            user_data_len = len(user_data)
+        user_data = to_bytes_or_null(user_data)
+
+        def callback_wrapper(path, action, user_data):
+            path = ffi.string(path).decode()
+            action = ffi.string(action).decode()
+            if user_data == ffi.NULL:
+                user_data = None
+            else:
+                user_data = bytes(
+                    ffi.unpack(ffi.cast("uint8_t *", user_data), user_data_len)
+                )
+            try:
+                callback(path, action, user_data)
+            except Exception:
+                return lib.TSS2_FAPI_RC_GENERAL_FAILURE
+            return lib.TPM2_RC_SUCCESS
+
+        c_callback = self._register_callback(
+            CallbackType.FAPI_POLICYACTION, callback_wrapper, unlock=callback is None
+        )
+        ret = lib.Fapi_SetPolicyActionCB(self.ctx, c_callback, user_data)
+        if ret != lib.TPM2_RC_SUCCESS:
+            raise TSS2_Exception(ret)
