@@ -3055,6 +3055,51 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.GetTime(signHandle, b"1234", session3=12.723)
 
+    def test_Commit(self):
+
+        p = TPM2B_PUBLIC.parse(
+            "ecc:ecdaa",
+            (
+                TPMA_OBJECT.USERWITHAUTH
+                | TPMA_OBJECT.SIGN_ENCRYPT
+                | TPMA_OBJECT.FIXEDTPM
+                | TPMA_OBJECT.FIXEDPARENT
+                | TPMA_OBJECT.SENSITIVEDATAORIGIN
+            ),
+        )
+
+        signHandle = self.ectx.CreatePrimary(TPM2B_SENSITIVE_CREATE(), p)[0]
+
+        P1 = TPM2B_ECC_POINT()
+        s2 = TPM2B_SENSITIVE_DATA()
+        y2 = TPM2B_ECC_PARAMETER()
+        K, L, E, counter = self.ectx.Commit(signHandle, P1, s2, y2)
+        self.assertEqual(type(K), TPM2B_ECC_POINT)
+        self.assertEqual(type(L), TPM2B_ECC_POINT)
+        self.assertEqual(type(E), TPM2B_ECC_POINT)
+        self.assertEqual(0, counter)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Commit("nope", P1, s2, y2)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Commit(signHandle, list(), s2, y2)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Commit(signHandle, P1, TPM2B_SENSITIVE_DATA, y2)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Commit(signHandle, P1, s2, 16)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Commit(signHandle, P1, s2, y2, session1="baz")
+
+        with self.assertRaises(TypeError):
+            self.ectx.Commit(signHandle, P1, s2, y2, session2=object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.Commit(signHandle, P1, s2, y2, session3=67.5)
+
 
 if __name__ == "__main__":
     unittest.main()
