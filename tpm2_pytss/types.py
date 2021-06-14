@@ -2155,3 +2155,7 @@ class TPMT_SIG_SCHEME(TPM_OBJECT):
 
 class TPMT_SIGNATURE(TPM_OBJECT):
     pass
+
+
+class TPMU_SIG_SCHEME(TPM_OBJECT):
+    pass
