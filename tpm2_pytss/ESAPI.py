@@ -1587,10 +1587,19 @@ class ESAPI:
         P1,
         s2,
         y2,
-        session1=ESYS_TR.NONE,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
+
+        check_handle_type(signHandle, "signHandle")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        P1_cdata = get_cdata(P1, TPM2B_ECC_POINT, "P1")
+        s2_cdata = get_cdata(s2, TPM2B_SENSITIVE_DATA, "s2")
+        y2_cdata = get_cdata(y2, TPM2B_ECC_PARAMETER, "y2")
 
         K = ffi.new("TPM2B_ECC_POINT **")
         L = ffi.new("TPM2B_ECC_POINT **")
@@ -1603,16 +1612,21 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                P1,
-                s2,
-                y2,
+                P1_cdata,
+                s2_cdata,
+                y2_cdata,
                 K,
                 L,
                 E,
                 counter,
             )
         )
-        return (get_ptr(K), get_ptr(L), get_ptr(E), counter[0])
+        return (
+            TPM2B_ECC_POINT(get_ptr(K)),
+            TPM2B_ECC_POINT(get_ptr(L)),
+            TPM2B_ECC_POINT(get_ptr(E)),
+            counter[0],
+        )
 
     def EC_Ephemeral(
         self,
