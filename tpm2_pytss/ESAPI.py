@@ -1655,6 +1655,14 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(keyHandle, "keyHandle")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        digest_cdata = get_cdata(digest, TPM2B_DIGEST, "digest")
+        signature_cdata = get_cdata(signature, TPMT_SIGNATURE, "signature")
+
         validation = ffi.new("TPMT_TK_VERIFIED **")
         _chkrc(
             lib.Esys_VerifySignature(
@@ -1663,12 +1671,12 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                digest,
-                signature,
+                digest_cdata,
+                signature_cdata,
                 validation,
             )
         )
-        return get_ptr(validation)
+        return TPMT_TK_VERIFIED(get_ptr(validation))
 
     def Sign(
         self,

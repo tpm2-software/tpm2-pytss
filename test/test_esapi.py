@@ -3148,6 +3148,53 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.Sign(sign_handle, digest, scheme, validation, session3=object())
 
+    def test_VerifySignature(self):
+
+        sign_handle = self.ectx.CreatePrimary(
+            TPM2B_SENSITIVE_CREATE(),
+            TPM2B_PUBLIC.parse(
+                "rsa",
+                (
+                    TPMA_OBJECT.USERWITHAUTH
+                    | TPMA_OBJECT.SIGN_ENCRYPT
+                    | TPMA_OBJECT.FIXEDTPM
+                    | TPMA_OBJECT.FIXEDPARENT
+                    | TPMA_OBJECT.SENSITIVEDATAORIGIN
+                ),
+            ),
+        )[0]
+        digest = b"0123456789abcdef0987654321fedcba"
+        scheme = TPMT_SIG_SCHEME(scheme=TPM2_ALG.RSAPSS)
+        scheme.details.any.hashAlg = TPM2_ALG.SHA256
+        validation = TPMT_TK_HASHCHECK(tag=TPM2_ST.HASHCHECK, hierarchy=TPM2_RH.OWNER)
+        signature = self.ectx.Sign(sign_handle, digest, scheme, validation)
+
+        verified = self.ectx.VerifySignature(sign_handle, digest, signature)
+        self.assertEqual(type(verified), TPMT_TK_VERIFIED)
+
+        verified = self.ectx.VerifySignature(
+            sign_handle, TPM2B_DIGEST(digest), signature
+        )
+        self.assertEqual(type(verified), TPMT_TK_VERIFIED)
+
+        with self.assertRaises(TypeError):
+            self.ectx.VerifySignature("nope", digest, signature)
+
+        with self.assertRaises(TypeError):
+            self.ectx.VerifySignature(sign_handle, object(), signature)
+
+        with self.assertRaises(TypeError):
+            self.ectx.VerifySignature(sign_handle, digest, 12.56)
+
+        with self.assertRaises(TypeError):
+            self.ectx.VerifySignature(sign_handle, digest, signature, session1="baz")
+
+        with self.assertRaises(TypeError):
+            self.ectx.VerifySignature(sign_handle, digest, signature, session2=12.3)
+
+        with self.assertRaises(TypeError):
+            self.ectx.VerifySignature(sign_handle, digest, signature, session3={})
+
 
 if __name__ == "__main__":
     unittest.main()
