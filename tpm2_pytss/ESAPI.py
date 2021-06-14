@@ -1676,10 +1676,19 @@ class ESAPI:
         digest,
         inScheme,
         validation,
-        session1=ESYS_TR.NONE,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
+
+        check_handle_type(keyHandle, "keyHandle")
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        digest_cdata = get_cdata(digest, TPM2B_DIGEST, "digest")
+        inScheme_cdata = get_cdata(inScheme, TPMT_SIG_SCHEME, "inScheme")
+        validation_cdata = get_cdata(validation, TPMT_TK_HASHCHECK, "validation")
 
         signature = ffi.new("TPMT_SIGNATURE **")
         _chkrc(
@@ -1689,13 +1698,13 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                digest,
-                inScheme,
-                validation,
+                digest_cdata,
+                inScheme_cdata,
+                validation_cdata,
                 signature,
             )
         )
-        return get_ptr(signature)
+        return TPMT_SIGNATURE(get_ptr(signature))
 
     def SetCommandCodeAuditStatus(
         self,
