@@ -3100,6 +3100,54 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.Commit(signHandle, P1, s2, y2, session3=67.5)
 
+    def test_Sign(self):
+
+        sign_handle = self.ectx.CreatePrimary(
+            TPM2B_SENSITIVE_CREATE(),
+            TPM2B_PUBLIC.parse(
+                "rsa",
+                (
+                    TPMA_OBJECT.USERWITHAUTH
+                    | TPMA_OBJECT.SIGN_ENCRYPT
+                    | TPMA_OBJECT.FIXEDTPM
+                    | TPMA_OBJECT.FIXEDPARENT
+                    | TPMA_OBJECT.SENSITIVEDATAORIGIN
+                ),
+            ),
+        )[0]
+        digest = b"0123456789abcdef0987654321fedcba"
+        scheme = TPMT_SIG_SCHEME(scheme=TPM2_ALG.RSAPSS)
+        scheme.details.any.hashAlg = TPM2_ALG.SHA256
+        validation = TPMT_TK_HASHCHECK(tag=TPM2_ST.HASHCHECK, hierarchy=TPM2_RH.OWNER)
+        signature = self.ectx.Sign(sign_handle, digest, scheme, validation)
+        self.assertEqual(type(signature), TPMT_SIGNATURE)
+
+        signature = self.ectx.Sign(
+            sign_handle, TPM2B_DIGEST(digest), scheme, validation
+        )
+        self.assertEqual(type(signature), TPMT_SIGNATURE)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Sign("not valid", digest, scheme, validation)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Sign(sign_handle, object, scheme, validation)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Sign(sign_handle, digest, "not a scheme", validation)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Sign(sign_handle, digest, scheme, list())
+
+        with self.assertRaises(TypeError):
+            self.ectx.Sign(sign_handle, digest, scheme, validation, session1="baz")
+
+        with self.assertRaises(TypeError):
+            self.ectx.Sign(sign_handle, digest, scheme, validation, session2=56.5)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Sign(sign_handle, digest, scheme, validation, session3=object())
+
 
 if __name__ == "__main__":
     unittest.main()
