@@ -3236,6 +3236,22 @@ class TestEsys(TSS2_EsapiTest):
                 TPM2_ALG.SHA256, TPML_CC(), TPML_CC(), session3=[]
             )
 
+    def test_PCR_Extend(self):
+
+        digests = TPML_DIGEST_VALUES(
+            [
+                TPMT_HA(
+                    hashAlg=TPM2_ALG.SHA1, digest=TPMU_HA(sha1=b"0123456789abcdeffedc")
+                ),
+                TPMT_HA(
+                    hashAlg=TPM2_ALG.SHA256,
+                    digest=TPMU_HA(sha256=b"0123456789abcdeffedcba9876543210"),
+                ),
+            ]
+        )
+
+        self.ectx.PCR_Extend(ESYS_TR.PCR16, digests)
+
 
 if __name__ == "__main__":
     unittest.main()
