@@ -3195,6 +3195,47 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.VerifySignature(sign_handle, digest, signature, session3={})
 
+    def test_SetCommandCodeAuditStatus(self):
+
+        self.ectx.SetCommandCodeAuditStatus(TPM2_ALG.SHA256, TPML_CC(), TPML_CC())
+
+        with self.assertRaises(TypeError):
+            self.ectx.SetCommandCodeAuditStatus(42.6, TPML_CC(), TPML_CC())
+
+        with self.assertRaises(ValueError):
+            self.ectx.SetCommandCodeAuditStatus(42, TPML_CC(), TPML_CC())
+
+        with self.assertRaises(TypeError):
+            self.ectx.SetCommandCodeAuditStatus(TPM2_ALG.SHA256, TPML_ALG(), TPML_CC())
+
+        with self.assertRaises(TypeError):
+            self.ectx.SetCommandCodeAuditStatus(TPM2_ALG.SHA256, TPML_CC(), object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.SetCommandCodeAuditStatus(
+                TPM2_ALG.SHA256, TPML_CC(), TPML_CC(), auth=45.6
+            )
+
+        with self.assertRaises(ValueError):
+            self.ectx.SetCommandCodeAuditStatus(
+                TPM2_ALG.SHA256, TPML_CC(), TPML_CC(), auth=ESYS_TR.ENDORSEMENT
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.SetCommandCodeAuditStatus(
+                TPM2_ALG.SHA256, TPML_CC(), TPML_CC(), session1=45.6
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.SetCommandCodeAuditStatus(
+                TPM2_ALG.SHA256, TPML_CC(), TPML_CC(), session2="baz"
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.SetCommandCodeAuditStatus(
+                TPM2_ALG.SHA256, TPML_CC(), TPML_CC(), session3=[]
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

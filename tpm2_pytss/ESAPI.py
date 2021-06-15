@@ -1716,14 +1716,33 @@ class ESAPI:
 
     def SetCommandCodeAuditStatus(
         self,
-        auth,
         auditAlg,
         setList,
         clearList,
-        session1=ESYS_TR.NONE,
+        auth=ESYS_TR.OWNER,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
+
+        if not isinstance(auth, int):
+            raise TypeError(
+                f"expected auth to be type int aka ESYS_TR, got {type(auth)}"
+            )
+
+        if auth not in [ESYS_TR.OWNER, ESYS_TR.PLATFORM]:
+            raise ValueError(
+                f"expected auth to be one of ESYS_TR.OWNER or ESYS_TR.PLATFORM, got {auth}"
+            )
+
+        check_friendly_int(auditAlg, "auditAlg", TPM2_ALG)
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        setList_cdata = get_cdata(setList, TPML_CC, "setList")
+        clearList_cdata = get_cdata(clearList, TPML_CC, "digest")
 
         _chkrc(
             lib.Esys_SetCommandCodeAuditStatus(
@@ -1733,8 +1752,8 @@ class ESAPI:
                 session2,
                 session3,
                 auditAlg,
-                setList,
-                clearList,
+                setList_cdata,
+                clearList_cdata,
             )
         )
 
