@@ -909,9 +909,12 @@ class TPM_OBJECT(object):
                     f"{self.__class__.__name__} has no field by the name of {k}"
                 )
             cname = fields[k]
-            if cname.kind != "primitive":
+            if cname.kind != "primitive" and cname.kind != "array":
                 clsname = fixup_classname(cname)
-                clazz = globals()[clsname]
+                try:
+                    clazz = globals()[clsname]
+                except Exception as e:
+                    raise e
                 # If subclass object is a TPM2B SIMPLE object, and we have a raw str, or bytes, convert
                 if issubclass(clazz, TPM2B_SIMPLE_OBJECT) and isinstance(
                     v, (str, bytes)

@@ -1228,6 +1228,26 @@ class TypesTest(unittest.TestCase):
 
         self.assertEqual(templ.parameters.rsaDetail.symmetric.algorithm, TPM2_ALG.NULL)
 
+    def test_TPML_DIGEST_VALUES(self):
+
+        sha1 = b"0123456789abcdeffedc"
+        sha256 = b"0123456789abcdeffedcba9876543210"
+
+        digests = TPML_DIGEST_VALUES(
+            [
+                TPMT_HA(hashAlg=TPM2_ALG.SHA1, digest=TPMU_HA(sha1=sha1)),
+                TPMT_HA(hashAlg=TPM2_ALG.SHA256, digest=TPMU_HA(sha256=sha256)),
+            ]
+        )
+
+        self.assertEqual(len(digests), 2)
+
+        self.assertEqual(digests[0].hashAlg, TPM2_ALG.SHA1)
+        self.assertEqual(bytes(digests[0].digest.sha1), sha1)
+
+        self.assertEqual(digests[1].hashAlg, TPM2_ALG.SHA256)
+        self.assertEqual(bytes(digests[1].digest.sha256), sha256)
+
 
 if __name__ == "__main__":
     unittest.main()
