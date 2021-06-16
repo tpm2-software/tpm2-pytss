@@ -54,6 +54,20 @@ class TPM_FRIENDLY_INT(int):
     def contains(cls, value):
         return value in cls.iterator()
 
+    @classmethod
+    def to_string(cls, value):
+        # Take the shortest match, ie OWNER over RH_OWNER.
+        m = None
+        items = vars(cls).items()
+        for k, v in items:
+            if v == value and (m is None or len(k) < len(m)):
+                m = k
+
+        if m is None:
+            raise RuntimeError("Could not match {value} to class {cls}")
+
+        return f"{cls.__name__}.{m}"
+
 
 class TPM_FRIENDLY_INTLIST(TPM_FRIENDLY_INT):
     @classmethod
