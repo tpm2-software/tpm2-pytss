@@ -64,7 +64,7 @@ class TPM_FRIENDLY_INT(int):
                 m = k
 
         if m is None:
-            raise RuntimeError("Could not match {value} to class {cls}")
+            raise ValueError(f"Could not match {value} to class {cls}")
 
         return f"{cls.__name__}.{m}"
 

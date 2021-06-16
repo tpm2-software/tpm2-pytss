@@ -43,11 +43,19 @@ def get_cdata(value, expected, varname, allow_none=False, *args, **kwargs):
     return value._cdata
 
 
-def check_handle_type(handle, varname):
+def check_handle_type(handle, varname, expected=None, cls=ESYS_TR):
     if not isinstance(handle, int):
         raise TypeError(
             f"expected {varname} to be type int aka ESYS_TR, got {type(handle)}"
         )
+
+    if expected is not None and handle not in expected:
+        if len(expected) > 1:
+            msg = f"expected {varname} to be one of {','.join([cls.to_string(x) for x in expected])}, got {cls.to_string(handle)}"
+        else:
+            msg = f"expected {varname} to be {cls.to_string(expected[0])}, got {cls.to_string(handle)}"
+
+        raise ValueError(msg)
 
 
 def check_friendly_int(friendly, varname, clazz):
