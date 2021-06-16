@@ -133,6 +133,18 @@ class TestEsys(TSS2_EsapiTest):
         for d in digests[1:]:
             self.assertEqual(len(d), 32)
 
+        with self.assertRaises(TypeError):
+            self.ectx.PCR_Read(TPML_AC_CAPABILITIES())
+
+        with self.assertRaises(TypeError):
+            self.ectx.PCR_Read(pcrsels, session1="bar")
+
+        with self.assertRaises(TypeError):
+            self.ectx.PCR_Read(pcrsels, session2=56.7)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PCR_Read(pcrsels, session3=object())
+
     def test_plain_NV_define_write_read_undefine(self):
 
         nv_public = TPM2B_NV_PUBLIC(
