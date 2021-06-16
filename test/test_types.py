@@ -305,6 +305,8 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(ESYS_TR.parse("owner"), ESYS_TR.OWNER)
         self.assertEqual(ESYS_TR.parse("NuLL"), ESYS_TR.NULL)
 
+        self.assertEqual(ESYS_TR.to_string(ESYS_TR.OWNER), "ESYS_TR.OWNER")
+
         with self.assertRaises(RuntimeError):
             ESYS_TR.parse("")
 
