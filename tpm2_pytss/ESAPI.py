@@ -1859,12 +1859,21 @@ class ESAPI:
 
     def PCR_Allocate(
         self,
-        authHandle,
         pcrAllocation,
-        session1=ESYS_TR.NONE,
+        authHandle=ESYS_TR.PLATFORM,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
+
+        check_handle_type(authHandle, "authHandle", expected=[ESYS_TR.PLATFORM])
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        pcrAllocation_cdata = get_cdata(
+            pcrAllocation, TPML_PCR_SELECTION, "pcrAllocation"
+        )
 
         allocationSuccess = ffi.new("TPMI_YES_NO *")
         maxPCR = ffi.new("UINT32 *")
@@ -1877,14 +1886,14 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                pcrAllocation,
+                pcrAllocation_cdata,
                 allocationSuccess,
                 maxPCR,
                 sizeNeeded,
                 sizeAvailable,
             )
         )
-        return (allocationSuccess[0], maxPCR[0], sizeNeeded[0], sizeAvailable[0])
+        return (bool(allocationSuccess[0]), maxPCR[0], sizeNeeded[0], sizeAvailable[0])
 
     def PCR_SetAuthPolicy(
         self,

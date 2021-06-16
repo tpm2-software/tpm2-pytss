@@ -3293,6 +3293,34 @@ class TestEsys(TSS2_EsapiTest):
                 ESYS_TR.PCR0, b"01234567890123456789", session3=TPML_ALG()
             )
 
+    def test_PCR_Allocate(self):
+
+        pcrsels = TPML_PCR_SELECTION.parse("sha1:3+sha256:all")
+
+        success, max_, needed, available = self.ectx.PCR_Allocate(pcrsels)
+        self.assertEqual(type(success), bool)
+        self.assertEqual(type(max_), int)
+        self.assertEqual(type(needed), int)
+        self.assertEqual(type(available), int)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PCR_Allocate(object)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PCR_Allocate(authHandle="foo")
+
+        with self.assertRaises(ValueError):
+            self.ectx.PCR_Allocate(pcrsels, authHandle=ESYS_TR.OWNER)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PCR_Allocate(pcrsels, session1="bar")
+
+        with self.assertRaises(TypeError):
+            self.ectx.PCR_Allocate(pcrsels, session2=12.3)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PCR_Allocate(pcrsels, session3=object())
+
 
 if __name__ == "__main__":
     unittest.main()
