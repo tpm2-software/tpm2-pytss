@@ -1819,6 +1819,14 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        pcrSelectionIn_cdata = get_cdata(
+            pcrSelectionIn, TPML_PCR_SELECTION, "pcrSelectionIn"
+        )
+
         pcrUpdateCounter = ffi.new("UINT32 *")
         pcrSelectionOut = ffi.new("TPML_PCR_SELECTION **")
         pcrValues = ffi.new("TPML_DIGEST **")
@@ -1828,7 +1836,7 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                pcrSelectionIn._cdata,
+                pcrSelectionIn_cdata,
                 pcrUpdateCounter,
                 pcrSelectionOut,
                 pcrValues,
