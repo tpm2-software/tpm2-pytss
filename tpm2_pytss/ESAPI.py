@@ -129,16 +129,12 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
-        if not isinstance(shutdownType, int):
-            raise TypeError(
-                f"Expected shutdownType to be int, got {type(shutdownType)}"
-            )
-
-        if shutdownType not in [TPM2_SU.STATE, TPM2_SU.CLEAR]:
-            raise ValueError(
-                f"Expected shutdownType to be TPM2_SU.STATE or TPM2_SU.CLEAR, got {shutdownType}"
-            )
-
+        check_handle_type(
+            shutdownType,
+            "shutdownType",
+            expected=[TPM2_SU.STATE, TPM2_SU.CLEAR],
+            cls=TPM2_SU,
+        )
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
