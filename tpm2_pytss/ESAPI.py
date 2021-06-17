@@ -1720,15 +1720,7 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
-        if not isinstance(auth, int):
-            raise TypeError(
-                f"expected auth to be type int aka ESYS_TR, got {type(auth)}"
-            )
-
-        if auth not in [ESYS_TR.OWNER, ESYS_TR.PLATFORM]:
-            raise ValueError(
-                f"expected auth to be one of ESYS_TR.OWNER or ESYS_TR.PLATFORM, got {auth}"
-            )
+        check_handle_type(auth, "auth", expected=[ESYS_TR.OWNER, ESYS_TR.PLATFORM])
 
         check_friendly_int(auditAlg, "auditAlg", TPM2_ALG)
 
