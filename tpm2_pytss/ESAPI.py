@@ -1544,16 +1544,13 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(privacyAdminHandle, "privacyAdminHandle")
+        check_handle_type(
+            privacyAdminHandle, "privacyAdminHandle", expected=[ESYS_TR.ENDORSEMENT]
+        )
         check_handle_type(signHandle, "signHandle")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
-
-        if privacyAdminHandle != ESYS_TR.RH_ENDORSEMENT:
-            raise ValueError(
-                f"Expected privacyAdminHandle to be ESYS_TR.TPM_RH_ENDORSEMENT, got {privacyAdminHandle}"
-            )
 
         qualifyingData_cdata = get_cdata(
             qualifyingData, TPM2B_DATA, "qualifyingData", allow_none=True
