@@ -2773,8 +2773,7 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
-        if not isinstance(capability, int):
-            raise TypeError(f"Expected capability to be an int, got {type(capability)}")
+        check_friendly_int(capability, "capability", TPM2_CAP)
 
         if not isinstance(prop, int):
             raise TypeError(f"Expected prop to be an int, got {type(prop)}")
