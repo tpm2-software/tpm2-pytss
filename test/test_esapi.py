@@ -3392,6 +3392,25 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.PCR_SetAuthValue(ESYS_TR.PCR20, b"password", session3=43.2)
 
+    def test_PCR_Reset(self):
+
+        self.ectx.PCR_Reset(ESYS_TR.PCR16)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PCR_Reset(42.0)
+
+        with self.assertRaises(ValueError):
+            self.ectx.PCR_Reset(42)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PCR_Reset(ESYS_TR.PCR20, session1="bar")
+
+        with self.assertRaises(TypeError):
+            self.ectx.PCR_Reset(ESYS_TR.PCR20, session2=object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.PCR_Reset(ESYS_TR.PCR20, session3=45.6)
+
 
 if __name__ == "__main__":
     unittest.main()
