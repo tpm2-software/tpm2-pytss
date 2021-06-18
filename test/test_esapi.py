@@ -3321,6 +3321,51 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.PCR_Allocate(pcrsels, session3=object())
 
+    def test_PCR_SetAuthPolicy(self):
+
+        policy = b"0123456789ABCDEF0123456789ABCDEF"
+        self.ectx.PCR_SetAuthPolicy(policy, TPM2_ALG.SHA256, ESYS_TR.PCR20)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PCR_SetAuthPolicy(object, TPM2_ALG.SHA256, ESYS_TR.PCR20)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PCR_SetAuthPolicy(policy, "bar", ESYS_TR.PCR20)
+
+        with self.assertRaises(ValueError):
+            self.ectx.PCR_SetAuthPolicy(policy, 42, ESYS_TR.PCR20)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PCR_SetAuthPolicy(policy, TPM2_ALG.SHA256, "baz")
+
+        with self.assertRaises(ValueError):
+            self.ectx.PCR_SetAuthPolicy(policy, TPM2_ALG.SHA256, 42)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PCR_SetAuthPolicy(
+                policy, TPM2_ALG.SHA256, ESYS_TR.PCR20, authHandle="foo"
+            )
+
+        with self.assertRaises(ValueError):
+            self.ectx.PCR_SetAuthPolicy(
+                policy, TPM2_ALG.SHA256, ESYS_TR.PCR20, authHandle=ESYS_TR.OWNER
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PCR_SetAuthPolicy(
+                policy, TPM2_ALG.SHA256, ESYS_TR.PCR20, session1="bar"
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PCR_SetAuthPolicy(
+                policy, TPM2_ALG.SHA256, ESYS_TR.PCR20, session2=12.3
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PCR_SetAuthPolicy(
+                policy, TPM2_ALG.SHA256, ESYS_TR.PCR20, session3=object()
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
