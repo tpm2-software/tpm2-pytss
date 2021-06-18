@@ -3366,6 +3366,32 @@ class TestEsys(TSS2_EsapiTest):
                 policy, TPM2_ALG.SHA256, ESYS_TR.PCR20, session3=object()
             )
 
+    def test_PCR_SetAuthValue(self):
+
+        self.ectx.PCR_SetAuthValue(ESYS_TR.PCR20, b"password")
+        self.ectx.setAuth(ESYS_TR.PCR20, b"password")
+        self.ectx.PCR_SetAuthValue(ESYS_TR.PCR20, "password")
+        self.ectx.setAuth(ESYS_TR.PCR20, "password")
+        self.ectx.PCR_SetAuthValue(ESYS_TR.PCR20, TPM2B_DIGEST("password"))
+
+        with self.assertRaises(TypeError):
+            self.ectx.PCR_SetAuthValue("bar", b"password")
+
+        with self.assertRaises(ValueError):
+            self.ectx.PCR_SetAuthValue(42, b"password")
+
+        with self.assertRaises(TypeError):
+            self.ectx.PCR_SetAuthValue(ESYS_TR.PCR20, object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.PCR_SetAuthValue(ESYS_TR.PCR20, b"password", session1="bar")
+
+        with self.assertRaises(TypeError):
+            self.ectx.PCR_SetAuthValue(ESYS_TR.PCR20, b"password", session2={})
+
+        with self.assertRaises(TypeError):
+            self.ectx.PCR_SetAuthValue(ESYS_TR.PCR20, b"password", session3=43.2)
+
 
 if __name__ == "__main__":
     unittest.main()
