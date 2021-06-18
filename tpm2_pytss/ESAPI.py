@@ -1876,14 +1876,25 @@ class ESAPI:
 
     def PCR_SetAuthPolicy(
         self,
-        authHandle,
         authPolicy,
         hashAlg,
         pcrNum,
-        session1=ESYS_TR.NONE,
+        authHandle=ESYS_TR.PLATFORM,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
+
+        check_handle_type(authHandle, "authHandle", expected=[ESYS_TR.PLATFORM])
+
+        check_friendly_int(hashAlg, "hashAlg", TPM2_ALG)
+        check_friendly_int(pcrNum, "pcrNum", ESYS_TR)
+
+        authPolicy_cdata = get_cdata(authPolicy, TPM2B_DIGEST, "authPolicy")
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
 
         _chkrc(
             lib.Esys_PCR_SetAuthPolicy(
@@ -1892,7 +1903,7 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                authPolicy,
+                authPolicy_cdata,
                 hashAlg,
                 pcrNum,
             )
