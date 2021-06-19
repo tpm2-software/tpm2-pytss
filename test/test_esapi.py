@@ -3641,6 +3641,12 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.ClearControl(ESYS_TR.RH_LOCKOUT, b"bad")
 
+    def test_gettcti(self):
+        tcti = self.ectx.GetTcti()
+        self.assertTrue(isinstance(tcti, TCTI))
+
+        self.assertEqual(tcti, self.ectx.tcti)
+
 
 if __name__ == "__main__":
     unittest.main()

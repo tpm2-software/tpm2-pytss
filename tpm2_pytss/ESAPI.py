@@ -7,6 +7,7 @@ from ._libtpm2_pytss import lib
 from .types import *
 
 from .utils import _chkrc, TPM2B_pack
+from .TCTI import TCTI
 
 
 def get_ptr(dptr):
@@ -72,7 +73,8 @@ def check_friendly_int(friendly, varname, clazz):
 class ESAPI:
     def __init__(self, tcti=None):
 
-        tctx = ffi.NULL if tcti is None else tcti.ctx
+        self._tcti = tcti
+        tctx = ffi.NULL if tcti is None else tcti._tcti_context
 
         self.ctx_pp = ffi.new("ESYS_CONTEXT **")
         _chkrc(lib.Esys_Initialize(self.ctx_pp, tctx, ffi.NULL))
@@ -87,6 +89,17 @@ class ESAPI:
     def close(self):
         lib.Esys_Finalize(self.ctx_pp)
         self.ctx = ffi.NULL
+
+    def GetTcti(self):
+        if hasattr(self._tcti, "_tcti_context"):
+            return self._tcti
+        tctx = ffi.new("TSS2_TCTI_CONTEXT **")
+        _chkrc(lib.Esys_GetTcti(self.ctx, tctx))
+        return TCTI(tctx[0])
+
+    @property
+    def tcti(self):
+        return self.GetTcti()
 
     def TR_FromTPMPublic(
         self,
