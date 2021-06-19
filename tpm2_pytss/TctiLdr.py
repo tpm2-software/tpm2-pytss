@@ -3,11 +3,11 @@ SPDX-License-Identifier: BSD-2
 """
 
 from ._libtpm2_pytss import lib, ffi
-
+from .TCTI import TCTI
 from .utils import _chkrc
 
 
-class TctiLdr:
+class TctiLdr(TCTI):
     def __init__(self, name=None, conf=None):
 
         self._ctx_pp = ffi.new("TSS2_TCTI_CONTEXT **")
@@ -29,7 +29,9 @@ class TctiLdr:
             raise RuntimeError(f"name must be of type bytes, got {type(name)}")
 
         _chkrc(lib.Tss2_TctiLdr_Initialize_Ex(name, conf, self._ctx_pp))
-        self._ctx = self._ctx_pp[0]
+        super().__init__(self._ctx_pp[0])
+        self._name = name.decode()
+        self._conf = conf.decode()
 
     def __enter__(self):
         return self
@@ -42,5 +44,9 @@ class TctiLdr:
         self._ctx = ffi.NULL
 
     @property
-    def ctx(self):
-        return self._ctx
+    def name(self):
+        return self._name
+
+    @property
+    def conf(self):
+        return self._conf

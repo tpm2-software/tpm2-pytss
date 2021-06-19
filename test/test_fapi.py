@@ -5,7 +5,6 @@ SPDX-License-Identifier: BSD-2
 import binascii
 import random
 import string
-from types import SimpleNamespace
 
 import pkgconfig
 
@@ -71,10 +70,7 @@ def init_fapi(request, fapi):
 class TestFapi:
     @pytest.fixture
     def esys(self):
-        # TODO ESAPI should accept either a cdata obj or a dedicated TCTI class, not TctiLdr!
-        tcti = SimpleNamespace()
-        tcti.ctx = self.fapi.tcti
-        with ESAPI(tcti=tcti) as esys:
+        with ESAPI(tcti=self.fapi.tcti) as esys:
             yield esys
 
     @pytest.fixture

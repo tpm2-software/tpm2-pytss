@@ -12,6 +12,7 @@ from ._libtpm2_pytss import ffi, lib
 from .callbacks import Callback, CallbackType, get_callback, unlock_callback
 from .fapi_info import FapiInfo
 from .utils import _chkrc, to_bytes_or_null
+from .TCTI import TCTI
 
 logger = logging.getLogger(__name__)
 
@@ -178,7 +179,7 @@ class FAPI:
         # returns the actual tcti context, not a copy (so no extra memory is allocated by the fapi)
         ret = lib.Fapi_GetTcti(self.ctx, tcti)
         _chkrc(ret)
-        return tcti[0]
+        return TCTI(tcti[0])
 
     def provision(
         self,
