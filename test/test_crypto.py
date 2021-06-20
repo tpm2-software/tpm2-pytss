@@ -127,6 +127,19 @@ MAn8wE6kuW3EouVvBt+/2O+szxMe4vxj8R6TDCYCMG7c9ov86ll/jDlJb/q0L4G+
 -----END CERTIFICATE-----
 """
 
+ssh_ecc_public = b"ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBOhMD+1HRoFoPTyGrldrZf0iZh2HjMzpm8oNioTIVDDpxHVb1+fW31P+iz8aUAdO25Nr01aWfPPrF869Zd5d9Yw="
+ssh_ecc_private = b"""
+-----BEGIN OPENSSH PRIVATE KEY-----
+b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAaAAAABNlY2RzYS
+1zaGEyLW5pc3RwMjU2AAAACG5pc3RwMjU2AAAAQQToTA/tR0aBaD08hq5Xa2X9ImYdh4zM
+6ZvKDYqEyFQw6cR1W9fn1t9T/os/GlAHTtuTa9NWlnzz6xfOvWXeXfWMAAAAqE5gSiZOYE
+omAAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBOhMD+1HRoFoPTyG
+rldrZf0iZh2HjMzpm8oNioTIVDDpxHVb1+fW31P+iz8aUAdO25Nr01aWfPPrF869Zd5d9Y
+wAAAAhAMBHdu575J/t4f/y9jqaPawioLJTCqQcd2MWdLcAbhPlAAAACndob0BzdmFsYW4B
+AgMEBQ==
+-----END OPENSSH PRIVATE KEY-----
+"""
+
 
 class CryptoTest(TSS2_EsapiTest):
     def test_public_from_pem_rsa(self):
@@ -465,3 +478,13 @@ class CryptoTest(TSS2_EsapiTest):
         self.assertEqual(
             str(e.exception), f"unsupported symmetric algorithm {TPM2_ALG.LAST + 1}"
         )
+
+    def test_ssh_key_ecc(self):
+        eccpub = TPM2B_PUBLIC.fromPEM(ssh_ecc_public)
+        self.assertEqual(eccpub.publicArea.type, types.TPM2_ALG.ECC)
+        self.assertEqual(
+            eccpub.publicArea.parameters.eccDetail.curveID, types.TPM2_ECC.NIST_P256
+        )
+
+        eccsens = TPM2B_SENSITIVE.fromPEM(ssh_ecc_private)
+        self.assertEqual(eccsens.sensitiveArea.sensitiveType, types.TPM2_ALG.ECC)

@@ -11,6 +11,8 @@ from cryptography.hazmat.primitives.serialization import (
     load_der_private_key,
     load_pem_public_key,
     load_der_public_key,
+    load_ssh_public_key,
+    load_ssh_private_key,
     Encoding,
     PublicFormat,
 )
@@ -89,6 +91,8 @@ def key_from_encoding(data):
         key = cert.public_key()
     elif sdata.startswith(b"-----BEGIN PUBLIC KEY-----"):
         key = load_pem_public_key(data, backend=default_backend())
+    elif sdata.startswith(b"ssh-") or sdata.startswith(b"ecdsa-sha2-"):
+        key = load_ssh_public_key(data, backend=default_backend())
     else:
         try:
             cert = load_der_x509_certificate(data, backend=default_backend())
@@ -136,6 +140,8 @@ def private_key_from_encoding(data):
         b"-----BEGIN EC PRIVATE KEY-----"
     ):
         key = load_pem_private_key(sdata, password=None, backend=default_backend())
+    elif sdata.startswith(b"-----BEGIN OPENSSH PRIVATE KEY-----"):
+        key = load_ssh_private_key(sdata, password=None, backend=default_backend())
     else:
         try:
             key = load_der_private_key(data, password=None, backend=default_backend())
