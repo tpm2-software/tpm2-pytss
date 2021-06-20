@@ -140,6 +140,18 @@ AgMEBQ==
 -----END OPENSSH PRIVATE KEY-----
 """
 
+rsa_three_exponent = b"""
+-----BEGIN PUBLIC KEY-----
+MIIBIDANBgkqhkiG9w0BAQEFAAOCAQ0AMIIBCAKCAQEAlxQ6vHpzuhFpXRkI0Xyg
+nK1OR94kJlU+8On+JM1CjLpMORSAUJ+/SazftAUahmgjJ/7cnXN4P4SIDzEHGll0
+wvrJS9d7ladGHYP09kjXyZex3NXUahqmn6kFAHhbdHHIDsMr1cO021gCUDKuJV3X
+3T2rqtc+0ZbFhg/Rp70WSAD84kaYP5jaBDNvK3t7DhGvMvkXY6SmFt045yHyDGfg
+YE1bW8Ji+NxLIXJ/PmUBOFUaV6//32ywiDM6Sri89k/AV/gFRcTVHKgVrvkkFo9M
+62I2eXz60GrWEs7HHDH4JrsUSDzwvQkYflnMOtbDRkhWs8JOI9/Su/T6rcYRbgiz
+XQIBAw==
+-----END PUBLIC KEY-----
+"""
+
 
 class CryptoTest(TSS2_EsapiTest):
     def test_public_from_pem_rsa(self):
@@ -509,3 +521,7 @@ class CryptoTest(TSS2_EsapiTest):
         with self.assertRaises(ValueError) as e:
             pub.toPEM(encoding="madeup")
         self.assertEqual(str(e.exception), "unsupported encoding: madeup")
+
+    def test_rsa_exponent(self):
+        pub = TPMT_PUBLIC.fromPEM(rsa_three_exponent)
+        self.assertEqual(pub.parameters.rsaDetail.exponent, 3)
