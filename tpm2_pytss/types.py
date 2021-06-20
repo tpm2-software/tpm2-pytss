@@ -1637,8 +1637,8 @@ class TPMT_PUBLIC(TPM_OBJECT):
             p.parameters.eccDetail.kdf.scheme = TPM2_ALG.NULL
         return p
 
-    def toPEM(self):
-        return public_to_pem(self)
+    def toPEM(self, encoding="pem"):
+        return public_to_pem(self, encoding)
 
     def getName(self):
         name = getname(self)
@@ -1738,8 +1738,8 @@ class TPM2B_PUBLIC(TPM_OBJECT):
         p = cls(publicArea=pa)
         return p
 
-    def toPEM(self):
-        return self.publicArea.toPEM()
+    def toPEM(self, encoding="pem"):
+        return self.publicArea.toPEM(encoding)
 
     def getName(self):
         return self.publicArea.getName()

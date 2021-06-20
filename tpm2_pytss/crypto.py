@@ -192,9 +192,17 @@ def public_to_key(obj):
     return key
 
 
-def public_to_pem(obj):
+def public_to_pem(obj, encoding="pem"):
+    encoding = encoding.lower()
     key = public_to_key(obj)
-    return key.public_bytes(Encoding.PEM, PublicFormat.SubjectPublicKeyInfo)
+    if encoding == "pem":
+        return key.public_bytes(Encoding.PEM, PublicFormat.SubjectPublicKeyInfo)
+    elif encoding == "der":
+        return key.public_bytes(Encoding.DER, PublicFormat.SubjectPublicKeyInfo)
+    elif encoding == "ssh":
+        return key.public_bytes(Encoding.OpenSSH, PublicFormat.OpenSSH)
+    else:
+        raise ValueError(f"unsupported encoding: {encoding}")
 
 
 def getname(obj):

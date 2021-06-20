@@ -488,3 +488,19 @@ class CryptoTest(TSS2_EsapiTest):
 
         eccsens = TPM2B_SENSITIVE.fromPEM(ssh_ecc_private)
         self.assertEqual(eccsens.sensitiveArea.sensitiveType, types.TPM2_ALG.ECC)
+
+    def test_topem_encodings(self):
+        pub = types.TPM2B_PUBLIC.fromPEM(ecc_public_key)
+
+        pem = pub.toPEM(encoding="PEM")
+        self.assertTrue(pem.startswith(b"-----BEGIN PUBLIC KEY-----"))
+
+        der = pub.toPEM(encoding="der")
+        self.assertTrue(der.startswith(b"0Y0\x13\x06\x07"))
+
+        ssh = pub.toPEM(encoding="ssh")
+        self.assertTrue(ssh.startswith(b"ecdsa-sha2-nistp256"))
+
+        with self.assertRaises(ValueError) as e:
+            pub.toPEM(encoding="madeup")
+        self.assertEqual(str(e.exception), "unsupported encoding: madeup")
