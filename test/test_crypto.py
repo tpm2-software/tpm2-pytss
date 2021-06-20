@@ -290,6 +290,11 @@ class CryptoTest(TSS2_EsapiTest):
 
         self.assertEqual(ename.name, oname.name)
 
+        pub.publicArea.nameAlg = TPM2_ALG.ERROR
+        with self.assertRaises(ValueError) as e:
+            pub.getName()
+        self.assertEqual(str(e.exception), "unsupported digest algorithm: 0")
+
     def test_nv_getname(self):
         nv = TPMS_NV_PUBLIC(
             nvIndex=0x1000000,

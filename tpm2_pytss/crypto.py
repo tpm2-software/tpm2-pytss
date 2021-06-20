@@ -208,7 +208,7 @@ def public_to_pem(obj, encoding="pem"):
 def getname(obj):
     dt = _get_digest(obj.nameAlg)
     if dt is None:
-        raise ValueError(f"unsupported digest algorithm: {dt}")
+        raise ValueError(f"unsupported digest algorithm: {obj.nameAlg}")
     d = hashes.Hash(dt(), backend=default_backend())
     mb = obj.Marshal()
     d.update(mb)
