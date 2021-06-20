@@ -152,6 +152,13 @@ XQIBAw==
 -----END PUBLIC KEY-----
 """
 
+ecc_bad_curve = b"""
+-----BEGIN PUBLIC KEY-----
+MEAwEAYHKoZIzj0CAQYFK4EEAA8DLAAEAH/ZAcztuiVJUsbprwXEyeHDzNscA7bn
+wF24s98qYmAu3ENjz6XPl/xv
+-----END PUBLIC KEY-----
+"""
+
 
 class CryptoTest(TSS2_EsapiTest):
     def test_public_from_pem_rsa(self):
@@ -525,3 +532,14 @@ class CryptoTest(TSS2_EsapiTest):
     def test_rsa_exponent(self):
         pub = TPMT_PUBLIC.fromPEM(rsa_three_exponent)
         self.assertEqual(pub.parameters.rsaDetail.exponent, 3)
+
+    def test_ecc_bad_curves(self):
+        with self.assertRaises(ValueError) as e:
+            pub = TPMT_PUBLIC.fromPEM(ecc_bad_curve)
+        self.assertEqual(str(e.exception), "unsupported curve: sect163r2")
+
+        pub = TPMT_PUBLIC.fromPEM(ecc_public_key)
+        pub.parameters.eccDetail.curveID = TPM2_ECC.NONE
+        with self.assertRaises(ValueError) as e:
+            pub.toPEM()
+        self.assertEqual(str(e.exception), "unsupported curve: 0")

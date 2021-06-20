@@ -29,9 +29,6 @@ _curvetable = (
     (lib.TPM2_ECC_NIST_P256, ec.SECP256R1),
     (lib.TPM2_ECC_NIST_P384, ec.SECP384R1),
     (lib.TPM2_ECC_NIST_P521, ec.SECP521R1),
-    (lib.TPM2_ECC_BN_P256, None),
-    (lib.TPM2_ECC_BN_P638, None),
-    (lib.TPM2_ECC_SM2_P256, None),
 )
 
 _digesttable = (
@@ -179,9 +176,7 @@ def public_to_key(obj):
     elif obj.type == lib.TPM2_ALG_ECC:
         curve = _get_curve(obj.parameters.eccDetail.curveID)
         if curve is None:
-            raise ValueError(
-                f"unsupported curve: {obj.publicArea.parameters.eccDetail.curveID}"
-            )
+            raise ValueError(f"unsupported curve: {obj.parameters.eccDetail.curveID}")
         x = int.from_bytes(obj.unique.ecc.x, byteorder="big")
         y = int.from_bytes(obj.unique.ecc.y, byteorder="big")
         nums = ec.EllipticCurvePublicNumbers(x, y, curve())
