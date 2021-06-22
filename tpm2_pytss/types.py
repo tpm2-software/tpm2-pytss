@@ -2198,3 +2198,11 @@ class TPMU_SIG_SCHEME(TPM_OBJECT):
 
 class TPMT_TK_VERIFIED(TPM_OBJECT):
     pass
+
+
+class TPM2B_TIMEOUT(TPM_OBJECT):
+    pass
+
+
+class TPMT_TK_AUTH(TPM_OBJECT):
+    pass
