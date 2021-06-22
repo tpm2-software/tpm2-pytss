@@ -617,6 +617,27 @@ class TypesTest(unittest.TestCase):
 
         self.assertEqual(templ.parameters.rsaDetail.symmetric.algorithm, TPM2_ALG.NULL)
 
+    def test_TPMT_PUBLIC_parse_rsa_rsapss(self):
+
+        templ = TPMT_PUBLIC.parse(
+            "rsa:rsapss:null", TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS
+        )
+        self.assertEqual(templ.nameAlg, TPM2_ALG.SHA256)
+        self.assertEqual(
+            templ.objectAttributes, TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS
+        )
+
+        self.assertEqual(templ.type, TPM2_ALG.RSA)
+
+        self.assertEqual(templ.type, TPM2_ALG.RSA)
+        self.assertEqual(templ.parameters.rsaDetail.keyBits, 2048)
+        self.assertEqual(templ.parameters.asymDetail.scheme.scheme, TPM2_ALG.RSAPSS)
+        self.assertEqual(
+            templ.parameters.asymDetail.scheme.details.anySig.hashAlg, TPM2_ALG.SHA256
+        )
+
+        self.assertEqual(templ.parameters.rsaDetail.symmetric.algorithm, TPM2_ALG.NULL)
+
     def test_TPMT_PUBLIC_parse_rsa_keysizes(self):
 
         for keysize in [1024, 2048, 3072, 4096]:
