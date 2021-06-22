@@ -1411,17 +1411,18 @@ class TPMT_PUBLIC(TPM_OBJECT):
 
         halg = ""
         # rsaes must match exactly takes no other params
-        if scheme == "rsapss":
+        if scheme == "rsaaes":
             templ.parameters.asymDetail.scheme.scheme = TPM2_ALG.RSAES
             TPMT_PUBLIC._error_on_conflicting_sign_attrs(templ)
             return
-
-        halg = ""
-        if scheme == "null":
+        elif scheme == "null":
             templ.parameters.asymDetail.scheme.scheme = TPM2_ALG.NULL
         elif scheme.startswith("rsassa"):
             templ.parameters.asymDetail.scheme.scheme = TPM2_ALG.RSASSA
             halg = scheme[len("rsassa") + 1 :]
+        elif scheme.startswith("rsapss"):
+            templ.parameters.asymDetail.scheme.scheme = TPM2_ALG.RSAPSS
+            halg = scheme[len("rsapss") + 1 :]
         else:
             templ.parameters.asymDetail.scheme.scheme = TPM2_ALG.NULL
             raise RuntimeError(
