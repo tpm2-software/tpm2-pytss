@@ -3501,6 +3501,21 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(ValueError):
             self.ectx.ChangeEPS(authHandle=ESYS_TR.RH_OWNER)
 
+    def test_clear(self):
+        self.ectx.Clear(ESYS_TR.RH_LOCKOUT)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Clear(ESYS_TR.RH_LOCKOUT, session1=None)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Clear(ESYS_TR.RH_LOCKOUT, session2=None)
+
+        with self.assertRaises(TypeError):
+            self.ectx.Clear(ESYS_TR.RH_LOCKOUT, session2=None)
+
+        with self.assertRaises(ValueError):
+            self.ectx.Clear(authHandle=ESYS_TR.RH_OWNER)
+
 
 if __name__ == "__main__":
     unittest.main()
