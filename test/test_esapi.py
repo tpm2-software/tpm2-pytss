@@ -3577,6 +3577,21 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(ValueError):
             self.ectx.SetPrimaryPolicy(ESYS_TR.ENDORSEMENT, b"\x00" * 32, TPM2_SE.TRIAL)
 
+    def test_change_pps(self):
+        self.ectx.ChangePPS()
+
+        with self.assertRaises(TypeError):
+            self.ectx.ChangePPS(session1=None)
+
+        with self.assertRaises(TypeError):
+            self.ectx.ChangePPS(session2=None)
+
+        with self.assertRaises(TypeError):
+            self.ectx.ChangePPS(session2=None)
+
+        with self.assertRaises(ValueError):
+            self.ectx.ChangePPS(authHandle=ESYS_TR.RH_OWNER)
+
 
 if __name__ == "__main__":
     unittest.main()
