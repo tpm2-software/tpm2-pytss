@@ -250,6 +250,16 @@ class ESAPI:
 
         _chkrc(lib.Esys_TRSess_SetAttributes(self.ctx, session, attributes, mask))
 
+    def TRSess_GetNonceTPM(self, session):
+
+        check_handle_type(session, "session")
+
+        nonce = ffi.new("TPM2B_NONCE **")
+
+        _chkrc(lib.Esys_TRSess_GetNonceTPM(self.ctx, session, nonce))
+
+        return TPM2B_NONCE(get_ptr(nonce))
+
     def PolicyRestart(
         self,
         sessionHandle,
@@ -1962,6 +1972,24 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(authObject, "authObject")
+
+        check_handle_type(policySession, "policySession")
+
+        if not isinstance(expiration, int):
+            raise TypeError(
+                f"expected expiration to be type int, got {type(expiration)}"
+            )
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        nonceTPM_cdata = get_cdata(nonceTPM, TPM2B_NONCE, "nonceTPM")
+        cpHashA_cdata = get_cdata(cpHashA, TPM2B_DIGEST, "cpHashA")
+        policyRef_cdata = get_cdata(policyRef, TPM2B_NONCE, "policyRef")
+        auth_cdata = get_cdata(auth, TPMT_SIGNATURE, "auth")
+
         timeout = ffi.new("TPM2B_TIMEOUT **")
         policyTicket = ffi.new("TPMT_TK_AUTH **")
         _chkrc(
@@ -1972,16 +2000,16 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                nonceTPM,
-                cpHashA,
-                policyRef,
+                nonceTPM_cdata,
+                cpHashA_cdata,
+                policyRef_cdata,
                 expiration,
-                auth,
+                auth_cdata,
                 timeout,
                 policyTicket,
             )
         )
-        return (get_ptr(timeout), get_ptr(policyTicket))
+        return (TPM2B_TIMEOUT(get_ptr(timeout)), TPMT_TK_AUTH(get_ptr(policyTicket)))
 
     def PolicySecret(
         self,
