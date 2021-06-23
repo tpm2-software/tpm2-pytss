@@ -2486,14 +2486,32 @@ class ESAPI:
         authHandle,
         authPolicy,
         hashAlg,
-        session1=ESYS_TR.NONE,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
+        check_handle_type(
+            authHandle,
+            "authHandle",
+            expected=(ESYS_TR.RH_ENDORSEMENT, ESYS_TR.RH_OWNER, ESYS_TR.RH_PLATFORM),
+        )
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        authPolicy_cdata = get_cdata(authPolicy, TPM2B_DIGEST, "authPolicy")
+        check_friendly_int(hashAlg, "hashAlg", TPM2_ALG)
 
         _chkrc(
             lib.Esys_SetPrimaryPolicy(
-                self.ctx, authHandle, session1, session2, session3, authPolicy, hashAlg
+                self.ctx,
+                authHandle,
+                session1,
+                session2,
+                session3,
+                authPolicy_cdata,
+                hashAlg,
             )
         )
 
