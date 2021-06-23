@@ -3411,6 +3411,37 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.PCR_Reset(ESYS_TR.PCR20, session3=45.6)
 
+    def test_hierarchy_control(self):
+        self.ectx.HierarchyControl(
+            ESYS_TR.RH_ENDORSEMENT, ESYS_TR.RH_ENDORSEMENT, False
+        )
+
+        with self.assertRaises(ValueError):
+            self.ectx.HierarchyControl(ESYS_TR.RH_NULL, ESYS_TR.RH_ENDORSEMENT, False)
+
+        with self.assertRaises(ValueError):
+            self.ectx.HierarchyControl(ESYS_TR.RH_ENDORSEMENT, ESYS_TR.RH_NULL, False)
+
+        with self.assertRaises(TypeError):
+            self.ectx.HierarchyControl(
+                ESYS_TR.RH_ENDORSEMENT, ESYS_TR.RH_ENDORSEMENT, b"bad"
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.HierarchyControl(
+                ESYS_TR.RH_ENDORSEMENT, ESYS_TR.RH_ENDORSEMENT, False, session1=None
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.HierarchyControl(
+                ESYS_TR.RH_ENDORSEMENT, ESYS_TR.RH_ENDORSEMENT, False, session2=None
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.HierarchyControl(
+                ESYS_TR.RH_ENDORSEMENT, ESYS_TR.RH_ENDORSEMENT, False, session3=None
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
