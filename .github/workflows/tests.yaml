@@ -34,7 +34,7 @@ jobs:
         WHITESPACE: 1
       run: ./.ci/run.sh
 
-  style-check:
+  linters:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Repository
@@ -45,7 +45,10 @@ jobs:
         python3 -m pip install --user --upgrade pip
         python3 -m pip install --user --upgrade black==19.10b0 isort
 
-    - name: Check
-      env:
-        STYLE: 1
-      run: ./.ci/run.sh
+    - name: black
+      run: .ci/linters.sh --linters=black --check $(pwd)
+      if: always()
+
+    - name: isort
+      run: .ci/linters.sh --linters=isort --check $(pwd)
+      if: always()

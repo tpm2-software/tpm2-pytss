@@ -1,17 +1,29 @@
 #!/bin/sh
-
-usage () {
-    echo "Usage: $0 [-c|--check] [-h|--help] [PATH]"
-}
+set -ex
 
 DIR=$(pwd)
 CHECK=YES
-while [[ $# -gt 0 ]]; do
+LINTERS="black|isort"
+
+usage () {
+    echo "Usage: $0 [-c|--check] [-l|--linters=black,isort] [-h|--help] [PATH]"
+}
+
+while [ $# -gt 0 ]; do
     key="$1"
 
     case $key in
     -c|--check)
         CHECK=true
+        shift
+        ;;
+    -l|--linters)
+        LINTERS="$2"
+        shift
+        shift
+        ;;
+    -l=*|--linters=*)
+        LINTERS="$1"
         shift
         ;;
     -h|--help)
@@ -39,5 +51,14 @@ if [ "${CHECK}" = true ]; then
     check_isort="--diff --check-only"
 fi
 
-python -m black ${check_black} "${DIR}"
-python -m isort ${check_isort} "${DIR}"
+case "${LINTERS}" in
+    *"black"*)
+    python -m black ${check_black} "${DIR}"
+    ;;
+esac
+
+case "${LINTERS}" in
+    *"isort"*)
+    python -m isort ${check_isort} "${DIR}"
+    ;;
+esac

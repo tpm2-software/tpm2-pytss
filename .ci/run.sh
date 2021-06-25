@@ -66,10 +66,6 @@ function run_whitespace() {
   fi
 }
 
-function run_style() {
-  .ci/linters.sh --check "${SRC_ROOT}"
-}
-
 function run_build_docs() {
 
   docker run --rm \
@@ -84,8 +80,6 @@ if [ "x${TEST}" != "x" ]; then
   run_test
 elif [ "x${WHITESPACE}" != "x" ]; then
   run_whitespace
-elif [ "x${STYLE}" != "x" ]; then
-  run_style
 elif [ "x${DOCS}" != "x" ]; then
   run_build_docs
 elif [ "x${PUBLISH_PKG}" != "x" ]; then
