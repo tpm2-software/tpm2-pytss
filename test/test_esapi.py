@@ -3647,6 +3647,66 @@ class TestEsys(TSS2_EsapiTest):
 
         self.assertEqual(tcti, self.ectx.tcti)
 
+    def test_PolicySecret(self):
+
+        sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL)
+
+        session = self.ectx.StartAuthSession(
+            tpmKey=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            nonceCaller=None,
+            sessionType=TPM2_SE.TRIAL,
+            symmetric=sym,
+            authHash=TPM2_ALG.SHA256,
+        )
+
+        nonce = self.ectx.TRSess_GetNonceTPM(session)
+
+        expiration = -(10 * 365 * 24 * 60 * 60)
+
+        timeout, policyTicket = self.ectx.PolicySecret(
+            ESYS_TR.OWNER, session, nonce, b"", b"", expiration
+        )
+        self.assertTrue(type(timeout), TPM2B_TIMEOUT)
+        self.assertTrue(type(policyTicket), TPMT_TK_AUTH)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicySecret("owner", session, nonce, b"", b"", expiration)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicySecret(ESYS_TR.OWNER, 56.7, nonce, b"", b"", expiration)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicySecret(
+                ESYS_TR.OWNER, session, object(), b"", b"", expiration
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicySecret(
+                ESYS_TR.OWNER, session, nonce, TPM2B_PUBLIC(), b"", expiration
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicySecret(ESYS_TR.OWNER, session, nonce, b"", {}, expiration)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicySecret(ESYS_TR.OWNER, session, nonce, b"", b"", 42.2)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicySecret(
+                ESYS_TR.OWNER, session, nonce, b"", b"", expiration, session1="bar"
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicySecret(
+                ESYS_TR.OWNER, session, nonce, b"", b"", expiration, session2=object()
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicySecret(
+                ESYS_TR.OWNER, session, nonce, b"", b"", expiration, session3=56.7
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

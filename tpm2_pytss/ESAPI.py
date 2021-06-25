@@ -2032,10 +2032,27 @@ class ESAPI:
         cpHashA,
         policyRef,
         expiration,
-        session1=ESYS_TR.NONE,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
+
+        check_handle_type(policySession, "policySession")
+
+        if not isinstance(expiration, int):
+            raise TypeError(
+                f"expected expiration to be type int, got {type(expiration)}"
+            )
+
+        check_friendly_int(authHandle, "authHandle", ESYS_TR)
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        nonceTPM_cdata = get_cdata(nonceTPM, TPM2B_NONCE, "nonceTPM")
+        cpHashA_cdata = get_cdata(cpHashA, TPM2B_DIGEST, "cpHashA")
+        policyRef_cdata = get_cdata(policyRef, TPM2B_NONCE, "policyRef")
 
         timeout = ffi.new("TPM2B_TIMEOUT **")
         policyTicket = ffi.new("TPMT_TK_AUTH **")
@@ -2047,15 +2064,15 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                nonceTPM,
-                cpHashA,
-                policyRef,
+                nonceTPM_cdata,
+                cpHashA_cdata,
+                policyRef_cdata,
                 expiration,
                 timeout,
                 policyTicket,
             )
         )
-        return (get_ptr(timeout), get_ptr(policyTicket))
+        return (TPM2B_TIMEOUT(get_ptr(timeout)), TPMT_TK_AUTH(get_ptr(policyTicket)))
 
     def PolicyTicket(
         self,
