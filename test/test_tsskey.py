@@ -2,14 +2,10 @@
 """
 SPDX-License-Identifier: BSD-3
 """
-import binascii
-import itertools
-import unittest
+from tpm2_pytss.tsskey import TSSPrivKey, parent_ecc_template, parent_rsa_template
+from tpm2_pytss.types import *
 
-from tpm2_pytss import *
-from tpm2_pytss.tsskey import TSSPrivKey, parent_rsa_template, parent_ecc_template
 from .TSS2_BaseTest import TSS2_EsapiTest
-
 
 rsa_pem = b"""-----BEGIN TSS2 PRIVATE KEY-----
 MIIB8gYGZ4EFCgEDoAMBAQECBEAAAAEEggEYARYAAQALAAYEcgAAABAAEAgAAAEA

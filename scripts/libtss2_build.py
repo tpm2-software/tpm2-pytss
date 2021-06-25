@@ -4,9 +4,10 @@ ffibuilder = FFI()
 
 import importlib.util
 import os
-import pkgconfig
 import re
 import sys
+
+import pkgconfig
 
 # import tpm2_pytss.constants
 constants_spec = importlib.util.spec_from_file_location(

@@ -3,25 +3,27 @@ SPDX-License-Identifier: BSD-2
 """
 
 from math import ceil
-from ._libtpm2_pytss import lib
-from cryptography.hazmat.primitives.asymmetric import rsa, ec
+
+from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import ec, rsa
+from cryptography.hazmat.primitives.ciphers import modes
+from cryptography.hazmat.primitives.ciphers.algorithms import AES
+from cryptography.hazmat.primitives.kdf.concatkdf import ConcatKDFHash
+from cryptography.hazmat.primitives.kdf.kbkdf import KBKDFHMAC, CounterLocation, Mode
 from cryptography.hazmat.primitives.serialization import (
-    load_pem_private_key,
-    load_der_private_key,
-    load_pem_public_key,
-    load_der_public_key,
-    load_ssh_public_key,
-    load_ssh_private_key,
     Encoding,
     PublicFormat,
+    load_der_private_key,
+    load_der_public_key,
+    load_pem_private_key,
+    load_pem_public_key,
+    load_ssh_private_key,
+    load_ssh_public_key,
 )
-from cryptography.x509 import load_pem_x509_certificate, load_der_x509_certificate
-from cryptography.hazmat.primitives.kdf.kbkdf import CounterLocation, KBKDFHMAC, Mode
-from cryptography.hazmat.primitives.kdf.concatkdf import ConcatKDFHash
-from cryptography.hazmat.primitives.ciphers.algorithms import AES
-from cryptography.hazmat.primitives.ciphers import modes
-from cryptography.hazmat.backends import default_backend
+from cryptography.x509 import load_der_x509_certificate, load_pem_x509_certificate
+
+from ._libtpm2_pytss import lib
 
 _curvetable = (
     (lib.TPM2_ECC_NIST_P192, ec.SECP192R1),

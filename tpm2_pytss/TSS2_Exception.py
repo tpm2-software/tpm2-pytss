@@ -1,4 +1,4 @@
-from ._libtpm2_pytss import lib, ffi
+from ._libtpm2_pytss import ffi, lib
 
 
 class TSS2_Exception(RuntimeError):

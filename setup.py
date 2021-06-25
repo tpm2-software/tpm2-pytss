@@ -1,5 +1,6 @@
 import site
 import sys
+
 from setuptools import setup
 
 # workaround bug https://github.com/pypa/pip/issues/7953

@@ -3,19 +3,22 @@
 SPDX-License-Identifier: BSD-2
 """
 import binascii
+import json
 import random
 import string
 
 import pkgconfig
-
 import pytest
+from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
-from cryptography.hazmat.backends import default_backend
 
-from tpm2_pytss import *
+from tpm2_pytss._libtpm2_pytss import ffi, lib
+from tpm2_pytss.ESAPI import ESAPI
+from tpm2_pytss.FAPI import FAPI, FapiConfig
+from tpm2_pytss.TSS2_Exception import TSS2_Exception
 
-from .TSS2_BaseTest import TpmSimulator, TSS2_BaseTest
+from .TSS2_BaseTest import TpmSimulator
 
 
 @pytest.fixture(scope="module")

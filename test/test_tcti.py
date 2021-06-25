@@ -3,9 +3,12 @@
 SPDX-License-Identifier: BSD-2
 """
 
-import unittest
+from tpm2_pytss import TctiLdr
+from tpm2_pytss._libtpm2_pytss import ffi, lib
+from tpm2_pytss.TCTI import TCTI
+from tpm2_pytss.TSS2_Exception import TSS2_Exception
+from tpm2_pytss.types import TPMA_LOCALITY
 
-from tpm2_pytss import *
 from .TSS2_BaseTest import TSS2_EsapiTest
 
 

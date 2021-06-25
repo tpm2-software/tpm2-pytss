@@ -2,25 +2,25 @@
 SPDX-License-Identifier: BSD-2
 """
 
-from ._libtpm2_pytss import ffi, lib
+import binascii
 
+from tpm2_pytss.crypto import (
+    getname,
+    private_from_encoding,
+    public_from_encoding,
+    public_to_pem,
+)
 from tpm2_pytss.utils import (
     CLASS_INT_ATTRS_from_string,
     _chkrc,
-    fixup_cdata_kwargs,
-    cpointer_to_ctype,
-    fixup_classname,
     convert_to_python_native,
+    cpointer_to_ctype,
+    fixup_cdata_kwargs,
+    fixup_classname,
     mock_bail,
 )
-from tpm2_pytss.crypto import (
-    public_from_encoding,
-    private_from_encoding,
-    public_to_pem,
-    getname,
-)
 
-import binascii
+from ._libtpm2_pytss import ffi, lib
 
 
 class ParserAttributeError(Exception):

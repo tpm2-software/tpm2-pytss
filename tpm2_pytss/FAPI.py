@@ -11,8 +11,8 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from ._libtpm2_pytss import ffi, lib
 from .callbacks import Callback, CallbackType, get_callback, unlock_callback
 from .fapi_info import FapiInfo
-from .utils import _chkrc, to_bytes_or_null, get_dptr
 from .TCTI import TCTI
+from .utils import _chkrc, get_dptr, to_bytes_or_null
 
 logger = logging.getLogger(__name__)
 

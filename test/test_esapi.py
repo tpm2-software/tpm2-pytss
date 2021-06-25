@@ -2,10 +2,14 @@
 """
 SPDX-License-Identifier: BSD-2
 """
-
+import binascii
 import unittest
 
-from tpm2_pytss import *
+from tpm2_pytss._libtpm2_pytss import ffi, lib
+from tpm2_pytss.TCTI import TCTI
+from tpm2_pytss.TSS2_Exception import TSS2_Exception
+from tpm2_pytss.types import *
+
 from .TSS2_BaseTest import TSS2_EsapiTest
 
 

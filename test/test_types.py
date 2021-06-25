@@ -6,7 +6,8 @@ import binascii
 import itertools
 import unittest
 
-from tpm2_pytss import *
+from tpm2_pytss._libtpm2_pytss import ffi
+from tpm2_pytss.types import *
 
 
 class TypesTest(unittest.TestCase):
@@ -675,7 +676,7 @@ class TypesTest(unittest.TestCase):
         keysizes = [128, 192, 256]
         modes = ["cfb", "cbc", "ofb", "ctr", "ecb"]
 
-        for rsasize, keysize, mode, in list(
+        for (rsasize, keysize, mode,) in list(
             itertools.product(rsasizes, keysizes, modes)
         ):
             templ = TPMT_PUBLIC.parse(

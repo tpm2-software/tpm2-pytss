@@ -2,12 +2,20 @@
 """
 SPDX-License-Identifier: BSD-2
 """
-import unittest
+from tpm2_pytss.makecred import (
+    TPM2_ALG,
+    TPM2B_PUBLIC,
+    generate_seed,
+    make_credential,
+    wrap,
+)
+from tpm2_pytss.types import (
+    TPM2B_SENSITIVE,
+    TPM2B_SENSITIVE_CREATE,
+    TPMT_SYM_DEF_OBJECT,
+)
 
-from tpm2_pytss import *
-from tpm2_pytss.makecred import *
 from .TSS2_BaseTest import TSS2_EsapiTest
-
 
 rsa_private_key = b"""
 -----BEGIN RSA PRIVATE KEY-----

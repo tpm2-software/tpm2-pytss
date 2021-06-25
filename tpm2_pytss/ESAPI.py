@@ -2,12 +2,12 @@
 SPDX-License-Identifier: BSD-2
 """
 
-from .types import *
+from typing import List, Tuple, Union
 
-from .utils import _chkrc, get_dptr, check_friendly_int
+from ._libtpm2_pytss import ffi, lib
 from .TCTI import TCTI
-
-from typing import Union, Tuple, List
+from .types import *
+from .utils import _chkrc, check_friendly_int, fixup_classname, get_dptr
 
 
 def _get_cdata(value, expected, varname, allow_none=False, *args, **kwargs):

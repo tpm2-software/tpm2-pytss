@@ -1,6 +1,7 @@
 import unittest
 
-from tpm2_pytss import TSS2_Exception, TPM2_RC
+from tpm2_pytss.TSS2_Exception import TSS2_Exception
+from tpm2_pytss.types import TPM2_RC
 
 
 class ExceptionTest(unittest.TestCase):

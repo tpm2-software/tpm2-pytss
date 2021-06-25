@@ -23,16 +23,18 @@ $ pip install -e .[dev]
 
 # Style
 
-Install `black` version `19.10b0`
+Install following linters:
+ * `black` version `19.10b0`
+ * `isort`
 
 ```
-$ pip install -U black==19.10b0
+$ pip install -U black==19.10b0 isort
 ```
 
 From the root of the repo
 
 ```
-$ black .
+$ .ci/linters.sh .
 ```
 
 # Testing

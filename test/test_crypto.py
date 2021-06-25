@@ -2,13 +2,23 @@
 """
 SPDX-License-Identifier: BSD-2
 """
-import binascii
-import itertools
-import unittest
-
-from tpm2_pytss import *
-from .TSS2_BaseTest import TSS2_EsapiTest
 from base64 import b64decode
+
+from tpm2_pytss import crypto, types
+from tpm2_pytss.types import (
+    TPM2_ALG,
+    TPM2_ECC,
+    TPM2B_NV_PUBLIC,
+    TPM2B_PUBLIC,
+    TPM2B_SENSITIVE,
+    TPMA_NV,
+    TPMA_OBJECT,
+    TPMS_NV_PUBLIC,
+    TPMT_PUBLIC,
+    TPMT_SYM_DEF_OBJECT,
+)
+
+from .TSS2_BaseTest import TSS2_EsapiTest
 
 rsa_private_key = b"""
 -----BEGIN RSA PRIVATE KEY-----
