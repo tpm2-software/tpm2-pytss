@@ -1271,6 +1271,33 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(digests[1].hashAlg, TPM2_ALG.SHA256)
         self.assertEqual(bytes(digests[1].digest.sha256), sha256)
 
+    def test_TPML_DIGEST(self):
+
+        x = TPML_DIGEST([b"0123456789ABCDEF0123456789ABCDEF"])
+        self.assertEqual(len(x), 1)
+        self.assertEqual(x[0], b"0123456789ABCDEF0123456789ABCDEF")
+
+        x = TPML_DIGEST(
+            [
+                "0123456789ABCDEF0123456789ABCDEF",
+                b"12345678901234567890",
+                TPM2B_DIGEST(b"0123456"),
+            ]
+        )
+        self.assertEqual(len(x), 3)
+        self.assertEqual(x[0], b"0123456789ABCDEF0123456789ABCDEF")
+        self.assertEqual(x[1], b"12345678901234567890")
+        self.assertEqual(x[2], b"0123456")
+
+        with self.assertRaises(TypeError):
+            TPML_DIGEST([object(), object()])
+
+        with self.assertRaises(TypeError):
+            TPML_DIGEST(TPML_ALG_PROPERTY())
+
+        with self.assertRaises(TypeError):
+            TPML_PCR_SELECTION(TPML_AC_CAPABILITIES())
+
 
 if __name__ == "__main__":
     unittest.main()

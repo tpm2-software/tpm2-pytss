@@ -128,6 +128,16 @@ def fixup_cdata_kwargs(this, _cdata, kwargs):
                 f"Ambigous call, try using key {field_name} in parameters"
             )
 
+        if hasattr(unknown, "_cdata"):
+            a = cpointer_to_ctype(getattr(_cdata, field_name))
+            b = cpointer_to_ctype(unknown._cdata)
+            if a != b:
+                expected = fixup_classname(tipe)
+                got = fixup_classname(b)
+                raise TypeError(
+                    f"Expected initialization from type {expected}, got {got}"
+                )
+
         kwargs[field_name] = unknown
     elif len(kwargs) == 0:
         return (_cdata, {})

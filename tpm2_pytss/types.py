@@ -1134,12 +1134,23 @@ class TPML_OBJECT(TPM_OBJECT):
                 "Expected initializer for TPML data types to be a list or tuple"
             )
 
+        expected_class = TPM_OBJECT
+        try:
+            tipe = ffi.typeof(cdata_array[0])
+            clsname = fixup_classname(tipe)
+            expected_class = globals()[clsname]
+        except TypeError:
+            pass
+
         for i, x in enumerate(kwargs[key]):
-            # int because we masquerade some types as ints
-            if not isinstance(x, (TPM_OBJECT, int)):
-                raise TypeError(
-                    f'Expected item at index {i} to be a TPM_OBJECT, got: "{type(x)}"'
-                )
+            if not isinstance(x, (expected_class, int)):
+                try:
+                    x = expected_class(x)
+                except TypeError:
+                    # Provide a better error message
+                    raise TypeError(
+                        f'Expected item at index {i} to be a TPM_OBJECT, got: "{type(x)}"'
+                    )
 
             cdata_array[i] = x._cdata[0] if isinstance(x, TPM_OBJECT) else x
 
@@ -1217,6 +1228,9 @@ class TPML_OBJECT(TPM_OBJECT):
 
         # convert it to python native
         objects = [convert_to_python_native(globals(), x) for x in cdatas]
+
+        if isinstance(objects[0], TPM2B_SIMPLE_OBJECT):
+            objects = [bytes(x) for x in objects]
 
         return objects[0] if item_was_int else objects
 
