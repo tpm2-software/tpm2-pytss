@@ -3707,6 +3707,104 @@ class TestEsys(TSS2_EsapiTest):
                 ESYS_TR.OWNER, session, nonce, b"", b"", expiration, session3=56.7
             )
 
+    def test_PolicyTicket(self):
+        handle = self.ectx.CreatePrimary(
+            TPM2B_SENSITIVE_CREATE(),
+            TPM2B_PUBLIC.parse(
+                "rsa:rsapss:null",
+                TPMA_OBJECT.USERWITHAUTH
+                | TPMA_OBJECT.SIGN_ENCRYPT
+                | TPMA_OBJECT.FIXEDTPM
+                | TPMA_OBJECT.FIXEDPARENT
+                | TPMA_OBJECT.SENSITIVEDATAORIGIN,
+            ),
+        )[0]
+
+        sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL)
+
+        session = self.ectx.StartAuthSession(
+            tpmKey=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            nonceCaller=None,
+            sessionType=TPM2_SE.POLICY,
+            symmetric=sym,
+            authHash=TPM2_ALG.SHA256,
+        )
+
+        nonce = self.ectx.TRSess_GetNonceTPM(session)
+
+        sequence = self.ectx.HashSequenceStart(None, TPM2_ALG.SHA256)
+
+        self.ectx.SequenceUpdate(sequence, TPM2B_MAX_BUFFER(bytes(nonce)))
+
+        # 10 year expiration
+        expiration = -(10 * 365 * 24 * 60 * 60)
+        expbytes = expiration.to_bytes(4, byteorder="big", signed=True)
+
+        digest = self.ectx.SequenceComplete(sequence, expbytes, ESYS_TR.OWNER)[0]
+
+        scheme = TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL)
+        hash_validation = TPMT_TK_HASHCHECK(
+            tag=TPM2_ST.HASHCHECK, hierarchy=TPM2_RH.OWNER
+        )
+
+        signature = self.ectx.Sign(handle, digest, scheme, hash_validation)
+
+        timeout, policy_ticket = self.ectx.PolicySigned(
+            handle, session, nonce, b"", b"", expiration, signature
+        )
+
+        self.ectx.FlushContext(session)
+
+        session = self.ectx.StartAuthSession(
+            tpmKey=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            nonceCaller=None,
+            sessionType=TPM2_SE.POLICY,
+            symmetric=sym,
+            authHash=TPM2_ALG.SHA256,
+        )
+
+        name = self.ectx.TR_GetName(handle)
+        self.ectx.PolicyTicket(session, timeout, b"", b"", name, policy_ticket)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyTicket(
+                "notasession", timeout, b"", b"", name, policy_ticket
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyTicket(session, object(), b"", b"", name, policy_ticket)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyTicket(
+                session, timeout, TPM2B_AUTH, b"", name, policy_ticket
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyTicket(session, timeout, b"", object(), name, policy_ticket)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyTicket(session, timeout, b"", b"", [], policy_ticket)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyTicket(session, timeout, b"", b"", name, 42)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyTicket(
+                session, timeout, b"", b"", name, policy_ticket, session1="bar"
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyTicket(
+                session, timeout, b"", b"", name, policy_ticket, session2=56.7
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyTicket(
+                session, timeout, b"", b"", name, policy_ticket, session3=object()
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
