@@ -109,10 +109,7 @@ def fixup_cdata_kwargs(this, _cdata, kwargs):
             # Its not a copy constructor, so it must be for a subfield,
             # so clear it from _cdata and call init
             unknown = _cdata
-            _cdata = None
-
-            if _cdata is None:
-                _cdata = ffi.new(f"{this.__class__.__name__} *")
+            _cdata = ffi.new(f"{this.__class__.__name__} *")
 
     # if it's unknown, find the field it's destined for. This is easy for TPML_
     # and TPM2B_ types because their is only one field.
