@@ -3848,6 +3848,49 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.PolicyOR(session, TPML_DIGEST(), session3=object())
 
+    def test_PolicyPCR(self):
+
+        sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL)
+
+        session = self.ectx.StartAuthSession(
+            tpmKey=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            nonceCaller=None,
+            sessionType=TPM2_SE.TRIAL,
+            symmetric=sym,
+            authHash=TPM2_ALG.SHA256,
+        )
+
+        self.ectx.PolicyPCR(session, b"0123456789ABCDEF0123456789ABCDEF", "sha256:1")
+        self.ectx.PolicyPCR(
+            session, TPM2B_DIGEST(b"0123456789ABCDEF0123456789ABCDEF"), "sha256:1"
+        )
+        self.ectx.PolicyPCR(
+            session,
+            b"0123456789ABCDEF0123456789ABCDEF",
+            TPML_PCR_SELECTION.parse("sha256:1"),
+        )
+        self.ectx.PolicyPCR(
+            session,
+            TPM2B_DIGEST(b"0123456789ABCDEF0123456789ABCDEF"),
+            TPML_PCR_SELECTION.parse("sha256:1"),
+        )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyPCR(session, TPM2B_ATTEST(), "sha256:1")
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyPCR(session, TPM2B_DIGEST(), TPML_ALG())
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyPCR(session, TPM2B_DIGEST(), "sha256:1", session1="baz")
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyPCR(session, TPM2B_DIGEST(), "sha256:1", session2=42.2)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyPCR(session, TPM2B_DIGEST(), "sha256:1", session3=object)
+
 
 if __name__ == "__main__":
     unittest.main()
