@@ -2179,6 +2179,23 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(policySession, "policySession")
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        if not isinstance(locality, int):
+            raise TypeError(
+                "Expected locality to be of type TPMA_LOCALITY aka int, got {type(locality)}"
+            )
+
+        # Locality of 0-4 are indicated as bit index 0-4 being set. Localities 32-255 are
+        # indicated as values. Thus locality of 0 is invalid, along with values greater than
+        # 1 byte (255).
+        if locality < 1 or locality > 255:
+            raise ValueError("Expected locality to be in range of 1 - 255")
+
         _chkrc(
             lib.Esys_PolicyLocality(
                 self.ctx, policySession, session1, session2, session3, locality
