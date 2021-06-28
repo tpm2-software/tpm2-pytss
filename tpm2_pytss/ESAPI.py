@@ -2149,9 +2149,24 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(policySession, "policySession")
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        pcrDigest_cdata = get_cdata(pcrDigest, TPM2B_DIGEST, "pcrDigest")
+        pcrs_cdata = get_cdata(pcrs, TPML_PCR_SELECTION, "pcrs")
+
         _chkrc(
             lib.Esys_PolicyPCR(
-                self.ctx, policySession, session1, session2, session3, pcrDigest, pcrs
+                self.ctx,
+                policySession,
+                session1,
+                session2,
+                session3,
+                pcrDigest_cdata,
+                pcrs_cdata,
             )
         )
 
