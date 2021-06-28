@@ -3891,6 +3891,42 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.PolicyPCR(session, TPM2B_DIGEST(), "sha256:1", session3=object)
 
+    def test_PolicyLocality(self):
+
+        sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL)
+
+        session = self.ectx.StartAuthSession(
+            tpmKey=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            nonceCaller=None,
+            sessionType=TPM2_SE.TRIAL,
+            symmetric=sym,
+            authHash=TPM2_ALG.SHA256,
+        )
+
+        self.ectx.PolicyLocality(session, TPMA_LOCALITY.ONE)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyLocality(45.6, TPMA_LOCALITY.ONE)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyLocality(session, "baz")
+
+        with self.assertRaises(ValueError):
+            self.ectx.PolicyLocality(session, 0)
+
+        with self.assertRaises(ValueError):
+            self.ectx.PolicyLocality(session, 256)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyLocality(session, TPMA_LOCALITY.ONE, session1="bar")
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyLocality(session, TPMA_LOCALITY.ONE, session2=56.7)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyLocality(session, TPMA_LOCALITY.ONE, session3=object())
+
 
 if __name__ == "__main__":
     unittest.main()
