@@ -711,6 +711,13 @@ class TPMA_LOCALITY(TPM_FRIENDLY_INT):
     EXTENDED_MASK = lib.TPMA_LOCALITY_EXTENDED_MASK
     EXTENDED_SHIFT = lib.TPMA_LOCALITY_EXTENDED_SHIFT
 
+    @classmethod
+    def create_extended(cls, value):
+        x = (1 << cls.EXTENDED_SHIFT) + value
+        if x > 255:
+            raise ValueError("Extended Localities must be less than 256")
+        return x
+
 
 class TPM2_NT(TPM_FRIENDLY_INT):
     ORDINARY = lib.TPM2_NT_ORDINARY

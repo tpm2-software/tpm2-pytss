@@ -1298,6 +1298,15 @@ class TypesTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             TPML_PCR_SELECTION(TPML_AC_CAPABILITIES())
 
+    def test_TPMA_LOCALITY(self):
+
+        self.assertEqual(TPMA_LOCALITY.create_extended(0), 32)
+        self.assertEqual(TPMA_LOCALITY.create_extended(2), 34)
+        self.assertEqual(TPMA_LOCALITY.create_extended(255 - 32), 255)
+
+        with self.assertRaises(ValueError):
+            TPMA_LOCALITY.create_extended(255 - 32 + 1)
+
 
 if __name__ == "__main__":
     unittest.main()
