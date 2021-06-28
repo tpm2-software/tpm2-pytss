@@ -38,6 +38,8 @@ def get_cdata(value, expected, varname, allow_none=False, *args, **kwargs):
         return bo._cdata
     elif isinstance(value, str) and parse_method and callable(parse_method):
         return expected.parse(value, *args, **kwargs)._cdata
+    elif issubclass(expected, TPML_OBJECT) and isinstance(value, list):
+        return expected(value)._cdata
     elif not isinstance(value, expected):
         raise TypeError(f"expected {varname} to be {tname}, got {vname}")
 
@@ -2123,9 +2125,17 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(policySession, "policySession")
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        pHashList_cdata = get_cdata(pHashList, TPML_DIGEST, "pHashList")
+
         _chkrc(
             lib.Esys_PolicyOR(
-                self.ctx, policySession, session1, session2, session3, pHashList
+                self.ctx, policySession, session1, session2, session3, pHashList_cdata
             )
         )
 

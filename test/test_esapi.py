@@ -3805,6 +3805,49 @@ class TestEsys(TSS2_EsapiTest):
                 session, timeout, b"", b"", name, policy_ticket, session3=object()
             )
 
+    def test_PolicyOR(self):
+
+        sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL)
+
+        session = self.ectx.StartAuthSession(
+            tpmKey=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            nonceCaller=None,
+            sessionType=TPM2_SE.TRIAL,
+            symmetric=sym,
+            authHash=TPM2_ALG.SHA256,
+        )
+
+        self.ectx.PolicyOR(
+            session,
+            TPML_DIGEST(
+                [
+                    b"0123456789ABCDEF0123456789ABCDEF",
+                    b"0987654321ABCDEF1234567890ABCDEF",
+                ]
+            ),
+        )
+
+        self.ectx.PolicyOR(
+            session,
+            [b"0123456789ABCDEF0123456789ABCDEF", b"0987654321ABCDEF1234567890ABCDEF"],
+        )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyOR("bar", TPML_DIGEST())
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyOR(session, TPML_PCR_SELECTION())
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyOR(session, TPML_DIGEST(), session1=43.2)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyOR(session, TPML_DIGEST(), session2="bar")
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyOR(session, TPML_DIGEST(), session3=object())
+
 
 if __name__ == "__main__":
     unittest.main()
