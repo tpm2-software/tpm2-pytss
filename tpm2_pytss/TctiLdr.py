@@ -23,15 +23,16 @@ class TctiLdr(TCTI):
             conf = conf.encode()
 
         if not isinstance(name, (bytes, type(ffi.NULL))):
-            raise RuntimeError(f"name must be of type bytes, got {type(name)}")
+            raise TypeError(f"name must be of type bytes, got {type(name)}")
 
         if not isinstance(conf, (bytes, type(ffi.NULL))):
-            raise RuntimeError(f"name must be of type bytes, got {type(name)}")
+            raise TypeError(f"conf must be of type bytes, got {type(name)}")
 
         _chkrc(lib.Tss2_TctiLdr_Initialize_Ex(name, conf, self._ctx_pp))
         super().__init__(self._ctx_pp[0])
-        self._name = name.decode()
-        self._conf = conf.decode()
+
+        self._name = name.decode() if name else ""
+        self._conf = conf.decode() if conf else ""
 
     def __enter__(self):
         return self

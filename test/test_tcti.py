@@ -64,3 +64,13 @@ class TestTCTI(TSS2_EsapiTest):
         with self.assertRaises(RuntimeError) as e:
             self.tcti.make_sticky(0, 0)
         self.assertEqual(str(e.exception), "unsupported by TCTI API version")
+
+    def test_tctildr(self):
+        self.assertIsInstance(self.tcti.name, str)
+        self.assertIsInstance(self.tcti.conf, str)
+
+        with self.assertRaises(TypeError):
+            TctiLdr(name=None, conf=1234)
+
+        with self.assertRaises(TypeError):
+            TctiLdr(name=1234, conf=None)
