@@ -2359,9 +2359,17 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(policySession, "policySession")
+
+        nameHash_cdata = get_cdata(nameHash, TPM2B_DIGEST, "nameHash")
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
         _chkrc(
             lib.Esys_PolicyNameHash(
-                self.ctx, policySession, session1, session2, session3, nameHash
+                self.ctx, policySession, session1, session2, session3, nameHash_cdata
             )
         )
 
