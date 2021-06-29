@@ -4011,6 +4011,52 @@ class TestEsys(TSS2_EsapiTest):
                 session3=object(),
             )
 
+    def test_PolicyCounterTimer(self):
+
+        sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL)
+
+        session = self.ectx.StartAuthSession(
+            tpmKey=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            nonceCaller=None,
+            sessionType=TPM2_SE.TRIAL,
+            symmetric=sym,
+            authHash=TPM2_ALG.SHA256,
+        )
+
+        self.ectx.PolicyCounterTimer(session, b"12345678", TPM2_EO.EQ)
+        self.ectx.PolicyCounterTimer(session, TPM2B_OPERAND(b"12345678"), TPM2_EO.EQ, 4)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyCounterTimer(object, b"12345678", TPM2_EO.EQ)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyCounterTimer(session, TPM2B_ATTEST(), TPM2_EO.EQ)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyCounterTimer(session, b"12345678", 42.2)
+
+        with self.assertRaises(ValueError):
+            self.ectx.PolicyCounterTimer(session, b"12345678", 42)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyCounterTimer(session, b"12345678", TPM2_EO.EQ, "bar")
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyCounterTimer(
+                session, b"12345678", TPM2_EO.EQ, session1="baz"
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyCounterTimer(
+                session, b"12345678", TPM2_EO.EQ, session2=object()
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyCounterTimer(
+                session, b"12345678", TPM2_EO.EQ, session3=45.6
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
