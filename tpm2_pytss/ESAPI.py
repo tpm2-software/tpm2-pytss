@@ -2254,12 +2254,25 @@ class ESAPI:
         self,
         policySession,
         operandB,
-        offset,
         operation,
+        offset=0,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
+
+        check_handle_type(policySession, "policySession")
+
+        operandB_cdata = get_cdata(operandB, TPM2B_OPERAND, "operandB")
+
+        check_friendly_int(operation, "operation", TPM2_EO)
+
+        if not isinstance(offset, int):
+            raise TypeError(f"Expected offset to be of type int, got {type(offset)}")
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
 
         _chkrc(
             lib.Esys_PolicyCounterTimer(
@@ -2268,7 +2281,7 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                operandB,
+                operandB_cdata,
                 offset,
                 operation,
             )
