@@ -3927,6 +3927,90 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.PolicyLocality(session, TPMA_LOCALITY.ONE, session3=object())
 
+    def test_PolicyNV(self):
+
+        sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL)
+
+        session = self.ectx.StartAuthSession(
+            tpmKey=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            nonceCaller=None,
+            sessionType=TPM2_SE.TRIAL,
+            symmetric=sym,
+            authHash=TPM2_ALG.SHA256,
+        )
+
+        nvpub = TPM2B_NV_PUBLIC(
+            nvPublic=TPMS_NV_PUBLIC(
+                nvIndex=0x1000000,
+                nameAlg=TPM2_ALG.SHA256,
+                attributes=TPMA_NV.OWNERWRITE | TPMA_NV.OWNERREAD,
+                authPolicy=b"",
+                dataSize=8,
+            )
+        )
+
+        nvhandle = self.ectx.NV_DefineSpace(b"", nvpub)
+
+        self.ectx.PolicyNV(ESYS_TR.OWNER, nvhandle, session, b"12345678", TPM2_EO.EQ)
+
+        self.ectx.PolicyNV(
+            ESYS_TR.OWNER, nvhandle, session, TPM2B_OPERAND(b"12345678"), TPM2_EO.EQ, 4
+        )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyNV(42.2, nvhandle, session, b"12345678", TPM2_EO.EQ)
+
+        with self.assertRaises(ValueError):
+            self.ectx.PolicyNV(42, nvhandle, session, b"12345678", TPM2_EO.EQ)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyNV(ESYS_TR.OWNER, "baz", session, b"12345678", TPM2_EO.EQ)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyNV(
+                ESYS_TR.OWNER, nvhandle, object(), b"12345678", TPM2_EO.EQ
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyNV(ESYS_TR.OWNER, nvhandle, session, object, TPM2_EO.EQ)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyNV(ESYS_TR.OWNER, nvhandle, session, b"12345678", "baz")
+
+        with self.assertRaises(ValueError):
+            self.ectx.PolicyNV(ESYS_TR.OWNER, nvhandle, session, b"12345678", 42)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyNV(
+                ESYS_TR.OWNER, nvhandle, session, b"12345678", TPM2_EO.EQ, "baz"
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyNV(
+                ESYS_TR.OWNER,
+                nvhandle,
+                session,
+                b"12345678",
+                TPM2_EO.EQ,
+                session1="baz",
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyNV(
+                ESYS_TR.OWNER, nvhandle, session, b"12345678", TPM2_EO.EQ, session2=42.2
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyNV(
+                ESYS_TR.OWNER,
+                nvhandle,
+                session,
+                b"12345678",
+                TPM2_EO.EQ,
+                session3=object(),
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
