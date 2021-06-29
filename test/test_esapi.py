@@ -4084,6 +4084,45 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.PolicyPhysicalPresence(session, session3=42.2)
 
+    def test_PolicyCPHash(self):
+
+        sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL)
+
+        session = self.ectx.StartAuthSession(
+            tpmKey=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            nonceCaller=None,
+            sessionType=TPM2_SE.TRIAL,
+            symmetric=sym,
+            authHash=TPM2_ALG.SHA256,
+        )
+
+        self.ectx.PolicyCpHash(session, b"01234567890ABCDEF012345689ABCDEF")
+        self.ectx.PolicyCpHash(
+            session, TPM2B_DIGEST(b"01234567890ABCDEF012345689ABCDEF")
+        )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyCpHash(42.2, b"01234567890ABCDEF012345689ABCDEF")
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyCpHash(session, TPM2B_ATTEST())
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyCpHash(
+                session, b"01234567890ABCDEF012345689ABCDEF", session1="foo"
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyCpHash(
+                session, b"01234567890ABCDEF012345689ABCDEF", session2=object()
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyCpHash(
+                session, b"01234567890ABCDEF012345689ABCDEF", session3=45.6
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
