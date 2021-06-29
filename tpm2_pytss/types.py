@@ -1100,6 +1100,10 @@ class TPM2B_SIMPLE_OBJECT(TPM_OBJECT):
         b = self.__bytes__()
         return binascii.hexlify(b).decode()
 
+    def __eq__(self, value):
+        b = self.__bytes__()
+        return b == value
+
 
 class TPML_Iterator(object):
     def __init__(self, tpml):

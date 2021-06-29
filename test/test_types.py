@@ -1152,6 +1152,12 @@ class TypesTest(unittest.TestCase):
         b = bytes(dig)
         self.assertEqual(b, bob)
 
+        self.assertEqual(dig, bob)
+        self.assertNotEqual(dig, "pinchofbytes")
+
+        sdig = TPM2B_DIGEST(bob)
+        self.assertEqual(dig, sdig)
+
         with self.assertRaises(AttributeError):
             dig.size = 1
         with self.assertRaises(TypeError):
