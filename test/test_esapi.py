@@ -2153,15 +2153,7 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(att.attested.nv.offset, 0)
         self.assertEqual(att.attested.nv.nvContents.buffer, b"sometest")
 
-        self.ectx.NV_Certify(
-            eccHandle,
-            nvhandle,
-            qualifyingData,
-            inScheme,
-            8,
-            session1=ESYS_TR.PASSWORD,
-            session2=ESYS_TR.PASSWORD,
-        )
+        self.ectx.NV_Certify(eccHandle, nvhandle, qualifyingData, inScheme, 8)
 
     def test_Certify(self):
         inPublic = TPM2B_PUBLIC(
