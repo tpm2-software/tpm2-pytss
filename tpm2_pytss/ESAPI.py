@@ -125,7 +125,7 @@ class ESAPI:
         )
         return obj[0]
 
-    def setAuth(self, esys_tr, auth):
+    def set_auth(self, esys_tr, auth):
 
         auth_p = TPM2B_pack(auth, "TPM2B_AUTH")
         _chkrc(lib.Esys_TR_SetAuth(self.ctx, esys_tr, auth_p))
