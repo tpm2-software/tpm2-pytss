@@ -110,6 +110,13 @@ class ESAPI:
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
+
+        check_handle_type(handle, "handle")
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
         obj = ffi.new("ESYS_TR *")
         _chkrc(
             lib.Esys_TR_FromTPMPublic(
