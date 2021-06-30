@@ -1840,6 +1840,8 @@ class TestEsys(TSS2_EsapiTest):
                 nameAlg=TPM2_ALG.SHA256,
                 attributes=TPMA_NV.OWNERWRITE
                 | TPMA_NV.OWNERREAD
+                | TPMA_NV.AUTHREAD
+                | TPMA_NV.AUTHWRITE
                 | (TPM2_NT.COUNTER << TPMA_NV.TPM2_NT_SHIFT),
                 authPolicy=b"",
                 dataSize=8,
@@ -1850,10 +1852,12 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.NV_Increment(nvhandle, authHandle=ESYS_TR.RH_OWNER)
 
+        self.ectx.NV_Increment(nvhandle)
+
         data = self.ectx.NV_Read(nvhandle, 8, 0, authHandle=ESYS_TR.RH_OWNER)
 
         counter = int.from_bytes(data.buffer, byteorder="big")
-        self.assertEqual(counter, 1)
+        self.assertEqual(counter, 2)
 
     def test_NV_Extend(self):
         nvpub = TPM2B_NV_PUBLIC(
