@@ -152,12 +152,7 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(
-            shutdown_type,
-            "shutdown_type",
-            expected=[TPM2_SU.STATE, TPM2_SU.CLEAR],
-            cls=TPM2_SU,
-        )
+        check_friendly_int(shutdown_type, "shutdown_type", TPM2_SU)
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
