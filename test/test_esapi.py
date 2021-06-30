@@ -2155,6 +2155,46 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.NV_Certify(eccHandle, nvhandle, qualifyingData, inScheme, 8)
 
+        with self.assertRaises(TypeError):
+            self.ectx.NV_Certify(67.7, nvhandle, qualifyingData, inScheme, 8)
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_Certify(eccHandle, "bad handle", qualifyingData, inScheme, 8)
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_Certify(eccHandle, nvhandle, object(), inScheme, 8)
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_Certify(eccHandle, nvhandle, qualifyingData, TPM2B_DATA(), 8)
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_Certify(eccHandle, nvhandle, qualifyingData, inScheme, 45.6)
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_Certify(
+                eccHandle, nvhandle, qualifyingData, inScheme, 8, offset="bar"
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_Certify(
+                eccHandle, nvhandle, qualifyingData, inScheme, 8, authHandle=object
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_Certify(
+                eccHandle, nvhandle, qualifyingData, inScheme, 8, session1=67.8
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_Certify(
+                eccHandle, nvhandle, qualifyingData, inScheme, 8, session2="bar"
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_Certify(
+                eccHandle, nvhandle, qualifyingData, inScheme, 8, session3=[]
+            )
+
     def test_Certify(self):
         inPublic = TPM2B_PUBLIC(
             TPMT_PUBLIC.parse(
