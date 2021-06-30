@@ -2423,6 +2423,17 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        check_handle_type(policySession, "policySession")
+
+        approvedPolicy_cdata = get_cdata(approvedPolicy, TPM2B_DIGEST, "approvedPolicy")
+        policyRef_cdata = get_cdata(policyRef, TPM2B_NONCE, "policyRef")
+        keySign_cdata = get_cdata(keySign, TPM2B_NAME, "keySign")
+        checkTicket_cdata = get_cdata(checkTicket, TPMT_TK_VERIFIED, "checkTicket")
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
         _chkrc(
             lib.Esys_PolicyAuthorize(
                 self.ctx,
@@ -2430,10 +2441,10 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                approvedPolicy,
-                policyRef,
-                keySign,
-                checkTicket,
+                approvedPolicy_cdata,
+                policyRef_cdata,
+                keySign_cdata,
+                checkTicket_cdata,
             )
         )
 

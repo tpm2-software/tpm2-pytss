@@ -4246,6 +4246,101 @@ class TestEsys(TSS2_EsapiTest):
                 session3=object(),
             )
 
+    def test_PolicyAuthorize(self):
+
+        handle = self.ectx.CreatePrimary(
+            TPM2B_SENSITIVE_CREATE(),
+            TPM2B_PUBLIC.parse(
+                "rsa:rsapss:null",
+                TPMA_OBJECT.USERWITHAUTH
+                | TPMA_OBJECT.SIGN_ENCRYPT
+                | TPMA_OBJECT.FIXEDTPM
+                | TPMA_OBJECT.FIXEDPARENT
+                | TPMA_OBJECT.SENSITIVEDATAORIGIN,
+            ),
+        )[0]
+
+        sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL)
+
+        session = self.ectx.StartAuthSession(
+            tpmKey=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            nonceCaller=None,
+            sessionType=TPM2_SE.TRIAL,
+            symmetric=sym,
+            authHash=TPM2_ALG.SHA256,
+        )
+
+        check_ticket = TPMT_TK_VERIFIED(tag=TPM2_ST.VERIFIED, hierarchy=TPM2_RH.OWNER)
+        name = self.ectx.TR_GetName(handle)
+
+        self.ectx.PolicyAuthorize(
+            session, TPM2B_DIGEST(), TPM2B_NONCE(), name, check_ticket
+        )
+        self.ectx.PolicyAuthorize(
+            session, TPM2B_DIGEST(), TPM2B_NONCE(), name, check_ticket
+        )
+        self.ectx.PolicyAuthorize(session, b"", TPM2B_NONCE(), name, check_ticket)
+        self.ectx.PolicyAuthorize(session, TPM2B_DIGEST(), b"", name, check_ticket)
+        self.ectx.PolicyAuthorize(
+            session, TPM2B_DIGEST(), TPM2B_NONCE(), bytes(name), check_ticket
+        )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyAuthorize(
+                42.5, TPM2B_DIGEST(), TPM2B_NONCE(), name, check_ticket
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyAuthorize(
+                session, TPM2B_ATTEST(), TPM2B_NONCE(), name, check_ticket
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyAuthorize(
+                session, TPM2B_DIGEST(), object(), name, check_ticket
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyAuthorize(
+                session, TPM2B_DIGEST(), TPM2B_NONCE(), object(), check_ticket
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyAuthorize(
+                session, TPM2B_DIGEST(), TPM2B_NONCE(), name, TPM2B_AUTH()
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyAuthorize(
+                session,
+                TPM2B_DIGEST(),
+                TPM2B_NONCE(),
+                name,
+                check_ticket,
+                session1="foo",
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyAuthorize(
+                session,
+                TPM2B_DIGEST(),
+                TPM2B_NONCE(),
+                name,
+                check_ticket,
+                session2=42.4,
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyAuthorize(
+                session,
+                TPM2B_DIGEST(),
+                TPM2B_NONCE(),
+                name,
+                check_ticket,
+                session3=object(),
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
