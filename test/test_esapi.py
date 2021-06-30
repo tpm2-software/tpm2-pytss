@@ -1881,6 +1881,8 @@ class TestEsys(TSS2_EsapiTest):
                 nameAlg=TPM2_ALG.SHA256,
                 attributes=TPMA_NV.OWNERWRITE
                 | TPMA_NV.OWNERREAD
+                | TPMA_NV.AUTHREAD
+                | TPMA_NV.AUTHWRITE
                 | (TPM2_NT.EXTEND << TPMA_NV.TPM2_NT_SHIFT),
                 authPolicy=b"",
                 dataSize=32,
@@ -1891,10 +1893,11 @@ class TestEsys(TSS2_EsapiTest):
 
         edata = b"\xFF" * 32
         self.ectx.NV_Extend(nvhandle, edata, authHandle=ESYS_TR.RH_OWNER)
+        self.ectx.NV_Extend(nvhandle, edata)
 
         data = self.ectx.NV_Read(nvhandle, 32, 0, authHandle=ESYS_TR.RH_OWNER)
 
-        edigest = b"\xbb\xa9\x1c\xa8]\xc9\x14\xb2\xec>\xfb\x9e\x16\xe7&{\xf9\x19;\x145\r \xfb\xa8\xa8\xb4\x06s\n\xe3\n"
+        edigest = b"\x10l\xc9ey]W\x01\xde\x94\x048\xf5\x08\x0fS'h\xbc\x98\xb5\x9bg\xf9g\xa4(\x1d\xc2\x83Z\xef"
         self.assertEqual(edigest, bytes(data))
 
     def test_NV_SetBits(self):
