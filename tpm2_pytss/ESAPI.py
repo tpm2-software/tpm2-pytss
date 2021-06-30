@@ -175,9 +175,9 @@ class ESAPI:
 
         _chkrc(lib.Esys_SelfTest(self.ctx, session1, session2, session3, full_test))
 
-    def IncrementalSelfTest(
+    def incremental_self_test(
         self,
-        toTest,
+        to_test,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
@@ -187,7 +187,7 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        toTest_cdata = get_cdata(toTest, TPML_ALG, "toTest")
+        toTest_cdata = get_cdata(to_test, TPML_ALG, "to_test")
 
         toDoList = ffi.new("TPML_ALG **")
         _chkrc(
