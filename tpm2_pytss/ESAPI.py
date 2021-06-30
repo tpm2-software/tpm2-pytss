@@ -168,6 +168,11 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
+        if not isinstance(full_test, bool):
+            raise TypeError(
+                f"Expected full_test to be type bool, got {type(full_test)}"
+            )
+
         _chkrc(lib.Esys_SelfTest(self.ctx, session1, session2, session3, full_test))
 
     def IncrementalSelfTest(
