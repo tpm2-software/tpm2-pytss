@@ -1707,12 +1707,12 @@ class TestEsys(TSS2_EsapiTest):
         self.ectx.EvictControl(
             ESYS_TR.OWNER, handle, 0x81000081, session1=ESYS_TR.PASSWORD
         )
-        phandle = self.ectx.TR_FromTPMPublic(0x81000081)
+        phandle = self.ectx.tr_from_tpmpublic(0x81000081)
         self.ectx.EvictControl(
             ESYS_TR.OWNER, phandle, 0x81000081, session1=ESYS_TR.PASSWORD
         )
         with self.assertRaises(TSS2_Exception) as e:
-            self.ectx.TR_FromTPMPublic(0x81000081)
+            self.ectx.tr_from_tpmpublic(0x81000081)
         self.assertEqual(e.exception.error, TPM2_RC.HANDLE)
 
     def test_GetCapability(self):

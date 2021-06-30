@@ -103,7 +103,7 @@ class ESAPI:
     def tcti(self):
         return self.GetTcti()
 
-    def TR_FromTPMPublic(
+    def tr_from_tpmpublic(
         self,
         handle,
         optionalSession1=ESYS_TR.NONE,
