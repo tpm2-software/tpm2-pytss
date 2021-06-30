@@ -4165,6 +4165,87 @@ class TestEsys(TSS2_EsapiTest):
                 session, b"01234567890ABCDEF012345689ABCDEF", session3=45.6
             )
 
+    def test_PolicyDuplicationSelect(self):
+
+        sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL)
+
+        session = self.ectx.StartAuthSession(
+            tpmKey=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            nonceCaller=None,
+            sessionType=TPM2_SE.TRIAL,
+            symmetric=sym,
+            authHash=TPM2_ALG.SHA256,
+        )
+
+        self.ectx.PolicyDuplicationSelect(
+            session,
+            b"0123456789ABCDEF0123456789ABCDEF",
+            b"0123456789ABCDEF0123456789ABCDEF",
+        )
+        self.ectx.PolicyRestart(session)
+        self.ectx.PolicyDuplicationSelect(
+            session,
+            TPM2B_NAME(b"0123456789ABCDEF0123456789ABCDEF"),
+            TPM2B_NAME(b"0123456789ABCDEF0123456789ABCDEF"),
+        )
+        self.ectx.PolicyRestart(session)
+        self.ectx.PolicyDuplicationSelect(
+            session,
+            TPM2B_NAME(b"0123456789ABCDEF0123456789ABCDEF"),
+            b"0123456789ABCDEF0123456789ABCDEF",
+            True,
+        )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyDuplicationSelect(
+                42.2,
+                b"0123456789ABCDEF0123456789ABCDEF",
+                b"0123456789ABCDEF0123456789ABCDEF",
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyDuplicationSelect(
+                session, TPM2B_ATTEST(), b"0123456789ABCDEF0123456789ABCDEF"
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyDuplicationSelect(
+                session, b"0123456789ABCDEF0123456789ABCDEF", object()
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyDuplicationSelect(
+                session,
+                b"0123456789ABCDEF0123456789ABCDEF",
+                b"0123456789ABCDEF0123456789ABCDEF",
+                "nope",
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyDuplicationSelect(
+                session,
+                b"0123456789ABCDEF0123456789ABCDEF",
+                b"0123456789ABCDEF0123456789ABCDEF",
+                session1=42.5,
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyDuplicationSelect(
+                session,
+                b"0123456789ABCDEF0123456789ABCDEF",
+                b"0123456789ABCDEF0123456789ABCDEF",
+                session2="baz",
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyDuplicationSelect(
+                session,
+                b"0123456789ABCDEF0123456789ABCDEF",
+                b"0123456789ABCDEF0123456789ABCDEF",
+                session3=object(),
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
