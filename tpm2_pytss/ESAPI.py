@@ -106,19 +106,14 @@ class ESAPI:
     def tr_from_tpmpublic(
         self,
         handle,
-        optionalSession1=ESYS_TR.NONE,
-        optionalSession2=ESYS_TR.NONE,
-        optionalSession3=ESYS_TR.NONE,
+        session1=ESYS_TR.NONE,
+        session2=ESYS_TR.NONE,
+        session3=ESYS_TR.NONE,
     ):
         obj = ffi.new("ESYS_TR *")
         _chkrc(
             lib.Esys_TR_FromTPMPublic(
-                self.ctx,
-                handle,
-                optionalSession1,
-                optionalSession2,
-                optionalSession3,
-                obj,
+                self.ctx, handle, session1, session2, session3, obj,
             )
         )
         return obj[0]
