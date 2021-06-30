@@ -2378,11 +2378,25 @@ class ESAPI:
         policySession,
         objectName,
         newParentName,
-        includeObject,
+        includeObject=False,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
+
+        check_handle_type(policySession, "policySession")
+
+        objectName_cdata = get_cdata(objectName, TPM2B_NAME, "objectName")
+        newParentName_cdata = get_cdata(newParentName, TPM2B_NAME, "newParentName")
+
+        if not isinstance(includeObject, bool):
+            raise TypeError(
+                f"Expected includeObject to be type bool, got {type(includeObject)}"
+            )
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
 
         _chkrc(
             lib.Esys_PolicyDuplicationSelect(
@@ -2391,8 +2405,8 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                objectName,
-                newParentName,
+                objectName_cdata,
+                newParentName_cdata,
                 includeObject,
             )
         )
