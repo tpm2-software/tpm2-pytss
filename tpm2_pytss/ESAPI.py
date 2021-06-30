@@ -2510,11 +2510,22 @@ class ESAPI:
     def PolicyNvWritten(
         self,
         policySession,
-        writtenSet,
+        writtenSet=True,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
+
+        check_handle_type(policySession, "policySession")
+
+        if not isinstance(writtenSet, bool):
+            raise TypeError(
+                f"Expected writtenSet to be type bool, got {type(writtenSet)}"
+            )
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
 
         _chkrc(
             lib.Esys_PolicyNvWritten(

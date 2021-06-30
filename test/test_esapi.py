@@ -4368,6 +4368,38 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.PolicyPassword(session, session3="baz")
 
+    def test_PolicyNVWritten(self):
+
+        sym = TPMT_SYM_DEF(TPM2_ALG.NULL)
+
+        session = self.ectx.StartAuthSession(
+            tpmKey=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            nonceCaller=None,
+            sessionType=TPM2_SE.TRIAL,
+            symmetric=sym,
+            authHash=TPM2_ALG.SHA256,
+        )
+
+        self.ectx.PolicyNvWritten(session)
+        self.ectx.PolicyRestart(session)
+        self.ectx.PolicyNvWritten(session, False)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyNvWritten(43.2)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyNvWritten(session, "False")
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyNvWritten(session, session1=45.6)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyNvWritten(session, session2=object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyNvWritten(session, session3="baz")
+
 
 if __name__ == "__main__":
     unittest.main()
