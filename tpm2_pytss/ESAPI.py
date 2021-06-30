@@ -139,6 +139,9 @@ class ESAPI:
         return TPM2B_NAME(_cdata=get_ptr(name))
 
     def Startup(self, startupType):
+
+        check_friendly_int(startupType, "startupType", TPM2_SU)
+
         _chkrc(lib.Esys_Startup(self.ctx, startupType))
 
     def Shutdown(
