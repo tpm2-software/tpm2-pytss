@@ -1989,6 +1989,21 @@ class TestEsys(TSS2_EsapiTest):
 
         self.assertEqual(e.exception.error, TPM2_RC.NV_LOCKED)
 
+        with self.assertRaises(TypeError):
+            self.ectx.NV_WriteLock(list())
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_WriteLock(nvhandle, authHandle=42.3)
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_WriteLock(nvhandle, session1="baz")
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_WriteLock(nvhandle, session2=45.6)
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_WriteLock(nvhandle, session3=list())
+
     def test_NV_GlobalWriteLock(self):
         nvpub = TPM2B_NV_PUBLIC(
             nvPublic=TPMS_NV_PUBLIC(
