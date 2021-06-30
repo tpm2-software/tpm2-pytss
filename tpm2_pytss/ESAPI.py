@@ -3445,6 +3445,10 @@ class ESAPI:
         check_handle_type(session3, "session3")
         qualifyingData_cdata = get_cdata(qualifyingData, TPM2B_DATA, "qualifyingData")
         inScheme_cdata = get_cdata(inScheme, TPMT_SIG_SCHEME, "inScheme")
+
+        if not isinstance(offset, int):
+            raise TypeError(f"Expected offset to be of type int, got: {type(offset)}")
+
         certifyInfo = ffi.new("TPM2B_ATTEST **")
         signature = ffi.new("TPMT_SIGNATURE **")
         _chkrc(
