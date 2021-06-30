@@ -179,7 +179,7 @@ class TSS2_EsapiTest(TSS2_BaseTest):
         try:
             self.tcti = self.tpm.get_tcti()
             with ESAPI(self.tcti) as ectx:
-                ectx.Startup(TPM2_SU.CLEAR)
+                ectx.startup(TPM2_SU.CLEAR)
 
         except Exception as e:
             self.tpm.close()

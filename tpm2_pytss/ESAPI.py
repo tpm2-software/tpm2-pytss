@@ -138,11 +138,11 @@ class ESAPI:
         _chkrc(lib.Esys_TR_GetName(self.ctx, handle, name))
         return TPM2B_NAME(_cdata=get_ptr(name))
 
-    def Startup(self, startupType):
+    def startup(self, startup_type):
 
-        check_friendly_int(startupType, "startupType", TPM2_SU)
+        check_friendly_int(startup_type, "startup_type", TPM2_SU)
 
-        _chkrc(lib.Esys_Startup(self.ctx, startupType))
+        _chkrc(lib.Esys_Startup(self.ctx, startup_type))
 
     def Shutdown(
         self,
