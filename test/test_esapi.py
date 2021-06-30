@@ -2105,7 +2105,10 @@ class TestEsys(TSS2_EsapiTest):
             nvPublic=TPMS_NV_PUBLIC(
                 nvIndex=0x1000000,
                 nameAlg=TPM2_ALG.SHA256,
-                attributes=TPMA_NV.OWNERWRITE | TPMA_NV.OWNERREAD,
+                attributes=TPMA_NV.OWNERWRITE
+                | TPMA_NV.OWNERREAD
+                | TPMA_NV.AUTHREAD
+                | TPMA_NV.AUTHWRITE,
                 authPolicy=b"",
                 dataSize=8,
             )
@@ -2149,6 +2152,16 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(bytes(att.attested.nv.indexName), bytes(nvpub.getName()))
         self.assertEqual(att.attested.nv.offset, 0)
         self.assertEqual(att.attested.nv.nvContents.buffer, b"sometest")
+
+        self.ectx.NV_Certify(
+            eccHandle,
+            nvhandle,
+            qualifyingData,
+            inScheme,
+            8,
+            session1=ESYS_TR.PASSWORD,
+            session2=ESYS_TR.PASSWORD,
+        )
 
     def test_Certify(self):
         inPublic = TPM2B_PUBLIC(
