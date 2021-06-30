@@ -1900,6 +1900,24 @@ class TestEsys(TSS2_EsapiTest):
         edigest = b"\x10l\xc9ey]W\x01\xde\x94\x048\xf5\x08\x0fS'h\xbc\x98\xb5\x9bg\xf9g\xa4(\x1d\xc2\x83Z\xef"
         self.assertEqual(edigest, bytes(data))
 
+        with self.assertRaises(TypeError):
+            self.ectx.NV_Extend("handle", edata)
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_Extend(nvhandle, TPM2B_CONTEXT_DATA())
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_Extend(nvhandle, edata, authHandle=34.7)
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_Extend(nvhandle, edata, session1="foo")
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_Extend(nvhandle, edata, session2=56.9)
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_Extend(nvhandle, edata, session3=object)
+
     def test_NV_SetBits(self):
         nvpub = TPM2B_NV_PUBLIC(
             nvPublic=TPMS_NV_PUBLIC(
