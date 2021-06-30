@@ -999,7 +999,7 @@ class ESAPI:
         inData_cdata = get_cdata(inData, TPM2B_MAX_BUFFER, "inData")
 
         if not isinstance(decrypt, bool):
-            raise TypeError("Expected decrypt to be type bool, got {type(decrypt)}")
+            raise TypeError(f"Expected decrypt to be type bool, got {type(decrypt)}")
 
         outData = ffi.new("TPM2B_MAX_BUFFER **")
         ivOut = ffi.new("TPM2B_IV **")
