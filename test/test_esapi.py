@@ -203,28 +203,28 @@ class TestEsys(TSS2_EsapiTest):
     def test_incremental_self_test(self):
         algs = TPML_ALG.parse("rsa,ecc,xor,aes,cbc")
 
-        self.ectx.IncrementalSelfTest(algs)
+        self.ectx.incremental_self_test(algs)
 
-        self.ectx.IncrementalSelfTest("rsa,ecc,xor,aes,cbc")
-
-        with self.assertRaises(TypeError):
-            self.ectx.IncrementalSelfTest(None)
-        with self.assertRaises(TypeError):
-            self.ectx.IncrementalSelfTest(object())
+        self.ectx.incremental_self_test("rsa,ecc,xor,aes,cbc")
 
         with self.assertRaises(TypeError):
-            self.ectx.IncrementalSelfTest(session1=45.9)
+            self.ectx.incremental_self_test(None)
+        with self.assertRaises(TypeError):
+            self.ectx.incremental_self_test(object())
 
         with self.assertRaises(TypeError):
-            self.ectx.IncrementalSelfTest(session2=object())
+            self.ectx.incremental_self_test(session1=45.9)
 
         with self.assertRaises(TypeError):
-            self.ectx.IncrementalSelfTest(session3=TPM2B_PUBLIC())
+            self.ectx.incremental_self_test(session2=object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.incremental_self_test(session3=TPM2B_PUBLIC())
 
     def test_incremental_resume_test(self):
         algs = TPML_ALG.parse("rsa,ecc,xor,aes,cbc")
 
-        self.ectx.IncrementalSelfTest(algs)
+        self.ectx.incremental_self_test(algs)
         toDo, rc = self.ectx.GetTestResult()
         self.assertEqual(type(toDo), TPM2B_MAX_BUFFER)
         self.assertEqual(rc, TPM2_RC.SUCCESS)
