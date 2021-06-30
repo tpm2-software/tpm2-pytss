@@ -2032,6 +2032,8 @@ class TestEsys(TSS2_EsapiTest):
                 nameAlg=TPM2_ALG.SHA256,
                 attributes=TPMA_NV.OWNERWRITE
                 | TPMA_NV.OWNERREAD
+                | TPMA_NV.AUTHREAD
+                | TPMA_NV.AUTHWRITE
                 | TPMA_NV.READ_STCLEAR,
                 authPolicy=b"",
                 dataSize=8,
@@ -2044,6 +2046,7 @@ class TestEsys(TSS2_EsapiTest):
         self.ectx.NV_Write(nvhandle, indata, authHandle=ESYS_TR.RH_OWNER)
 
         self.ectx.NV_ReadLock(nvhandle, authHandle=ESYS_TR.RH_OWNER)
+        self.ectx.NV_ReadLock(nvhandle)
         with self.assertRaises(TSS2_Exception) as e:
             self.ectx.NV_Read(nvhandle, 8, authHandle=ESYS_TR.RH_OWNER)
 
