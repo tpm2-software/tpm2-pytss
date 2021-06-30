@@ -3430,7 +3430,7 @@ class ESAPI:
         size,
         offset=0,
         authHandle=0,
-        session1=ESYS_TR.NONE,
+        session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.PASSWORD,
         session3=ESYS_TR.NONE,
     ):
