@@ -2844,7 +2844,7 @@ class TestEsys(TSS2_EsapiTest):
         )
 
         self.ectx.GetCapability(
-            TPM2_CAP.COMMANDS, TPM2_CC.FIRST, lib.TPM2_MAX_CAP_CC, session1=session
+            TPM2_CAP.COMMANDS, TPM2_CC.FIRST, TPM2_MAX.CAP_CC, session1=session
         )
 
         auditInfo, signature = self.ectx.GetSessionAuditDigest(
@@ -3012,7 +3012,7 @@ class TestEsys(TSS2_EsapiTest):
         )
 
         self.ectx.GetCapability(
-            TPM2_CAP.COMMANDS, TPM2_CC.FIRST, lib.TPM2_MAX_CAP_CC, session1=session
+            TPM2_CAP.COMMANDS, TPM2_CC.FIRST, TPM2_MAX.CAP_CC, session1=session
         )
 
         auditInfo, signature = self.ectx.GetCommandAuditDigest(signHandle, b"12345678")
