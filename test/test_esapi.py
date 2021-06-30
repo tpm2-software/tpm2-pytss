@@ -4341,6 +4341,33 @@ class TestEsys(TSS2_EsapiTest):
                 session3=object(),
             )
 
+    def test_PolicyPassword(self):
+
+        sym = TPMT_SYM_DEF(TPM2_ALG.NULL)
+
+        session = self.ectx.StartAuthSession(
+            tpmKey=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            nonceCaller=None,
+            sessionType=TPM2_SE.TRIAL,
+            symmetric=sym,
+            authHash=TPM2_ALG.SHA256,
+        )
+
+        self.ectx.PolicyPassword(session)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyPassword("session")
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyPassword(session, session1=45.6)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyPassword(session, session2=object)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyPassword(session, session3="baz")
+
 
 if __name__ == "__main__":
     unittest.main()
