@@ -2410,29 +2410,29 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(e.exception.error, TPM2_RC.COMMAND_CODE)
 
     def test_shutdown_no_arg(self):
-        self.ectx.Shutdown(TPM2_SU.STATE)
+        self.ectx.shutdown(TPM2_SU.STATE)
 
     def test_shutdown_state(self):
-        self.ectx.Shutdown(TPM2_SU.STATE)
+        self.ectx.shutdown(TPM2_SU.STATE)
 
     def test_shutdown_clear(self):
-        self.ectx.Shutdown(TPM2_SU.CLEAR)
+        self.ectx.shutdown(TPM2_SU.CLEAR)
 
     def test_shutdown_bad(self):
         with self.assertRaises(TypeError):
-            self.ectx.Shutdown(object())
+            self.ectx.shutdown(object())
 
         with self.assertRaises(ValueError):
-            self.ectx.Shutdown(42)
+            self.ectx.shutdown(42)
 
         with self.assertRaises(TypeError):
-            self.ectx.Shutdown(session1=object())
+            self.ectx.shutdown(session1=object())
 
         with self.assertRaises(TypeError):
-            self.ectx.Shutdown(session2=object())
+            self.ectx.shutdown(session2=object())
 
         with self.assertRaises(TypeError):
-            self.ectx.Shutdown(session3=object())
+            self.ectx.shutdown(session3=object())
 
     def test_policyrestart(self):
 

@@ -144,25 +144,26 @@ class ESAPI:
 
         _chkrc(lib.Esys_Startup(self.ctx, startup_type))
 
-    def Shutdown(
+    def shutdown(
         self,
-        shutdownType=TPM2_SU.STATE,
+        shutdown_type=TPM2_SU.STATE,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
         check_handle_type(
-            shutdownType,
-            "shutdownType",
+            shutdown_type,
+            "shutdown_type",
             expected=[TPM2_SU.STATE, TPM2_SU.CLEAR],
             cls=TPM2_SU,
         )
+
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        _chkrc(lib.Esys_Shutdown(self.ctx, session1, session2, session3, shutdownType))
+        _chkrc(lib.Esys_Shutdown(self.ctx, session1, session2, session3, shutdown_type))
 
     def SelfTest(
         self,
