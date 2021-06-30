@@ -4439,6 +4439,52 @@ class TestEsys(TSS2_EsapiTest):
                 session, b"0123456789ABCDEF01234567890ABCDE", session3=45.6
             )
 
+    def test_PolicyAuthorizeNV(self):
+
+        nv_public = TPM2B_NV_PUBLIC(
+            nvPublic=TPMS_NV_PUBLIC(
+                nvIndex=TPM2_HC.NV_INDEX_FIRST,
+                nameAlg=TPM2_ALG.SHA256,
+                attributes=TPMA_NV.parse("ownerread|ownerwrite|authread|authwrite"),
+                dataSize=32,
+            )
+        )
+
+        # No password NV index
+        nv_index = self.ectx.NV_DefineSpace(None, nv_public)
+
+        sym = TPMT_SYM_DEF(TPM2_ALG.NULL)
+
+        session = self.ectx.StartAuthSession(
+            tpmKey=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            nonceCaller=None,
+            sessionType=TPM2_SE.TRIAL,
+            symmetric=sym,
+            authHash=TPM2_ALG.SHA256,
+        )
+
+        self.ectx.PolicyAuthorizeNV(nv_index, session)
+        self.ectx.PolicyAuthorizeNV(nv_index, session, authHandle=ESYS_TR.OWNER)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyAuthorizeNV("not an index", session)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyAuthorizeNV(nv_index, object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyAuthorizeNV(nv_index, session, authHandle=object)
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyAuthorizeNV(nv_index, session, session1="foo")
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyAuthorizeNV(nv_index, session, session2=object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.PolicyAuthorizeNV(nv_index, session, session3=45.6)
+
 
 if __name__ == "__main__":
     unittest.main()
