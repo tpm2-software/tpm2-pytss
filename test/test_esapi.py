@@ -195,10 +195,10 @@ class TestEsys(TSS2_EsapiTest):
             self.ectx.HierarchyChangeAuth(ESYS_TR.OWNER, "anotherpasswd")
 
     def test_fulltest_YES(self):
-        self.ectx.SelfTest(True)
+        self.ectx.self_test(True)
 
     def test_fulltest_NO(self):
-        self.ectx.SelfTest(False)
+        self.ectx.self_test(False)
 
     def test_incremental_self_test(self):
         algs = TPML_ALG.parse("rsa,ecc,xor,aes,cbc")

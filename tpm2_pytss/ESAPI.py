@@ -160,15 +160,15 @@ class ESAPI:
 
         _chkrc(lib.Esys_Shutdown(self.ctx, session1, session2, session3, shutdown_type))
 
-    def SelfTest(
+    def self_test(
         self,
-        fullTest,
+        full_test,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        _chkrc(lib.Esys_SelfTest(self.ctx, session1, session2, session3, fullTest))
+        _chkrc(lib.Esys_SelfTest(self.ctx, session1, session2, session3, full_test))
 
     def IncrementalSelfTest(
         self,
