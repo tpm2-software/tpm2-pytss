@@ -1945,6 +1945,24 @@ class TestEsys(TSS2_EsapiTest):
         b = bits.to_bytes(length=8, byteorder="big")
         self.assertEqual(b, bytes(data))
 
+        with self.assertRaises(TypeError):
+            self.ectx.NV_SetBits("not a handle", bits)
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_SetBits(nvhandle, object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_SetBits(nvhandle, bits, authHandle=45.6)
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_SetBits(nvhandle, bits, session1="foo")
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_SetBits(nvhandle, bits, session2=45.6)
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_SetBits(nvhandle, bits, session3=object())
+
     def test_NV_WriteLock(self):
         nvpub = TPM2B_NV_PUBLIC(
             nvPublic=TPMS_NV_PUBLIC(
