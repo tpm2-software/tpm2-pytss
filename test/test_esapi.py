@@ -225,18 +225,18 @@ class TestEsys(TSS2_EsapiTest):
         algs = TPML_ALG.parse("rsa,ecc,xor,aes,cbc")
 
         self.ectx.incremental_self_test(algs)
-        toDo, rc = self.ectx.GetTestResult()
+        toDo, rc = self.ectx.get_test_result()
         self.assertEqual(type(toDo), TPM2B_MAX_BUFFER)
         self.assertEqual(rc, TPM2_RC.SUCCESS)
 
         with self.assertRaises(TypeError):
-            self.ectx.GetTestResult(session1=45.7)
+            self.ectx.get_test_result(session1=45.7)
 
         with self.assertRaises(TypeError):
-            self.ectx.GetTestResult(session2=TPM2B_DATA())
+            self.ectx.get_test_result(session2=TPM2B_DATA())
 
         with self.assertRaises(TypeError):
-            self.ectx.GetTestResult(session3=object())
+            self.ectx.get_test_result(session3=object())
 
     def test_hmac_session(self):
 

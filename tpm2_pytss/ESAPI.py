@@ -197,7 +197,7 @@ class ESAPI:
         )
         return TPML_ALG(get_ptr(toDoList))
 
-    def GetTestResult(
+    def get_test_result(
         self, session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE
     ):
 
