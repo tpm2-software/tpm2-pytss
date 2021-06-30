@@ -131,6 +131,9 @@ class ESAPI:
         _chkrc(lib.Esys_TR_SetAuth(self.ctx, esys_tr, auth_p))
 
     def TR_GetName(self, handle):
+
+        check_handle_type(handle, "handle")
+
         name = ffi.new("TPM2B_NAME **")
         _chkrc(lib.Esys_TR_GetName(self.ctx, handle, name))
         return TPM2B_NAME(_cdata=get_ptr(name))
