@@ -130,7 +130,7 @@ class ESAPI:
         auth_p = TPM2B_pack(auth, "TPM2B_AUTH")
         _chkrc(lib.Esys_TR_SetAuth(self.ctx, esys_tr, auth_p))
 
-    def TR_GetName(self, handle):
+    def tr_get_name(self, handle):
 
         check_handle_type(handle, "handle")
 

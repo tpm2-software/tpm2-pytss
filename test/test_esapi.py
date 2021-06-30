@@ -1665,7 +1665,7 @@ class TestEsys(TSS2_EsapiTest):
         ctx = self.ectx.ContextSave(handle)
 
         nhandle = self.ectx.ContextLoad(ctx)
-        name = self.ectx.TR_GetName(nhandle)
+        name = self.ectx.tr_get_name(nhandle)
 
         self.assertEqual(bytes(outpub.getName()), bytes(name))
 
@@ -1686,7 +1686,7 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.FlushContext(handle)
         with self.assertRaises(TSS2_Exception) as e:
-            self.ectx.TR_GetName(handle)
+            self.ectx.tr_get_name(handle)
         self.assertEqual(e.exception.error, TSS2_Exception.ESYS_RC_BAD_TR)
 
     def test_EvictControl(self):
@@ -3932,7 +3932,7 @@ class TestEsys(TSS2_EsapiTest):
             authHash=TPM2_ALG.SHA256,
         )
 
-        name = self.ectx.TR_GetName(handle)
+        name = self.ectx.tr_get_name(handle)
         self.ectx.PolicyTicket(session, timeout, b"", b"", name, policy_ticket)
 
         with self.assertRaises(TypeError):
@@ -4439,7 +4439,7 @@ class TestEsys(TSS2_EsapiTest):
         )
 
         check_ticket = TPMT_TK_VERIFIED(tag=TPM2_ST.VERIFIED, hierarchy=TPM2_RH.OWNER)
-        name = self.ectx.TR_GetName(handle)
+        name = self.ectx.tr_get_name(handle)
 
         self.ectx.PolicyAuthorize(
             session, TPM2B_DIGEST(), TPM2B_NONCE(), name, check_ticket

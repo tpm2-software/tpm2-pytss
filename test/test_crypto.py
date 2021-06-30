@@ -304,7 +304,7 @@ class CryptoTest(TSS2_EsapiTest):
         pub = types.TPM2B_PUBLIC.fromPEM(ecc_public_key)
         priv = types.TPM2B_SENSITIVE.fromPEM(ecc_private_key)
         handle = self.ectx.LoadExternal(priv, pub, types.ESYS_TR.RH_NULL)
-        ename = self.ectx.TR_GetName(handle)
+        ename = self.ectx.tr_get_name(handle)
         oname = pub.getName()
 
         self.assertEqual(ename.name, oname.name)
@@ -326,7 +326,7 @@ class CryptoTest(TSS2_EsapiTest):
 
         handle = self.ectx.NV_DefineSpace(b"1234", nv2b)
 
-        ename = self.ectx.TR_GetName(handle)
+        ename = self.ectx.tr_get_name(handle)
 
         self.assertEqual(ename.name, oname.name)
 
