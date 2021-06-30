@@ -1859,6 +1859,21 @@ class TestEsys(TSS2_EsapiTest):
         counter = int.from_bytes(data.buffer, byteorder="big")
         self.assertEqual(counter, 2)
 
+        with self.assertRaises(TypeError):
+            self.ectx.NV_Increment("foo")
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_Increment(nvhandle, authHandle="bar")
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_Increment(nvhandle, session1=45.6)
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_Increment(nvhandle, session2=object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_Increment(nvhandle, session3="baz")
+
     def test_NV_Extend(self):
         nvpub = TPM2B_NV_PUBLIC(
             nvPublic=TPMS_NV_PUBLIC(
