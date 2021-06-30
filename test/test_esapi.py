@@ -2052,6 +2052,21 @@ class TestEsys(TSS2_EsapiTest):
 
         self.assertEqual(e.exception.error, TPM2_RC.NV_LOCKED)
 
+        with self.assertRaises(TypeError):
+            self.ectx.NV_ReadLock("handle")
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_ReadLock(nvhandle, authHandle=45.6)
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_ReadLock(nvhandle, session1=56.9)
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_ReadLock(nvhandle, sesiosn2=object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.NV_ReadLock(nvhandle, session3="baz")
+
     def test_NV_ChangeAuth(self):
         # pre-generated TPM2_PolicyCommandCode(TPM2_CC_NV_ChangeAuth)
         pol = b"D^\xd9S`\x1a\x04U\x04U\t\x99\xbf,\xbb)\x92\xcb\xa2\xdb\xb5\x12\x1b\xcf\x03\x86\x9fe\xb5\x0c&\xe5"
