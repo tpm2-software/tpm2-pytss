@@ -1719,10 +1719,34 @@ class TestEsys(TSS2_EsapiTest):
         more = True
         while more:
             more, capdata = self.ectx.GetCapability(
-                TPM2_CAP.COMMANDS, TPM2_CC.FIRST, lib.TPM2_MAX_CAP_CC
+                TPM2_CAP.COMMANDS, TPM2_CC.FIRST, TPM2_MAX.CAP_CC
             )
             for c in capdata.data.command:
                 pass
+
+        with self.assertRaises(TypeError):
+            self.ectx.GetCapability("Not valid", TPM2_CC.FIRST, TPM2_MAX.CAP_CC)
+
+        with self.assertRaises(TypeError):
+            self.ectx.GetCapability(TPM2_CAP.COMMANDS, 45.6, TPM2_MAX.CAP_CC)
+
+        with self.assertRaises(TypeError):
+            self.ectx.GetCapability(TPM2_CAP.COMMANDS, TPM2_CC.FIRST, [])
+
+        with self.assertRaises(TypeError):
+            self.ectx.GetCapability(
+                TPM2_CAP.COMMANDS, TPM2_CC.FIRST, TPM2_MAX.CAP_CC, session1=56.7
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.GetCapability(
+                TPM2_CAP.COMMANDS, TPM2_CC.FIRST, TPM2_MAX.CAP_CC, session2=object()
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.GetCapability(
+                TPM2_CAP.COMMANDS, TPM2_CC.FIRST, TPM2_MAX.CAP_CC, session3="baz"
+            )
 
     def test_TestParms(self):
         parms = TPMT_PUBLIC_PARMS(type=TPM2_ALG.RSA)
