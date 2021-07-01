@@ -786,20 +786,20 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.set_auth(childHandle, "childpassword")
 
-        secret = self.ectx.Unseal(childHandle)
+        secret = self.ectx.unseal(childHandle)
         self.assertEqual(bytes(secret), b"sealedsecret")
 
         with self.assertRaises(TypeError):
-            self.ectx.Unseal(45.2)
+            self.ectx.unseal(45.2)
 
         with self.assertRaises(TypeError):
-            self.ectx.Unseal(childHandle, session1=object())
+            self.ectx.unseal(childHandle, session1=object())
 
         with self.assertRaises(TypeError):
-            self.ectx.Unseal(childHandle, session2=67.4)
+            self.ectx.unseal(childHandle, session2=67.4)
 
         with self.assertRaises(TypeError):
-            self.ectx.Unseal(childHandle, session3="bar")
+            self.ectx.unseal(childHandle, session3="bar")
 
     def test_objectChangeAuth(self):
 
