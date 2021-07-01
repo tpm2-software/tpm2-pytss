@@ -926,13 +926,13 @@ class TestEsys(TSS2_EsapiTest):
         scheme = TPMT_RSA_DECRYPT(scheme=TPM2_ALG.RSAES)
         outData = self.ectx.rsa_encrypt(childHandle, message, scheme)
 
-        message2 = self.ectx.RSA_Decrypt(childHandle, outData, scheme)
+        message2 = self.ectx.rsa_decrypt(childHandle, outData, scheme)
 
         self.assertEqual(bytes(message), bytes(message2))
 
         outData = self.ectx.rsa_encrypt(childHandle, "hello world", scheme)
 
-        message2 = self.ectx.RSA_Decrypt(childHandle, outData, scheme)
+        message2 = self.ectx.rsa_decrypt(childHandle, outData, scheme)
 
         self.assertEqual(bytes(message), bytes(message2))
 
@@ -955,24 +955,24 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.rsa_encrypt(childHandle, message, scheme, session3=52.6)
 
-        # negative test RSA_Decrypt
+        # negative test rsa_decrypt
         with self.assertRaises(TypeError):
-            self.ectx.RSA_Decrypt(56.2, outData, scheme)
+            self.ectx.rsa_decrypt(56.2, outData, scheme)
 
         with self.assertRaises(TypeError):
-            self.ectx.RSA_Decrypt(childHandle, object(), scheme)
+            self.ectx.rsa_decrypt(childHandle, object(), scheme)
 
         with self.assertRaises(TypeError):
-            self.ectx.RSA_Decrypt(childHandle, outData, TPM2_ALG.RSAES)
+            self.ectx.rsa_decrypt(childHandle, outData, TPM2_ALG.RSAES)
 
         with self.assertRaises(TypeError):
-            self.ectx.RSA_Decrypt(childHandle, outData, scheme, session1=67.9)
+            self.ectx.rsa_decrypt(childHandle, outData, scheme, session1=67.9)
 
         with self.assertRaises(TypeError):
-            self.ectx.RSA_Decrypt(childHandle, outData, scheme, session2="foo")
+            self.ectx.rsa_decrypt(childHandle, outData, scheme, session2="foo")
 
         with self.assertRaises(TypeError):
-            self.ectx.RSA_Decrypt(childHandle, outData, scheme, session3=object())
+            self.ectx.rsa_decrypt(childHandle, outData, scheme, session3=object())
 
     def test_rsa_enc_dec_with_label(self):
 
@@ -1002,7 +1002,7 @@ class TestEsys(TSS2_EsapiTest):
             childHandle, message, scheme, label=b"my label\0"
         )
 
-        message2 = self.ectx.RSA_Decrypt(
+        message2 = self.ectx.rsa_decrypt(
             childHandle, outData, scheme, label=b"my label\0"
         )
 

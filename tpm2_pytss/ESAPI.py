@@ -825,31 +825,31 @@ class ESAPI:
         )
         return TPM2B_PUBLIC_KEY_RSA(get_ptr(outData))
 
-    def RSA_Decrypt(
+    def rsa_decrypt(
         self,
-        keyHandle,
-        cipherText,
-        inScheme,
+        key_handle,
+        cipher_text,
+        in_scheme,
         label=None,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(keyHandle, "keyHandle")
+        check_handle_type(key_handle, "key_handle")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        inScheme_cdata = get_cdata(inScheme, TPMT_RSA_DECRYPT, "inScheme")
-        cipherText_cdata = get_cdata(cipherText, TPM2B_PUBLIC_KEY_RSA, "cipherText")
+        inScheme_cdata = get_cdata(in_scheme, TPMT_RSA_DECRYPT, "in_scheme")
+        cipherText_cdata = get_cdata(cipher_text, TPM2B_PUBLIC_KEY_RSA, "cipher_text")
         label_cdata = get_cdata(label, TPM2B_DATA, "label", allow_none=True)
 
         message = ffi.new("TPM2B_PUBLIC_KEY_RSA **")
         _chkrc(
             lib.Esys_RSA_Decrypt(
                 self.ctx,
-                keyHandle,
+                key_handle,
                 session1,
                 session2,
                 session3,
