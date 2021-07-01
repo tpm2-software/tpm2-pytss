@@ -1263,16 +1263,16 @@ class ESAPI:
         sequenceHandleObject = sequenceHandle[0]
         return sequenceHandleObject
 
-    def SequenceUpdate(
+    def sequence_update(
         self,
-        sequenceHandle,
+        sequence_handle,
         buffer,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(sequenceHandle, "sequenceHandle")
+        check_handle_type(sequence_handle, "sequence_handle")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
@@ -1281,7 +1281,7 @@ class ESAPI:
 
         _chkrc(
             lib.Esys_SequenceUpdate(
-                self.ctx, sequenceHandle, session1, session2, session3, buffer_cdata
+                self.ctx, sequence_handle, session1, session2, session3, buffer_cdata
             )
         )
 

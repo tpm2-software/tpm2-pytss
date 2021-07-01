@@ -1474,13 +1474,13 @@ class TestEsys(TSS2_EsapiTest):
 
         # self.ectx.set_auth(seqHandle, b"1234")
 
-        self.ectx.SequenceUpdate(seqHandle, "here is some data")
+        self.ectx.sequence_update(seqHandle, "here is some data")
 
-        self.ectx.SequenceUpdate(seqHandle, b"more data but byte string")
+        self.ectx.sequence_update(seqHandle, b"more data but byte string")
 
-        self.ectx.SequenceUpdate(seqHandle, TPM2B_MAX_BUFFER("native data format"))
+        self.ectx.sequence_update(seqHandle, TPM2B_MAX_BUFFER("native data format"))
 
-        self.ectx.SequenceUpdate(seqHandle, None)
+        self.ectx.sequence_update(seqHandle, None)
 
         digest, ticket = self.ectx.SequenceComplete(seqHandle, None)
         self.assertNotEqual(digest, None)
@@ -1528,13 +1528,13 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.set_auth(seqHandle, b"1234")
 
-        self.ectx.SequenceUpdate(seqHandle, "here is some data")
+        self.ectx.sequence_update(seqHandle, "here is some data")
 
-        self.ectx.SequenceUpdate(seqHandle, b"more data but byte string")
+        self.ectx.sequence_update(seqHandle, b"more data but byte string")
 
-        self.ectx.SequenceUpdate(seqHandle, TPM2B_MAX_BUFFER("native data format"))
+        self.ectx.sequence_update(seqHandle, TPM2B_MAX_BUFFER("native data format"))
 
-        self.ectx.SequenceUpdate(seqHandle, None)
+        self.ectx.sequence_update(seqHandle, None)
 
         digest, ticket = self.ectx.SequenceComplete(seqHandle, "AnotherBuffer")
         self.assertNotEqual(digest, None)
@@ -1567,19 +1567,21 @@ class TestEsys(TSS2_EsapiTest):
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.SequenceUpdate(56.7, "here is some data")
+            self.ectx.sequence_update(56.7, "here is some data")
 
         with self.assertRaises(TypeError):
-            self.ectx.SequenceUpdate(seqHandle, [])
+            self.ectx.sequence_update(seqHandle, [])
 
         with self.assertRaises(TypeError):
-            self.ectx.SequenceUpdate(seqHandle, "here is some data", sequence1="foo")
+            self.ectx.sequence_update(seqHandle, "here is some data", sequence1="foo")
 
         with self.assertRaises(TypeError):
-            self.ectx.SequenceUpdate(seqHandle, "here is some data", sequence2=object())
+            self.ectx.sequence_update(
+                seqHandle, "here is some data", sequence2=object()
+            )
 
         with self.assertRaises(TypeError):
-            self.ectx.SequenceUpdate(seqHandle, "here is some data", sequence3=78.23)
+            self.ectx.sequence_update(seqHandle, "here is some data", sequence3=78.23)
 
         with self.assertRaises(TypeError):
             self.ectx.SequenceComplete(78.25, "AnotherBuffer")
@@ -1609,13 +1611,13 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.set_auth(seqHandle, b"1234")
 
-        self.ectx.SequenceUpdate(seqHandle, "here is some data")
+        self.ectx.sequence_update(seqHandle, "here is some data")
 
-        self.ectx.SequenceUpdate(seqHandle, b"more data but byte string")
+        self.ectx.sequence_update(seqHandle, b"more data but byte string")
 
-        self.ectx.SequenceUpdate(seqHandle, TPM2B_MAX_BUFFER("native data format"))
+        self.ectx.sequence_update(seqHandle, TPM2B_MAX_BUFFER("native data format"))
 
-        self.ectx.SequenceUpdate(seqHandle, None)
+        self.ectx.sequence_update(seqHandle, None)
 
         pcrs = self.ectx.EventSequenceComplete(
             ESYS_TR.PCR16, seqHandle, "AnotherBuffer"
@@ -3609,7 +3611,7 @@ class TestEsys(TSS2_EsapiTest):
 
         sequence = self.ectx.hash_sequence_start(None, TPM2_ALG.SHA256)
 
-        self.ectx.SequenceUpdate(sequence, TPM2B_MAX_BUFFER(bytes(nonce)))
+        self.ectx.sequence_update(sequence, TPM2B_MAX_BUFFER(bytes(nonce)))
 
         # 10 year expiration
         expiration = -(10 * 365 * 24 * 60 * 60)
@@ -3904,7 +3906,7 @@ class TestEsys(TSS2_EsapiTest):
 
         sequence = self.ectx.hash_sequence_start(None, TPM2_ALG.SHA256)
 
-        self.ectx.SequenceUpdate(sequence, TPM2B_MAX_BUFFER(bytes(nonce)))
+        self.ectx.sequence_update(sequence, TPM2B_MAX_BUFFER(bytes(nonce)))
 
         # 10 year expiration
         expiration = -(10 * 365 * 24 * 60 * 60)
