@@ -1874,22 +1874,22 @@ class ESAPI:
             TPML_DIGEST(_cdata=get_ptr(pcrValues)),
         )
 
-    def PCR_Allocate(
+    def pcr_allocate(
         self,
-        pcrAllocation,
-        authHandle=ESYS_TR.PLATFORM,
+        pcr_allocation,
+        auth_handle=ESYS_TR.PLATFORM,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(authHandle, "authHandle", expected=[ESYS_TR.PLATFORM])
+        check_handle_type(auth_handle, "auth_handle", expected=[ESYS_TR.PLATFORM])
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
         pcrAllocation_cdata = get_cdata(
-            pcrAllocation, TPML_PCR_SELECTION, "pcrAllocation"
+            pcr_allocation, TPML_PCR_SELECTION, "pcr_allocation"
         )
 
         allocationSuccess = ffi.new("TPMI_YES_NO *")
@@ -1899,7 +1899,7 @@ class ESAPI:
         _chkrc(
             lib.Esys_PCR_Allocate(
                 self.ctx,
-                authHandle,
+                auth_handle,
                 session1,
                 session2,
                 session3,

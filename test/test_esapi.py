@@ -3476,29 +3476,29 @@ class TestEsys(TSS2_EsapiTest):
 
         pcrsels = TPML_PCR_SELECTION.parse("sha1:3+sha256:all")
 
-        success, max_, needed, available = self.ectx.PCR_Allocate(pcrsels)
+        success, max_, needed, available = self.ectx.pcr_allocate(pcrsels)
         self.assertEqual(type(success), bool)
         self.assertEqual(type(max_), int)
         self.assertEqual(type(needed), int)
         self.assertEqual(type(available), int)
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_Allocate(object)
+            self.ectx.pcr_allocate(object)
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_Allocate(authHandle="foo")
+            self.ectx.pcr_allocate(auth_handle="foo")
 
         with self.assertRaises(ValueError):
-            self.ectx.PCR_Allocate(pcrsels, authHandle=ESYS_TR.OWNER)
+            self.ectx.pcr_allocate(pcrsels, auth_handle=ESYS_TR.OWNER)
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_Allocate(pcrsels, session1="bar")
+            self.ectx.pcr_allocate(pcrsels, session1="bar")
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_Allocate(pcrsels, session2=12.3)
+            self.ectx.pcr_allocate(pcrsels, session2=12.3)
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_Allocate(pcrsels, session3=object())
+            self.ectx.pcr_allocate(pcrsels, session3=object())
 
     def test_PCR_SetAuthPolicy(self):
 
