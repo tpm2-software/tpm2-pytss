@@ -924,36 +924,36 @@ class TestEsys(TSS2_EsapiTest):
 
         message = TPM2B_PUBLIC_KEY_RSA("hello world")
         scheme = TPMT_RSA_DECRYPT(scheme=TPM2_ALG.RSAES)
-        outData = self.ectx.RSA_Encrypt(childHandle, message, scheme)
+        outData = self.ectx.rsa_encrypt(childHandle, message, scheme)
 
         message2 = self.ectx.RSA_Decrypt(childHandle, outData, scheme)
 
         self.assertEqual(bytes(message), bytes(message2))
 
-        outData = self.ectx.RSA_Encrypt(childHandle, "hello world", scheme)
+        outData = self.ectx.rsa_encrypt(childHandle, "hello world", scheme)
 
         message2 = self.ectx.RSA_Decrypt(childHandle, outData, scheme)
 
         self.assertEqual(bytes(message), bytes(message2))
 
-        # negative test RSA_Encrypt
+        # negative test rsa_encrypt
         with self.assertRaises(TypeError):
-            self.ectx.RSA_Encrypt(45.6, message, scheme)
+            self.ectx.rsa_encrypt(45.6, message, scheme)
 
         with self.assertRaises(TypeError):
-            self.ectx.RSA_Encrypt(childHandle, TPM2B_PUBLIC(), scheme)
+            self.ectx.rsa_encrypt(childHandle, TPM2B_PUBLIC(), scheme)
 
         with self.assertRaises(TypeError):
-            self.ectx.RSA_Encrypt(childHandle, message, "foo")
+            self.ectx.rsa_encrypt(childHandle, message, "foo")
 
         with self.assertRaises(TypeError):
-            self.ectx.RSA_Encrypt(childHandle, message, scheme, session1=object())
+            self.ectx.rsa_encrypt(childHandle, message, scheme, session1=object())
 
         with self.assertRaises(TypeError):
-            self.ectx.RSA_Encrypt(childHandle, message, scheme, session2="foo")
+            self.ectx.rsa_encrypt(childHandle, message, scheme, session2="foo")
 
         with self.assertRaises(TypeError):
-            self.ectx.RSA_Encrypt(childHandle, message, scheme, session3=52.6)
+            self.ectx.rsa_encrypt(childHandle, message, scheme, session3=52.6)
 
         # negative test RSA_Decrypt
         with self.assertRaises(TypeError):
@@ -998,7 +998,7 @@ class TestEsys(TSS2_EsapiTest):
 
         message = TPM2B_PUBLIC_KEY_RSA("hello world")
         scheme = TPMT_RSA_DECRYPT(scheme=TPM2_ALG.RSAES)
-        outData = self.ectx.RSA_Encrypt(
+        outData = self.ectx.rsa_encrypt(
             childHandle, message, scheme, label=b"my label\0"
         )
 
