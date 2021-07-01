@@ -1356,33 +1356,33 @@ class ESAPI:
         )
         return TPML_DIGEST_VALUES(get_ptr(results))
 
-    def Certify(
+    def certify(
         self,
-        objectHandle,
-        signHandle,
-        qualifyingData,
-        inScheme,
+        object_handle,
+        sign_handle,
+        qualifying_data,
+        in_scheme,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.PASSWORD,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(objectHandle, "objectHandle")
-        check_handle_type(signHandle, "signHandle")
+        check_handle_type(object_handle, "object_handle")
+        check_handle_type(sign_handle, "sign_handle")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        qualifyingData_cdata = get_cdata(qualifyingData, TPM2B_DATA, "qualifyingData")
-        inScheme_cdata = get_cdata(inScheme, TPMT_SIG_SCHEME, "inScheme")
+        qualifyingData_cdata = get_cdata(qualifying_data, TPM2B_DATA, "qualifying_data")
+        inScheme_cdata = get_cdata(in_scheme, TPMT_SIG_SCHEME, "in_scheme")
 
         certifyInfo = ffi.new("TPM2B_ATTEST **")
         signature = ffi.new("TPMT_SIGNATURE **")
         _chkrc(
             lib.Esys_Certify(
                 self.ctx,
-                objectHandle,
-                signHandle,
+                object_handle,
+                sign_handle,
                 session1,
                 session2,
                 session3,
