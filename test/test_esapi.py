@@ -3441,7 +3441,7 @@ class TestEsys(TSS2_EsapiTest):
             ]
         )
 
-        self.ectx.PCR_Extend(ESYS_TR.PCR16, digests)
+        self.ectx.pcr_extend(ESYS_TR.PCR16, digests)
 
     def test_PCR_Event(self):
 
