@@ -214,30 +214,30 @@ class ESAPI:
         )
         return (TPM2B_MAX_BUFFER(get_ptr(outData)), TPM2_RC(testResult[0]))
 
-    def StartAuthSession(
+    def start_auth_session(
         self,
-        tpmKey,
+        tpm_key,
         bind,
-        nonceCaller,
-        sessionType,
+        nonce_caller,
+        session_type,
         symmetric,
-        authHash,
+        auth_hash,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(tpmKey, "tpmKey")
+        check_handle_type(tpm_key, "tpm_key")
         check_handle_type(bind, "bind")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        check_friendly_int(sessionType, "sessionType", TPM2_SE)
-        check_friendly_int(authHash, "authHash", TPM2_ALG)
+        check_friendly_int(session_type, "session_type", TPM2_SE)
+        check_friendly_int(auth_hash, "auth_hash", TPM2_ALG)
 
         nonceCaller_cdata = get_cdata(
-            nonceCaller, TPM2B_NONCE, "nonceCaller", allow_none=True
+            nonce_caller, TPM2B_NONCE, "nonce_caller", allow_none=True
         )
         symmetric_cdata = get_cdata(symmetric, TPMT_SYM_DEF, "symmetric")
 
@@ -245,15 +245,15 @@ class ESAPI:
         _chkrc(
             lib.Esys_StartAuthSession(
                 self.ctx,
-                tpmKey,
+                tpm_key,
                 bind,
                 session1,
                 session2,
                 session3,
                 nonceCaller_cdata,
-                sessionType,
+                session_type,
                 symmetric_cdata,
-                authHash,
+                auth_hash,
                 sessionHandle,
             )
         )
