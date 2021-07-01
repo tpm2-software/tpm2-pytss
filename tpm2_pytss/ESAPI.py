@@ -1228,10 +1228,10 @@ class ESAPI:
         sequenceHandleObject = sequenceHandle[0]
         return sequenceHandleObject
 
-    def HashSequenceStart(
+    def hash_sequence_start(
         self,
         auth,
-        hashAlg,
+        hash_alg,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
@@ -1241,7 +1241,7 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        check_friendly_int(hashAlg, "hashAlg", TPM2_ALG)
+        check_friendly_int(hash_alg, "hash_alg", TPM2_ALG)
 
         if auth is None:
             auth = TPM2B_AUTH()
@@ -1256,7 +1256,7 @@ class ESAPI:
                 session2,
                 session3,
                 auth_cdata,
-                hashAlg,
+                hash_alg,
                 sequenceHandle,
             )
         )
