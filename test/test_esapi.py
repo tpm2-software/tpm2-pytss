@@ -2451,19 +2451,19 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
 
-        self.ectx.PolicyRestart(session)
+        self.ectx.policy_restart(session)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyRestart(object())
+            self.ectx.policy_restart(object())
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyRestart(session, session1=4.5)
+            self.ectx.policy_restart(session, session1=4.5)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyRestart(session, session2=object())
+            self.ectx.policy_restart(session, session2=object())
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyRestart(session, session3=33.666)
+            self.ectx.policy_restart(session, session3=33.666)
 
     def test_duplicate(self):
 
@@ -4305,7 +4305,7 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.PolicyNameHash(session, b"01234567890ABCDEF012345689ABCDEF")
 
-        self.ectx.PolicyRestart(session)
+        self.ectx.policy_restart(session)
 
         self.ectx.PolicyNameHash(
             session, TPM2B_DIGEST(b"ABCDEF01234567890ABCDEF012345689")
@@ -4350,13 +4350,13 @@ class TestEsys(TSS2_EsapiTest):
             b"0123456789ABCDEF0123456789ABCDEF",
             b"0123456789ABCDEF0123456789ABCDEF",
         )
-        self.ectx.PolicyRestart(session)
+        self.ectx.policy_restart(session)
         self.ectx.PolicyDuplicationSelect(
             session,
             TPM2B_NAME(b"0123456789ABCDEF0123456789ABCDEF"),
             TPM2B_NAME(b"0123456789ABCDEF0123456789ABCDEF"),
         )
-        self.ectx.PolicyRestart(session)
+        self.ectx.policy_restart(session)
         self.ectx.PolicyDuplicationSelect(
             session,
             TPM2B_NAME(b"0123456789ABCDEF0123456789ABCDEF"),
@@ -4549,7 +4549,7 @@ class TestEsys(TSS2_EsapiTest):
         )
 
         self.ectx.PolicyNvWritten(session)
-        self.ectx.PolicyRestart(session)
+        self.ectx.policy_restart(session)
         self.ectx.PolicyNvWritten(session, False)
 
         with self.assertRaises(TypeError):
