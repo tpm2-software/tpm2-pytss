@@ -100,7 +100,7 @@ class MakeCredTest(TSS2_EsapiTest):
         phandle, parent, _, _, _ = self.ectx.CreatePrimary(insens)
         private, public, _, _, _ = self.ectx.create(phandle, insens)
         credblob, secret = MakeCredential(parent, b"credential data", public.getName())
-        handle = self.ectx.Load(phandle, private, public)
+        handle = self.ectx.load(phandle, private, public)
         certinfo = self.ectx.ActivateCredential(handle, phandle, credblob, secret)
         self.assertEqual(b"credential data", bytes(certinfo))
 
@@ -109,7 +109,7 @@ class MakeCredTest(TSS2_EsapiTest):
         phandle, parent, _, _, _ = self.ectx.CreatePrimary(insens, "ecc")
         private, public, _, _, _ = self.ectx.create(phandle, insens, "ecc")
         credblob, secret = MakeCredential(parent, b"credential data", public.getName())
-        handle = self.ectx.Load(phandle, private, public)
+        handle = self.ectx.load(phandle, private, public)
         certinfo = self.ectx.ActivateCredential(handle, phandle, credblob, secret)
         self.assertEqual(b"credential data", bytes(certinfo))
 

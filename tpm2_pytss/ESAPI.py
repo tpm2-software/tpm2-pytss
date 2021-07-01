@@ -358,29 +358,29 @@ class ESAPI:
             TPMT_TK_CREATION(get_ptr(creationTicket)),
         )
 
-    def Load(
+    def load(
         self,
-        parentHandle,
-        inPrivate,
-        inPublic,
+        parent_handle,
+        in_private,
+        in_public,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(parentHandle, "parentHandle")
+        check_handle_type(parent_handle, "parent_handle")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        inPublic_cdata = get_cdata(inPublic, TPM2B_PUBLIC, "inPublic")
-        inPrivate_cdata = get_cdata(inPrivate, TPM2B_PRIVATE, "inPrivate")
+        inPublic_cdata = get_cdata(in_public, TPM2B_PUBLIC, "in_public")
+        inPrivate_cdata = get_cdata(in_private, TPM2B_PRIVATE, "in_private")
 
         objectHandle = ffi.new("ESYS_TR *")
         _chkrc(
             lib.Esys_Load(
                 self.ctx,
-                parentHandle,
+                parent_handle,
                 session1,
                 session2,
                 session3,
@@ -3496,7 +3496,7 @@ class ESAPI:
         return TPM2B_DATA(get_ptr(outputData))
 
     def load_blob(self, data: bytes, type: int = lib.FAPI_ESYSBLOB_CONTEXTLOAD) -> int:
-        """Load binary ESAPI object as binary blob. Supported are the types :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_CONTEXTLOAD` and :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_DESERIALIZE`.
+        """load binary ESAPI object as binary blob. Supported are the types :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_CONTEXTLOAD` and :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_DESERIALIZE`.
 
         Args:
             data (bytes): Binary blob of the ESAPI object to load.
