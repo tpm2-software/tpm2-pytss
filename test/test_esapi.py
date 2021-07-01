@@ -1113,7 +1113,7 @@ class TestEsys(TSS2_EsapiTest):
 
         curveId = TPM2_ECC.NIST_P256
 
-        Q, counter = self.ectx.EC_Ephemeral(curveId)
+        Q, counter = self.ectx.ec_ephemeral(curveId)
 
         inQsB = TPM2B_ECC_POINT(outPublic.publicArea.unique.ecc)
         inQeB = Q

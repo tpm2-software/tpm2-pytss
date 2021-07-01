@@ -1661,9 +1661,9 @@ class ESAPI:
             counter[0],
         )
 
-    def EC_Ephemeral(
+    def ec_ephemeral(
         self,
-        curveID,
+        curve_id,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
@@ -1673,7 +1673,7 @@ class ESAPI:
         counter = ffi.new("UINT16 *")
         _chkrc(
             lib.Esys_EC_Ephemeral(
-                self.ctx, session1, session2, session3, curveID, Q, counter
+                self.ctx, session1, session2, session3, curve_id, Q, counter
             )
         )
         return (TPM2B_ECC_POINT(get_ptr(Q)), counter[0])
