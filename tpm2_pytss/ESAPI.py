@@ -1805,10 +1805,10 @@ class ESAPI:
             )
         )
 
-    def PCR_Event(
+    def pcr_event(
         self,
-        pcrHandle,
-        eventData,
+        pcr_handle,
+        event_data,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
@@ -1818,15 +1818,15 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        check_handle_type(pcrHandle, "pcrHandle")
+        check_handle_type(pcr_handle, "pcr_handle")
 
-        eventData_cdata = get_cdata(eventData, TPM2B_EVENT, "eventData")
+        eventData_cdata = get_cdata(event_data, TPM2B_EVENT, "event_data")
 
         digests = ffi.new("TPML_DIGEST_VALUES **")
         _chkrc(
             lib.Esys_PCR_Event(
                 self.ctx,
-                pcrHandle,
+                pcr_handle,
                 session1,
                 session2,
                 session3,
