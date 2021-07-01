@@ -3356,31 +3356,31 @@ class TestEsys(TSS2_EsapiTest):
         validation = TPMT_TK_HASHCHECK(tag=TPM2_ST.HASHCHECK, hierarchy=TPM2_RH.OWNER)
         signature = self.ectx.Sign(sign_handle, digest, scheme, validation)
 
-        verified = self.ectx.VerifySignature(sign_handle, digest, signature)
+        verified = self.ectx.verify_signature(sign_handle, digest, signature)
         self.assertEqual(type(verified), TPMT_TK_VERIFIED)
 
-        verified = self.ectx.VerifySignature(
+        verified = self.ectx.verify_signature(
             sign_handle, TPM2B_DIGEST(digest), signature
         )
         self.assertEqual(type(verified), TPMT_TK_VERIFIED)
 
         with self.assertRaises(TypeError):
-            self.ectx.VerifySignature("nope", digest, signature)
+            self.ectx.verify_signature("nope", digest, signature)
 
         with self.assertRaises(TypeError):
-            self.ectx.VerifySignature(sign_handle, object(), signature)
+            self.ectx.verify_signature(sign_handle, object(), signature)
 
         with self.assertRaises(TypeError):
-            self.ectx.VerifySignature(sign_handle, digest, 12.56)
+            self.ectx.verify_signature(sign_handle, digest, 12.56)
 
         with self.assertRaises(TypeError):
-            self.ectx.VerifySignature(sign_handle, digest, signature, session1="baz")
+            self.ectx.verify_signature(sign_handle, digest, signature, session1="baz")
 
         with self.assertRaises(TypeError):
-            self.ectx.VerifySignature(sign_handle, digest, signature, session2=12.3)
+            self.ectx.verify_signature(sign_handle, digest, signature, session2=12.3)
 
         with self.assertRaises(TypeError):
-            self.ectx.VerifySignature(sign_handle, digest, signature, session3={})
+            self.ectx.verify_signature(sign_handle, digest, signature, session3={})
 
     def test_SetCommandCodeAuditStatus(self):
 

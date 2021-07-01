@@ -1678,9 +1678,9 @@ class ESAPI:
         )
         return (TPM2B_ECC_POINT(get_ptr(Q)), counter[0])
 
-    def VerifySignature(
+    def verify_signature(
         self,
-        keyHandle,
+        key_handle,
         digest,
         signature,
         session1=ESYS_TR.NONE,
@@ -1688,7 +1688,7 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(keyHandle, "keyHandle")
+        check_handle_type(key_handle, "key_handle")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
@@ -1700,7 +1700,7 @@ class ESAPI:
         _chkrc(
             lib.Esys_VerifySignature(
                 self.ctx,
-                keyHandle,
+                key_handle,
                 session1,
                 session2,
                 session3,
