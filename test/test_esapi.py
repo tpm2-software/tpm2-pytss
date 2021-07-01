@@ -2916,47 +2916,47 @@ class TestEsys(TSS2_EsapiTest):
 
         parentHandle = self.ectx.CreatePrimary(inSensitive, inPublic)[0]
 
-        quote, signature = self.ectx.Quote(
+        quote, signature = self.ectx.quote(
             parentHandle, "sha256:1,2,3,4", TPM2B_DATA(b"123456789")
         )
         self.assertTrue(type(quote), TPM2B_ATTEST)
         self.assertTrue(type(signature), TPMT_SIGNATURE)
 
-        quote, signature = self.ectx.Quote(
+        quote, signature = self.ectx.quote(
             parentHandle, TPML_PCR_SELECTION.parse("sha256:1,2,3,4"), TPM2B_DATA()
         )
         self.assertTrue(type(quote), TPM2B_ATTEST)
         self.assertTrue(type(signature), TPMT_SIGNATURE)
 
-        quote, signature = self.ectx.Quote(
+        quote, signature = self.ectx.quote(
             parentHandle,
             "sha256:1,2,3,4",
             TPM2B_DATA(),
-            inScheme=TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL),
+            in_scheme=TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL),
         )
         self.assertTrue(type(quote), TPM2B_ATTEST)
         self.assertTrue(type(signature), TPMT_SIGNATURE)
 
         with self.assertRaises(TypeError):
-            self.ectx.Quote(42.0, "sha256:1,2,3,4", TPM2B_DATA())
+            self.ectx.quote(42.0, "sha256:1,2,3,4", TPM2B_DATA())
 
         with self.assertRaises(TypeError):
-            self.ectx.Quote(parentHandle, b"sha256:1,2,3,4")
+            self.ectx.quote(parentHandle, b"sha256:1,2,3,4")
 
         with self.assertRaises(TypeError):
-            self.ectx.Quote(parentHandle, "sha256:1,2,3,4", qualifyingData=object())
+            self.ectx.quote(parentHandle, "sha256:1,2,3,4", qualifying_data=object())
 
         with self.assertRaises(TypeError):
-            self.ectx.Quote(parentHandle, "sha256:1,2,3,4", inScheme=87)
+            self.ectx.quote(parentHandle, "sha256:1,2,3,4", in_scheme=87)
 
         with self.assertRaises(TypeError):
-            self.ectx.Quote(parentHandle, "sha256:1,2,3,4", session1="foo")
+            self.ectx.quote(parentHandle, "sha256:1,2,3,4", session1="foo")
 
         with self.assertRaises(TypeError):
-            self.ectx.Quote(parentHandle, "sha256:1,2,3,4", session2=25.68)
+            self.ectx.quote(parentHandle, "sha256:1,2,3,4", session2=25.68)
 
         with self.assertRaises(TypeError):
-            self.ectx.Quote(parentHandle, "sha256:1,2,3,4", session3=object())
+            self.ectx.quote(parentHandle, "sha256:1,2,3,4", session3=object())
 
     def test_GetSessionAuditDigest(self):
 
