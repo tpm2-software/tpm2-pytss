@@ -1145,9 +1145,9 @@ class ESAPI:
         )
         return TPM2B_DIGEST(get_ptr(outHMAC))
 
-    def GetRandom(
+    def get_random(
         self,
-        bytesRequested,
+        bytes_requested,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
@@ -1157,15 +1157,15 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        if not isinstance(bytesRequested, int):
+        if not isinstance(bytes_requested, int):
             raise TypeError(
-                f"Expected bytesRequested type to be int, got {type(bytesRequested)}"
+                f"Expected bytes_requested type to be int, got {type(bytes_requested)}"
             )
 
         randomBytes = ffi.new("TPM2B_DIGEST **")
         _chkrc(
             lib.Esys_GetRandom(
-                self.ctx, session1, session2, session3, bytesRequested, randomBytes
+                self.ctx, session1, session2, session3, bytes_requested, randomBytes
             )
         )
 
