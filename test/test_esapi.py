@@ -3206,39 +3206,41 @@ class TestEsys(TSS2_EsapiTest):
 
         signHandle = self.ectx.CreatePrimary(inSensitive, inPublic)[0]
 
-        auditInfo, signature = self.ectx.GetTime(signHandle, b"12345678")
+        auditInfo, signature = self.ectx.get_time(signHandle, b"12345678")
         self.assertTrue(type(auditInfo), TPM2B_ATTEST)
         self.assertTrue(type(signature), TPMT_SIGNATURE)
 
         scheme = TPMT_SIG_SCHEME(scheme=TPM2_ALG.RSASSA)
         scheme.details.rsassa.hashAlg = TPM2_ALG.SHA256
 
-        auditInfo, signature = self.ectx.GetTime(
-            signHandle, b"12345678", inScheme=scheme
+        auditInfo, signature = self.ectx.get_time(
+            signHandle, b"12345678", in_scheme=scheme
         )
         self.assertTrue(type(auditInfo), TPM2B_ATTEST)
         self.assertTrue(type(signature), TPMT_SIGNATURE)
 
         with self.assertRaises(TypeError):
-            self.ectx.GetTime(45.89, b"1234")
+            self.ectx.get_time(45.89, b"1234")
 
         with self.assertRaises(TypeError):
-            self.ectx.GetTime(signHandle, list())
+            self.ectx.get_time(signHandle, list())
 
         with self.assertRaises(TypeError):
-            self.ectx.GetTime(signHandle, b"1234", privacyAdminHandle=45.6)
+            self.ectx.get_time(signHandle, b"1234", privacy_admin_handle=45.6)
 
         with self.assertRaises(ValueError):
-            self.ectx.GetTime(signHandle, b"1234", privacyAdminHandle=ESYS_TR.LOCKOUT)
+            self.ectx.get_time(
+                signHandle, b"1234", privacy_admin_handle=ESYS_TR.LOCKOUT
+            )
 
         with self.assertRaises(TypeError):
-            self.ectx.GetTime(signHandle, b"1234", session1="baz")
+            self.ectx.get_time(signHandle, b"1234", session1="baz")
 
         with self.assertRaises(TypeError):
-            self.ectx.GetTime(signHandle, b"1234", session2=object())
+            self.ectx.get_time(signHandle, b"1234", session2=object())
 
         with self.assertRaises(TypeError):
-            self.ectx.GetTime(signHandle, b"1234", session3=12.723)
+            self.ectx.get_time(signHandle, b"1234", session3=12.723)
 
     def test_Commit(self):
 

@@ -1571,38 +1571,38 @@ class ESAPI:
         )
         return (TPM2B_ATTEST(get_ptr(auditInfo)), TPMT_SIGNATURE(get_ptr(signature)))
 
-    def GetTime(
+    def get_time(
         self,
-        signHandle,
-        qualifyingData,
-        inScheme=TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL),
-        privacyAdminHandle=ESYS_TR.RH_ENDORSEMENT,
+        sign_handle,
+        qualifying_data,
+        in_scheme=TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL),
+        privacy_admin_handle=ESYS_TR.RH_ENDORSEMENT,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.PASSWORD,
         session3=ESYS_TR.NONE,
     ):
 
         check_handle_type(
-            privacyAdminHandle, "privacyAdminHandle", expected=[ESYS_TR.ENDORSEMENT]
+            privacy_admin_handle, "privacy_admin_handle", expected=[ESYS_TR.ENDORSEMENT]
         )
-        check_handle_type(signHandle, "signHandle")
+        check_handle_type(sign_handle, "sign_handle")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
         qualifyingData_cdata = get_cdata(
-            qualifyingData, TPM2B_DATA, "qualifyingData", allow_none=True
+            qualifying_data, TPM2B_DATA, "qualifying_data", allow_none=True
         )
 
-        inScheme_cdata = get_cdata(inScheme, TPMT_SIG_SCHEME, "inScheme")
+        inScheme_cdata = get_cdata(in_scheme, TPMT_SIG_SCHEME, "in_scheme")
 
         timeInfo = ffi.new("TPM2B_ATTEST **")
         signature = ffi.new("TPMT_SIGNATURE **")
         _chkrc(
             lib.Esys_GetTime(
                 self.ctx,
-                privacyAdminHandle,
-                signHandle,
+                privacy_admin_handle,
+                sign_handle,
                 session1,
                 session2,
                 session3,
