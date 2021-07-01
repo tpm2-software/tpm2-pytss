@@ -3162,32 +3162,34 @@ class TestEsys(TSS2_EsapiTest):
             TPM2_CAP.COMMANDS, TPM2_CC.FIRST, TPM2_MAX.CAP_CC, session1=session
         )
 
-        auditInfo, signature = self.ectx.GetCommandAuditDigest(signHandle, b"12345678")
+        auditInfo, signature = self.ectx.get_command_audit_digest(
+            signHandle, b"12345678"
+        )
         self.assertEqual(type(auditInfo), TPM2B_ATTEST)
         self.assertEqual(type(signature), TPMT_SIGNATURE)
 
         with self.assertRaises(TypeError):
-            self.ectx.GetCommandAuditDigest(45.89, b"1234")
+            self.ectx.get_command_audit_digest(45.89, b"1234")
 
         with self.assertRaises(TypeError):
-            self.ectx.GetCommandAuditDigest(signHandle, b"1234", list())
+            self.ectx.get_command_audit_digest(signHandle, b"1234", list())
 
         with self.assertRaises(TypeError):
-            self.ectx.GetCommandAuditDigest(signHandle, b"1234", privacyHandle=45.6)
+            self.ectx.get_command_audit_digest(signHandle, b"1234", privacy_handle=45.6)
 
         with self.assertRaises(ValueError):
-            self.ectx.GetCommandAuditDigest(
-                signHandle, b"1234", privacyHandle=ESYS_TR.LOCKOUT
+            self.ectx.get_command_audit_digest(
+                signHandle, b"1234", privacy_handle=ESYS_TR.LOCKOUT
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.GetCommandAuditDigest(signHandle, b"1234", session1="baz")
+            self.ectx.get_command_audit_digest(signHandle, b"1234", session1="baz")
 
         with self.assertRaises(TypeError):
-            self.ectx.GetCommandAuditDigest(signHandle, b"1234", session2=object())
+            self.ectx.get_command_audit_digest(signHandle, b"1234", session2=object())
 
         with self.assertRaises(TypeError):
-            self.ectx.GetCommandAuditDigest(signHandle, b"1234", session3=12.723)
+            self.ectx.get_command_audit_digest(signHandle, b"1234", session3=12.723)
 
     def test_getTime(self):
 
