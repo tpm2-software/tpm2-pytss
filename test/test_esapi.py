@@ -1312,7 +1312,7 @@ class TestEsys(TSS2_EsapiTest):
     def test_Hash(self):
 
         # Null hierarchy default
-        digest, ticket = self.ectx.Hash(b"1234", TPM2_ALG.SHA256)
+        digest, ticket = self.ectx.hash(b"1234", TPM2_ALG.SHA256)
         self.assertNotEqual(digest, None)
         self.assertNotEqual(ticket, None)
         d = bytes(digest)
@@ -1322,7 +1322,7 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(c, d)
 
         # Owner hierarchy set
-        digest, ticket = self.ectx.Hash(b"1234", TPM2_ALG.SHA256, ESYS_TR.OWNER)
+        digest, ticket = self.ectx.hash(b"1234", TPM2_ALG.SHA256, ESYS_TR.OWNER)
         self.assertNotEqual(digest, None)
         self.assertNotEqual(ticket, None)
         d = bytes(digest)
@@ -1333,7 +1333,7 @@ class TestEsys(TSS2_EsapiTest):
 
         # Test TPM2B_MAX_BUFFER
         inData = TPM2B_MAX_BUFFER(b"1234")
-        digest, ticket = self.ectx.Hash(inData, TPM2_ALG.SHA256)
+        digest, ticket = self.ectx.hash(inData, TPM2_ALG.SHA256)
         self.assertNotEqual(digest, None)
         self.assertNotEqual(ticket, None)
         d = bytes(digest)
@@ -1344,7 +1344,7 @@ class TestEsys(TSS2_EsapiTest):
 
         # Test str input
         inData = TPM2B_MAX_BUFFER("1234")
-        digest, ticket = self.ectx.Hash(inData, TPM2_ALG.SHA256)
+        digest, ticket = self.ectx.hash(inData, TPM2_ALG.SHA256)
         self.assertNotEqual(digest, None)
         self.assertNotEqual(ticket, None)
         d = bytes(digest)
@@ -1354,22 +1354,22 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(c, d)
 
         with self.assertRaises(TypeError):
-            self.ectx.Hash(object(), TPM2_ALG.SHA256)
+            self.ectx.hash(object(), TPM2_ALG.SHA256)
 
         with self.assertRaises(TypeError):
-            self.ectx.Hash(inData, "baz")
+            self.ectx.hash(inData, "baz")
 
         with self.assertRaises(ValueError):
-            self.ectx.Hash(inData, 42)
+            self.ectx.hash(inData, 42)
 
         with self.assertRaises(TypeError):
-            self.ectx.Hash(inData, TPM2_ALG.SHA256, session1=56.7)
+            self.ectx.hash(inData, TPM2_ALG.SHA256, session1=56.7)
 
         with self.assertRaises(TypeError):
-            self.ectx.Hash(inData, TPM2_ALG.SHA256, session2="baz")
+            self.ectx.hash(inData, TPM2_ALG.SHA256, session2="baz")
 
         with self.assertRaises(TypeError):
-            self.ectx.Hash(inData, TPM2_ALG.SHA256, session3=object())
+            self.ectx.hash(inData, TPM2_ALG.SHA256, session3=object())
 
     def test_HMAC(self):
 

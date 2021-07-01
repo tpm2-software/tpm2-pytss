@@ -1076,10 +1076,10 @@ class ESAPI:
         )
         return (TPM2B_MAX_BUFFER(get_ptr(outData)), TPM2B_IV(get_ptr(ivOut)))
 
-    def Hash(
+    def hash(
         self,
         data,
-        hashAlg,
+        hash_alg,
         hierarchy=ESYS_TR.OWNER,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
@@ -1090,7 +1090,7 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        check_friendly_int(hashAlg, "hashAlg", TPM2_ALG)
+        check_friendly_int(hash_alg, "hash_alg", TPM2_ALG)
 
         data_cdata = get_cdata(data, TPM2B_MAX_BUFFER, "data")
 
@@ -1103,7 +1103,7 @@ class ESAPI:
                 session2,
                 session3,
                 data_cdata,
-                hashAlg,
+                hash_alg,
                 hierarchy,
                 outHash,
                 validation,
