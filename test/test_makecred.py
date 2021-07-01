@@ -125,13 +125,13 @@ class MakeCredTest(TSS2_EsapiTest):
             parent.publicArea, public, sensitive, b"", symdef
         )
 
-        self.ectx.Import(phandle, enckey, public, duplicate, outsymseed, symdef)
+        self.ectx.import_(phandle, enckey, public, duplicate, outsymseed, symdef)
 
         enckey, duplicate, outsymseed = Wrap(
             parent.publicArea, public, sensitive, b"", None
         )
 
-        self.ectx.Import(
+        self.ectx.import_(
             phandle,
             enckey,
             public,
@@ -152,13 +152,13 @@ class MakeCredTest(TSS2_EsapiTest):
             parent.publicArea, public, sensitive, b"\xA1" * 16, symdef
         )
 
-        self.ectx.Import(phandle, enckey, public, duplicate, outsymseed, symdef)
+        self.ectx.import_(phandle, enckey, public, duplicate, outsymseed, symdef)
 
         enckey, duplicate, outsymseed = Wrap(
             parent.publicArea, public, sensitive, b"", None
         )
 
-        self.ectx.Import(
+        self.ectx.import_(
             phandle,
             enckey,
             public,
