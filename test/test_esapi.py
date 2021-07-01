@@ -870,35 +870,35 @@ class TestEsys(TSS2_EsapiTest):
             TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("childpassword"))
         )
 
-        childHandle, priv, pub = self.ectx.CreateLoaded(
+        childHandle, priv, pub = self.ectx.create_loaded(
             parentHandle, childInSensitive, childInPublic
         )
         self.assertNotEqual(childHandle, 0)
         self.assertEqual(type(priv), TPM2B_PRIVATE)
         self.assertEqual(type(pub), TPM2B_PUBLIC)
 
-        childHandle, priv, pub = self.ectx.CreateLoaded(parentHandle, childInSensitive)
+        childHandle, priv, pub = self.ectx.create_loaded(parentHandle, childInSensitive)
         self.assertNotEqual(childHandle, 0)
         self.assertEqual(type(priv), TPM2B_PRIVATE)
         self.assertEqual(type(pub), TPM2B_PUBLIC)
 
         with self.assertRaises(TypeError):
-            self.ectx.CreateLoaded(65.4, childInSensitive, childInPublic)
+            self.ectx.create_loaded(65.4, childInSensitive, childInPublic)
 
         with self.assertRaises(TypeError):
-            self.ectx.CreateLoaded(parentHandle, "1223", childInPublic)
+            self.ectx.create_loaded(parentHandle, "1223", childInPublic)
 
         with self.assertRaises(TypeError):
-            self.ectx.CreateLoaded(parentHandle, childInSensitive, object())
+            self.ectx.create_loaded(parentHandle, childInSensitive, object())
 
         with self.assertRaises(TypeError):
-            self.ectx.CreateLoaded(parentHandle, childInSensitive, session1=56.7)
+            self.ectx.create_loaded(parentHandle, childInSensitive, session1=56.7)
 
         with self.assertRaises(TypeError):
-            self.ectx.CreateLoaded(parentHandle, childInSensitive, session2=b"baz")
+            self.ectx.create_loaded(parentHandle, childInSensitive, session2=b"baz")
 
         with self.assertRaises(TypeError):
-            self.ectx.CreateLoaded(parentHandle, childInSensitive, session3=object())
+            self.ectx.create_loaded(parentHandle, childInSensitive, session3=object())
 
     def test_rsa_enc_dec(self):
 
@@ -918,7 +918,7 @@ class TestEsys(TSS2_EsapiTest):
             TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("childpassword"))
         )
 
-        childHandle, _, _ = self.ectx.CreateLoaded(
+        childHandle, _, _ = self.ectx.create_loaded(
             parentHandle, childInSensitive, childInPublic
         )
 
@@ -992,7 +992,7 @@ class TestEsys(TSS2_EsapiTest):
             TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("childpassword"))
         )
 
-        childHandle, _, _ = self.ectx.CreateLoaded(
+        childHandle, _, _ = self.ectx.create_loaded(
             parentHandle, childInSensitive, childInPublic
         )
 
@@ -1160,7 +1160,7 @@ class TestEsys(TSS2_EsapiTest):
         parentHandle = self.ectx.CreatePrimary(inSensitive, "ecc")[0]
 
         inPublic = TPM2B_TEMPLATE(TPMT_PUBLIC.parse(alg="aes").Marshal())
-        aesKeyHandle = self.ectx.CreateLoaded(parentHandle, inSensitive, inPublic)[0]
+        aesKeyHandle = self.ectx.create_loaded(parentHandle, inSensitive, inPublic)[0]
 
         ivIn = TPM2B_IV(b"thisis16byteszxc")
         inData = TPM2B_MAX_BUFFER(b"this is data to encrypt")
@@ -1237,7 +1237,7 @@ class TestEsys(TSS2_EsapiTest):
         parentHandle = self.ectx.CreatePrimary(inSensitive, "ecc")[0]
 
         inPublic = TPM2B_TEMPLATE(TPMT_PUBLIC.parse(alg="aes").Marshal())
-        aesKeyHandle = self.ectx.CreateLoaded(parentHandle, inSensitive, inPublic)[0]
+        aesKeyHandle = self.ectx.create_loaded(parentHandle, inSensitive, inPublic)[0]
 
         ivIn = TPM2B_IV(b"thisis16byteszxc")
         inData = TPM2B_MAX_BUFFER(b"this is data to encrypt")
