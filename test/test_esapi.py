@@ -1511,19 +1511,19 @@ class TestEsys(TSS2_EsapiTest):
 
     def test_HashSequence(self):
 
-        seqHandle = self.ectx.HashSequenceStart(None, TPM2_ALG.SHA256)
+        seqHandle = self.ectx.hash_sequence_start(None, TPM2_ALG.SHA256)
         self.assertNotEqual(seqHandle, 0)
         self.ectx.FlushContext(seqHandle)
 
-        seqHandle = self.ectx.HashSequenceStart(b"1234", TPM2_ALG.SHA256)
+        seqHandle = self.ectx.hash_sequence_start(b"1234", TPM2_ALG.SHA256)
         self.assertNotEqual(seqHandle, 0)
         self.ectx.FlushContext(seqHandle)
 
-        seqHandle = self.ectx.HashSequenceStart("1234", TPM2_ALG.SHA256)
+        seqHandle = self.ectx.hash_sequence_start("1234", TPM2_ALG.SHA256)
         self.assertNotEqual(seqHandle, 0)
         self.ectx.FlushContext(seqHandle)
 
-        seqHandle = self.ectx.HashSequenceStart(TPM2B_AUTH(b"1234"), TPM2_ALG.SHA256)
+        seqHandle = self.ectx.hash_sequence_start(TPM2B_AUTH(b"1234"), TPM2_ALG.SHA256)
         self.assertNotEqual(seqHandle, 0)
 
         self.ectx.set_auth(seqHandle, b"1234")
@@ -1547,22 +1547,24 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(e, d)
 
         with self.assertRaises(TypeError):
-            self.ectx.HashSequenceStart(object(), TPM2_ALG.SHA256)
+            self.ectx.hash_sequence_start(object(), TPM2_ALG.SHA256)
 
         with self.assertRaises(TypeError):
-            self.ectx.HashSequenceStart(b"1234", "dssdf")
+            self.ectx.hash_sequence_start(b"1234", "dssdf")
 
         with self.assertRaises(ValueError):
-            self.ectx.HashSequenceStart(b"1234", 42)
+            self.ectx.hash_sequence_start(b"1234", 42)
 
         with self.assertRaises(TypeError):
-            self.ectx.HashSequenceStart(b"1234", TPM2_ALG.SHA256, session1="baz")
+            self.ectx.hash_sequence_start(b"1234", TPM2_ALG.SHA256, session1="baz")
 
         with self.assertRaises(TypeError):
-            self.ectx.HashSequenceStart(b"1234", TPM2_ALG.SHA256, session2=56.7)
+            self.ectx.hash_sequence_start(b"1234", TPM2_ALG.SHA256, session2=56.7)
 
         with self.assertRaises(TypeError):
-            self.ectx.HashSequenceStart(b"1234", TPM2_ALG.SHA256, session3=TPM2B_DATA())
+            self.ectx.hash_sequence_start(
+                b"1234", TPM2_ALG.SHA256, session3=TPM2B_DATA()
+            )
 
         with self.assertRaises(TypeError):
             self.ectx.SequenceUpdate(56.7, "here is some data")
@@ -1602,7 +1604,7 @@ class TestEsys(TSS2_EsapiTest):
 
     def test_EventSequenceComplete(self):
 
-        seqHandle = self.ectx.HashSequenceStart(TPM2B_AUTH(b"1234"), TPM2_ALG.NULL)
+        seqHandle = self.ectx.hash_sequence_start(TPM2B_AUTH(b"1234"), TPM2_ALG.NULL)
         self.assertNotEqual(seqHandle, 0)
 
         self.ectx.set_auth(seqHandle, b"1234")
@@ -3605,7 +3607,7 @@ class TestEsys(TSS2_EsapiTest):
 
         nonce = self.ectx.trsess_get_nonce_tpm(session)
 
-        sequence = self.ectx.HashSequenceStart(None, TPM2_ALG.SHA256)
+        sequence = self.ectx.hash_sequence_start(None, TPM2_ALG.SHA256)
 
         self.ectx.SequenceUpdate(sequence, TPM2B_MAX_BUFFER(bytes(nonce)))
 
@@ -3900,7 +3902,7 @@ class TestEsys(TSS2_EsapiTest):
 
         nonce = self.ectx.trsess_get_nonce_tpm(session)
 
-        sequence = self.ectx.HashSequenceStart(None, TPM2_ALG.SHA256)
+        sequence = self.ectx.hash_sequence_start(None, TPM2_ALG.SHA256)
 
         self.ectx.SequenceUpdate(sequence, TPM2B_MAX_BUFFER(bytes(nonce)))
 
