@@ -98,7 +98,7 @@ class MakeCredTest(TSS2_EsapiTest):
     def test_MakeCredential_rsa(self):
         insens = TPM2B_SENSITIVE_CREATE()
         phandle, parent, _, _, _ = self.ectx.CreatePrimary(insens)
-        private, public, _, _, _ = self.ectx.Create(phandle, insens)
+        private, public, _, _, _ = self.ectx.create(phandle, insens)
         credblob, secret = MakeCredential(parent, b"credential data", public.getName())
         handle = self.ectx.Load(phandle, private, public)
         certinfo = self.ectx.ActivateCredential(handle, phandle, credblob, secret)
@@ -107,7 +107,7 @@ class MakeCredTest(TSS2_EsapiTest):
     def test_MakeCredential_ecc(self):
         insens = TPM2B_SENSITIVE_CREATE()
         phandle, parent, _, _, _ = self.ectx.CreatePrimary(insens, "ecc")
-        private, public, _, _, _ = self.ectx.Create(phandle, insens, "ecc")
+        private, public, _, _, _ = self.ectx.create(phandle, insens, "ecc")
         credblob, secret = MakeCredential(parent, b"credential data", public.getName())
         handle = self.ectx.Load(phandle, private, public)
         certinfo = self.ectx.ActivateCredential(handle, phandle, credblob, secret)

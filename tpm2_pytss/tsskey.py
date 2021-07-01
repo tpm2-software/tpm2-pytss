@@ -208,12 +208,12 @@ class TSSPrivKey(object):
             insens.sensitive.userAuth = password
             emptyauth = False
         phandle = cls._getparent(ectx, template.type, parent)
-        private, public, _, _, _ = ectx.Create(
-            parentHandle=phandle,
-            inSensitive=insens,
-            inPublic=TPM2B_PUBLIC(publicArea=template),
-            outsideInfo=TPM2B_DATA(),
-            creationPCR=TPML_PCR_SELECTION(),
+        private, public, _, _, _ = ectx.create(
+            parent_handle=phandle,
+            in_sensitive=insens,
+            in_public=TPM2B_PUBLIC(publicArea=template),
+            outside_info=TPM2B_DATA(),
+            creation_pcr=TPML_PCR_SELECTION(),
         )
         return cls(private, public, emptyauth, parent)
 

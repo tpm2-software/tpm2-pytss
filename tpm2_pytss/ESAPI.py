@@ -303,29 +303,29 @@ class ESAPI:
             )
         )
 
-    def Create(
+    def create(
         self,
-        parentHandle,
-        inSensitive,
-        inPublic="rsa2048",
-        outsideInfo=TPM2B_DATA(),
-        creationPCR=TPML_PCR_SELECTION(),
+        parent_handle,
+        in_sensitive,
+        in_public="rsa2048",
+        outside_info=TPM2B_DATA(),
+        creation_pcr=TPML_PCR_SELECTION(),
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(parentHandle, "parentHandle")
+        check_handle_type(parent_handle, "parent_handle")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        inPublic_cdata = get_cdata(inPublic, TPM2B_PUBLIC, "inPublic")
+        inPublic_cdata = get_cdata(in_public, TPM2B_PUBLIC, "in_public")
         inSensitive_cdata = get_cdata(
-            inSensitive, TPM2B_SENSITIVE_CREATE, "inSensitive"
+            in_sensitive, TPM2B_SENSITIVE_CREATE, "in_sensitive"
         )
-        outsideInfo_cdata = get_cdata(outsideInfo, TPM2B_DATA, "outsideInfo")
-        creationPCR_cdata = get_cdata(creationPCR, TPML_PCR_SELECTION, "creationPCR")
+        outsideInfo_cdata = get_cdata(outside_info, TPM2B_DATA, "outside_info")
+        creationPCR_cdata = get_cdata(creation_pcr, TPML_PCR_SELECTION, "creation_pcr")
 
         outPrivate = ffi.new("TPM2B_PRIVATE **")
         outPublic = ffi.new("TPM2B_PUBLIC **")
@@ -335,7 +335,7 @@ class ESAPI:
         _chkrc(
             lib.Esys_Create(
                 self.ctx,
-                parentHandle,
+                parent_handle,
                 session1,
                 session2,
                 session3,
