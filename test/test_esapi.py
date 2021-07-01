@@ -3573,22 +3573,22 @@ class TestEsys(TSS2_EsapiTest):
 
     def test_PCR_Reset(self):
 
-        self.ectx.PCR_Reset(ESYS_TR.PCR16)
+        self.ectx.pcr_reset(ESYS_TR.PCR16)
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_Reset(42.0)
+            self.ectx.pcr_reset(42.0)
 
         with self.assertRaises(ValueError):
-            self.ectx.PCR_Reset(42)
+            self.ectx.pcr_reset(42)
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_Reset(ESYS_TR.PCR20, session1="bar")
+            self.ectx.pcr_reset(ESYS_TR.PCR20, session1="bar")
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_Reset(ESYS_TR.PCR20, session2=object())
+            self.ectx.pcr_reset(ESYS_TR.PCR20, session2=object())
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_Reset(ESYS_TR.PCR20, session3=45.6)
+            self.ectx.pcr_reset(ESYS_TR.PCR20, session3=45.6)
 
     def test_PolicySigned(self):
 
