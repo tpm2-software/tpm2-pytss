@@ -3306,34 +3306,34 @@ class TestEsys(TSS2_EsapiTest):
         scheme = TPMT_SIG_SCHEME(scheme=TPM2_ALG.RSAPSS)
         scheme.details.any.hashAlg = TPM2_ALG.SHA256
         validation = TPMT_TK_HASHCHECK(tag=TPM2_ST.HASHCHECK, hierarchy=TPM2_RH.OWNER)
-        signature = self.ectx.Sign(sign_handle, digest, scheme, validation)
+        signature = self.ectx.sign(sign_handle, digest, scheme, validation)
         self.assertEqual(type(signature), TPMT_SIGNATURE)
 
-        signature = self.ectx.Sign(
+        signature = self.ectx.sign(
             sign_handle, TPM2B_DIGEST(digest), scheme, validation
         )
         self.assertEqual(type(signature), TPMT_SIGNATURE)
 
         with self.assertRaises(TypeError):
-            self.ectx.Sign("not valid", digest, scheme, validation)
+            self.ectx.sign("not valid", digest, scheme, validation)
 
         with self.assertRaises(TypeError):
-            self.ectx.Sign(sign_handle, object, scheme, validation)
+            self.ectx.sign(sign_handle, object, scheme, validation)
 
         with self.assertRaises(TypeError):
-            self.ectx.Sign(sign_handle, digest, "not a scheme", validation)
+            self.ectx.sign(sign_handle, digest, "not a scheme", validation)
 
         with self.assertRaises(TypeError):
-            self.ectx.Sign(sign_handle, digest, scheme, list())
+            self.ectx.sign(sign_handle, digest, scheme, list())
 
         with self.assertRaises(TypeError):
-            self.ectx.Sign(sign_handle, digest, scheme, validation, session1="baz")
+            self.ectx.sign(sign_handle, digest, scheme, validation, session1="baz")
 
         with self.assertRaises(TypeError):
-            self.ectx.Sign(sign_handle, digest, scheme, validation, session2=56.5)
+            self.ectx.sign(sign_handle, digest, scheme, validation, session2=56.5)
 
         with self.assertRaises(TypeError):
-            self.ectx.Sign(sign_handle, digest, scheme, validation, session3=object())
+            self.ectx.sign(sign_handle, digest, scheme, validation, session3=object())
 
     def test_VerifySignature(self):
 
@@ -3354,7 +3354,7 @@ class TestEsys(TSS2_EsapiTest):
         scheme = TPMT_SIG_SCHEME(scheme=TPM2_ALG.RSAPSS)
         scheme.details.any.hashAlg = TPM2_ALG.SHA256
         validation = TPMT_TK_HASHCHECK(tag=TPM2_ST.HASHCHECK, hierarchy=TPM2_RH.OWNER)
-        signature = self.ectx.Sign(sign_handle, digest, scheme, validation)
+        signature = self.ectx.sign(sign_handle, digest, scheme, validation)
 
         verified = self.ectx.verify_signature(sign_handle, digest, signature)
         self.assertEqual(type(verified), TPMT_TK_VERIFIED)
@@ -3628,7 +3628,7 @@ class TestEsys(TSS2_EsapiTest):
             tag=TPM2_ST.HASHCHECK, hierarchy=TPM2_RH.OWNER
         )
 
-        signature = self.ectx.Sign(handle, digest, scheme, hash_validation)
+        signature = self.ectx.sign(handle, digest, scheme, hash_validation)
 
         timeout, policy_ticket = self.ectx.PolicySigned(
             handle, session, nonce, b"", b"", expiration, signature
@@ -3923,7 +3923,7 @@ class TestEsys(TSS2_EsapiTest):
             tag=TPM2_ST.HASHCHECK, hierarchy=TPM2_RH.OWNER
         )
 
-        signature = self.ectx.Sign(handle, digest, scheme, hash_validation)
+        signature = self.ectx.sign(handle, digest, scheme, hash_validation)
 
         timeout, policy_ticket = self.ectx.PolicySigned(
             handle, session, nonce, b"", b"", expiration, signature
