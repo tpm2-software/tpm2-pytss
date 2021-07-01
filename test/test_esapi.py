@@ -542,17 +542,17 @@ class TestEsys(TSS2_EsapiTest):
 
         priv, pub, _, _, _ = self.ectx.create(parentHandle, childInSensitive)
 
-        childHandle = self.ectx.Load(parentHandle, priv, pub)
+        childHandle = self.ectx.load(parentHandle, priv, pub)
         self.assertTrue(childHandle)
 
         with self.assertRaises(TypeError):
-            self.ectx.Load(42.5, priv, pub)
+            self.ectx.load(42.5, priv, pub)
 
         with self.assertRaises(TypeError):
-            self.ectx.Load(parentHandle, TPM2B_DATA(), pub)
+            self.ectx.load(parentHandle, TPM2B_DATA(), pub)
 
         with self.assertRaises(TypeError):
-            self.ectx.Load(parentHandle, priv, object())
+            self.ectx.load(parentHandle, priv, object())
 
     def test_readpublic(self):
 
@@ -570,7 +570,7 @@ class TestEsys(TSS2_EsapiTest):
 
         priv, pub, _, _, _ = self.ectx.create(parentHandle, childInSensitive)
 
-        childHandle = self.ectx.Load(parentHandle, priv, pub)
+        childHandle = self.ectx.load(parentHandle, priv, pub)
 
         pubdata, name, qname = self.ectx.ReadPublic(childHandle)
         self.assertTrue(
@@ -627,7 +627,7 @@ class TestEsys(TSS2_EsapiTest):
             parentHandle, childInSensitive, childInPublic
         )
 
-        childHandle = self.ectx.Load(parentHandle, priv, pub)
+        childHandle = self.ectx.load(parentHandle, priv, pub)
 
         primaryKeyName = self.ectx.ReadPublic(parentHandle)[1]
 
@@ -698,7 +698,7 @@ class TestEsys(TSS2_EsapiTest):
             parentHandle, childInSensitive, childInPublic
         )
 
-        childHandle = self.ectx.Load(parentHandle, priv, pub)
+        childHandle = self.ectx.load(parentHandle, priv, pub)
 
         primaryKeyName = self.ectx.ReadPublic(parentHandle)[1]
 
@@ -782,7 +782,7 @@ class TestEsys(TSS2_EsapiTest):
             parentHandle, childInSensitive, childInPublic
         )
 
-        childHandle = self.ectx.Load(parentHandle, priv, pub)
+        childHandle = self.ectx.load(parentHandle, priv, pub)
 
         self.ectx.set_auth(childHandle, "childpassword")
 
@@ -827,7 +827,7 @@ class TestEsys(TSS2_EsapiTest):
             parentHandle, childInSensitive, childInPublic
         )
 
-        childHandle = self.ectx.Load(parentHandle, priv, pub)
+        childHandle = self.ectx.load(parentHandle, priv, pub)
 
         # force an error
         self.ectx.set_auth(childHandle, "BADchildpassword")
@@ -2519,7 +2519,7 @@ class TestEsys(TSS2_EsapiTest):
 
         priv, pub, _, _, _ = self.ectx.create(primary1, inSensitive, inPublic)
 
-        childHandle = self.ectx.Load(primary1, priv, pub)
+        childHandle = self.ectx.load(primary1, priv, pub)
 
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
@@ -2718,7 +2718,7 @@ class TestEsys(TSS2_EsapiTest):
 
         priv, pub, _, _, _ = self.ectx.create(primary1, inSensitive, inPublic)
 
-        childHandle = self.ectx.Load(primary1, priv, pub)
+        childHandle = self.ectx.load(primary1, priv, pub)
 
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
@@ -2832,7 +2832,7 @@ class TestEsys(TSS2_EsapiTest):
 
         priv, pub, _, _, _ = self.ectx.create(primary1, inSensitive, inPublic)
 
-        childHandle = self.ectx.Load(primary1, priv, pub)
+        childHandle = self.ectx.load(primary1, priv, pub)
 
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,

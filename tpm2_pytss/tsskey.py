@@ -196,7 +196,7 @@ class TSSPrivKey(object):
         elif password and self.emptyAuth:
             warnings.warn("password specified but emptyAuth is true")
         phandle = self._getparent(ectx, self.public.publicArea.type, self.parent)
-        handle = ectx.Load(phandle, self.private, self.public)
+        handle = ectx.load(phandle, self.private, self.public)
         ectx.set_auth(handle, password)
         return handle
 
