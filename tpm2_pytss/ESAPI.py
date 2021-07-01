@@ -392,10 +392,10 @@ class ESAPI:
         objectHandleObject = objectHandle[0]
         return objectHandleObject
 
-    def LoadExternal(
+    def load_external(
         self,
-        inPrivate,
-        inPublic,
+        in_private,
+        in_public,
         hierarchy=ESYS_TR.NULL,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
@@ -409,10 +409,10 @@ class ESAPI:
         check_handle_type(session3, "session3")
 
         inPrivate_cdata = get_cdata(
-            inPrivate, TPM2B_SENSITIVE, "inPrivate", allow_none=True
+            in_private, TPM2B_SENSITIVE, "in_private", allow_none=True
         )
 
-        inPublic_cdata = get_cdata(inPublic, TPM2B_PUBLIC, "inPublic")
+        inPublic_cdata = get_cdata(in_public, TPM2B_PUBLIC, "in_public")
 
         objectHandle = ffi.new("ESYS_TR *")
         _chkrc(
