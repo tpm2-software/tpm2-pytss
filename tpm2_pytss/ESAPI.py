@@ -741,31 +741,31 @@ class ESAPI:
             TPM2B_ENCRYPTED_SECRET(get_ptr(outSymSeed)),
         )
 
-    def Import(
+    def import_(
         self,
-        parentHandle,
-        encryptionKey,
-        objectPublic,
+        parent_handle,
+        encryption_key,
+        object_public,
         duplicate,
-        inSymSeed,
+        in_sym_seed,
         symmetricAlg,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(parentHandle, "parentHandle")
+        check_handle_type(parent_handle, "parent_handle")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        encryptionKey_cdata = get_cdata(encryptionKey, TPM2B_DATA, "encryptionKey")
+        encryptionKey_cdata = get_cdata(encryption_key, TPM2B_DATA, "encryption_key")
 
-        objectPublic_cdata = get_cdata(objectPublic, TPM2B_PUBLIC, "objectPublic")
+        objectPublic_cdata = get_cdata(object_public, TPM2B_PUBLIC, "object_public")
 
         duplicate_cdata = get_cdata(duplicate, TPM2B_PRIVATE, "duplicate")
 
-        inSymSeed_cdata = get_cdata(inSymSeed, TPM2B_ENCRYPTED_SECRET, "inSymSeed")
+        inSymSeed_cdata = get_cdata(in_sym_seed, TPM2B_ENCRYPTED_SECRET, "in_sym_seed")
 
         symmetricAlg_cdata = get_cdata(
             symmetricAlg, TPMT_SYM_DEF_OBJECT, "symmetricAlg"
@@ -775,7 +775,7 @@ class ESAPI:
         _chkrc(
             lib.Esys_Import(
                 self.ctx,
-                parentHandle,
+                parent_handle,
                 session1,
                 session2,
                 session3,

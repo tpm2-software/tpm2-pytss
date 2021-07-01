@@ -2852,46 +2852,46 @@ class TestEsys(TSS2_EsapiTest):
             childHandle, primary2, None, sym, session1=session
         )
 
-        private = self.ectx.Import(
+        private = self.ectx.import_(
             primary1, encryptionKey, pub, duplicate, symSeed, sym
         )
 
         self.assertEqual(type(private), TPM2B_PRIVATE)
 
         with self.assertRaises(TypeError):
-            self.ectx.Import(98.5, encryptionKey, pub, duplicate, symSeed, sym)
+            self.ectx.import_(98.5, encryptionKey, pub, duplicate, symSeed, sym)
 
         with self.assertRaises(TypeError):
-            self.ectx.Import(primary1, TPM2B_ECC_POINT(), pub, duplicate, symSeed, sym)
+            self.ectx.import_(primary1, TPM2B_ECC_POINT(), pub, duplicate, symSeed, sym)
 
         with self.assertRaises(TypeError):
-            self.ectx.Import(
+            self.ectx.import_(
                 primary1, encryptionKey, TPM2B_DATA(), duplicate, symSeed, sym
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.Import(primary1, encryptionKey, pub, object(), symSeed, sym)
+            self.ectx.import_(primary1, encryptionKey, pub, object(), symSeed, sym)
 
         with self.assertRaises(TypeError):
-            self.ectx.Import(primary1, encryptionKey, pub, duplicate, None, sym)
+            self.ectx.import_(primary1, encryptionKey, pub, duplicate, None, sym)
 
         with self.assertRaises(TypeError):
-            self.ectx.Import(
+            self.ectx.import_(
                 primary1, encryptionKey, pub, duplicate, symSeed, TPM2B_PUBLIC()
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.Import(
+            self.ectx.import_(
                 primary1, encryptionKey, pub, duplicate, symSeed, sym, session1="boo"
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.Import(
+            self.ectx.import_(
                 primary1, encryptionKey, pub, duplicate, symSeed, sym, session2=object()
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.Import(
+            self.ectx.import_(
                 primary1, encryptionKey, pub, duplicate, symSeed, sym, session3=4.5
             )
 
