@@ -883,27 +883,27 @@ class ESAPI:
         )
         return (TPM2B_ECC_POINT(get_ptr(zPoint)), TPM2B_ECC_POINT(get_ptr(pubPoint)))
 
-    def ECDH_ZGen(
+    def ecdh_zgen(
         self,
-        keyHandle,
-        inPoint,
+        key_handle,
+        in_point,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(keyHandle, "keyHandle")
+        check_handle_type(key_handle, "key_handle")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        inPoint_cdata = get_cdata(inPoint, TPM2B_ECC_POINT, "inPoint")
+        inPoint_cdata = get_cdata(in_point, TPM2B_ECC_POINT, "in_point")
 
         outPoint = ffi.new("TPM2B_ECC_POINT **")
         _chkrc(
             lib.Esys_ECDH_ZGen(
                 self.ctx,
-                keyHandle,
+                key_handle,
                 session1,
                 session2,
                 session3,

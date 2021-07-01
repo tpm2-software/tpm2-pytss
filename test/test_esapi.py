@@ -1058,23 +1058,23 @@ class TestEsys(TSS2_EsapiTest):
             )
         )
 
-        outPoint = self.ectx.ECDH_ZGen(parentHandle, inPoint)
+        outPoint = self.ectx.ecdh_zgen(parentHandle, inPoint)
         self.assertEqual(type(outPoint), TPM2B_ECC_POINT)
 
         with self.assertRaises(TypeError):
-            self.ectx.ECDH_ZGen(object(), inPoint)
+            self.ectx.ecdh_zgen(object(), inPoint)
 
         with self.assertRaises(TypeError):
-            self.ectx.ECDH_ZGen(parentHandle, "boo")
+            self.ectx.ecdh_zgen(parentHandle, "boo")
 
         with self.assertRaises(TypeError):
-            self.ectx.ECDH_ZGen(parentHandle, inPoint, session1="baz")
+            self.ectx.ecdh_zgen(parentHandle, inPoint, session1="baz")
 
         with self.assertRaises(TypeError):
-            self.ectx.ECDH_ZGen(parentHandle, inPoint, session2=object())
+            self.ectx.ecdh_zgen(parentHandle, inPoint, session2=object())
 
         with self.assertRaises(TypeError):
-            self.ectx.ECDH_ZGen(parentHandle, inPoint, session3=89.6)
+            self.ectx.ecdh_zgen(parentHandle, inPoint, session3=89.6)
 
     def test_ECC_Parameters(self):
 
