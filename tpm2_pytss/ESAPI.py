@@ -284,22 +284,22 @@ class ESAPI:
 
         return TPM2B_NONCE(get_ptr(nonce))
 
-    def PolicyRestart(
+    def policy_restart(
         self,
-        sessionHandle,
+        session_handle,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(sessionHandle, "sessionHandle")
+        check_handle_type(session_handle, "session_handle")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
         _chkrc(
             lib.Esys_PolicyRestart(
-                self.ctx, sessionHandle, session1, session2, session3
+                self.ctx, session_handle, session1, session2, session3
             )
         )
 
