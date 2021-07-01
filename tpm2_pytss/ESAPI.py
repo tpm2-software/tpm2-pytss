@@ -1986,13 +1986,13 @@ class ESAPI:
 
         _chkrc(lib.Esys_PCR_Reset(self.ctx, pcr_handle, session1, session2, session3))
 
-    def PolicySigned(
+    def policy_signed(
         self,
-        authObject,
-        policySession,
-        nonceTPM,
-        cpHashA,
-        policyRef,
+        auth_object,
+        policy_session,
+        nonce_tpm,
+        cp_hash_a,
+        policy_ref,
         expiration,
         auth,
         session1=ESYS_TR.NONE,
@@ -2000,9 +2000,9 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(authObject, "authObject")
+        check_handle_type(auth_object, "auth_object")
 
-        check_handle_type(policySession, "policySession")
+        check_handle_type(policy_session, "policy_session")
 
         if not isinstance(expiration, int):
             raise TypeError(
@@ -2013,9 +2013,9 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        nonceTPM_cdata = get_cdata(nonceTPM, TPM2B_NONCE, "nonceTPM")
-        cpHashA_cdata = get_cdata(cpHashA, TPM2B_DIGEST, "cpHashA")
-        policyRef_cdata = get_cdata(policyRef, TPM2B_NONCE, "policyRef")
+        nonceTPM_cdata = get_cdata(nonce_tpm, TPM2B_NONCE, "nonce_tpm")
+        cpHashA_cdata = get_cdata(cp_hash_a, TPM2B_DIGEST, "cp_hash_a")
+        policyRef_cdata = get_cdata(policy_ref, TPM2B_NONCE, "policy_ref")
         auth_cdata = get_cdata(auth, TPMT_SIGNATURE, "auth")
 
         timeout = ffi.new("TPM2B_TIMEOUT **")
@@ -2023,8 +2023,8 @@ class ESAPI:
         _chkrc(
             lib.Esys_PolicySigned(
                 self.ctx,
-                authObject,
-                policySession,
+                auth_object,
+                policy_session,
                 session1,
                 session2,
                 session3,
