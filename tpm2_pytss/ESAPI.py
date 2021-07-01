@@ -1747,11 +1747,11 @@ class ESAPI:
         )
         return TPMT_SIGNATURE(get_ptr(signature))
 
-    def SetCommandCodeAuditStatus(
+    def set_command_code_audit_status(
         self,
-        auditAlg,
-        setList,
-        clearList,
+        audit_alg,
+        set_list,
+        clear_list,
         auth=ESYS_TR.OWNER,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
@@ -1760,14 +1760,14 @@ class ESAPI:
 
         check_handle_type(auth, "auth", expected=[ESYS_TR.OWNER, ESYS_TR.PLATFORM])
 
-        check_friendly_int(auditAlg, "auditAlg", TPM2_ALG)
+        check_friendly_int(audit_alg, "audit_alg", TPM2_ALG)
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        setList_cdata = get_cdata(setList, TPML_CC, "setList")
-        clearList_cdata = get_cdata(clearList, TPML_CC, "digest")
+        setList_cdata = get_cdata(set_list, TPML_CC, "set_list")
+        clearList_cdata = get_cdata(clear_list, TPML_CC, "digest")
 
         _chkrc(
             lib.Esys_SetCommandCodeAuditStatus(
@@ -1776,7 +1776,7 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                auditAlg,
+                audit_alg,
                 setList_cdata,
                 clearList_cdata,
             )
