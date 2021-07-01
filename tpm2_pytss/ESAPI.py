@@ -861,15 +861,15 @@ class ESAPI:
         )
         return TPM2B_PUBLIC_KEY_RSA(get_ptr(message))
 
-    def ECDH_KeyGen(
+    def ecdh_key_gen(
         self,
-        keyHandle,
+        key_handle,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(keyHandle, "keyHandle")
+        check_handle_type(key_handle, "key_handle")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
@@ -878,7 +878,7 @@ class ESAPI:
         pubPoint = ffi.new("TPM2B_ECC_POINT **")
         _chkrc(
             lib.Esys_ECDH_KeyGen(
-                self.ctx, keyHandle, session1, session2, session3, zPoint, pubPoint
+                self.ctx, key_handle, session1, session2, session3, zPoint, pubPoint
             )
         )
         return (TPM2B_ECC_POINT(get_ptr(zPoint)), TPM2B_ECC_POINT(get_ptr(pubPoint)))

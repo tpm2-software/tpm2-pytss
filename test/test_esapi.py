@@ -1016,21 +1016,21 @@ class TestEsys(TSS2_EsapiTest):
             inSensitive, "ecc256:aes128cfb"
         )
 
-        zPoint, pubPoint = self.ectx.ECDH_KeyGen(parentHandle)
+        zPoint, pubPoint = self.ectx.ecdh_key_gen(parentHandle)
         self.assertNotEqual(zPoint, None)
         self.assertNotEqual(pubPoint, None)
 
         with self.assertRaises(TypeError):
-            self.ectx.ECDH_KeyGen(56.8)
+            self.ectx.ecdh_key_gen(56.8)
 
         with self.assertRaises(TypeError):
-            self.ectx.ECDH_KeyGen(parentHandle, session1="baz")
+            self.ectx.ecdh_key_gen(parentHandle, session1="baz")
 
         with self.assertRaises(TypeError):
-            self.ectx.ECDH_KeyGen(parentHandle, session2=object())
+            self.ectx.ecdh_key_gen(parentHandle, session2=object())
 
         with self.assertRaises(TypeError):
-            self.ectx.ECDH_KeyGen(parentHandle, session3=45.6)
+            self.ectx.ecdh_key_gen(parentHandle, session3=45.6)
 
     def test_ECDH_ZGen(self):
 
