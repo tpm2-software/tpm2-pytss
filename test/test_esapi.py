@@ -1386,41 +1386,41 @@ class TestEsys(TSS2_EsapiTest):
         primaryHandle = self.ectx.CreatePrimary(inSensitive, inPublic)[0]
 
         # Test bytes
-        hmac = self.ectx.HMAC(primaryHandle, b"1234", TPM2_ALG.SHA256)
+        hmac = self.ectx.hmac(primaryHandle, b"1234", TPM2_ALG.SHA256)
         self.assertNotEqual(hmac, None)
         self.assertEqual(len(bytes(hmac)), 32)
 
         # Test str
-        hmac = self.ectx.HMAC(primaryHandle, "1234", TPM2_ALG.SHA256)
+        hmac = self.ectx.hmac(primaryHandle, "1234", TPM2_ALG.SHA256)
         self.assertNotEqual(hmac, None)
         self.assertEqual(len(bytes(hmac)), 32)
 
         # Test Native
         inData = TPM2B_MAX_BUFFER("1234")
-        hmac = self.ectx.HMAC(primaryHandle, inData, TPM2_ALG.SHA256)
+        hmac = self.ectx.hmac(primaryHandle, inData, TPM2_ALG.SHA256)
         self.assertNotEqual(hmac, None)
         self.assertEqual(len(bytes(hmac)), 32)
 
         with self.assertRaises(TypeError):
-            self.ectx.HMAC(45.6, inData, TPM2_ALG.SHA256)
+            self.ectx.hmac(45.6, inData, TPM2_ALG.SHA256)
 
         with self.assertRaises(TypeError):
-            self.ectx.HMAC(primaryHandle, object(), TPM2_ALG.SHA256)
+            self.ectx.hmac(primaryHandle, object(), TPM2_ALG.SHA256)
 
         with self.assertRaises(TypeError):
-            self.ectx.HMAC(primaryHandle, inData, "baz")
+            self.ectx.hmac(primaryHandle, inData, "baz")
 
         with self.assertRaises(ValueError):
-            self.ectx.HMAC(primaryHandle, inData, 42)
+            self.ectx.hmac(primaryHandle, inData, 42)
 
         with self.assertRaises(TypeError):
-            self.ectx.HMAC(primaryHandle, inData, TPM2_ALG.SHA256, session1=object())
+            self.ectx.hmac(primaryHandle, inData, TPM2_ALG.SHA256, session1=object())
 
         with self.assertRaises(TypeError):
-            self.ectx.HMAC(primaryHandle, inData, TPM2_ALG.SHA256, session2="object")
+            self.ectx.hmac(primaryHandle, inData, TPM2_ALG.SHA256, session2="object")
 
         with self.assertRaises(TypeError):
-            self.ectx.HMAC(primaryHandle, inData, TPM2_ALG.SHA256, session3=45.6)
+            self.ectx.hmac(primaryHandle, inData, TPM2_ALG.SHA256, session3=45.6)
 
     def test_StirRandom(self):
 
