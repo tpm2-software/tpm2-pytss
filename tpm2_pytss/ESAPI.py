@@ -913,15 +913,15 @@ class ESAPI:
         )
         return TPM2B_ECC_POINT(get_ptr(outPoint))
 
-    def ECC_Parameters(
+    def ecc_parameters(
         self,
-        curveID,
+        curve_id,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_friendly_int(curveID, "curveID", TPM2_ECC_CURVE)
+        check_friendly_int(curve_id, "curve_id", TPM2_ECC_CURVE)
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
@@ -930,7 +930,7 @@ class ESAPI:
         parameters = ffi.new("TPMS_ALGORITHM_DETAIL_ECC **")
         _chkrc(
             lib.Esys_ECC_Parameters(
-                self.ctx, session1, session2, session3, curveID, parameters
+                self.ctx, session1, session2, session3, curve_id, parameters
             )
         )
         return TPMS_ALGORITHM_DETAIL_ECC(get_ptr(parameters))
