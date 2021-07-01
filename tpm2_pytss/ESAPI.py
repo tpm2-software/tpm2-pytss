@@ -1782,16 +1782,16 @@ class ESAPI:
             )
         )
 
-    def PCR_Extend(
+    def pcr_extend(
         self,
-        pcrHandle,
+        pcr_handle,
         digests,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(pcrHandle, "pcrHandle")
+        check_handle_type(pcr_handle, "pcr_handle")
 
         digests_cdata = get_cdata(digests, TPML_DIGEST_VALUES, "digests")
 
@@ -1801,7 +1801,7 @@ class ESAPI:
 
         _chkrc(
             lib.Esys_PCR_Extend(
-                self.ctx, pcrHandle, session1, session2, session3, digests_cdata
+                self.ctx, pcr_handle, session1, session2, session3, digests_cdata
             )
         )
 
