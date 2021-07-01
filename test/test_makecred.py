@@ -101,7 +101,7 @@ class MakeCredTest(TSS2_EsapiTest):
         private, public, _, _, _ = self.ectx.create(phandle, insens)
         credblob, secret = MakeCredential(parent, b"credential data", public.getName())
         handle = self.ectx.load(phandle, private, public)
-        certinfo = self.ectx.ActivateCredential(handle, phandle, credblob, secret)
+        certinfo = self.ectx.activate_credential(handle, phandle, credblob, secret)
         self.assertEqual(b"credential data", bytes(certinfo))
 
     def test_MakeCredential_ecc(self):
@@ -110,7 +110,7 @@ class MakeCredTest(TSS2_EsapiTest):
         private, public, _, _, _ = self.ectx.create(phandle, insens, "ecc")
         credblob, secret = MakeCredential(parent, b"credential data", public.getName())
         handle = self.ectx.load(phandle, private, public)
-        certinfo = self.ectx.ActivateCredential(handle, phandle, credblob, secret)
+        certinfo = self.ectx.activate_credential(handle, phandle, credblob, secret)
         self.assertEqual(b"credential data", bytes(certinfo))
 
     def test_Wrap_rsa(self):
