@@ -3634,7 +3634,7 @@ class TestEsys(TSS2_EsapiTest):
 
         signature = self.ectx.sign(handle, digest, scheme, hash_validation)
 
-        timeout, policy_ticket = self.ectx.PolicySigned(
+        timeout, policy_ticket = self.ectx.policy_signed(
             handle, session, nonce, b"", b"", expiration, signature
         )
 
@@ -3642,45 +3642,47 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(type(policy_ticket), TPMT_TK_AUTH)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicySigned(
+            self.ectx.policy_signed(
                 "baz", session, nonce, b"", b"", expiration, signature
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicySigned(handle, 56.6, nonce, b"", b"", expiration, signature)
+            self.ectx.policy_signed(
+                handle, 56.6, nonce, b"", b"", expiration, signature
+            )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicySigned(
+            self.ectx.policy_signed(
                 handle, session, object(), b"", b"", expiration, signature
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicySigned(
+            self.ectx.policy_signed(
                 handle, session, nonce, TPM2B_PUBLIC(), b"", expiration, signature
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicySigned(
+            self.ectx.policy_signed(
                 handle, session, nonce, b"", [], expiration, signature
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicySigned(
+            self.ectx.policy_signed(
                 handle, session, nonce, b"", b"", object(), signature
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicySigned(
+            self.ectx.policy_signed(
                 handle, session, nonce, b"", b"", expiration, "signature"
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicySigned(
+            self.ectx.policy_signed(
                 handle, session, nonce, b"", b"", expiration, signature, session1="bar"
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicySigned(
+            self.ectx.policy_signed(
                 handle,
                 session,
                 nonce,
@@ -3692,7 +3694,7 @@ class TestEsys(TSS2_EsapiTest):
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicySigned(
+            self.ectx.policy_signed(
                 handle, session, nonce, b"", b"", expiration, signature, session3=56.6
             )
 
@@ -3929,7 +3931,7 @@ class TestEsys(TSS2_EsapiTest):
 
         signature = self.ectx.sign(handle, digest, scheme, hash_validation)
 
-        timeout, policy_ticket = self.ectx.PolicySigned(
+        timeout, policy_ticket = self.ectx.policy_signed(
             handle, session, nonce, b"", b"", expiration, signature
         )
 
