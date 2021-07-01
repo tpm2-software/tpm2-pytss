@@ -646,28 +646,28 @@ class ESAPI:
             TPM2B_PUBLIC(get_ptr(outPublic)),
         )
 
-    def Duplicate(
+    def duplicate(
         self,
-        objectHandle,
-        newParentHandle,
-        encryptionKeyIn,
-        symmetricAlg,
+        object_handle,
+        new_parent_handle,
+        encryption_key_in,
+        symmetric_alg,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(objectHandle, "objectHandle")
-        check_handle_type(newParentHandle, "newParentHandle")
+        check_handle_type(object_handle, "object_handle")
+        check_handle_type(new_parent_handle, "new_parent_handle")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
         encryptionKeyIn_cdata = get_cdata(
-            encryptionKeyIn, TPM2B_DATA, "encryptionKeyIn", allow_none=True
+            encryption_key_in, TPM2B_DATA, "encryption_key_in", allow_none=True
         )
         symmetricAlg_cdata = get_cdata(
-            symmetricAlg, TPMT_SYM_DEF_OBJECT, "symmetricAlg"
+            symmetric_alg, TPMT_SYM_DEF_OBJECT, "symmetric_alg"
         )
 
         encryptionKeyOut = ffi.new("TPM2B_DATA **")
@@ -676,8 +676,8 @@ class ESAPI:
         _chkrc(
             lib.Esys_Duplicate(
                 self.ctx,
-                objectHandle,
-                newParentHandle,
+                object_handle,
+                new_parent_handle,
                 session1,
                 session2,
                 session3,

@@ -2541,7 +2541,7 @@ class TestEsys(TSS2_EsapiTest):
             mode=TPMU_SYM_MODE(aes=TPM2_ALG.CFB),
         )
 
-        encryptionKeyOut, duplicate, symSeed = self.ectx.Duplicate(
+        encryptionKeyOut, duplicate, symSeed = self.ectx.duplicate(
             childHandle, primary2, encryptionKey, sym, session1=session
         )
         self.assertEqual(type(encryptionKeyOut), TPM2B_DATA)
@@ -2549,30 +2549,30 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(type(symSeed), TPM2B_ENCRYPTED_SECRET)
 
         with self.assertRaises(TypeError):
-            self.ectx.Duplicate(6.7, primary2, encryptionKey, sym, session1=session)
+            self.ectx.duplicate(6.7, primary2, encryptionKey, sym, session1=session)
 
         with self.assertRaises(TypeError):
-            self.ectx.Duplicate(
+            self.ectx.duplicate(
                 childHandle, object(), encryptionKey, sym, session1=session
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.Duplicate(
+            self.ectx.duplicate(
                 childHandle, primary2, TPM2B_PUBLIC(), sym, session1=session
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.Duplicate(
+            self.ectx.duplicate(
                 childHandle, primary2, encryptionKey, b"1234", session1=session
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.Duplicate(
+            self.ectx.duplicate(
                 childHandle, primary2, encryptionKey, sym, session1=7.89
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.Duplicate(
+            self.ectx.duplicate(
                 childHandle,
                 primary2,
                 encryptionKey,
@@ -2582,7 +2582,7 @@ class TestEsys(TSS2_EsapiTest):
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.Duplicate(
+            self.ectx.duplicate(
                 childHandle,
                 primary2,
                 encryptionKey,
@@ -2740,7 +2740,7 @@ class TestEsys(TSS2_EsapiTest):
             mode=TPMU_SYM_MODE(aes=TPM2_ALG.CFB),
         )
 
-        _, duplicate, symSeed = self.ectx.Duplicate(
+        _, duplicate, symSeed = self.ectx.duplicate(
             childHandle, primary2, encryptionKey, sym, session1=session
         )
 
@@ -2848,7 +2848,7 @@ class TestEsys(TSS2_EsapiTest):
 
         sym = TPMT_SYM_DEF_OBJECT(algorithm=TPM2_ALG.NULL,)
 
-        encryptionKey, duplicate, symSeed = self.ectx.Duplicate(
+        encryptionKey, duplicate, symSeed = self.ectx.duplicate(
             childHandle, primary2, None, sym, session1=session
         )
 
