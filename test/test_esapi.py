@@ -126,7 +126,7 @@ class TestEsys(TSS2_EsapiTest):
     def testPCRRead(self):
 
         pcrsels = TPML_PCR_SELECTION.parse("sha1:3+sha256:all")
-        _, _, digests, = self.ectx.PCR_Read(pcrsels)
+        _, _, digests, = self.ectx.pcr_read(pcrsels)
 
         self.assertEqual(len(digests[0]), 20)
 
@@ -134,16 +134,16 @@ class TestEsys(TSS2_EsapiTest):
             self.assertEqual(len(d), 32)
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_Read(TPML_AC_CAPABILITIES())
+            self.ectx.pcr_read(TPML_AC_CAPABILITIES())
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_Read(pcrsels, session1="bar")
+            self.ectx.pcr_read(pcrsels, session1="bar")
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_Read(pcrsels, session2=56.7)
+            self.ectx.pcr_read(pcrsels, session2=56.7)
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_Read(pcrsels, session3=object())
+            self.ectx.pcr_read(pcrsels, session3=object())
 
     def test_plain_NV_define_write_read_undefine(self):
 
