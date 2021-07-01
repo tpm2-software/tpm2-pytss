@@ -564,31 +564,31 @@ class ESAPI:
         )
         return TPM2B_SENSITIVE_DATA(get_ptr(outData))
 
-    def ObjectChangeAuth(
+    def object_change_auth(
         self,
-        objectHandle,
-        parentHandle,
-        newAuth,
+        object_handle,
+        parent_handle,
+        new_auth,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(objectHandle, "objectHandle")
-        check_handle_type(parentHandle, "parentHandle")
+        check_handle_type(object_handle, "object_handle")
+        check_handle_type(parent_handle, "parent_handle")
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        newAuth_cdata = get_cdata(newAuth, TPM2B_AUTH, "newAuth")
+        newAuth_cdata = get_cdata(new_auth, TPM2B_AUTH, "new_auth")
 
         outPrivate = ffi.new("TPM2B_PRIVATE **")
         _chkrc(
             lib.Esys_ObjectChangeAuth(
                 self.ctx,
-                objectHandle,
-                parentHandle,
+                object_handle,
+                parent_handle,
                 session1,
                 session2,
                 session3,

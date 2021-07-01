@@ -833,24 +833,24 @@ class TestEsys(TSS2_EsapiTest):
         self.ectx.set_auth(childHandle, "BADchildpassword")
 
         with self.assertRaises(TSS2_Exception):
-            self.ectx.ObjectChangeAuth(childHandle, parentHandle, "newauth")
+            self.ectx.object_change_auth(childHandle, parentHandle, "newauth")
 
         self.ectx.set_auth(childHandle, "childpassword")
 
-        self.ectx.ObjectChangeAuth(childHandle, parentHandle, TPM2B_AUTH("newauth"))
+        self.ectx.object_change_auth(childHandle, parentHandle, TPM2B_AUTH("newauth"))
 
-        self.ectx.ObjectChangeAuth(childHandle, parentHandle, b"anotherauth")
+        self.ectx.object_change_auth(childHandle, parentHandle, b"anotherauth")
 
-        self.ectx.ObjectChangeAuth(childHandle, parentHandle, "yetanotherone")
-
-        with self.assertRaises(TypeError):
-            self.ectx.ObjectChangeAuth("bad", parentHandle, "yetanotherone")
+        self.ectx.object_change_auth(childHandle, parentHandle, "yetanotherone")
 
         with self.assertRaises(TypeError):
-            self.ectx.ObjectChangeAuth(childHandle, 56.7, "yetanotherone")
+            self.ectx.object_change_auth("bad", parentHandle, "yetanotherone")
 
         with self.assertRaises(TypeError):
-            self.ectx.ObjectChangeAuth(childHandle, parentHandle, object())
+            self.ectx.object_change_auth(childHandle, 56.7, "yetanotherone")
+
+        with self.assertRaises(TypeError):
+            self.ectx.object_change_auth(childHandle, parentHandle, object())
 
     def test_createloaded(self):
 
