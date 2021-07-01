@@ -598,29 +598,29 @@ class ESAPI:
         )
         return TPM2B_PRIVATE(get_ptr(outPrivate))
 
-    def CreateLoaded(
+    def create_loaded(
         self,
-        parentHandle,
-        inSensitive,
-        inPublic="rsa2048",
+        parent_handle,
+        in_sensitive,
+        in_public="rsa2048",
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(parentHandle, "parentHandle")
+        check_handle_type(parent_handle, "parent_handle")
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        if isinstance(inPublic, str):
-            inPublic = TPM2B_TEMPLATE(TPMT_PUBLIC.parse(inPublic).Marshal())
+        if isinstance(in_public, str):
+            in_public = TPM2B_TEMPLATE(TPMT_PUBLIC.parse(in_public).Marshal())
 
         inSensitive_cdata = get_cdata(
-            inSensitive, TPM2B_SENSITIVE_CREATE, "inSensitive"
+            in_sensitive, TPM2B_SENSITIVE_CREATE, "in_sensitive"
         )
-        inPublic_cdata = get_cdata(inPublic, TPM2B_TEMPLATE, "inPublic")
+        inPublic_cdata = get_cdata(in_public, TPM2B_TEMPLATE, "in_public")
 
         objectHandle = ffi.new("ESYS_TR *")
         outPrivate = ffi.new("TPM2B_PRIVATE **")
@@ -628,7 +628,7 @@ class ESAPI:
         _chkrc(
             lib.Esys_CreateLoaded(
                 self.ctx,
-                parentHandle,
+                parent_handle,
                 session1,
                 session2,
                 session3,
