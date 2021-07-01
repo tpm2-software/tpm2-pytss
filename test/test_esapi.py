@@ -713,39 +713,39 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.set_auth(childHandle, "childpassword")
 
-        certInfo = self.ectx.ActivateCredential(
+        certInfo = self.ectx.activate_credential(
             parentHandle, childHandle, credentialBlob, secret
         )
         self.assertEqual(bytes(certInfo), b"this is my credential")
 
         with self.assertRaises(TypeError):
-            self.ectx.ActivateCredential(object(), childHandle, credentialBlob, secret)
+            self.ectx.activate_credential(object(), childHandle, credentialBlob, secret)
 
         with self.assertRaises(TypeError):
-            self.ectx.ActivateCredential(parentHandle, 76.4, credentialBlob, secret)
+            self.ectx.activate_credential(parentHandle, 76.4, credentialBlob, secret)
 
         with self.assertRaises(TypeError):
-            self.ectx.ActivateCredential(
+            self.ectx.activate_credential(
                 parentHandle, childHandle, TPM2B_PUBLIC(), secret
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.ActivateCredential(
+            self.ectx.activate_credential(
                 parentHandle, childHandle, credentialBlob, object()
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.ActivateCredential(
+            self.ectx.activate_credential(
                 parentHandle, childHandle, credentialBlob, secret, session1="foo"
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.ActivateCredential(
+            self.ectx.activate_credential(
                 parentHandle, childHandle, credentialBlob, secret, session2=object()
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.ActivateCredential(
+            self.ectx.activate_credential(
                 parentHandle, childHandle, credentialBlob, secret, session3=65.4
             )
 

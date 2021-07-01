@@ -464,26 +464,26 @@ class ESAPI:
             TPM2B_NAME(get_ptr(qualifiedName)),
         )
 
-    def ActivateCredential(
+    def activate_credential(
         self,
-        activateHandle,
-        keyHandle,
-        credentialBlob,
+        activate_handle,
+        key_handle,
+        credential_blob,
         secret,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.PASSWORD,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(activateHandle, "activateHandle")
-        check_handle_type(keyHandle, "keyHandle")
+        check_handle_type(activate_handle, "activate_handle")
+        check_handle_type(key_handle, "key_handle")
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
         credentialBlob_cdata = get_cdata(
-            credentialBlob, TPM2B_ID_OBJECT, "credentialBlob"
+            credential_blob, TPM2B_ID_OBJECT, "credential_blob"
         )
         secret_cdata = get_cdata(secret, TPM2B_ENCRYPTED_SECRET, "secret")
 
@@ -491,8 +491,8 @@ class ESAPI:
         _chkrc(
             lib.Esys_ActivateCredential(
                 self.ctx,
-                activateHandle,
-                keyHandle,
+                activate_handle,
+                key_handle,
                 session1,
                 session2,
                 session3,
