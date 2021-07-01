@@ -1836,9 +1836,9 @@ class ESAPI:
         )
         return TPML_DIGEST_VALUES(get_ptr(digests))
 
-    def PCR_Read(
+    def pcr_read(
         self,
-        pcrSelectionIn,
+        pcr_selection_in,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
@@ -1849,7 +1849,7 @@ class ESAPI:
         check_handle_type(session3, "session3")
 
         pcrSelectionIn_cdata = get_cdata(
-            pcrSelectionIn, TPML_PCR_SELECTION, "pcrSelectionIn"
+            pcr_selection_in, TPML_PCR_SELECTION, "pcr_selection_in"
         )
 
         pcrUpdateCounter = ffi.new("UINT32 *")
