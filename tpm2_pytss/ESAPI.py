@@ -542,15 +542,15 @@ class ESAPI:
             TPM2B_ENCRYPTED_SECRET(get_ptr(secret)),
         )
 
-    def Unseal(
+    def unseal(
         self,
-        itemHandle,
+        item_handle,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(itemHandle, "itemHandle")
+        check_handle_type(item_handle, "item_handle")
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
@@ -558,7 +558,9 @@ class ESAPI:
 
         outData = ffi.new("TPM2B_SENSITIVE_DATA **")
         _chkrc(
-            lib.Esys_Unseal(self.ctx, itemHandle, session1, session2, session3, outData)
+            lib.Esys_Unseal(
+                self.ctx, item_handle, session1, session2, session3, outData
+            )
         )
         return TPM2B_SENSITIVE_DATA(get_ptr(outData))
 
