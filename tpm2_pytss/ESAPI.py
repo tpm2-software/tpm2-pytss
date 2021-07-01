@@ -2039,43 +2039,43 @@ class ESAPI:
         )
         return (TPM2B_TIMEOUT(get_ptr(timeout)), TPMT_TK_AUTH(get_ptr(policyTicket)))
 
-    def PolicySecret(
+    def policy_secret(
         self,
-        authHandle,
-        policySession,
-        nonceTPM,
-        cpHashA,
-        policyRef,
+        auth_handle,
+        policy_session,
+        nonce_tpm,
+        cp_hash_a,
+        policy_ref,
         expiration,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(policySession, "policySession")
+        check_handle_type(policy_session, "policy_session")
 
         if not isinstance(expiration, int):
             raise TypeError(
                 f"expected expiration to be type int, got {type(expiration)}"
             )
 
-        check_friendly_int(authHandle, "authHandle", ESYS_TR)
+        check_friendly_int(auth_handle, "auth_handle", ESYS_TR)
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        nonceTPM_cdata = get_cdata(nonceTPM, TPM2B_NONCE, "nonceTPM")
-        cpHashA_cdata = get_cdata(cpHashA, TPM2B_DIGEST, "cpHashA")
-        policyRef_cdata = get_cdata(policyRef, TPM2B_NONCE, "policyRef")
+        nonceTPM_cdata = get_cdata(nonce_tpm, TPM2B_NONCE, "nonce_tpm")
+        cpHashA_cdata = get_cdata(cp_hash_a, TPM2B_DIGEST, "cp_hash_a")
+        policyRef_cdata = get_cdata(policy_ref, TPM2B_NONCE, "policy_ref")
 
         timeout = ffi.new("TPM2B_TIMEOUT **")
         policyTicket = ffi.new("TPMT_TK_AUTH **")
         _chkrc(
             lib.Esys_PolicySecret(
                 self.ctx,
-                authHandle,
-                policySession,
+                auth_handle,
+                policy_session,
                 session1,
                 session2,
                 session3,

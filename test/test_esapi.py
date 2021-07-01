@@ -3845,46 +3845,46 @@ class TestEsys(TSS2_EsapiTest):
 
         expiration = -(10 * 365 * 24 * 60 * 60)
 
-        timeout, policyTicket = self.ectx.PolicySecret(
+        timeout, policyTicket = self.ectx.policy_secret(
             ESYS_TR.OWNER, session, nonce, b"", b"", expiration
         )
         self.assertTrue(type(timeout), TPM2B_TIMEOUT)
         self.assertTrue(type(policyTicket), TPMT_TK_AUTH)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicySecret("owner", session, nonce, b"", b"", expiration)
+            self.ectx.policy_secret("owner", session, nonce, b"", b"", expiration)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicySecret(ESYS_TR.OWNER, 56.7, nonce, b"", b"", expiration)
+            self.ectx.policy_secret(ESYS_TR.OWNER, 56.7, nonce, b"", b"", expiration)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicySecret(
+            self.ectx.policy_secret(
                 ESYS_TR.OWNER, session, object(), b"", b"", expiration
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicySecret(
+            self.ectx.policy_secret(
                 ESYS_TR.OWNER, session, nonce, TPM2B_PUBLIC(), b"", expiration
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicySecret(ESYS_TR.OWNER, session, nonce, b"", {}, expiration)
+            self.ectx.policy_secret(ESYS_TR.OWNER, session, nonce, b"", {}, expiration)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicySecret(ESYS_TR.OWNER, session, nonce, b"", b"", 42.2)
+            self.ectx.policy_secret(ESYS_TR.OWNER, session, nonce, b"", b"", 42.2)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicySecret(
+            self.ectx.policy_secret(
                 ESYS_TR.OWNER, session, nonce, b"", b"", expiration, session1="bar"
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicySecret(
+            self.ectx.policy_secret(
                 ESYS_TR.OWNER, session, nonce, b"", b"", expiration, session2=object()
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicySecret(
+            self.ectx.policy_secret(
                 ESYS_TR.OWNER, session, nonce, b"", b"", expiration, session3=56.7
             )
 
