@@ -1947,16 +1947,16 @@ class ESAPI:
             )
         )
 
-    def PCR_SetAuthValue(
+    def pcr_set_auth_value(
         self,
-        pcrHandle,
+        pcr_handle,
         auth,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_friendly_int(pcrHandle, "pcrHandle", ESYS_TR)
+        check_friendly_int(pcr_handle, "pcr_handle", ESYS_TR)
 
         auth_cdata = get_cdata(auth, TPM2B_DIGEST, "auth")
 
@@ -1966,7 +1966,7 @@ class ESAPI:
 
         _chkrc(
             lib.Esys_PCR_SetAuthValue(
-                self.ctx, pcrHandle, session1, session2, session3, auth_cdata
+                self.ctx, pcr_handle, session1, session2, session3, auth_cdata
             )
         )
 

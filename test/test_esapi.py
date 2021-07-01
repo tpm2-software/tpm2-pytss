@@ -3547,29 +3547,29 @@ class TestEsys(TSS2_EsapiTest):
 
     def test_PCR_SetAuthValue(self):
 
-        self.ectx.PCR_SetAuthValue(ESYS_TR.PCR20, b"password")
+        self.ectx.pcr_set_auth_value(ESYS_TR.PCR20, b"password")
         self.ectx.set_auth(ESYS_TR.PCR20, b"password")
-        self.ectx.PCR_SetAuthValue(ESYS_TR.PCR20, "password")
+        self.ectx.pcr_set_auth_value(ESYS_TR.PCR20, "password")
         self.ectx.set_auth(ESYS_TR.PCR20, "password")
-        self.ectx.PCR_SetAuthValue(ESYS_TR.PCR20, TPM2B_DIGEST("password"))
+        self.ectx.pcr_set_auth_value(ESYS_TR.PCR20, TPM2B_DIGEST("password"))
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_SetAuthValue("bar", b"password")
+            self.ectx.pcr_set_auth_value("bar", b"password")
 
         with self.assertRaises(ValueError):
-            self.ectx.PCR_SetAuthValue(42, b"password")
+            self.ectx.pcr_set_auth_value(42, b"password")
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_SetAuthValue(ESYS_TR.PCR20, object())
+            self.ectx.pcr_set_auth_value(ESYS_TR.PCR20, object())
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_SetAuthValue(ESYS_TR.PCR20, b"password", session1="bar")
+            self.ectx.pcr_set_auth_value(ESYS_TR.PCR20, b"password", session1="bar")
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_SetAuthValue(ESYS_TR.PCR20, b"password", session2={})
+            self.ectx.pcr_set_auth_value(ESYS_TR.PCR20, b"password", session2={})
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_SetAuthValue(ESYS_TR.PCR20, b"password", session3=43.2)
+            self.ectx.pcr_set_auth_value(ESYS_TR.PCR20, b"password", session3=43.2)
 
     def test_PCR_Reset(self):
 
