@@ -1424,21 +1424,21 @@ class TestEsys(TSS2_EsapiTest):
 
     def test_StirRandom(self):
 
-        self.ectx.StirRandom(b"1234")
-        self.ectx.StirRandom("1234")
-        self.ectx.StirRandom(TPM2B_SENSITIVE_DATA("1234"))
+        self.ectx.stir_random(b"1234")
+        self.ectx.stir_random("1234")
+        self.ectx.stir_random(TPM2B_SENSITIVE_DATA("1234"))
 
         with self.assertRaises(TypeError):
-            self.ectx.StirRandom(object())
+            self.ectx.stir_random(object())
 
         with self.assertRaises(TypeError):
-            self.ectx.StirRandom("1234", session1=56.7)
+            self.ectx.stir_random("1234", session1=56.7)
 
         with self.assertRaises(TypeError):
-            self.ectx.StirRandom("1234", session2="foo")
+            self.ectx.stir_random("1234", session2="foo")
 
         with self.assertRaises(TypeError):
-            self.ectx.StirRandom("1234", session3=object())
+            self.ectx.stir_random("1234", session3=object())
 
     def test_HMAC_Sequence(self):
 

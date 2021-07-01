@@ -1171,9 +1171,9 @@ class ESAPI:
 
         return TPM2B_DIGEST(get_ptr(randomBytes))
 
-    def StirRandom(
+    def stir_random(
         self,
-        inData,
+        in_data,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
@@ -1183,7 +1183,7 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        inData_cdata = get_cdata(inData, TPM2B_SENSITIVE_DATA, "inData")
+        inData_cdata = get_cdata(in_data, TPM2B_SENSITIVE_DATA, "in_data")
 
         _chkrc(
             lib.Esys_StirRandom(self.ctx, session1, session2, session3, inData_cdata)
