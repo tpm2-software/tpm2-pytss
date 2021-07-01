@@ -636,39 +636,39 @@ class TestEsys(TSS2_EsapiTest):
         # this can be done without a key as in tpm2-tools project, but for simpplicity
         # use the TPM command, which uses the PUBLIC portion of the object and thus
         # needs no auth.
-        credentialBlob, secret = self.ectx.MakeCredential(
+        credentialBlob, secret = self.ectx.make_credential(
             childHandle, credential, primaryKeyName
         )
         self.assertEqual(type(credentialBlob), TPM2B_ID_OBJECT)
         self.assertEqual(type(secret), TPM2B_ENCRYPTED_SECRET)
 
-        credentialBlob, secret = self.ectx.MakeCredential(
+        credentialBlob, secret = self.ectx.make_credential(
             childHandle, "this is my credential", bytes(primaryKeyName)
         )
         self.assertEqual(type(credentialBlob), TPM2B_ID_OBJECT)
         self.assertEqual(type(secret), TPM2B_ENCRYPTED_SECRET)
 
         with self.assertRaises(TypeError):
-            self.ectx.MakeCredential(42.5, credential, primaryKeyName)
+            self.ectx.make_credential(42.5, credential, primaryKeyName)
 
         with self.assertRaises(TypeError):
-            self.ectx.MakeCredential(childHandle, object(), primaryKeyName)
+            self.ectx.make_credential(childHandle, object(), primaryKeyName)
 
         with self.assertRaises(TypeError):
-            self.ectx.MakeCredential(childHandle, credential, object())
+            self.ectx.make_credential(childHandle, credential, object())
 
         with self.assertRaises(TypeError):
-            self.ectx.MakeCredential(
+            self.ectx.make_credential(
                 childHandle, credential, primaryKeyName, session1="bar"
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.MakeCredential(
+            self.ectx.make_credential(
                 childHandle, credential, primaryKeyName, session2=54.6
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.MakeCredential(
+            self.ectx.make_credential(
                 childHandle, credential, primaryKeyName, session3=object()
             )
 
@@ -707,7 +707,7 @@ class TestEsys(TSS2_EsapiTest):
         # this can be done without a key as in tpm2-tools project, but for simpplicity
         # use the TPM command, which uses the PUBLIC portion of the object and thus
         # needs no auth.
-        credentialBlob, secret = self.ectx.MakeCredential(
+        credentialBlob, secret = self.ectx.make_credential(
             childHandle, credential, primaryKeyName
         )
 

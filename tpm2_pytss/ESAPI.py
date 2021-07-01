@@ -503,11 +503,11 @@ class ESAPI:
         )
         return TPM2B_DIGEST(get_ptr(certInfo))
 
-    def MakeCredential(
+    def make_credential(
         self,
         handle,
         credential,
-        objectName,
+        object_name,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
@@ -520,7 +520,7 @@ class ESAPI:
         check_handle_type(session3, "session3")
 
         credential_cdata = get_cdata(credential, TPM2B_DIGEST, "credential")
-        objectName_cdata = get_cdata(objectName, TPM2B_NAME, "objectName")
+        objectName_cdata = get_cdata(object_name, TPM2B_NAME, "object_name")
 
         credentialBlob = ffi.new("TPM2B_ID_OBJECT **")
         secret = ffi.new("TPM2B_ENCRYPTED_SECRET **")
