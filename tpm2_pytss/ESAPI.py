@@ -1440,34 +1440,34 @@ class ESAPI:
         )
         return (TPM2B_ATTEST(get_ptr(certifyInfo)), TPMT_SIGNATURE(get_ptr(signature)))
 
-    def Quote(
+    def quote(
         self,
-        signHandle,
-        PCRselect,
-        qualifyingData,
-        inScheme=TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL),
+        sign_handle,
+        pcr_select,
+        qualifying_data,
+        in_scheme=TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL),
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(signHandle, "signHandle")
+        check_handle_type(sign_handle, "sign_handle")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        qualifyingData_cdata = get_cdata(qualifyingData, TPM2B_DATA, "qualifyingData")
+        qualifyingData_cdata = get_cdata(qualifying_data, TPM2B_DATA, "qualifying_data")
 
-        inScheme_cdata = get_cdata(inScheme, TPMT_SIG_SCHEME, "inScheme")
+        inScheme_cdata = get_cdata(in_scheme, TPMT_SIG_SCHEME, "in_scheme")
 
-        PCRselect_cdata = get_cdata(PCRselect, TPML_PCR_SELECTION, "PCRselect")
+        PCRselect_cdata = get_cdata(pcr_select, TPML_PCR_SELECTION, "pcr_select")
 
         quoted = ffi.new("TPM2B_ATTEST **")
         signature = ffi.new("TPMT_SIGNATURE **")
         _chkrc(
             lib.Esys_Quote(
                 self.ctx,
-                signHandle,
+                sign_handle,
                 session1,
                 session2,
                 session3,
