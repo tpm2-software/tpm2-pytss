@@ -2129,26 +2129,26 @@ class ESAPI:
             )
         )
 
-    def PolicyOR(
+    def policy_or(
         self,
-        policySession,
-        pHashList,
+        policy_session,
+        p_hash_list,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(policySession, "policySession")
+        check_handle_type(policy_session, "policy_session")
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        pHashList_cdata = get_cdata(pHashList, TPML_DIGEST, "pHashList")
+        pHashList_cdata = get_cdata(p_hash_list, TPML_DIGEST, "p_hash_list")
 
         _chkrc(
             lib.Esys_PolicyOR(
-                self.ctx, policySession, session1, session2, session3, pHashList_cdata
+                self.ctx, policy_session, session1, session2, session3, pHashList_cdata
             )
         )
 

@@ -4001,7 +4001,7 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
 
-        self.ectx.PolicyOR(
+        self.ectx.policy_or(
             session,
             TPML_DIGEST(
                 [
@@ -4011,25 +4011,25 @@ class TestEsys(TSS2_EsapiTest):
             ),
         )
 
-        self.ectx.PolicyOR(
+        self.ectx.policy_or(
             session,
             [b"0123456789ABCDEF0123456789ABCDEF", b"0987654321ABCDEF1234567890ABCDEF"],
         )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyOR("bar", TPML_DIGEST())
+            self.ectx.policy_or("bar", TPML_DIGEST())
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyOR(session, TPML_PCR_SELECTION())
+            self.ectx.policy_or(session, TPML_PCR_SELECTION())
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyOR(session, TPML_DIGEST(), session1=43.2)
+            self.ectx.policy_or(session, TPML_DIGEST(), session1=43.2)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyOR(session, TPML_DIGEST(), session2="bar")
+            self.ectx.policy_or(session, TPML_DIGEST(), session2="bar")
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyOR(session, TPML_DIGEST(), session3=object())
+            self.ectx.policy_or(session, TPML_DIGEST(), session3=object())
 
     def test_PolicyPCR(self):
 
