@@ -1711,31 +1711,31 @@ class ESAPI:
         )
         return TPMT_TK_VERIFIED(get_ptr(validation))
 
-    def Sign(
+    def sign(
         self,
-        keyHandle,
+        key_handle,
         digest,
-        inScheme,
+        in_scheme,
         validation,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(keyHandle, "keyHandle")
+        check_handle_type(key_handle, "key_handle")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
         digest_cdata = get_cdata(digest, TPM2B_DIGEST, "digest")
-        inScheme_cdata = get_cdata(inScheme, TPMT_SIG_SCHEME, "inScheme")
+        inScheme_cdata = get_cdata(in_scheme, TPMT_SIG_SCHEME, "in_scheme")
         validation_cdata = get_cdata(validation, TPMT_TK_HASHCHECK, "validation")
 
         signature = ffi.new("TPMT_SIGNATURE **")
         _chkrc(
             lib.Esys_Sign(
                 self.ctx,
-                keyHandle,
+                key_handle,
                 session1,
                 session2,
                 session3,
