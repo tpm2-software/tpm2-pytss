@@ -2284,7 +2284,7 @@ class TestEsys(TSS2_EsapiTest):
 
         qualifyingData = TPM2B_DATA()
         inScheme = TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL)
-        certifyInfo, signature = self.ectx.CertifyCreation(
+        certifyInfo, signature = self.ectx.certify_creation(
             eccHandle, eccHandle, qualifyingData, creationHash, inScheme, creationTicket
         )
         self.assertEqual(type(certifyInfo), TPM2B_ATTEST)
@@ -2292,12 +2292,12 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(type(signature), TPMT_SIGNATURE)
 
         with self.assertRaises(TypeError):
-            self.ectx.CertifyCreation(
+            self.ectx.certify_creation(
                 45.6, eccHandle, qualifyingData, creationHash, inScheme, creationTicket
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.CertifyCreation(
+            self.ectx.certify_creation(
                 eccHandle,
                 object(),
                 qualifyingData,
@@ -2307,7 +2307,7 @@ class TestEsys(TSS2_EsapiTest):
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.CertifyCreation(
+            self.ectx.certify_creation(
                 eccHandle,
                 eccHandle,
                 TPM2B_PUBLIC(),
@@ -2317,22 +2317,22 @@ class TestEsys(TSS2_EsapiTest):
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.CertifyCreation(
+            self.ectx.certify_creation(
                 eccHandle, eccHandle, qualifyingData, object(), inScheme, creationTicket
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.CertifyCreation(
+            self.ectx.certify_creation(
                 eccHandle, eccHandle, qualifyingData, creationHash, [], creationTicket
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.CertifyCreation(
+            self.ectx.certify_creation(
                 eccHandle, eccHandle, qualifyingData, creationHash, inScheme, 56.7
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.CertifyCreation(
+            self.ectx.certify_creation(
                 eccHandle,
                 eccHandle,
                 qualifyingData,
@@ -2343,7 +2343,7 @@ class TestEsys(TSS2_EsapiTest):
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.CertifyCreation(
+            self.ectx.certify_creation(
                 eccHandle,
                 eccHandle,
                 qualifyingData,
@@ -2354,7 +2354,7 @@ class TestEsys(TSS2_EsapiTest):
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.CertifyCreation(
+            self.ectx.certify_creation(
                 eccHandle,
                 eccHandle,
                 qualifyingData,

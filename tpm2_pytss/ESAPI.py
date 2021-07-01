@@ -1394,30 +1394,30 @@ class ESAPI:
         )
         return (TPM2B_ATTEST(get_ptr(certifyInfo)), TPMT_SIGNATURE(get_ptr(signature)))
 
-    def CertifyCreation(
+    def certify_creation(
         self,
-        signHandle,
-        objectHandle,
-        qualifyingData,
-        creationHash,
-        inScheme,
-        creationTicket,
+        sign_handle,
+        object_handle,
+        qualifying_data,
+        creation_hash,
+        in_scheme,
+        creation_ticket,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(objectHandle, "objectHandle")
-        check_handle_type(signHandle, "signHandle")
+        check_handle_type(object_handle, "object_handle")
+        check_handle_type(sign_handle, "sign_handle")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        qualifyingData_cdata = get_cdata(qualifyingData, TPM2B_DATA, "qualifyingData")
-        inScheme_cdata = get_cdata(inScheme, TPMT_SIG_SCHEME, "inScheme")
-        creationHash_cdata = get_cdata(creationHash, TPM2B_DIGEST, "creationHash")
+        qualifyingData_cdata = get_cdata(qualifying_data, TPM2B_DATA, "qualifying_data")
+        inScheme_cdata = get_cdata(in_scheme, TPMT_SIG_SCHEME, "in_scheme")
+        creationHash_cdata = get_cdata(creation_hash, TPM2B_DIGEST, "creation_hash")
         creationTicket_cdata = get_cdata(
-            creationTicket, TPMT_TK_CREATION, "creationTicket"
+            creation_ticket, TPMT_TK_CREATION, "creation_ticket"
         )
 
         certifyInfo = ffi.new("TPM2B_ATTEST **")
@@ -1425,8 +1425,8 @@ class ESAPI:
         _chkrc(
             lib.Esys_CertifyCreation(
                 self.ctx,
-                signHandle,
-                objectHandle,
+                sign_handle,
+                object_handle,
                 session1,
                 session2,
                 session3,
