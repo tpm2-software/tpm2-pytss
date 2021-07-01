@@ -1241,13 +1241,13 @@ class TestEsys(TSS2_EsapiTest):
 
         ivIn = TPM2B_IV(b"thisis16byteszxc")
         inData = TPM2B_MAX_BUFFER(b"this is data to encrypt")
-        outCipherText, outIV = self.ectx.EncryptDecrypt2(
+        outCipherText, outIV = self.ectx.encrypt_decrypt_2(
             aesKeyHandle, False, TPM2_ALG.CFB, ivIn, inData
         )
 
         self.assertEqual(len(outIV), len(ivIn))
 
-        outData, outIV2 = self.ectx.EncryptDecrypt2(
+        outData, outIV2 = self.ectx.encrypt_decrypt_2(
             aesKeyHandle, True, TPM2_ALG.CFB, ivIn, outCipherText
         )
         self.assertEqual(bytes(inData), bytes(outData))
@@ -1255,13 +1255,13 @@ class TestEsys(TSS2_EsapiTest):
 
         ivIn = b"thisis16byteszxc"
         inData = b"this is data to encrypt"
-        outCipherText, outIV = self.ectx.EncryptDecrypt2(
+        outCipherText, outIV = self.ectx.encrypt_decrypt_2(
             aesKeyHandle, False, TPM2_ALG.CFB, ivIn, inData
         )
 
         self.assertEqual(len(outIV), len(ivIn))
 
-        outData, outIV2 = self.ectx.EncryptDecrypt2(
+        outData, outIV2 = self.ectx.encrypt_decrypt_2(
             aesKeyHandle, True, TPM2_ALG.CFB, ivIn, outCipherText
         )
         self.assertEqual(inData, bytes(outData))
@@ -1305,7 +1305,7 @@ class TestEsys(TSS2_EsapiTest):
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.EncryptDecrypt2(
+            self.ectx.encrypt_decrypt_2(
                 aesKeyHandle, "Not Bool", TPM2_ALG.CFB, ivIn, inData
             )
 
