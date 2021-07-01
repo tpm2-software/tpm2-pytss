@@ -11,20 +11,20 @@ from .TSS2_BaseTest import TSS2_EsapiTest
 
 class TestEsys(TSS2_EsapiTest):
     def testGetRandom(self):
-        r = self.ectx.GetRandom(5)
+        r = self.ectx.get_random(5)
         self.assertEqual(len(r), 5)
 
         with self.assertRaises(TypeError):
-            self.ectx.GetRandom("foo")
+            self.ectx.get_random("foo")
 
         with self.assertRaises(TypeError):
-            self.ectx.GetRandom(5, session1="baz")
+            self.ectx.get_random(5, session1="baz")
 
         with self.assertRaises(TypeError):
-            self.ectx.GetRandom(5, session2=object())
+            self.ectx.get_random(5, session2=object())
 
         with self.assertRaises(TypeError):
-            self.ectx.GetRandom(5, session3=56.7)
+            self.ectx.get_random(5, session3=56.7)
 
     def testCreatePrimary(self):
         inSensitive = TPM2B_SENSITIVE_CREATE()
@@ -336,7 +336,7 @@ class TestEsys(TSS2_EsapiTest):
             session, (TPMA_SESSION.ENCRYPT | TPMA_SESSION.DECRYPT)
         )
 
-        random = self.ectx.GetRandom(4, session1=session)
+        random = self.ectx.get_random(4, session1=session)
         self.assertEqual(len(random), 4)
 
     def test_start_authSession_enckey_bindkey(self):
@@ -366,7 +366,7 @@ class TestEsys(TSS2_EsapiTest):
             session, (TPMA_SESSION.ENCRYPT | TPMA_SESSION.DECRYPT)
         )
 
-        random = self.ectx.GetRandom(4, session1=session)
+        random = self.ectx.get_random(4, session1=session)
         self.assertEqual(len(random), 4)
 
     def test_TRSess_SetAttributes(self):
@@ -434,7 +434,7 @@ class TestEsys(TSS2_EsapiTest):
             session, (TPMA_SESSION.ENCRYPT | TPMA_SESSION.DECRYPT)
         )
 
-        random = self.ectx.GetRandom(4, session1=session)
+        random = self.ectx.get_random(4, session1=session)
         self.assertEqual(len(random), 4)
 
     def test_start_authSession_noncecaller_bad(self):
