@@ -2152,29 +2152,29 @@ class ESAPI:
             )
         )
 
-    def PolicyPCR(
+    def policy_pcr(
         self,
-        policySession,
-        pcrDigest,
+        policy_session,
+        pcr_digest,
         pcrs,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(policySession, "policySession")
+        check_handle_type(policy_session, "policy_session")
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        pcrDigest_cdata = get_cdata(pcrDigest, TPM2B_DIGEST, "pcrDigest")
+        pcrDigest_cdata = get_cdata(pcr_digest, TPM2B_DIGEST, "pcr_digest")
         pcrs_cdata = get_cdata(pcrs, TPML_PCR_SELECTION, "pcrs")
 
         _chkrc(
             lib.Esys_PolicyPCR(
                 self.ctx,
-                policySession,
+                policy_session,
                 session1,
                 session2,
                 session3,
