@@ -695,27 +695,27 @@ class ESAPI:
             TPM2B_ENCRYPTED_SECRET(get_ptr(outSymSeed)),
         )
 
-    def Rewrap(
+    def rewrap(
         self,
-        oldParent,
-        newParent,
-        inDuplicate,
+        old_parent,
+        new_parent,
+        in_duplicate,
         name,
-        inSymSeed,
+        in_sym_seed,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(oldParent, "oldParent")
-        check_handle_type(newParent, "newParent")
+        check_handle_type(old_parent, "old_parent")
+        check_handle_type(new_parent, "new_parent")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        inDuplicate_cdata = get_cdata(inDuplicate, TPM2B_PRIVATE, "inDuplicate")
+        inDuplicate_cdata = get_cdata(in_duplicate, TPM2B_PRIVATE, "in_duplicate")
 
-        inSymSeed_cdata = get_cdata(inSymSeed, TPM2B_ENCRYPTED_SECRET, "inSymSeed")
+        inSymSeed_cdata = get_cdata(in_sym_seed, TPM2B_ENCRYPTED_SECRET, "in_sym_seed")
 
         name_cdata = get_cdata(name, TPM2B_NAME, "name")
 
@@ -724,8 +724,8 @@ class ESAPI:
         _chkrc(
             lib.Esys_Rewrap(
                 self.ctx,
-                oldParent,
-                newParent,
+                old_parent,
+                new_parent,
                 session1,
                 session2,
                 session3,
