@@ -3947,42 +3947,44 @@ class TestEsys(TSS2_EsapiTest):
         )
 
         name = self.ectx.tr_get_name(handle)
-        self.ectx.PolicyTicket(session, timeout, b"", b"", name, policy_ticket)
+        self.ectx.policy_ticket(session, timeout, b"", b"", name, policy_ticket)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyTicket(
+            self.ectx.policy_ticket(
                 "notasession", timeout, b"", b"", name, policy_ticket
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyTicket(session, object(), b"", b"", name, policy_ticket)
+            self.ectx.policy_ticket(session, object(), b"", b"", name, policy_ticket)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyTicket(
+            self.ectx.policy_ticket(
                 session, timeout, TPM2B_AUTH, b"", name, policy_ticket
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyTicket(session, timeout, b"", object(), name, policy_ticket)
+            self.ectx.policy_ticket(
+                session, timeout, b"", object(), name, policy_ticket
+            )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyTicket(session, timeout, b"", b"", [], policy_ticket)
+            self.ectx.policy_ticket(session, timeout, b"", b"", [], policy_ticket)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyTicket(session, timeout, b"", b"", name, 42)
+            self.ectx.policy_ticket(session, timeout, b"", b"", name, 42)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyTicket(
+            self.ectx.policy_ticket(
                 session, timeout, b"", b"", name, policy_ticket, session1="bar"
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyTicket(
+            self.ectx.policy_ticket(
                 session, timeout, b"", b"", name, policy_ticket, session2=56.7
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyTicket(
+            self.ectx.policy_ticket(
                 session, timeout, b"", b"", name, policy_ticket, session3=object()
             )
 
