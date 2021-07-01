@@ -2994,43 +2994,43 @@ class TestEsys(TSS2_EsapiTest):
             TPM2_CAP.COMMANDS, TPM2_CC.FIRST, TPM2_MAX.CAP_CC, session1=session
         )
 
-        auditInfo, signature = self.ectx.GetSessionAuditDigest(
+        auditInfo, signature = self.ectx.get_session_audit_digest(
             signHandle, session, b"1234"
         )
         self.assertEqual(type(auditInfo), TPM2B_ATTEST)
         self.assertEqual(type(signature), TPMT_SIGNATURE)
 
         with self.assertRaises(TypeError):
-            self.ectx.GetSessionAuditDigest(45.89, session, b"1234")
+            self.ectx.get_session_audit_digest(45.89, session, b"1234")
 
         with self.assertRaises(TypeError):
-            self.ectx.GetSessionAuditDigest(signHandle, object(), b"1234")
+            self.ectx.get_session_audit_digest(signHandle, object(), b"1234")
 
         with self.assertRaises(TypeError):
-            self.ectx.GetSessionAuditDigest(signHandle, session, list())
+            self.ectx.get_session_audit_digest(signHandle, session, list())
 
         with self.assertRaises(TypeError):
-            self.ectx.GetSessionAuditDigest(
-                signHandle, session, b"1234", privacyAdminHandle=45.6
+            self.ectx.get_session_audit_digest(
+                signHandle, session, b"1234", privacy_admin_handle=45.6
             )
 
         with self.assertRaises(ValueError):
-            self.ectx.GetSessionAuditDigest(
-                signHandle, session, b"1234", privacyAdminHandle=ESYS_TR.LOCKOUT
+            self.ectx.get_session_audit_digest(
+                signHandle, session, b"1234", privacy_admin_handle=ESYS_TR.LOCKOUT
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.GetSessionAuditDigest(
+            self.ectx.get_session_audit_digest(
                 signHandle, session, b"1234", session1="baz"
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.GetSessionAuditDigest(
+            self.ectx.get_session_audit_digest(
                 signHandle, session, b"1234", session2=object()
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.GetSessionAuditDigest(
+            self.ectx.get_session_audit_digest(
                 signHandle, session, b"1234", session3=12.723
             )
 
