@@ -3603,7 +3603,7 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
 
-        nonce = self.ectx.TRSess_GetNonceTPM(session)
+        nonce = self.ectx.trsess_get_nonce_tpm(session)
 
         sequence = self.ectx.HashSequenceStart(None, TPM2_ALG.SHA256)
 
@@ -3827,7 +3827,7 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
 
-        nonce = self.ectx.TRSess_GetNonceTPM(session)
+        nonce = self.ectx.trsess_get_nonce_tpm(session)
 
         expiration = -(10 * 365 * 24 * 60 * 60)
 
@@ -3898,7 +3898,7 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
 
-        nonce = self.ectx.TRSess_GetNonceTPM(session)
+        nonce = self.ectx.trsess_get_nonce_tpm(session)
 
         sequence = self.ectx.HashSequenceStart(None, TPM2_ALG.SHA256)
 
