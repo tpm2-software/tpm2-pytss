@@ -2089,35 +2089,35 @@ class ESAPI:
         )
         return (TPM2B_TIMEOUT(get_ptr(timeout)), TPMT_TK_AUTH(get_ptr(policyTicket)))
 
-    def PolicyTicket(
+    def policy_ticket(
         self,
-        policySession,
+        policy_session,
         timeout,
-        cpHashA,
-        policyRef,
-        authName,
+        cp_hash_a,
+        policy_ref,
+        auth_name,
         ticket,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(policySession, "policySession")
+        check_handle_type(policy_session, "policy_session")
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
         timeout_cdata = get_cdata(timeout, TPM2B_TIMEOUT, "timeout")
-        cpHashA_cdata = get_cdata(cpHashA, TPM2B_DIGEST, "cpHashA")
-        policyRef_cdata = get_cdata(policyRef, TPM2B_NONCE, "policyRef")
-        authName_cdata = get_cdata(authName, TPM2B_NAME, "authName")
+        cpHashA_cdata = get_cdata(cp_hash_a, TPM2B_DIGEST, "cp_hash_a")
+        policyRef_cdata = get_cdata(policy_ref, TPM2B_NONCE, "policy_ref")
+        authName_cdata = get_cdata(auth_name, TPM2B_NAME, "auth_name")
         ticket_cdata = get_cdata(ticket, TPMT_TK_AUTH, "ticket")
 
         _chkrc(
             lib.Esys_PolicyTicket(
                 self.ctx,
-                policySession,
+                policy_session,
                 session1,
                 session2,
                 session3,
