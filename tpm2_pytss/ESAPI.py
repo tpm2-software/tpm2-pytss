@@ -1322,22 +1322,22 @@ class ESAPI:
 
         return (TPM2B_DIGEST(get_ptr(result)), TPMT_TK_HASHCHECK(get_ptr(validation)))
 
-    def EventSequenceComplete(
+    def event_sequence_complete(
         self,
-        pcrHandle,
-        sequenceHandle,
+        pcr_handle,
+        sequence_handle,
         buffer,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.PASSWORD,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(sequenceHandle, "sequenceHandle")
+        check_handle_type(sequence_handle, "sequence_handle")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        check_friendly_int(pcrHandle, "pcrHandle", ESYS_TR)
+        check_friendly_int(pcr_handle, "pcr_handle", ESYS_TR)
 
         buffer_cdata = get_cdata(buffer, TPM2B_MAX_BUFFER, "buffer", allow_none=True)
 
@@ -1345,8 +1345,8 @@ class ESAPI:
         _chkrc(
             lib.Esys_EventSequenceComplete(
                 self.ctx,
-                pcrHandle,
-                sequenceHandle,
+                pcr_handle,
+                sequence_handle,
                 session1,
                 session2,
                 session3,
