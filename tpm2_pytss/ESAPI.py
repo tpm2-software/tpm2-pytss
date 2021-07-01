@@ -986,19 +986,19 @@ class ESAPI:
 
         return (TPM2B_ECC_POINT(get_ptr(outZ1)), TPM2B_ECC_POINT(get_ptr(outZ2)))
 
-    def EncryptDecrypt(
+    def encrypt_decrypt(
         self,
-        keyHandle,
+        key_handle,
         decrypt,
         mode,
-        ivIn,
-        inData,
+        iv_in,
+        in_data,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(keyHandle, "keyHandle")
+        check_handle_type(key_handle, "key_handle")
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
@@ -1006,8 +1006,8 @@ class ESAPI:
 
         check_friendly_int(mode, "mode", TPM2_ALG)
 
-        ivIn_cdata = get_cdata(ivIn, TPM2B_IV, "ivIn")
-        inData_cdata = get_cdata(inData, TPM2B_MAX_BUFFER, "inData")
+        ivIn_cdata = get_cdata(iv_in, TPM2B_IV, "iv_in")
+        inData_cdata = get_cdata(in_data, TPM2B_MAX_BUFFER, "in_data")
 
         if not isinstance(decrypt, bool):
             raise TypeError(f"Expected decrypt to be type bool, got {type(decrypt)}")
@@ -1017,7 +1017,7 @@ class ESAPI:
         _chkrc(
             lib.Esys_EncryptDecrypt(
                 self.ctx,
-                keyHandle,
+                key_handle,
                 session1,
                 session2,
                 session3,

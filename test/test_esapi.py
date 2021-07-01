@@ -1164,12 +1164,12 @@ class TestEsys(TSS2_EsapiTest):
 
         ivIn = TPM2B_IV(b"thisis16byteszxc")
         inData = TPM2B_MAX_BUFFER(b"this is data to encrypt")
-        outCipherText, outIV = self.ectx.EncryptDecrypt(
+        outCipherText, outIV = self.ectx.encrypt_decrypt(
             aesKeyHandle, False, TPM2_ALG.CFB, ivIn, inData
         )
         self.assertEqual(len(outIV), len(ivIn))
 
-        outData, outIV2 = self.ectx.EncryptDecrypt(
+        outData, outIV2 = self.ectx.encrypt_decrypt(
             aesKeyHandle, True, TPM2_ALG.CFB, ivIn, outCipherText
         )
         self.assertEqual(bytes(inData), bytes(outData))
@@ -1178,56 +1178,56 @@ class TestEsys(TSS2_EsapiTest):
         # test plain bytes for data
         ivIn = b"thisis16byteszxc"
         inData = b"this is data to encrypt"
-        outCipherText, outIV = self.ectx.EncryptDecrypt(
+        outCipherText, outIV = self.ectx.encrypt_decrypt(
             aesKeyHandle, False, TPM2_ALG.CFB, ivIn, inData
         )
         self.assertEqual(len(outIV), len(ivIn))
 
-        outData, outIV2 = self.ectx.EncryptDecrypt(
+        outData, outIV2 = self.ectx.encrypt_decrypt(
             aesKeyHandle, True, TPM2_ALG.CFB, ivIn, outCipherText
         )
         self.assertEqual(inData, bytes(outData))
         self.assertEqual(bytes(outIV), bytes(outIV2))
 
         with self.assertRaises(TypeError):
-            self.ectx.EncryptDecrypt(42.5, True, TPM2_ALG.CFB, ivIn, outCipherText)
+            self.ectx.encrypt_decrypt(42.5, True, TPM2_ALG.CFB, ivIn, outCipherText)
 
         with self.assertRaises(TypeError):
-            self.ectx.EncryptDecrypt(
+            self.ectx.encrypt_decrypt(
                 aesKeyHandle, object(), TPM2_ALG.CFB, ivIn, outCipherText
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.EncryptDecrypt(aesKeyHandle, True, object(), ivIn, outCipherText)
+            self.ectx.encrypt_decrypt(aesKeyHandle, True, object(), ivIn, outCipherText)
 
         with self.assertRaises(ValueError):
-            self.ectx.EncryptDecrypt(aesKeyHandle, True, 42, ivIn, outCipherText)
+            self.ectx.encrypt_decrypt(aesKeyHandle, True, 42, ivIn, outCipherText)
 
         with self.assertRaises(TypeError):
-            self.ectx.EncryptDecrypt(
+            self.ectx.encrypt_decrypt(
                 aesKeyHandle, True, TPM2_ALG.CFB, TPM2B_PUBLIC(), outCipherText
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.EncryptDecrypt(aesKeyHandle, True, TPM2_ALG.CFB, ivIn, None)
+            self.ectx.encrypt_decrypt(aesKeyHandle, True, TPM2_ALG.CFB, ivIn, None)
 
         with self.assertRaises(TypeError):
-            self.ectx.EncryptDecrypt(
+            self.ectx.encrypt_decrypt(
                 aesKeyHandle, True, TPM2_ALG.CFB, ivIn, outCipherText, session1=object()
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.EncryptDecrypt(
+            self.ectx.encrypt_decrypt(
                 aesKeyHandle, True, TPM2_ALG.CFB, ivIn, outCipherText, session2="foo"
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.EncryptDecrypt(
+            self.ectx.encrypt_decrypt(
                 aesKeyHandle, True, TPM2_ALG.CFB, ivIn, outCipherText, session3=12.3
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.EncryptDecrypt(
+            self.ectx.encrypt_decrypt(
                 aesKeyHandle, "bad Bool", TPM2_ALG.CFB, ivIn, inData
             )
 
@@ -1268,39 +1268,39 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(bytes(outIV), bytes(outIV2))
 
         with self.assertRaises(TypeError):
-            self.ectx.EncryptDecrypt(42.5, True, TPM2_ALG.CFB, ivIn, outCipherText)
+            self.ectx.encrypt_decrypt(42.5, True, TPM2_ALG.CFB, ivIn, outCipherText)
 
         with self.assertRaises(TypeError):
-            self.ectx.EncryptDecrypt(
+            self.ectx.encrypt_decrypt(
                 aesKeyHandle, object(), TPM2_ALG.CFB, ivIn, outCipherText
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.EncryptDecrypt(aesKeyHandle, True, object(), ivIn, outCipherText)
+            self.ectx.encrypt_decrypt(aesKeyHandle, True, object(), ivIn, outCipherText)
 
         with self.assertRaises(ValueError):
-            self.ectx.EncryptDecrypt(aesKeyHandle, True, 42, ivIn, outCipherText)
+            self.ectx.encrypt_decrypt(aesKeyHandle, True, 42, ivIn, outCipherText)
 
         with self.assertRaises(TypeError):
-            self.ectx.EncryptDecrypt(
+            self.ectx.encrypt_decrypt(
                 aesKeyHandle, True, TPM2_ALG.CFB, TPM2B_PUBLIC(), outCipherText
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.EncryptDecrypt(aesKeyHandle, True, TPM2_ALG.CFB, ivIn, None)
+            self.ectx.encrypt_decrypt(aesKeyHandle, True, TPM2_ALG.CFB, ivIn, None)
 
         with self.assertRaises(TypeError):
-            self.ectx.EncryptDecrypt(
+            self.ectx.encrypt_decrypt(
                 aesKeyHandle, True, TPM2_ALG.CFB, ivIn, outCipherText, session1=object()
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.EncryptDecrypt(
+            self.ectx.encrypt_decrypt(
                 aesKeyHandle, True, TPM2_ALG.CFB, ivIn, outCipherText, session2="foo"
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.EncryptDecrypt(
+            self.ectx.encrypt_decrypt(
                 aesKeyHandle, True, TPM2_ALG.CFB, ivIn, outCipherText, session3=12.3
             )
 
