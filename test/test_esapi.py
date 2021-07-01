@@ -3503,45 +3503,45 @@ class TestEsys(TSS2_EsapiTest):
     def test_PCR_SetAuthPolicy(self):
 
         policy = b"0123456789ABCDEF0123456789ABCDEF"
-        self.ectx.PCR_SetAuthPolicy(policy, TPM2_ALG.SHA256, ESYS_TR.PCR20)
+        self.ectx.pcr_set_auth_policy(policy, TPM2_ALG.SHA256, ESYS_TR.PCR20)
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_SetAuthPolicy(object, TPM2_ALG.SHA256, ESYS_TR.PCR20)
+            self.ectx.pcr_set_auth_policy(object, TPM2_ALG.SHA256, ESYS_TR.PCR20)
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_SetAuthPolicy(policy, "bar", ESYS_TR.PCR20)
+            self.ectx.pcr_set_auth_policy(policy, "bar", ESYS_TR.PCR20)
 
         with self.assertRaises(ValueError):
-            self.ectx.PCR_SetAuthPolicy(policy, 42, ESYS_TR.PCR20)
+            self.ectx.pcr_set_auth_policy(policy, 42, ESYS_TR.PCR20)
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_SetAuthPolicy(policy, TPM2_ALG.SHA256, "baz")
+            self.ectx.pcr_set_auth_policy(policy, TPM2_ALG.SHA256, "baz")
 
         with self.assertRaises(ValueError):
-            self.ectx.PCR_SetAuthPolicy(policy, TPM2_ALG.SHA256, 42)
+            self.ectx.pcr_set_auth_policy(policy, TPM2_ALG.SHA256, 42)
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_SetAuthPolicy(
-                policy, TPM2_ALG.SHA256, ESYS_TR.PCR20, authHandle="foo"
+            self.ectx.pcr_set_auth_policy(
+                policy, TPM2_ALG.SHA256, ESYS_TR.PCR20, auth_handle="foo"
             )
 
         with self.assertRaises(ValueError):
-            self.ectx.PCR_SetAuthPolicy(
-                policy, TPM2_ALG.SHA256, ESYS_TR.PCR20, authHandle=ESYS_TR.OWNER
+            self.ectx.pcr_set_auth_policy(
+                policy, TPM2_ALG.SHA256, ESYS_TR.PCR20, auth_handle=ESYS_TR.OWNER
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_SetAuthPolicy(
+            self.ectx.pcr_set_auth_policy(
                 policy, TPM2_ALG.SHA256, ESYS_TR.PCR20, session1="bar"
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_SetAuthPolicy(
+            self.ectx.pcr_set_auth_policy(
                 policy, TPM2_ALG.SHA256, ESYS_TR.PCR20, session2=12.3
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_SetAuthPolicy(
+            self.ectx.pcr_set_auth_policy(
                 policy, TPM2_ALG.SHA256, ESYS_TR.PCR20, session3=object()
             )
 

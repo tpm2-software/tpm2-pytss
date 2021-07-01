@@ -1912,23 +1912,23 @@ class ESAPI:
         )
         return (bool(allocationSuccess[0]), maxPCR[0], sizeNeeded[0], sizeAvailable[0])
 
-    def PCR_SetAuthPolicy(
+    def pcr_set_auth_policy(
         self,
-        authPolicy,
-        hashAlg,
-        pcrNum,
-        authHandle=ESYS_TR.PLATFORM,
+        auth_policy,
+        hash_alg,
+        pcr_num,
+        auth_handle=ESYS_TR.PLATFORM,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(authHandle, "authHandle", expected=[ESYS_TR.PLATFORM])
+        check_handle_type(auth_handle, "auth_handle", expected=[ESYS_TR.PLATFORM])
 
-        check_friendly_int(hashAlg, "hashAlg", TPM2_ALG)
-        check_friendly_int(pcrNum, "pcrNum", ESYS_TR)
+        check_friendly_int(hash_alg, "hash_alg", TPM2_ALG)
+        check_friendly_int(pcr_num, "pcr_num", ESYS_TR)
 
-        authPolicy_cdata = get_cdata(authPolicy, TPM2B_DIGEST, "authPolicy")
+        authPolicy_cdata = get_cdata(auth_policy, TPM2B_DIGEST, "auth_policy")
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
@@ -1937,13 +1937,13 @@ class ESAPI:
         _chkrc(
             lib.Esys_PCR_SetAuthPolicy(
                 self.ctx,
-                authHandle,
+                auth_handle,
                 session1,
                 session2,
                 session3,
                 authPolicy_cdata,
-                hashAlg,
-                pcrNum,
+                hash_alg,
+                pcr_num,
             )
         )
 
