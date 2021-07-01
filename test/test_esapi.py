@@ -1457,19 +1457,19 @@ class TestEsys(TSS2_EsapiTest):
 
         handle = self.ectx.CreatePrimary(inSensitive, inPublic)[0]
 
-        seqHandle = self.ectx.HMAC_Start(handle, None, TPM2_ALG.SHA256)
+        seqHandle = self.ectx.hmac_start(handle, None, TPM2_ALG.SHA256)
         self.assertNotEqual(seqHandle, 0)
         self.ectx.FlushContext(seqHandle)
 
-        seqHandle = self.ectx.HMAC_Start(handle, b"1234", TPM2_ALG.SHA256)
+        seqHandle = self.ectx.hmac_start(handle, b"1234", TPM2_ALG.SHA256)
         self.assertNotEqual(seqHandle, 0)
         self.ectx.FlushContext(seqHandle)
 
-        seqHandle = self.ectx.HMAC_Start(handle, "1234", TPM2_ALG.SHA256)
+        seqHandle = self.ectx.hmac_start(handle, "1234", TPM2_ALG.SHA256)
         self.assertNotEqual(seqHandle, 0)
         self.ectx.FlushContext(seqHandle)
 
-        seqHandle = self.ectx.HMAC_Start(handle, TPM2B_AUTH(b"1234"), TPM2_ALG.SHA256)
+        seqHandle = self.ectx.hmac_start(handle, TPM2B_AUTH(b"1234"), TPM2_ALG.SHA256)
         self.assertNotEqual(seqHandle, 0)
 
         # self.ectx.set_auth(seqHandle, b"1234")
@@ -1489,25 +1489,25 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(len(digest), 32)
 
         with self.assertRaises(TypeError):
-            self.ectx.HMAC_Start(45.6, "1234", TPM2_ALG.SHA256)
+            self.ectx.hmac_start(45.6, "1234", TPM2_ALG.SHA256)
 
         with self.assertRaises(TypeError):
-            self.ectx.HMAC_Start(handle, dict(), TPM2_ALG.SHA256)
+            self.ectx.hmac_start(handle, dict(), TPM2_ALG.SHA256)
 
         with self.assertRaises(TypeError):
-            self.ectx.HMAC_Start(handle, "1234", object())
+            self.ectx.hmac_start(handle, "1234", object())
 
         with self.assertRaises(ValueError):
-            self.ectx.HMAC_Start(handle, "1234", 42)
+            self.ectx.hmac_start(handle, "1234", 42)
 
         with self.assertRaises(TypeError):
-            self.ectx.HMAC_Start(handle, "1234", TPM2_ALG.SHA256, session1="baz")
+            self.ectx.hmac_start(handle, "1234", TPM2_ALG.SHA256, session1="baz")
 
         with self.assertRaises(TypeError):
-            self.ectx.HMAC_Start(handle, "1234", TPM2_ALG.SHA256, session2=object())
+            self.ectx.hmac_start(handle, "1234", TPM2_ALG.SHA256, session2=object())
 
         with self.assertRaises(TypeError):
-            self.ectx.HMAC_Start(handle, "1234", TPM2_ALG.SHA256, session3=45.6)
+            self.ectx.hmac_start(handle, "1234", TPM2_ALG.SHA256, session3=45.6)
 
     def test_HashSequence(self):
 

@@ -1189,11 +1189,11 @@ class ESAPI:
             lib.Esys_StirRandom(self.ctx, session1, session2, session3, inData_cdata)
         )
 
-    def HMAC_Start(
+    def hmac_start(
         self,
         handle,
         auth,
-        hashAlg,
+        hash_alg,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
@@ -1205,7 +1205,7 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        check_friendly_int(hashAlg, "hashAlg", TPM2_ALG)
+        check_friendly_int(hash_alg, "hash_alg", TPM2_ALG)
 
         if auth is None:
             auth = TPM2B_AUTH()
@@ -1221,7 +1221,7 @@ class ESAPI:
                 session2,
                 session3,
                 auth_cdata,
-                hashAlg,
+                hash_alg,
                 sequenceHandle,
             )
         )
