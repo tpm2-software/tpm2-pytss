@@ -274,7 +274,7 @@ class ESAPI:
 
         _chkrc(lib.Esys_TRSess_SetAttributes(self.ctx, session, attributes, mask))
 
-    def TRSess_GetNonceTPM(self, session):
+    def trsess_get_nonce_tpm(self, session):
 
         check_handle_type(session, "session")
 
