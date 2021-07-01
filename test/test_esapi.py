@@ -2216,14 +2216,14 @@ class TestEsys(TSS2_EsapiTest):
 
         qualifyingData = TPM2B_DATA()
         inScheme = TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL)
-        certifyInfo, signature = self.ectx.Certify(
+        certifyInfo, signature = self.ectx.certify(
             eccHandle, eccHandle, qualifyingData, inScheme
         )
         self.assertEqual(type(certifyInfo), TPM2B_ATTEST)
         self.assertNotEqual(len(certifyInfo), 0)
         self.assertEqual(type(signature), TPMT_SIGNATURE)
 
-        certifyInfo, signature = self.ectx.Certify(
+        certifyInfo, signature = self.ectx.certify(
             eccHandle, eccHandle, b"12345678", inScheme
         )
         self.assertEqual(type(certifyInfo), TPM2B_ATTEST)
@@ -2231,37 +2231,37 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(type(signature), TPMT_SIGNATURE)
 
         with self.assertRaises(TypeError):
-            certifyInfo, signature = self.ectx.Certify(
+            certifyInfo, signature = self.ectx.certify(
                 TPM2B_ATTEST(), eccHandle, qualifyingData, inScheme
             )
 
         with self.assertRaises(TypeError):
-            certifyInfo, signature = self.ectx.Certify(
+            certifyInfo, signature = self.ectx.certify(
                 eccHandle, 2.0, qualifyingData, inScheme
             )
 
         with self.assertRaises(TypeError):
-            certifyInfo, signature = self.ectx.Certify(
+            certifyInfo, signature = self.ectx.certify(
                 eccHandle, eccHandle, TPM2B_PUBLIC(), inScheme
             )
 
         with self.assertRaises(TypeError):
-            certifyInfo, signature = self.ectx.Certify(
+            certifyInfo, signature = self.ectx.certify(
                 eccHandle, eccHandle, qualifyingData, TPM2B_PRIVATE()
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.Certify(
+            self.ectx.certify(
                 eccHandle, eccHandle, qualifyingData, inScheme, session1=56.7
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.Certify(
+            self.ectx.certify(
                 eccHandle, eccHandle, qualifyingData, inScheme, session2="foo"
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.Certify(
+            self.ectx.certify(
                 eccHandle, eccHandle, qualifyingData, inScheme, session3=object()
             )
 
