@@ -1117,40 +1117,40 @@ class TestEsys(TSS2_EsapiTest):
 
         inQsB = TPM2B_ECC_POINT(outPublic.publicArea.unique.ecc)
         inQeB = Q
-        Z1, Z2 = self.ectx.ZGen_2Phase(eccHandle, inQsB, inQeB, TPM2_ALG.ECDH, counter)
+        Z1, Z2 = self.ectx.zgen_2_phase(eccHandle, inQsB, inQeB, TPM2_ALG.ECDH, counter)
         self.assertEqual(type(Z1), TPM2B_ECC_POINT)
         self.assertEqual(type(Z2), TPM2B_ECC_POINT)
 
         with self.assertRaises(TypeError):
-            self.ectx.ZGen_2Phase(42.5, inQsB, inQeB, TPM2_ALG.ECDH, counter)
+            self.ectx.zgen_2_phase(42.5, inQsB, inQeB, TPM2_ALG.ECDH, counter)
 
         with self.assertRaises(TypeError):
-            self.ectx.ZGen_2Phase(eccHandle, "hello", inQeB, TPM2_ALG.ECDH, counter)
+            self.ectx.zgen_2_phase(eccHandle, "hello", inQeB, TPM2_ALG.ECDH, counter)
 
         with self.assertRaises(TypeError):
-            self.ectx.ZGen_2Phase(eccHandle, inQsB, object(), TPM2_ALG.ECDH, counter)
+            self.ectx.zgen_2_phase(eccHandle, inQsB, object(), TPM2_ALG.ECDH, counter)
 
         with self.assertRaises(TypeError):
-            self.ectx.ZGen_2Phase(eccHandle, inQsB, inQeB, object(), counter)
+            self.ectx.zgen_2_phase(eccHandle, inQsB, inQeB, object(), counter)
 
         with self.assertRaises(TypeError):
-            self.ectx.ZGen_2Phase(eccHandle, inQsB, inQeB, TPM2_ALG.ECDH, "baz")
+            self.ectx.zgen_2_phase(eccHandle, inQsB, inQeB, TPM2_ALG.ECDH, "baz")
 
         with self.assertRaises(ValueError):
-            self.ectx.ZGen_2Phase(eccHandle, inQsB, inQeB, TPM2_ALG.ECDH, 2 ** 18)
+            self.ectx.zgen_2_phase(eccHandle, inQsB, inQeB, TPM2_ALG.ECDH, 2 ** 18)
 
         with self.assertRaises(TypeError):
-            self.ectx.ZGen_2Phase(
+            self.ectx.zgen_2_phase(
                 eccHandle, inQsB, inQeB, TPM2_ALG.ECDH, counter, session1=object()
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.ZGen_2Phase(
+            self.ectx.zgen_2_phase(
                 eccHandle, inQsB, inQeB, TPM2_ALG.ECDH, counter, session2="baz"
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.ZGen_2Phase(
+            self.ectx.zgen_2_phase(
                 eccHandle, inQsB, inQeB, TPM2_ALG.ECDH, counter, session3=45.5
             )
 

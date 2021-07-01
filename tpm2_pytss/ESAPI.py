@@ -935,25 +935,25 @@ class ESAPI:
         )
         return TPMS_ALGORITHM_DETAIL_ECC(get_ptr(parameters))
 
-    def ZGen_2Phase(
+    def zgen_2_phase(
         self,
-        keyA,
-        inQsB,
-        inQeB,
-        inScheme,
+        key_a,
+        in_qs_b,
+        in_qe_b,
+        in_scheme,
         counter,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(session1, "keyA")
+        check_handle_type(session1, "key_a")
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        check_friendly_int(inScheme, "inScheme", TPM2_ALG)
+        check_friendly_int(in_scheme, "in_scheme", TPM2_ALG)
 
         if not isinstance(counter, int):
             raise TypeError(f"Expected counter to be type int, got {type(counter)}")
@@ -963,21 +963,21 @@ class ESAPI:
                 f"Expected counter to be in range of uint16_t, got {counter}"
             )
 
-        inQsB_cdata = get_cdata(inQsB, TPM2B_ECC_POINT, "inQsB")
-        inQeB_cdata = get_cdata(inQeB, TPM2B_ECC_POINT, "inQeB")
+        inQsB_cdata = get_cdata(in_qs_b, TPM2B_ECC_POINT, "in_qs_b")
+        inQeB_cdata = get_cdata(in_qe_b, TPM2B_ECC_POINT, "in_qe_b")
 
         outZ1 = ffi.new("TPM2B_ECC_POINT **")
         outZ2 = ffi.new("TPM2B_ECC_POINT **")
         _chkrc(
             lib.Esys_ZGen_2Phase(
                 self.ctx,
-                keyA,
+                key_a,
                 session1,
                 session2,
                 session3,
                 inQsB_cdata,
                 inQeB_cdata,
-                inScheme,
+                in_scheme,
                 counter,
                 outZ1,
                 outZ2,
