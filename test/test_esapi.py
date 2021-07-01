@@ -2745,36 +2745,36 @@ class TestEsys(TSS2_EsapiTest):
         )
 
         keyName = pub.publicArea.getName()
-        duplicate, symSeed = self.ectx.Rewrap(
+        duplicate, symSeed = self.ectx.rewrap(
             primary2, primary1, duplicate, keyName, symSeed
         )
         self.assertEqual(type(duplicate), TPM2B_PRIVATE)
         self.assertEqual(type(symSeed), TPM2B_ENCRYPTED_SECRET)
 
         with self.assertRaises(TypeError):
-            self.ectx.Rewrap(67.3, primary1, duplicate, keyName, symSeed)
+            self.ectx.rewrap(67.3, primary1, duplicate, keyName, symSeed)
 
         with self.assertRaises(TypeError):
-            self.ectx.Rewrap(primary2, object(), duplicate, keyName, symSeed)
+            self.ectx.rewrap(primary2, object(), duplicate, keyName, symSeed)
 
         with self.assertRaises(TypeError):
-            self.ectx.Rewrap(primary2, primary1, TPM2B_NAME(), keyName, symSeed)
+            self.ectx.rewrap(primary2, primary1, TPM2B_NAME(), keyName, symSeed)
 
         with self.assertRaises(TypeError):
-            self.ectx.Rewrap(primary2, primary1, duplicate, TPM2B_PRIVATE(), symSeed)
+            self.ectx.rewrap(primary2, primary1, duplicate, TPM2B_PRIVATE(), symSeed)
 
         with self.assertRaises(TypeError):
-            self.ectx.Rewrap(
+            self.ectx.rewrap(
                 primary2, primary1, duplicate, keyName, symSeed, session1="goo"
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.Rewrap(
+            self.ectx.rewrap(
                 primary2, primary1, duplicate, keyName, symSeed, session2=45.6
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.Rewrap(
+            self.ectx.rewrap(
                 primary2, primary1, duplicate, keyName, symSeed, sesion3=object()
             )
 
