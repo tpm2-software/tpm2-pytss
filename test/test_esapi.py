@@ -1482,7 +1482,7 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.sequence_update(seqHandle, None)
 
-        digest, ticket = self.ectx.SequenceComplete(seqHandle, None)
+        digest, ticket = self.ectx.sequence_complete(seqHandle, None)
         self.assertNotEqual(digest, None)
         self.assertNotEqual(ticket, None)
 
@@ -1536,7 +1536,7 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.sequence_update(seqHandle, None)
 
-        digest, ticket = self.ectx.SequenceComplete(seqHandle, "AnotherBuffer")
+        digest, ticket = self.ectx.sequence_complete(seqHandle, "AnotherBuffer")
         self.assertNotEqual(digest, None)
         self.assertNotEqual(ticket, None)
 
@@ -1584,25 +1584,25 @@ class TestEsys(TSS2_EsapiTest):
             self.ectx.sequence_update(seqHandle, "here is some data", sequence3=78.23)
 
         with self.assertRaises(TypeError):
-            self.ectx.SequenceComplete(78.25, "AnotherBuffer")
+            self.ectx.sequence_complete(78.25, "AnotherBuffer")
 
         with self.assertRaises(TypeError):
-            self.ectx.SequenceComplete(seqHandle, [])
+            self.ectx.sequence_complete(seqHandle, [])
 
         with self.assertRaises(TypeError):
-            self.ectx.SequenceComplete(seqHandle, "AnotherBuffer", hierarchy=object())
+            self.ectx.sequence_complete(seqHandle, "AnotherBuffer", hierarchy=object())
 
         with self.assertRaises(ValueError):
-            self.ectx.SequenceComplete(seqHandle, "AnotherBuffer", hierarchy=42)
+            self.ectx.sequence_complete(seqHandle, "AnotherBuffer", hierarchy=42)
 
         with self.assertRaises(TypeError):
-            self.ectx.SequenceComplete(seqHandle, "AnotherBuffer", session1=42.67)
+            self.ectx.sequence_complete(seqHandle, "AnotherBuffer", session1=42.67)
 
         with self.assertRaises(TypeError):
-            self.ectx.SequenceComplete(seqHandle, "AnotherBuffer", session2="baz")
+            self.ectx.sequence_complete(seqHandle, "AnotherBuffer", session2="baz")
 
         with self.assertRaises(TypeError):
-            self.ectx.SequenceComplete(seqHandle, "AnotherBuffer", session3=object())
+            self.ectx.sequence_complete(seqHandle, "AnotherBuffer", session3=object())
 
     def test_EventSequenceComplete(self):
 
@@ -3617,7 +3617,7 @@ class TestEsys(TSS2_EsapiTest):
         expiration = -(10 * 365 * 24 * 60 * 60)
         expbytes = expiration.to_bytes(4, byteorder="big", signed=True)
 
-        digest = self.ectx.SequenceComplete(sequence, expbytes, ESYS_TR.OWNER)[0]
+        digest = self.ectx.sequence_complete(sequence, expbytes, ESYS_TR.OWNER)[0]
 
         scheme = TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL)
         hash_validation = TPMT_TK_HASHCHECK(
@@ -3912,7 +3912,7 @@ class TestEsys(TSS2_EsapiTest):
         expiration = -(10 * 365 * 24 * 60 * 60)
         expbytes = expiration.to_bytes(4, byteorder="big", signed=True)
 
-        digest = self.ectx.SequenceComplete(sequence, expbytes, ESYS_TR.OWNER)[0]
+        digest = self.ectx.sequence_complete(sequence, expbytes, ESYS_TR.OWNER)[0]
 
         scheme = TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL)
         hash_validation = TPMT_TK_HASHCHECK(
