@@ -1970,21 +1970,21 @@ class ESAPI:
             )
         )
 
-    def PCR_Reset(
+    def pcr_reset(
         self,
-        pcrHandle,
+        pcr_handle,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_friendly_int(pcrHandle, "pcrHandle", ESYS_TR)
+        check_friendly_int(pcr_handle, "pcr_handle", ESYS_TR)
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        _chkrc(lib.Esys_PCR_Reset(self.ctx, pcrHandle, session1, session2, session3))
+        _chkrc(lib.Esys_PCR_Reset(self.ctx, pcr_handle, session1, session2, session3))
 
     def PolicySigned(
         self,
