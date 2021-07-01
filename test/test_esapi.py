@@ -3445,30 +3445,30 @@ class TestEsys(TSS2_EsapiTest):
 
     def test_PCR_Event(self):
 
-        digests = self.ectx.PCR_Event(ESYS_TR.PCR0, b"01234567890123456789")
+        digests = self.ectx.pcr_event(ESYS_TR.PCR0, b"01234567890123456789")
         self.assertEqual(type(digests), TPML_DIGEST_VALUES)
 
-        digests = self.ectx.PCR_Event(
+        digests = self.ectx.pcr_event(
             ESYS_TR.PCR0, TPM2B_EVENT(b"01234567890123456789")
         )
         self.assertEqual(type(digests), TPML_DIGEST_VALUES)
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_Event("foo", b"01234567890123456789")
+            self.ectx.pcr_event("foo", b"01234567890123456789")
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_Event(ESYS_TR.PCR0, object)
+            self.ectx.pcr_event(ESYS_TR.PCR0, object)
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_Event(ESYS_TR.PCR0, b"01234567890123456789", session1="bar")
+            self.ectx.pcr_event(ESYS_TR.PCR0, b"01234567890123456789", session1="bar")
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_Event(
+            self.ectx.pcr_event(
                 ESYS_TR.PCR0, b"01234567890123456789", session2=object()
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PCR_Event(
+            self.ectx.pcr_event(
                 ESYS_TR.PCR0, b"01234567890123456789", session3=TPML_ALG()
             )
 
