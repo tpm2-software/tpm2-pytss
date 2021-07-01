@@ -572,7 +572,7 @@ class TestEsys(TSS2_EsapiTest):
 
         childHandle = self.ectx.load(parentHandle, priv, pub)
 
-        pubdata, name, qname = self.ectx.ReadPublic(childHandle)
+        pubdata, name, qname = self.ectx.read_public(childHandle)
         self.assertTrue(
             isinstance(pubdata, TPM2B_PUBLIC),
             f"Expected TPM2B_PUBLIC, got: {type(pubdata)}",
@@ -590,16 +590,16 @@ class TestEsys(TSS2_EsapiTest):
         self.assertTrue(qname.size, 32)
 
         with self.assertRaises(TypeError):
-            self.ectx.ReadPublic(object())
+            self.ectx.read_public(object())
 
         with self.assertRaises(TypeError):
-            self.ectx.ReadPublic(childHandle, session1=object)
+            self.ectx.read_public(childHandle, session1=object)
 
         with self.assertRaises(TypeError):
-            self.ectx.ReadPublic(childHandle, session2="foo")
+            self.ectx.read_public(childHandle, session2="foo")
 
         with self.assertRaises(TypeError):
-            self.ectx.ReadPublic(childHandle, session3=42.5)
+            self.ectx.read_public(childHandle, session3=42.5)
 
     def test_MakeCredential(self):
 
@@ -629,7 +629,7 @@ class TestEsys(TSS2_EsapiTest):
 
         childHandle = self.ectx.load(parentHandle, priv, pub)
 
-        primaryKeyName = self.ectx.ReadPublic(parentHandle)[1]
+        primaryKeyName = self.ectx.read_public(parentHandle)[1]
 
         credential = TPM2B_DIGEST("this is my credential")
 
@@ -700,7 +700,7 @@ class TestEsys(TSS2_EsapiTest):
 
         childHandle = self.ectx.load(parentHandle, priv, pub)
 
-        primaryKeyName = self.ectx.ReadPublic(parentHandle)[1]
+        primaryKeyName = self.ectx.read_public(parentHandle)[1]
 
         credential = TPM2B_DIGEST("this is my credential")
 

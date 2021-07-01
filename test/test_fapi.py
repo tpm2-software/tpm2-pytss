@@ -264,7 +264,7 @@ class TestFapi:
         blob_data, blob_type = self.fapi.get_esys_blob(path=sign_key)
         assert blob_type == lib.FAPI_ESYSBLOB_CONTEXTLOAD
         esys_handle = esys.load_blob(blob_data, blob_type)
-        esys.ReadPublic(esys_handle)
+        esys.read_public(esys_handle)
         esys.FlushContext(esys_handle)
 
     def test_get_esys_blob_deserialize(self, esys, nv_ordinary):
