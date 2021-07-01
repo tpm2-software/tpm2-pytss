@@ -260,7 +260,7 @@ class ESAPI:
         sessionHandleObject = sessionHandle[0]
         return sessionHandleObject
 
-    def TRSess_SetAttributes(self, session, attributes, mask=0xFF):
+    def trsess_set_attributes(self, session, attributes, mask=0xFF):
 
         check_handle_type(session, "session")
 

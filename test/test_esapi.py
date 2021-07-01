@@ -332,7 +332,7 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
 
-        self.ectx.TRSess_SetAttributes(
+        self.ectx.trsess_set_attributes(
             session, (TPMA_SESSION.ENCRYPT | TPMA_SESSION.DECRYPT)
         )
 
@@ -362,7 +362,7 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
 
-        self.ectx.TRSess_SetAttributes(
+        self.ectx.trsess_set_attributes(
             session, (TPMA_SESSION.ENCRYPT | TPMA_SESSION.DECRYPT)
         )
 
@@ -392,20 +392,20 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
 
-        self.ectx.TRSess_SetAttributes(
+        self.ectx.trsess_set_attributes(
             session, (TPMA_SESSION.ENCRYPT | TPMA_SESSION.DECRYPT)
         )
 
         with self.assertRaises(TypeError):
-            self.ectx.TRSess_SetAttributes(
+            self.ectx.trsess_set_attributes(
                 object(), (TPMA_SESSION.ENCRYPT | TPMA_SESSION.DECRYPT)
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.TRSess_SetAttributes(session, 67.5)
+            self.ectx.trsess_set_attributes(session, 67.5)
 
         with self.assertRaises(TypeError):
-            self.ectx.TRSess_SetAttributes(session, 1, 75.6)
+            self.ectx.trsess_set_attributes(session, 1, 75.6)
 
     def test_start_authSession_noncecaller(self):
 
@@ -430,7 +430,7 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
 
-        self.ectx.TRSess_SetAttributes(
+        self.ectx.trsess_set_attributes(
             session, (TPMA_SESSION.ENCRYPT | TPMA_SESSION.DECRYPT)
         )
 
@@ -2982,7 +2982,7 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
 
-        self.ectx.TRSess_SetAttributes(
+        self.ectx.trsess_set_attributes(
             session, TPMA_SESSION.AUDIT | TPMA_SESSION.CONTINUESESSION
         )
 
@@ -3150,7 +3150,7 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
 
-        self.ectx.TRSess_SetAttributes(
+        self.ectx.trsess_set_attributes(
             session, TPMA_SESSION.AUDIT | TPMA_SESSION.CONTINUESESSION
         )
 
