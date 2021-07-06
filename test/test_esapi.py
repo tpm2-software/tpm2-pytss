@@ -1774,12 +1774,12 @@ class TestEsys(TSS2_EsapiTest):
 
     def test_ClockSet(self):
         newtime = 0xFA1AFE1
-        self.ectx.ClockSet(ESYS_TR.OWNER, newtime, session1=ESYS_TR.PASSWORD)
+        self.ectx.clock_set(ESYS_TR.OWNER, newtime, session1=ESYS_TR.PASSWORD)
         ntime = self.ectx.read_clock()
         self.assertGreaterEqual(ntime.clockInfo.clock, newtime)
 
         with self.assertRaises(TSS2_Exception) as e:
-            self.ectx.ClockSet(ESYS_TR.OWNER, 0, session1=ESYS_TR.PASSWORD)
+            self.ectx.clock_set(ESYS_TR.OWNER, 0, session1=ESYS_TR.PASSWORD)
         self.assertEqual(e.exception.error, TPM2_RC.VALUE)
 
     def test_ClockRateAdjust(self):

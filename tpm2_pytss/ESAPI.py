@@ -3045,17 +3045,19 @@ class ESAPI:
         _chkrc(lib.Esys_ReadClock(self.ctx, session1, session2, session3, currentTime))
         return TPMS_TIME_INFO(get_ptr(currentTime))
 
-    def ClockSet(
+    def clock_set(
         self,
         auth,
-        newTime,
+        new_time,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
         check_handle_type(auth, "auth")
-        _chkrc(lib.Esys_ClockSet(self.ctx, auth, session1, session2, session3, newTime))
+        _chkrc(
+            lib.Esys_ClockSet(self.ctx, auth, session1, session2, session3, new_time)
+        )
 
     def ClockRateAdjust(
         self,
