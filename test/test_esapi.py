@@ -1768,14 +1768,14 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(e.exception.parameter, 1)
 
     def test_ReadClock(self):
-        ctime = self.ectx.ReadClock()
+        ctime = self.ectx.read_clock()
         self.assertGreater(ctime.time, 0)
         self.assertGreater(ctime.clockInfo.clock, 0)
 
     def test_ClockSet(self):
         newtime = 0xFA1AFE1
         self.ectx.ClockSet(ESYS_TR.OWNER, newtime, session1=ESYS_TR.PASSWORD)
-        ntime = self.ectx.ReadClock()
+        ntime = self.ectx.read_clock()
         self.assertGreaterEqual(ntime.clockInfo.clock, newtime)
 
         with self.assertRaises(TSS2_Exception) as e:
