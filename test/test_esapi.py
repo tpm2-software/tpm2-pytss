@@ -3059,22 +3059,22 @@ class TestEsys(TSS2_EsapiTest):
             self.ectx.pp_commands(TPML_CC(), TPML_CC(), authHandle="platform")
 
     def test_SetAlgorithmSet(self):
-        self.ectx.SetAlgorithmSet(0)
+        self.ectx.set_algorithm_set(0)
 
         with self.assertRaises(TypeError):
-            self.ectx.SetAlgorithmSet([1, 2, 3])
+            self.ectx.set_algorithm_set([1, 2, 3])
 
         with self.assertRaises(TypeError):
-            self.ectx.SetAlgorithmSet(session2=set(3, 2, 1))
+            self.ectx.set_algorithm_set(session2=set(3, 2, 1))
 
         with self.assertRaises(TypeError):
-            self.ectx.SetAlgorithmSet(session1=set(4, 3, 2))
+            self.ectx.set_algorithm_set(session1=set(4, 3, 2))
 
         with self.assertRaises(TypeError):
-            self.ectx.SetAlgorithmSet(session3=set(5, 4, 3))
+            self.ectx.set_algorithm_set(session3=set(5, 4, 3))
 
         with self.assertRaises(TypeError):
-            self.ectx.SetAlgorithmSet(authHandle=None)
+            self.ectx.set_algorithm_set(auth_handle=None)
 
     def test_DictionaryAttackLockReset(self):
         self.ectx.dictionary_attack_lock_reset()

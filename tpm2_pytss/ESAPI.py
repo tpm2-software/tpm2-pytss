@@ -2902,22 +2902,22 @@ class ESAPI:
             )
         )
 
-    def SetAlgorithmSet(
+    def set_algorithm_set(
         self,
-        algorithmSet,
-        authHandle=ESYS_TR.PLATFORM,
+        algorithm_set,
+        auth_handle=ESYS_TR.PLATFORM,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(authHandle, "authHandle")
+        check_handle_type(auth_handle, "auth_handle")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
         _chkrc(
             lib.Esys_SetAlgorithmSet(
-                self.ctx, authHandle, session1, session2, session3, algorithmSet
+                self.ctx, auth_handle, session1, session2, session3, algorithm_set
             )
         )
 
