@@ -1898,8 +1898,8 @@ class TestEsys(TSS2_EsapiTest):
         nvhandle = self.ectx.nv_define_space(b"", nvpub)
 
         edata = b"\xFF" * 32
-        self.ectx.NV_Extend(nvhandle, edata, authHandle=ESYS_TR.RH_OWNER)
-        self.ectx.NV_Extend(nvhandle, edata)
+        self.ectx.nv_extend(nvhandle, edata, auth_handle=ESYS_TR.RH_OWNER)
+        self.ectx.nv_extend(nvhandle, edata)
 
         data = self.ectx.NV_Read(nvhandle, 32, 0, authHandle=ESYS_TR.RH_OWNER)
 
@@ -1907,22 +1907,22 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(edigest, bytes(data))
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_Extend("handle", edata)
+            self.ectx.nv_extend("handle", edata)
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_Extend(nvhandle, TPM2B_CONTEXT_DATA())
+            self.ectx.nv_extend(nvhandle, TPM2B_CONTEXT_DATA())
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_Extend(nvhandle, edata, authHandle=34.7)
+            self.ectx.nv_extend(nvhandle, edata, auth_handle=34.7)
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_Extend(nvhandle, edata, session1="foo")
+            self.ectx.nv_extend(nvhandle, edata, session1="foo")
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_Extend(nvhandle, edata, session2=56.9)
+            self.ectx.nv_extend(nvhandle, edata, session2=56.9)
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_Extend(nvhandle, edata, session3=object)
+            self.ectx.nv_extend(nvhandle, edata, session3=object)
 
     def test_NV_SetBits(self):
         nvpub = TPM2B_NV_PUBLIC(
