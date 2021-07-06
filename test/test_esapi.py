@@ -2102,7 +2102,7 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.policy_command_code(session, TPM2_CC.NV_ChangeAuth)
 
-        self.ectx.NV_ChangeAuth(nvhandle, b"second", session1=session)
+        self.ectx.nv_change_auth(nvhandle, b"second", session1=session)
 
         self.ectx.nv_read(nvhandle, 8, auth_handle=nvhandle)
 

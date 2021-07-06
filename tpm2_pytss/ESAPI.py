@@ -3428,23 +3428,23 @@ class ESAPI:
             )
         )
 
-    def NV_ChangeAuth(
+    def nv_change_auth(
         self,
-        nvIndex,
-        newAuth,
+        nv_index,
+        new_auth,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(nvIndex, "nvIndex")
+        check_handle_type(nv_index, "nv_index")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
-        newAuth_cdata = get_cdata(newAuth, TPM2B_DIGEST, "newAuth")
+        newAuth_cdata = get_cdata(new_auth, TPM2B_DIGEST, "new_auth")
         _chkrc(
             lib.Esys_NV_ChangeAuth(
-                self.ctx, nvIndex, session1, session2, session3, newAuth_cdata
+                self.ctx, nv_index, session1, session2, session3, newAuth_cdata
             )
         )
 
