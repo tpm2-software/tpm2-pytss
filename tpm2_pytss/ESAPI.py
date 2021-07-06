@@ -2183,16 +2183,16 @@ class ESAPI:
             )
         )
 
-    def PolicyLocality(
+    def policy_locality(
         self,
-        policySession,
+        policy_session,
         locality,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(policySession, "policySession")
+        check_handle_type(policy_session, "policy_session")
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
@@ -2213,7 +2213,7 @@ class ESAPI:
 
         _chkrc(
             lib.Esys_PolicyLocality(
-                self.ctx, policySession, session1, session2, session3, locality
+                self.ctx, policy_session, session1, session2, session3, locality
             )
         )
 

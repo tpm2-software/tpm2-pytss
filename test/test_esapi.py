@@ -4087,28 +4087,28 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
 
-        self.ectx.PolicyLocality(session, TPMA_LOCALITY.ONE)
+        self.ectx.policy_locality(session, TPMA_LOCALITY.ONE)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyLocality(45.6, TPMA_LOCALITY.ONE)
+            self.ectx.policy_locality(45.6, TPMA_LOCALITY.ONE)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyLocality(session, "baz")
+            self.ectx.policy_locality(session, "baz")
 
         with self.assertRaises(ValueError):
-            self.ectx.PolicyLocality(session, 0)
+            self.ectx.policy_locality(session, 0)
 
         with self.assertRaises(ValueError):
-            self.ectx.PolicyLocality(session, 256)
+            self.ectx.policy_locality(session, 256)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyLocality(session, TPMA_LOCALITY.ONE, session1="bar")
+            self.ectx.policy_locality(session, TPMA_LOCALITY.ONE, session1="bar")
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyLocality(session, TPMA_LOCALITY.ONE, session2=56.7)
+            self.ectx.policy_locality(session, TPMA_LOCALITY.ONE, session2=56.7)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyLocality(session, TPMA_LOCALITY.ONE, session3=object())
+            self.ectx.policy_locality(session, TPMA_LOCALITY.ONE, session3=object())
 
     def test_PolicyNV(self):
 
