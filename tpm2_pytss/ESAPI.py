@@ -3497,14 +3497,14 @@ class ESAPI:
         )
         return (TPM2B_ATTEST(get_ptr(certifyInfo)), TPMT_SIGNATURE(get_ptr(signature)))
 
-    def Vendor_TCG_Test(
+    def vendor_tcg_test(
         self,
-        inputData,
+        input_data,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
-        inputData_cdata = get_cdata(inputData, TPM2B_DATA, "inputData")
+        inputData_cdata = get_cdata(input_data, TPM2B_DATA, "input_data")
         outputData = ffi.new("TPM2B_DATA **")
         _chkrc(
             lib.Esys_Vendor_TCG_Test(

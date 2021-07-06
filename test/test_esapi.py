@@ -2368,17 +2368,17 @@ class TestEsys(TSS2_EsapiTest):
 
     def test_Vendor_TCG_Test(self):
         with self.assertRaises(TSS2_Exception):
-            self.ectx.Vendor_TCG_Test(b"random data")
+            self.ectx.vendor_tcg_test(b"random data")
 
         in_cdata = TPM2B_DATA(b"other bytes")._cdata
         with self.assertRaises(TSS2_Exception):
-            self.ectx.Vendor_TCG_Test(in_cdata)
+            self.ectx.vendor_tcg_test(in_cdata)
 
         with self.assertRaises(TypeError):
-            self.ectx.Vendor_TCG_Test(None)
+            self.ectx.vendor_tcg_test(None)
 
         with self.assertRaises(TypeError):
-            self.ectx.Vendor_TCG_Test(TPM2B_PUBLIC())
+            self.ectx.vendor_tcg_test(TPM2B_PUBLIC())
 
     def test_FieldUpgradeStart(self):
         inPublic = TPM2B_PUBLIC(
