@@ -1856,9 +1856,9 @@ class TestEsys(TSS2_EsapiTest):
 
         nvhandle = self.ectx.nv_define_space(b"", nvpub)
 
-        self.ectx.NV_Increment(nvhandle, authHandle=ESYS_TR.RH_OWNER)
+        self.ectx.nv_increment(nvhandle, auth_handle=ESYS_TR.RH_OWNER)
 
-        self.ectx.NV_Increment(nvhandle)
+        self.ectx.nv_increment(nvhandle)
 
         data = self.ectx.NV_Read(nvhandle, 8, 0, authHandle=ESYS_TR.RH_OWNER)
 
@@ -1866,19 +1866,19 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(counter, 2)
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_Increment("foo")
+            self.ectx.nv_increment("foo")
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_Increment(nvhandle, authHandle="bar")
+            self.ectx.nv_increment(nvhandle, auth_handle="bar")
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_Increment(nvhandle, session1=45.6)
+            self.ectx.nv_increment(nvhandle, session1=45.6)
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_Increment(nvhandle, session2=object())
+            self.ectx.nv_increment(nvhandle, session2=object())
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_Increment(nvhandle, session3="baz")
+            self.ectx.nv_increment(nvhandle, session3="baz")
 
     def test_NV_Extend(self):
         nvpub = TPM2B_NV_PUBLIC(
