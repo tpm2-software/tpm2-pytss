@@ -3004,9 +3004,9 @@ class ESAPI:
         loadedHandleObject = loadedHandle[0]
         return loadedHandleObject
 
-    def FlushContext(self, flushHandle):
-        check_handle_type(flushHandle, "flushHandle")
-        _chkrc(lib.Esys_FlushContext(self.ctx, flushHandle))
+    def flush_context(self, flush_handle):
+        check_handle_type(flush_handle, "flush_handle")
+        _chkrc(lib.Esys_FlushContext(self.ctx, flush_handle))
 
     def EvictControl(
         self,
