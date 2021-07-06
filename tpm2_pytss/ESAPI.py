@@ -3448,30 +3448,30 @@ class ESAPI:
             )
         )
 
-    def NV_Certify(
+    def nv_certify(
         self,
-        signHandle,
-        nvIndex,
-        qualifyingData,
-        inScheme,
+        sign_handle,
+        nv_index,
+        qualifying_data,
+        in_scheme,
         size,
         offset=0,
-        authHandle=0,
+        auth_handle=0,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.PASSWORD,
         session3=ESYS_TR.NONE,
     ):
 
-        if authHandle == 0:
-            authHandle = nvIndex
-        check_handle_type(signHandle, "signHandle")
-        check_handle_type(authHandle, "authHandle")
-        check_handle_type(nvIndex, "nvIndex")
+        if auth_handle == 0:
+            auth_handle = nv_index
+        check_handle_type(sign_handle, "sign_handle")
+        check_handle_type(auth_handle, "auth_handle")
+        check_handle_type(nv_index, "nv_index")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
-        qualifyingData_cdata = get_cdata(qualifyingData, TPM2B_DATA, "qualifyingData")
-        inScheme_cdata = get_cdata(inScheme, TPMT_SIG_SCHEME, "inScheme")
+        qualifyingData_cdata = get_cdata(qualifying_data, TPM2B_DATA, "qualifying_data")
+        inScheme_cdata = get_cdata(in_scheme, TPMT_SIG_SCHEME, "in_scheme")
 
         if not isinstance(offset, int):
             raise TypeError(f"Expected offset to be of type int, got: {type(offset)}")
@@ -3481,9 +3481,9 @@ class ESAPI:
         _chkrc(
             lib.Esys_NV_Certify(
                 self.ctx,
-                signHandle,
-                authHandle,
-                nvIndex,
+                sign_handle,
+                auth_handle,
+                nv_index,
                 session1,
                 session2,
                 session3,

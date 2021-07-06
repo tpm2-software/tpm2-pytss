@@ -2140,13 +2140,13 @@ class TestEsys(TSS2_EsapiTest):
         qualifyingData = TPM2B_DATA(b"qdata")
         inScheme = TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL)
 
-        certifyInfo, _ = self.ectx.NV_Certify(
+        certifyInfo, _ = self.ectx.nv_certify(
             eccHandle,
             nvhandle,
             qualifyingData,
             inScheme,
             8,
-            authHandle=ESYS_TR.RH_OWNER,
+            auth_handle=ESYS_TR.RH_OWNER,
             session1=ESYS_TR.PASSWORD,
             session2=ESYS_TR.PASSWORD,
         )
@@ -2159,45 +2159,45 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(att.attested.nv.offset, 0)
         self.assertEqual(att.attested.nv.nvContents.buffer, b"sometest")
 
-        self.ectx.NV_Certify(eccHandle, nvhandle, qualifyingData, inScheme, 8)
+        self.ectx.nv_certify(eccHandle, nvhandle, qualifyingData, inScheme, 8)
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_Certify(67.7, nvhandle, qualifyingData, inScheme, 8)
+            self.ectx.nv_certify(67.7, nvhandle, qualifyingData, inScheme, 8)
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_Certify(eccHandle, "bad handle", qualifyingData, inScheme, 8)
+            self.ectx.nv_certify(eccHandle, "bad handle", qualifyingData, inScheme, 8)
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_Certify(eccHandle, nvhandle, object(), inScheme, 8)
+            self.ectx.nv_certify(eccHandle, nvhandle, object(), inScheme, 8)
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_Certify(eccHandle, nvhandle, qualifyingData, TPM2B_DATA(), 8)
+            self.ectx.nv_certify(eccHandle, nvhandle, qualifyingData, TPM2B_DATA(), 8)
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_Certify(eccHandle, nvhandle, qualifyingData, inScheme, 45.6)
+            self.ectx.nv_certify(eccHandle, nvhandle, qualifyingData, inScheme, 45.6)
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_Certify(
+            self.ectx.nv_certify(
                 eccHandle, nvhandle, qualifyingData, inScheme, 8, offset="bar"
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_Certify(
-                eccHandle, nvhandle, qualifyingData, inScheme, 8, authHandle=object
+            self.ectx.nv_certify(
+                eccHandle, nvhandle, qualifyingData, inScheme, 8, auth_handle=object
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_Certify(
+            self.ectx.nv_certify(
                 eccHandle, nvhandle, qualifyingData, inScheme, 8, session1=67.8
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_Certify(
+            self.ectx.nv_certify(
                 eccHandle, nvhandle, qualifyingData, inScheme, 8, session2="bar"
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_Certify(
+            self.ectx.nv_certify(
                 eccHandle, nvhandle, qualifyingData, inScheme, 8, session3=[]
             )
 
