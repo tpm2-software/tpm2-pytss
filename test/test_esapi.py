@@ -4135,42 +4135,42 @@ class TestEsys(TSS2_EsapiTest):
 
         nvhandle = self.ectx.NV_DefineSpace(b"", nvpub)
 
-        self.ectx.PolicyNV(ESYS_TR.OWNER, nvhandle, session, b"12345678", TPM2_EO.EQ)
+        self.ectx.policy_nv(ESYS_TR.OWNER, nvhandle, session, b"12345678", TPM2_EO.EQ)
 
-        self.ectx.PolicyNV(
+        self.ectx.policy_nv(
             ESYS_TR.OWNER, nvhandle, session, TPM2B_OPERAND(b"12345678"), TPM2_EO.EQ, 4
         )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyNV(42.2, nvhandle, session, b"12345678", TPM2_EO.EQ)
+            self.ectx.policy_nv(42.2, nvhandle, session, b"12345678", TPM2_EO.EQ)
 
         with self.assertRaises(ValueError):
-            self.ectx.PolicyNV(42, nvhandle, session, b"12345678", TPM2_EO.EQ)
+            self.ectx.policy_nv(42, nvhandle, session, b"12345678", TPM2_EO.EQ)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyNV(ESYS_TR.OWNER, "baz", session, b"12345678", TPM2_EO.EQ)
+            self.ectx.policy_nv(ESYS_TR.OWNER, "baz", session, b"12345678", TPM2_EO.EQ)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyNV(
+            self.ectx.policy_nv(
                 ESYS_TR.OWNER, nvhandle, object(), b"12345678", TPM2_EO.EQ
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyNV(ESYS_TR.OWNER, nvhandle, session, object, TPM2_EO.EQ)
+            self.ectx.policy_nv(ESYS_TR.OWNER, nvhandle, session, object, TPM2_EO.EQ)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyNV(ESYS_TR.OWNER, nvhandle, session, b"12345678", "baz")
+            self.ectx.policy_nv(ESYS_TR.OWNER, nvhandle, session, b"12345678", "baz")
 
         with self.assertRaises(ValueError):
-            self.ectx.PolicyNV(ESYS_TR.OWNER, nvhandle, session, b"12345678", 42)
+            self.ectx.policy_nv(ESYS_TR.OWNER, nvhandle, session, b"12345678", 42)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyNV(
+            self.ectx.policy_nv(
                 ESYS_TR.OWNER, nvhandle, session, b"12345678", TPM2_EO.EQ, "baz"
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyNV(
+            self.ectx.policy_nv(
                 ESYS_TR.OWNER,
                 nvhandle,
                 session,
@@ -4180,12 +4180,12 @@ class TestEsys(TSS2_EsapiTest):
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyNV(
+            self.ectx.policy_nv(
                 ESYS_TR.OWNER, nvhandle, session, b"12345678", TPM2_EO.EQ, session2=42.2
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyNV(
+            self.ectx.policy_nv(
                 ESYS_TR.OWNER,
                 nvhandle,
                 session,
