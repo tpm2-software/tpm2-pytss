@@ -2997,7 +2997,7 @@ class ESAPI:
         _chkrc(lib.Esys_ContextSave(self.ctx, save_handle, context))
         return TPMS_CONTEXT(get_ptr(context))
 
-    def ContextLoad(self, context):
+    def context_load(self, context):
         context_cdata = get_cdata(context, TPMS_CONTEXT, "context")
         loadedHandle = ffi.new("ESYS_TR *")
         _chkrc(lib.Esys_ContextLoad(self.ctx, context_cdata, loadedHandle))
