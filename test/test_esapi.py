@@ -1666,7 +1666,7 @@ class TestEsys(TSS2_EsapiTest):
 
         handle, outpub, _, _, _ = self.ectx.create_primary(inSensitive, inPublic)
 
-        ctx = self.ectx.ContextSave(handle)
+        ctx = self.ectx.context_save(handle)
 
         nhandle = self.ectx.ContextLoad(ctx)
         name = self.ectx.tr_get_name(nhandle)
