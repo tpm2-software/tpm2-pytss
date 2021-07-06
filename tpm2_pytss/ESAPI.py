@@ -3354,21 +3354,21 @@ class ESAPI:
             )
         )
 
-    def NV_GlobalWriteLock(
+    def nv_global_write_lock(
         self,
-        authHandle=ESYS_TR.RH_OWNER,
+        auth_handle=ESYS_TR.RH_OWNER,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(authHandle, "authHandle")
+        check_handle_type(auth_handle, "auth_handle")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
         _chkrc(
             lib.Esys_NV_GlobalWriteLock(
-                self.ctx, authHandle, session1, session2, session3
+                self.ctx, auth_handle, session1, session2, session3
             )
         )
 
