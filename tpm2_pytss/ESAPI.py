@@ -2365,18 +2365,18 @@ class ESAPI:
             )
         )
 
-    def PolicyNameHash(
+    def policy_name_hash(
         self,
-        policySession,
-        nameHash,
+        policy_session,
+        name_hash,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(policySession, "policySession")
+        check_handle_type(policy_session, "policy_session")
 
-        nameHash_cdata = get_cdata(nameHash, TPM2B_DIGEST, "nameHash")
+        nameHash_cdata = get_cdata(name_hash, TPM2B_DIGEST, "name_hash")
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
@@ -2384,7 +2384,7 @@ class ESAPI:
 
         _chkrc(
             lib.Esys_PolicyNameHash(
-                self.ctx, policySession, session1, session2, session3, nameHash_cdata
+                self.ctx, policy_session, session1, session2, session3, nameHash_cdata
             )
         )
 
