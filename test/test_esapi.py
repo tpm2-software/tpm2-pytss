@@ -3730,33 +3730,35 @@ class TestEsys(TSS2_EsapiTest):
             )
 
     def test_set_primary_policy(self):
-        self.ectx.SetPrimaryPolicy(
+        self.ectx.set_primary_policy(
             ESYS_TR.RH_ENDORSEMENT, b"\x00" * 32, TPM2_ALG.SHA256
         )
 
         with self.assertRaises(TypeError):
-            self.ectx.SetPrimaryPolicy(
+            self.ectx.set_primary_policy(
                 ESYS_TR.RH_ENDORSEMENT, b"\x00" * 32, TPM2_ALG.SHA256, session1=None
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.SetPrimaryPolicy(
+            self.ectx.set_primary_policy(
                 ESYS_TR.RH_ENDORSEMENT, b"\x00" * 32, TPM2_ALG.SHA256, session2=None
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.SetPrimaryPolicy(
+            self.ectx.set_primary_policy(
                 ESYS_TR.RH_ENDORSEMENT, b"\x00" * 32, TPM2_ALG.SHA256, session3=None
             )
 
         with self.assertRaises(ValueError):
-            self.ectx.SetPrimaryPolicy(ESYS_TR.NULL, b"\x00" * 32, TPM2_ALG.SHA256)
+            self.ectx.set_primary_policy(ESYS_TR.NULL, b"\x00" * 32, TPM2_ALG.SHA256)
 
         with self.assertRaises(TypeError):
-            self.ectx.SetPrimaryPolicy(ESYS_TR.ENDORSEMENT, 123, TPM2_ALG.SHA256)
+            self.ectx.set_primary_policy(ESYS_TR.ENDORSEMENT, 123, TPM2_ALG.SHA256)
 
         with self.assertRaises(ValueError):
-            self.ectx.SetPrimaryPolicy(ESYS_TR.ENDORSEMENT, b"\x00" * 32, TPM2_SE.TRIAL)
+            self.ectx.set_primary_policy(
+                ESYS_TR.ENDORSEMENT, b"\x00" * 32, TPM2_SE.TRIAL
+            )
 
     def test_change_pps(self):
         self.ectx.ChangePPS()

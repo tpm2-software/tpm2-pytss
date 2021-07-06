@@ -2701,18 +2701,18 @@ class ESAPI:
             )
         )
 
-    def SetPrimaryPolicy(
+    def set_primary_policy(
         self,
-        authHandle,
-        authPolicy,
-        hashAlg,
+        auth_handle,
+        auth_policy,
+        hash_alg,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
         check_handle_type(
-            authHandle,
-            "authHandle",
+            auth_handle,
+            "auth_handle",
             expected=(ESYS_TR.RH_ENDORSEMENT, ESYS_TR.RH_OWNER, ESYS_TR.RH_PLATFORM),
         )
 
@@ -2720,18 +2720,18 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        authPolicy_cdata = get_cdata(authPolicy, TPM2B_DIGEST, "authPolicy")
-        check_friendly_int(hashAlg, "hashAlg", TPM2_ALG)
+        authPolicy_cdata = get_cdata(auth_policy, TPM2B_DIGEST, "auth_policy")
+        check_friendly_int(hash_alg, "hash_alg", TPM2_ALG)
 
         _chkrc(
             lib.Esys_SetPrimaryPolicy(
                 self.ctx,
-                authHandle,
+                auth_handle,
                 session1,
                 session2,
                 session3,
                 authPolicy_cdata,
-                hashAlg,
+                hash_alg,
             )
         )
 
