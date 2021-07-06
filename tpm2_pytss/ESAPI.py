@@ -3008,29 +3008,29 @@ class ESAPI:
         check_handle_type(flush_handle, "flush_handle")
         _chkrc(lib.Esys_FlushContext(self.ctx, flush_handle))
 
-    def EvictControl(
+    def evict_control(
         self,
         auth,
-        objectHandle,
-        persistentHandle,
+        object_handle,
+        persistent_handle,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
         check_handle_type(auth, "auth")
-        check_handle_type(objectHandle, "objectHandle")
-        check_handle_type(persistentHandle, "persistentHandle")
+        check_handle_type(object_handle, "object_handle")
+        check_handle_type(persistent_handle, "persistent_handle")
         newObjectHandle = ffi.new("ESYS_TR *")
         _chkrc(
             lib.Esys_EvictControl(
                 self.ctx,
                 auth,
-                objectHandle,
+                object_handle,
                 session1,
                 session2,
                 session3,
-                persistentHandle,
+                persistent_handle,
                 newObjectHandle,
             )
         )
