@@ -2265,10 +2265,10 @@ class ESAPI:
             )
         )
 
-    def PolicyCounterTimer(
+    def policy_counter_timer(
         self,
-        policySession,
-        operandB,
+        policy_session,
+        operand_b,
         operation,
         offset=0,
         session1=ESYS_TR.NONE,
@@ -2276,9 +2276,9 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(policySession, "policySession")
+        check_handle_type(policy_session, "policy_session")
 
-        operandB_cdata = get_cdata(operandB, TPM2B_OPERAND, "operandB")
+        operandB_cdata = get_cdata(operand_b, TPM2B_OPERAND, "operand_b")
 
         check_friendly_int(operation, "operation", TPM2_EO)
 
@@ -2292,7 +2292,7 @@ class ESAPI:
         _chkrc(
             lib.Esys_PolicyCounterTimer(
                 self.ctx,
-                policySession,
+                policy_session,
                 session1,
                 session2,
                 session3,
