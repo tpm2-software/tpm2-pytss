@@ -2488,7 +2488,7 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.policy_auth_value(session)
         self.ectx.policy_command_code(session, TPM2_CC.Duplicate)
-        policyDigest = self.ectx.PolicyGetDigest(session)
+        policyDigest = self.ectx.policy_get_digest(session)
         self.ectx.FlushContext(session)
         session = None
 
@@ -2665,7 +2665,7 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.policy_auth_value(session)
         self.ectx.policy_command_code(session, TPM2_CC.Duplicate)
-        policyDigest = self.ectx.PolicyGetDigest(session)
+        policyDigest = self.ectx.policy_get_digest(session)
         self.assertTrue(type(policyDigest), TPM2B_DIGEST)
 
     def test_rewrap(self):
@@ -2687,7 +2687,7 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.policy_auth_value(session)
         self.ectx.policy_command_code(session, TPM2_CC.Duplicate)
-        policyDigest = self.ectx.PolicyGetDigest(session)
+        policyDigest = self.ectx.policy_get_digest(session)
         self.ectx.FlushContext(session)
         session = None
 
@@ -2801,7 +2801,7 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.policy_auth_value(session)
         self.ectx.policy_command_code(session, TPM2_CC.Duplicate)
-        policyDigest = self.ectx.PolicyGetDigest(session)
+        policyDigest = self.ectx.policy_get_digest(session)
         self.ectx.FlushContext(session)
         session = None
 
