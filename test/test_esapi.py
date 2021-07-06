@@ -160,7 +160,7 @@ class TestEsys(TSS2_EsapiTest):
         nv_index = self.ectx.nv_define_space(None, nv_public)
         self.ectx.nv_write(nv_index, b"hello world")
 
-        value = self.ectx.NV_Read(nv_index, 11)
+        value = self.ectx.nv_read(nv_index, 11)
         self.assertEqual(bytes(value), b"hello world")
 
         public, name = self.ectx.nv_read_public(nv_index)
@@ -1860,7 +1860,7 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.nv_increment(nvhandle)
 
-        data = self.ectx.NV_Read(nvhandle, 8, 0, authHandle=ESYS_TR.RH_OWNER)
+        data = self.ectx.nv_read(nvhandle, 8, 0, auth_handle=ESYS_TR.RH_OWNER)
 
         counter = int.from_bytes(data.buffer, byteorder="big")
         self.assertEqual(counter, 2)
@@ -1901,7 +1901,7 @@ class TestEsys(TSS2_EsapiTest):
         self.ectx.nv_extend(nvhandle, edata, auth_handle=ESYS_TR.RH_OWNER)
         self.ectx.nv_extend(nvhandle, edata)
 
-        data = self.ectx.NV_Read(nvhandle, 32, 0, authHandle=ESYS_TR.RH_OWNER)
+        data = self.ectx.nv_read(nvhandle, 32, 0, auth_handle=ESYS_TR.RH_OWNER)
 
         edigest = b"\x10l\xc9ey]W\x01\xde\x94\x048\xf5\x08\x0fS'h\xbc\x98\xb5\x9bg\xf9g\xa4(\x1d\xc2\x83Z\xef"
         self.assertEqual(edigest, bytes(data))
@@ -1946,7 +1946,7 @@ class TestEsys(TSS2_EsapiTest):
         bits = 0b1011
         self.ectx.nv_set_bits(nvhandle, bits)
 
-        data = self.ectx.NV_Read(nvhandle, 8, 0, authHandle=ESYS_TR.RH_OWNER)
+        data = self.ectx.nv_read(nvhandle, 8, 0, auth_handle=ESYS_TR.RH_OWNER)
 
         b = bits.to_bytes(length=8, byteorder="big")
         self.assertEqual(b, bytes(data))
@@ -2054,7 +2054,7 @@ class TestEsys(TSS2_EsapiTest):
         self.ectx.NV_ReadLock(nvhandle, authHandle=ESYS_TR.RH_OWNER)
         self.ectx.NV_ReadLock(nvhandle)
         with self.assertRaises(TSS2_Exception) as e:
-            self.ectx.NV_Read(nvhandle, 8, authHandle=ESYS_TR.RH_OWNER)
+            self.ectx.nv_read(nvhandle, 8, auth_handle=ESYS_TR.RH_OWNER)
 
         self.assertEqual(e.exception.error, TPM2_RC.NV_LOCKED)
 
@@ -2089,7 +2089,7 @@ class TestEsys(TSS2_EsapiTest):
         nvhandle = self.ectx.nv_define_space(b"first", nvpub)
         self.ectx.nv_write(nvhandle, b"sometest", auth_handle=ESYS_TR.RH_OWNER)
 
-        self.ectx.NV_Read(nvhandle, 8, authHandle=nvhandle)
+        self.ectx.nv_read(nvhandle, 8, auth_handle=nvhandle)
 
         session = self.ectx.start_auth_session(
             ESYS_TR.NONE,
@@ -2104,7 +2104,7 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.NV_ChangeAuth(nvhandle, b"second", session1=session)
 
-        self.ectx.NV_Read(nvhandle, 8, authHandle=nvhandle)
+        self.ectx.nv_read(nvhandle, 8, auth_handle=nvhandle)
 
     def test_NV_Certify(self):
         nvpub = TPM2B_NV_PUBLIC(

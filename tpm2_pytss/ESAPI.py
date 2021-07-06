@@ -3372,21 +3372,21 @@ class ESAPI:
             )
         )
 
-    def NV_Read(
+    def nv_read(
         self,
-        nvIndex,
+        nv_index,
         size,
         offset=0,
-        authHandle=0,
+        auth_handle=0,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        if authHandle == 0:
-            authHandle = nvIndex
-        check_handle_type(nvIndex, "nvIndex")
-        check_handle_type(authHandle, "authHandle")
+        if auth_handle == 0:
+            auth_handle = nv_index
+        check_handle_type(nv_index, "nv_index")
+        check_handle_type(auth_handle, "auth_handle")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
@@ -3394,8 +3394,8 @@ class ESAPI:
         _chkrc(
             lib.Esys_NV_Read(
                 self.ctx,
-                authHandle,
-                nvIndex,
+                auth_handle,
+                nv_index,
                 session1,
                 session2,
                 session3,
