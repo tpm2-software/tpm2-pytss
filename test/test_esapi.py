@@ -3036,27 +3036,27 @@ class TestEsys(TSS2_EsapiTest):
 
     def test_PP_Commands(self):
         with self.assertRaises(TSS2_Exception) as e:
-            self.ectx.PP_Commands(TPML_CC(), TPML_CC(), session1=ESYS_TR.PASSWORD)
+            self.ectx.pp_commands(TPML_CC(), TPML_CC(), session1=ESYS_TR.PASSWORD)
         self.assertEqual(e.exception.error, TPM2_RC.PP)
         self.assertEqual(e.exception.session, 1)
 
         with self.assertRaises(TypeError):
-            self.ectx.PP_Commands(b"bad setList", TPML_CC(), session1=ESYS_TR.PASSWORD)
+            self.ectx.pp_commands(b"bad setList", TPML_CC(), session1=ESYS_TR.PASSWORD)
 
         with self.assertRaises(TypeError):
-            self.ectx.PP_Commands(TPML_CC(), None, session1=ESYS_TR.PASSWORD)
+            self.ectx.pp_commands(TPML_CC(), None, session1=ESYS_TR.PASSWORD)
 
         with self.assertRaises(TypeError):
-            self.ectx.PP_Commands(TPML_CC(), TPML_CC(), session1=b"0xF1F1")
+            self.ectx.pp_commands(TPML_CC(), TPML_CC(), session1=b"0xF1F1")
 
         with self.assertRaises(TypeError):
-            self.ectx.PP_Commands(TPML_CC(), TPML_CC(), session2=b"0xF1F1")
+            self.ectx.pp_commands(TPML_CC(), TPML_CC(), session2=b"0xF1F1")
 
         with self.assertRaises(TypeError):
-            self.ectx.PP_Commands(TPML_CC(), TPML_CC(), session3=b"0xF1F1")
+            self.ectx.pp_commands(TPML_CC(), TPML_CC(), session3=b"0xF1F1")
 
         with self.assertRaises(TypeError):
-            self.ectx.PP_Commands(TPML_CC(), TPML_CC(), authHandle="platform")
+            self.ectx.pp_commands(TPML_CC(), TPML_CC(), authHandle="platform")
 
     def test_SetAlgorithmSet(self):
         self.ectx.SetAlgorithmSet(0)
