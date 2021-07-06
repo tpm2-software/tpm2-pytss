@@ -4321,32 +4321,32 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
 
-        self.ectx.PolicyNameHash(session, b"01234567890ABCDEF012345689ABCDEF")
+        self.ectx.policy_name_hash(session, b"01234567890ABCDEF012345689ABCDEF")
 
         self.ectx.policy_restart(session)
 
-        self.ectx.PolicyNameHash(
+        self.ectx.policy_name_hash(
             session, TPM2B_DIGEST(b"ABCDEF01234567890ABCDEF012345689")
         )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyNameHash(42.2, b"01234567890ABCDEF012345689ABCDEF")
+            self.ectx.policy_name_hash(42.2, b"01234567890ABCDEF012345689ABCDEF")
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyNameHash(session, TPM2B_ATTEST())
+            self.ectx.policy_name_hash(session, TPM2B_ATTEST())
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyNameHash(
+            self.ectx.policy_name_hash(
                 session, b"01234567890ABCDEF012345689ABCDEF", session1="foo"
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyNameHash(
+            self.ectx.policy_name_hash(
                 session, b"01234567890ABCDEF012345689ABCDEF", session2=object()
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyNameHash(
+            self.ectx.policy_name_hash(
                 session, b"01234567890ABCDEF012345689ABCDEF", session3=45.6
             )
 
