@@ -3077,27 +3077,27 @@ class TestEsys(TSS2_EsapiTest):
             self.ectx.SetAlgorithmSet(authHandle=None)
 
     def test_DictionaryAttackLockReset(self):
-        self.ectx.DictionaryAttackLockReset()
+        self.ectx.dictionary_attack_lock_reset()
 
         with self.assertRaises(TSS2_Exception) as e:
-            self.ectx.DictionaryAttackLockReset(lockHandle=ESYS_TR.RH_OWNER)
+            self.ectx.dictionary_attack_lock_reset(lock_handle=ESYS_TR.RH_OWNER)
         self.assertEqual(e.exception.error, 132)
         self.assertEqual(e.exception.handle, 1)
 
         with self.assertRaises(TypeError):
-            self.ectx.DictionaryAttackLockReset([1, 2, 3])
+            self.ectx.dictionary_attack_lock_reset([1, 2, 3])
 
         with self.assertRaises(TypeError):
-            self.ectx.DictionaryAttackLockReset(session2=set(3, 2, 1))
+            self.ectx.dictionary_attack_lock_reset(session2=set(3, 2, 1))
 
         with self.assertRaises(TypeError):
-            self.ectx.DictionaryAttackLockReset(session1=set(4, 3, 2))
+            self.ectx.dictionary_attack_lock_reset(session1=set(4, 3, 2))
 
         with self.assertRaises(TypeError):
-            self.ectx.DictionaryAttackLockReset(session3=set(5, 4, 3))
+            self.ectx.dictionary_attack_lock_reset(session3=set(5, 4, 3))
 
         with self.assertRaises(TypeError):
-            self.ectx.DictionaryAttackLockReset(lockHandle=None)
+            self.ectx.dictionary_attack_lock_reset(lock_handle=None)
 
     def test_DictionaryAttackParameters(self):
         self.ectx.DictionaryAttackParameters(1, 2, 3)

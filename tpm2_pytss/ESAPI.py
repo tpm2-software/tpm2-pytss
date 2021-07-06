@@ -2828,21 +2828,21 @@ class ESAPI:
             )
         )
 
-    def DictionaryAttackLockReset(
+    def dictionary_attack_lock_reset(
         self,
-        lockHandle=ESYS_TR.RH_LOCKOUT,
+        lock_handle=ESYS_TR.RH_LOCKOUT,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(lockHandle, "lockHandle")
+        check_handle_type(lock_handle, "lock_handle")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
         _chkrc(
             lib.Esys_DictionaryAttackLockReset(
-                self.ctx, lockHandle, session1, session2, session3
+                self.ctx, lock_handle, session1, session2, session3
             )
         )
 
