@@ -157,7 +157,7 @@ class TestEsys(TSS2_EsapiTest):
         )
 
         # No password NV index
-        nv_index = self.ectx.NV_DefineSpace(None, nv_public)
+        nv_index = self.ectx.nv_define_space(None, nv_public)
         self.ectx.NV_Write(nv_index, b"hello world")
 
         value = self.ectx.NV_Read(nv_index, 11)
@@ -1803,7 +1803,9 @@ class TestEsys(TSS2_EsapiTest):
             )
         )
 
-        nvhandle = self.ectx.NV_DefineSpace(b"", nvpub, authHandle=ESYS_TR.RH_PLATFORM)
+        nvhandle = self.ectx.nv_define_space(
+            b"", nvpub, auth_handle=ESYS_TR.RH_PLATFORM
+        )
 
         session = self.ectx.start_auth_session(
             ESYS_TR.NONE,
@@ -1831,7 +1833,7 @@ class TestEsys(TSS2_EsapiTest):
             )
         )
 
-        nvhandle = self.ectx.NV_DefineSpace(b"", nvpub)
+        nvhandle = self.ectx.nv_define_space(b"", nvpub)
 
         pubout, name = self.ectx.NV_ReadPublic(nvhandle)
 
@@ -1852,7 +1854,7 @@ class TestEsys(TSS2_EsapiTest):
             )
         )
 
-        nvhandle = self.ectx.NV_DefineSpace(b"", nvpub)
+        nvhandle = self.ectx.nv_define_space(b"", nvpub)
 
         self.ectx.NV_Increment(nvhandle, authHandle=ESYS_TR.RH_OWNER)
 
@@ -1893,7 +1895,7 @@ class TestEsys(TSS2_EsapiTest):
             )
         )
 
-        nvhandle = self.ectx.NV_DefineSpace(b"", nvpub)
+        nvhandle = self.ectx.nv_define_space(b"", nvpub)
 
         edata = b"\xFF" * 32
         self.ectx.NV_Extend(nvhandle, edata, authHandle=ESYS_TR.RH_OWNER)
@@ -1937,7 +1939,7 @@ class TestEsys(TSS2_EsapiTest):
             )
         )
 
-        nvhandle = self.ectx.NV_DefineSpace(b"", nvpub)
+        nvhandle = self.ectx.nv_define_space(b"", nvpub)
 
         bits = 0b1010
         self.ectx.NV_SetBits(nvhandle, bits, authHandle=ESYS_TR.RH_OWNER)
@@ -1982,7 +1984,7 @@ class TestEsys(TSS2_EsapiTest):
             )
         )
 
-        nvhandle = self.ectx.NV_DefineSpace(b"", nvpub)
+        nvhandle = self.ectx.nv_define_space(b"", nvpub)
 
         self.ectx.NV_WriteLock(nvhandle, authHandle=ESYS_TR.RH_OWNER)
         self.ectx.NV_WriteLock(nvhandle)
@@ -2019,7 +2021,7 @@ class TestEsys(TSS2_EsapiTest):
             )
         )
 
-        nvhandle = self.ectx.NV_DefineSpace(b"", nvpub)
+        nvhandle = self.ectx.nv_define_space(b"", nvpub)
 
         self.ectx.NV_GlobalWriteLock()
 
@@ -2044,7 +2046,7 @@ class TestEsys(TSS2_EsapiTest):
             )
         )
 
-        nvhandle = self.ectx.NV_DefineSpace(b"", nvpub)
+        nvhandle = self.ectx.nv_define_space(b"", nvpub)
 
         indata = b"12345678"
         self.ectx.NV_Write(nvhandle, indata, authHandle=ESYS_TR.RH_OWNER)
@@ -2084,7 +2086,7 @@ class TestEsys(TSS2_EsapiTest):
             )
         )
 
-        nvhandle = self.ectx.NV_DefineSpace(b"first", nvpub)
+        nvhandle = self.ectx.nv_define_space(b"first", nvpub)
         self.ectx.NV_Write(nvhandle, b"sometest", authHandle=ESYS_TR.RH_OWNER)
 
         self.ectx.NV_Read(nvhandle, 8, authHandle=nvhandle)
@@ -2118,7 +2120,7 @@ class TestEsys(TSS2_EsapiTest):
             )
         )
 
-        nvhandle = self.ectx.NV_DefineSpace(b"", nvpub)
+        nvhandle = self.ectx.nv_define_space(b"", nvpub)
         self.ectx.NV_Write(nvhandle, b"sometest", authHandle=ESYS_TR.RH_OWNER)
 
         inPublic = TPM2B_PUBLIC(
@@ -4135,7 +4137,7 @@ class TestEsys(TSS2_EsapiTest):
             )
         )
 
-        nvhandle = self.ectx.NV_DefineSpace(b"", nvpub)
+        nvhandle = self.ectx.nv_define_space(b"", nvpub)
 
         self.ectx.policy_nv(ESYS_TR.OWNER, nvhandle, session, b"12345678", TPM2_EO.EQ)
 
@@ -4638,7 +4640,7 @@ class TestEsys(TSS2_EsapiTest):
         )
 
         # No password NV index
-        nv_index = self.ectx.NV_DefineSpace(None, nv_public)
+        nv_index = self.ectx.nv_define_space(None, nv_public)
 
         sym = TPMT_SYM_DEF(TPM2_ALG.NULL)
 

@@ -324,7 +324,7 @@ class CryptoTest(TSS2_EsapiTest):
         oname = nv.getName()
         nv2b = TPM2B_NV_PUBLIC(nvPublic=nv)
 
-        handle = self.ectx.NV_DefineSpace(b"1234", nv2b)
+        handle = self.ectx.nv_define_space(b"1234", nv2b)
 
         ename = self.ectx.tr_get_name(handle)
 
