@@ -3806,23 +3806,23 @@ class TestEsys(TSS2_EsapiTest):
             self.ectx.clear(auth_handle=ESYS_TR.RH_OWNER)
 
     def test_clearcontrol(self):
-        self.ectx.ClearControl(ESYS_TR.RH_LOCKOUT, True)
-        self.ectx.ClearControl(ESYS_TR.RH_PLATFORM, False)
+        self.ectx.clear_control(ESYS_TR.RH_LOCKOUT, True)
+        self.ectx.clear_control(ESYS_TR.RH_PLATFORM, False)
 
         with self.assertRaises(TypeError):
-            self.ectx.ClearControl(ESYS_TR.RH_LOCKOUT, True, session1=None)
+            self.ectx.clear_control(ESYS_TR.RH_LOCKOUT, True, session1=None)
 
         with self.assertRaises(TypeError):
-            self.ectx.ClearControl(ESYS_TR.RH_LOCKOUT, True, session2=None)
+            self.ectx.clear_control(ESYS_TR.RH_LOCKOUT, True, session2=None)
 
         with self.assertRaises(TypeError):
-            self.ectx.ClearControl(ESYS_TR.RH_LOCKOUT, True, session3=None)
+            self.ectx.clear_control(ESYS_TR.RH_LOCKOUT, True, session3=None)
 
         with self.assertRaises(ValueError):
-            self.ectx.ClearControl(ESYS_TR.RH_OWNER, False)
+            self.ectx.clear_control(ESYS_TR.RH_OWNER, False)
 
         with self.assertRaises(TypeError):
-            self.ectx.ClearControl(ESYS_TR.RH_LOCKOUT, b"bad")
+            self.ectx.clear_control(ESYS_TR.RH_LOCKOUT, b"bad")
 
     def test_gettcti(self):
         tcti = self.ectx.GetTcti()

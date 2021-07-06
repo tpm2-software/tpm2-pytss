@@ -2787,7 +2787,7 @@ class ESAPI:
 
         _chkrc(lib.Esys_Clear(self.ctx, auth_handle, session1, session2, session3))
 
-    def ClearControl(
+    def clear_control(
         self,
         auth,
         disable,
