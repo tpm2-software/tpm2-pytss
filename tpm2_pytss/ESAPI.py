@@ -2991,10 +2991,10 @@ class ESAPI:
         )
         return TPM2B_MAX_BUFFER(get_ptr(fuData))
 
-    def ContextSave(self, saveHandle):
-        check_handle_type(saveHandle, "saveHandle")
+    def context_save(self, save_handle):
+        check_handle_type(save_handle, "save_handle")
         context = ffi.new("TPMS_CONTEXT **")
-        _chkrc(lib.Esys_ContextSave(self.ctx, saveHandle, context))
+        _chkrc(lib.Esys_ContextSave(self.ctx, save_handle, context))
         return TPMS_CONTEXT(get_ptr(context))
 
     def ContextLoad(self, context):
