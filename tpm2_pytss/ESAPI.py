@@ -2302,16 +2302,16 @@ class ESAPI:
             )
         )
 
-    def PolicyCommandCode(
+    def policy_command_code(
         self,
-        policySession,
+        policy_session,
         code,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(policySession, "policySession")
+        check_handle_type(policy_session, "policy_session")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
@@ -2319,7 +2319,7 @@ class ESAPI:
 
         _chkrc(
             lib.Esys_PolicyCommandCode(
-                self.ctx, policySession, session1, session2, session3, code
+                self.ctx, policy_session, session1, session2, session3, code
             )
         )
 
