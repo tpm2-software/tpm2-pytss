@@ -3129,27 +3129,27 @@ class ESAPI:
             lib.Esys_TestParms(self.ctx, session1, session2, session3, parameters_cdata)
         )
 
-    def NV_DefineSpace(
+    def nv_define_space(
         self,
         auth,
-        publicInfo,
-        authHandle=ESYS_TR.OWNER,
+        public_info,
+        auth_handle=ESYS_TR.OWNER,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(authHandle, "authHandle")
+        check_handle_type(auth_handle, "auth_handle")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
         auth_cdata = get_cdata(auth, TPM2B_AUTH, "auth", allow_none=True)
-        publicInfo_cdata = get_cdata(publicInfo, TPM2B_NV_PUBLIC, "publicInfo")
+        publicInfo_cdata = get_cdata(public_info, TPM2B_NV_PUBLIC, "public_info")
         nvHandle = ffi.new("ESYS_TR *")
         _chkrc(
             lib.Esys_NV_DefineSpace(
                 self.ctx,
-                authHandle,
+                auth_handle,
                 session1,
                 session2,
                 session3,
