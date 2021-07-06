@@ -2410,7 +2410,7 @@ class TestEsys(TSS2_EsapiTest):
 
     def test_FirmwareRead(self):
         with self.assertRaises(TSS2_Exception) as e:
-            self.ectx.FirmwareRead(0)
+            self.ectx.firmware_read(0)
         self.assertEqual(e.exception.error, TPM2_RC.COMMAND_CODE)
 
     def test_shutdown_no_arg(self):

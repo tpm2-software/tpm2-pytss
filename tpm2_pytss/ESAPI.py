@@ -2975,9 +2975,9 @@ class ESAPI:
         )
         return (TPMT_HA(get_ptr(nextDigest)), TPMT_HA(get_ptr(firstDigest)))
 
-    def FirmwareRead(
+    def firmware_read(
         self,
-        sequenceNumber,
+        sequence_number,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
@@ -2986,7 +2986,7 @@ class ESAPI:
         fuData = ffi.new("TPM2B_MAX_BUFFER **")
         _chkrc(
             lib.Esys_FirmwareRead(
-                self.ctx, session1, session2, session3, sequenceNumber, fuData
+                self.ctx, session1, session2, session3, sequence_number, fuData
             )
         )
         return TPM2B_MAX_BUFFER(get_ptr(fuData))
