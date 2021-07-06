@@ -4363,19 +4363,19 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
 
-        self.ectx.PolicyDuplicationSelect(
+        self.ectx.policy_duplication_select(
             session,
             b"0123456789ABCDEF0123456789ABCDEF",
             b"0123456789ABCDEF0123456789ABCDEF",
         )
         self.ectx.policy_restart(session)
-        self.ectx.PolicyDuplicationSelect(
+        self.ectx.policy_duplication_select(
             session,
             TPM2B_NAME(b"0123456789ABCDEF0123456789ABCDEF"),
             TPM2B_NAME(b"0123456789ABCDEF0123456789ABCDEF"),
         )
         self.ectx.policy_restart(session)
-        self.ectx.PolicyDuplicationSelect(
+        self.ectx.policy_duplication_select(
             session,
             TPM2B_NAME(b"0123456789ABCDEF0123456789ABCDEF"),
             b"0123456789ABCDEF0123456789ABCDEF",
@@ -4383,24 +4383,24 @@ class TestEsys(TSS2_EsapiTest):
         )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyDuplicationSelect(
+            self.ectx.policy_duplication_select(
                 42.2,
                 b"0123456789ABCDEF0123456789ABCDEF",
                 b"0123456789ABCDEF0123456789ABCDEF",
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyDuplicationSelect(
+            self.ectx.policy_duplication_select(
                 session, TPM2B_ATTEST(), b"0123456789ABCDEF0123456789ABCDEF"
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyDuplicationSelect(
+            self.ectx.policy_duplication_select(
                 session, b"0123456789ABCDEF0123456789ABCDEF", object()
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyDuplicationSelect(
+            self.ectx.policy_duplication_select(
                 session,
                 b"0123456789ABCDEF0123456789ABCDEF",
                 b"0123456789ABCDEF0123456789ABCDEF",
@@ -4408,7 +4408,7 @@ class TestEsys(TSS2_EsapiTest):
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyDuplicationSelect(
+            self.ectx.policy_duplication_select(
                 session,
                 b"0123456789ABCDEF0123456789ABCDEF",
                 b"0123456789ABCDEF0123456789ABCDEF",
@@ -4416,7 +4416,7 @@ class TestEsys(TSS2_EsapiTest):
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyDuplicationSelect(
+            self.ectx.policy_duplication_select(
                 session,
                 b"0123456789ABCDEF0123456789ABCDEF",
                 b"0123456789ABCDEF0123456789ABCDEF",
@@ -4424,7 +4424,7 @@ class TestEsys(TSS2_EsapiTest):
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyDuplicationSelect(
+            self.ectx.policy_duplication_select(
                 session,
                 b"0123456789ABCDEF0123456789ABCDEF",
                 b"0123456789ABCDEF0123456789ABCDEF",
