@@ -51,7 +51,7 @@ class TestEsys(TSS2_EsapiTest):
         inPublic.publicArea.parameters.eccDetail.kdf.scheme = TPM2_ALG.NULL
         inPublic.publicArea.parameters.eccDetail.curveID = TPM2_ECC.NIST_P256
 
-        handle, public, creation_data, digest, ticket = self.ectx.CreatePrimary(
+        handle, public, creation_data, digest, ticket = self.ectx.create_primary(
             inSensitive, inPublic, ESYS_TR.OWNER, outsideInfo, creationPCR,
         )
         self.assertNotEqual(handle, 0)
@@ -61,31 +61,31 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(type(ticket), TPMT_TK_CREATION)
         self.ectx.FlushContext(handle)
 
-        handle, _, _, _, _ = self.ectx.CreatePrimary(inSensitive,)
+        handle, _, _, _, _ = self.ectx.create_primary(inSensitive,)
         self.assertNotEqual(handle, 0)
         self.ectx.FlushContext(handle)
 
-        handle, _, _, _, _ = self.ectx.CreatePrimary(inSensitive, inPublic)
+        handle, _, _, _, _ = self.ectx.create_primary(inSensitive, inPublic)
         self.assertNotEqual(handle, 0)
         self.ectx.FlushContext(handle)
 
-        handle, _, _, _, _ = self.ectx.CreatePrimary(inSensitive, "ecc256")
+        handle, _, _, _, _ = self.ectx.create_primary(inSensitive, "ecc256")
         self.assertNotEqual(handle, 0)
         self.ectx.FlushContext(handle)
 
-        handle, _, _, _, _ = self.ectx.CreatePrimary(
-            inSensitive, "ecc256", creationPCR="sha256:4,6,7"
+        handle, _, _, _, _ = self.ectx.create_primary(
+            inSensitive, "ecc256", creation_pcr="sha256:4,6,7"
         )
         self.assertNotEqual(handle, 0)
         self.ectx.FlushContext(handle)
 
         with self.assertRaises(TypeError):
-            self.ectx.CreatePrimary(
+            self.ectx.create_primary(
                 TPM2B_DATA, inPublic, ESYS_TR.OWNER, outsideInfo, creationPCR,
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.CreatePrimary(
+            self.ectx.create_primary(
                 inSensitive,
                 b"should not work",
                 ESYS_TR.OWNER,
@@ -94,32 +94,32 @@ class TestEsys(TSS2_EsapiTest):
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.CreatePrimary(
+            self.ectx.create_primary(
                 inSensitive, inPublic, object(), outsideInfo, creationPCR,
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.CreatePrimary(
+            self.ectx.create_primary(
                 inSensitive, inPublic, ESYS_TR.OWNER, object(), creationPCR,
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.CreatePrimary(
+            self.ectx.create_primary(
                 inSensitive, inPublic, ESYS_TR.OWNER, outsideInfo, TPM2B_SENSITIVE(),
             )
 
         with self.assertRaises(TypeError):
-            handle, _, _, _, _ = self.ectx.CreatePrimary(
+            handle, _, _, _, _ = self.ectx.create_primary(
                 inSensitive, "ecc256", session1=object()
             )
 
         with self.assertRaises(TypeError):
-            handle, _, _, _, _ = self.ectx.CreatePrimary(
+            handle, _, _, _, _ = self.ectx.create_primary(
                 inSensitive, "ecc256", session2=object()
             )
 
         with self.assertRaises(TypeError):
-            handle, _, _, _, _ = self.ectx.CreatePrimary(
+            handle, _, _, _, _ = self.ectx.create_primary(
                 inSensitive, "ecc256", session3=object()
             )
 
@@ -315,7 +315,7 @@ class TestEsys(TSS2_EsapiTest):
 
         inSensitive = TPM2B_SENSITIVE_CREATE()
 
-        handle, _, _, _, _ = self.ectx.CreatePrimary(inSensitive, "rsa2048:aes128cfb")
+        handle, _, _, _, _ = self.ectx.create_primary(inSensitive, "rsa2048:aes128cfb")
 
         sym = TPMT_SYM_DEF(
             algorithm=TPM2_ALG.XOR,
@@ -345,7 +345,7 @@ class TestEsys(TSS2_EsapiTest):
             TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
         )
 
-        handle, _, _, _, _ = self.ectx.CreatePrimary(inSensitive, "rsa2048:aes128cfb")
+        handle, _, _, _, _ = self.ectx.create_primary(inSensitive, "rsa2048:aes128cfb")
 
         sym = TPMT_SYM_DEF(
             algorithm=TPM2_ALG.XOR,
@@ -375,7 +375,7 @@ class TestEsys(TSS2_EsapiTest):
             TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
         )
 
-        handle, _, _, _, _ = self.ectx.CreatePrimary(inSensitive, "rsa2048:aes128cfb")
+        handle, _, _, _, _ = self.ectx.create_primary(inSensitive, "rsa2048:aes128cfb")
 
         sym = TPMT_SYM_DEF(
             algorithm=TPM2_ALG.XOR,
@@ -413,7 +413,7 @@ class TestEsys(TSS2_EsapiTest):
             TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
         )
 
-        handle, _, _, _, _ = self.ectx.CreatePrimary(inSensitive, "rsa2048:aes128cfb")
+        handle, _, _, _, _ = self.ectx.create_primary(inSensitive, "rsa2048:aes128cfb")
 
         sym = TPMT_SYM_DEF(
             algorithm=TPM2_ALG.XOR,
@@ -461,7 +461,7 @@ class TestEsys(TSS2_EsapiTest):
             TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
         )
 
-        parentHandle, _, _, _, _ = self.ectx.CreatePrimary(
+        parentHandle, _, _, _, _ = self.ectx.create_primary(
             inSensitive, "rsa2048:aes128cfb"
         )
 
@@ -532,7 +532,7 @@ class TestEsys(TSS2_EsapiTest):
             TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
         )
 
-        parentHandle, _, _, _, _ = self.ectx.CreatePrimary(
+        parentHandle, _, _, _, _ = self.ectx.create_primary(
             inSensitive, "rsa2048:aes128cfb"
         )
 
@@ -560,7 +560,7 @@ class TestEsys(TSS2_EsapiTest):
             TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
         )
 
-        parentHandle, _, _, _, _ = self.ectx.CreatePrimary(
+        parentHandle, _, _, _, _ = self.ectx.create_primary(
             inSensitive, "rsa2048:aes128cfb"
         )
 
@@ -607,7 +607,7 @@ class TestEsys(TSS2_EsapiTest):
             TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
         )
 
-        parentHandle, _, _, _, _ = self.ectx.CreatePrimary(
+        parentHandle, _, _, _, _ = self.ectx.create_primary(
             inSensitive, "rsa2048:aes128cfb"
         )
 
@@ -678,7 +678,7 @@ class TestEsys(TSS2_EsapiTest):
             TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
         )
 
-        parentHandle, _, _, _, _ = self.ectx.CreatePrimary(
+        parentHandle, _, _, _, _ = self.ectx.create_primary(
             inSensitive, "rsa2048:aes128cfb"
         )
 
@@ -755,7 +755,7 @@ class TestEsys(TSS2_EsapiTest):
             TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
         )
 
-        parentHandle, _, _, _, _ = self.ectx.CreatePrimary(
+        parentHandle, _, _, _, _ = self.ectx.create_primary(
             inSensitive, "rsa2048:aes128cfb"
         )
 
@@ -807,7 +807,7 @@ class TestEsys(TSS2_EsapiTest):
             TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
         )
 
-        parentHandle, _, _, _, _ = self.ectx.CreatePrimary(
+        parentHandle, _, _, _, _ = self.ectx.create_primary(
             inSensitive, "rsa2048:aes128cfb"
         )
 
@@ -858,7 +858,7 @@ class TestEsys(TSS2_EsapiTest):
             TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
         )
 
-        parentHandle, _, _, _, _ = self.ectx.CreatePrimary(
+        parentHandle, _, _, _, _ = self.ectx.create_primary(
             inSensitive, "rsa2048:aes128cfb"
         )
 
@@ -906,7 +906,7 @@ class TestEsys(TSS2_EsapiTest):
             TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
         )
 
-        parentHandle, _, _, _, _ = self.ectx.CreatePrimary(
+        parentHandle, _, _, _, _ = self.ectx.create_primary(
             inSensitive, "rsa2048:aes128cfb"
         )
 
@@ -980,7 +980,7 @@ class TestEsys(TSS2_EsapiTest):
             TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
         )
 
-        parentHandle, _, _, _, _ = self.ectx.CreatePrimary(
+        parentHandle, _, _, _, _ = self.ectx.create_primary(
             inSensitive, "rsa2048:aes128cfb"
         )
 
@@ -1012,7 +1012,7 @@ class TestEsys(TSS2_EsapiTest):
 
         inSensitive = TPM2B_SENSITIVE_CREATE()
 
-        parentHandle, _, _, _, _ = self.ectx.CreatePrimary(
+        parentHandle, _, _, _, _ = self.ectx.create_primary(
             inSensitive, "ecc256:aes128cfb"
         )
 
@@ -1045,7 +1045,7 @@ class TestEsys(TSS2_EsapiTest):
         inPublic = TPM2B_PUBLIC(TPMT_PUBLIC.parse(alg=alg, objectAttributes=attrs))
         inSensitive = TPM2B_SENSITIVE_CREATE(TPMS_SENSITIVE_CREATE())
 
-        parentHandle, _, _, _, _ = self.ectx.CreatePrimary(inSensitive, inPublic)
+        parentHandle, _, _, _, _ = self.ectx.create_primary(inSensitive, inPublic)
 
         inPoint = TPM2B_ECC_POINT(
             TPMS_ECC_POINT(
@@ -1109,7 +1109,7 @@ class TestEsys(TSS2_EsapiTest):
         inPublic = TPM2B_PUBLIC(TPMT_PUBLIC.parse(alg=alg, objectAttributes=attrs))
         inSensitive = TPM2B_SENSITIVE_CREATE(TPMS_SENSITIVE_CREATE())
 
-        eccHandle, outPublic, _, _, _ = self.ectx.CreatePrimary(inSensitive, inPublic)
+        eccHandle, outPublic, _, _, _ = self.ectx.create_primary(inSensitive, inPublic)
 
         curveId = TPM2_ECC.NIST_P256
 
@@ -1157,7 +1157,7 @@ class TestEsys(TSS2_EsapiTest):
     def test_EncryptDecrypt(self):
 
         inSensitive = TPM2B_SENSITIVE_CREATE()
-        parentHandle = self.ectx.CreatePrimary(inSensitive, "ecc")[0]
+        parentHandle = self.ectx.create_primary(inSensitive, "ecc")[0]
 
         inPublic = TPM2B_TEMPLATE(TPMT_PUBLIC.parse(alg="aes").Marshal())
         aesKeyHandle = self.ectx.create_loaded(parentHandle, inSensitive, inPublic)[0]
@@ -1234,7 +1234,7 @@ class TestEsys(TSS2_EsapiTest):
     def test_EncryptDecrypt2(self):
 
         inSensitive = TPM2B_SENSITIVE_CREATE()
-        parentHandle = self.ectx.CreatePrimary(inSensitive, "ecc")[0]
+        parentHandle = self.ectx.create_primary(inSensitive, "ecc")[0]
 
         inPublic = TPM2B_TEMPLATE(TPMT_PUBLIC.parse(alg="aes").Marshal())
         aesKeyHandle = self.ectx.create_loaded(parentHandle, inSensitive, inPublic)[0]
@@ -1383,7 +1383,7 @@ class TestEsys(TSS2_EsapiTest):
 
         inSensitive = TPM2B_SENSITIVE_CREATE(TPMS_SENSITIVE_CREATE())
 
-        primaryHandle = self.ectx.CreatePrimary(inSensitive, inPublic)[0]
+        primaryHandle = self.ectx.create_primary(inSensitive, inPublic)[0]
 
         # Test bytes
         hmac = self.ectx.hmac(primaryHandle, b"1234", TPM2_ALG.SHA256)
@@ -1455,7 +1455,7 @@ class TestEsys(TSS2_EsapiTest):
 
         inSensitive = TPM2B_SENSITIVE_CREATE(TPMS_SENSITIVE_CREATE())
 
-        handle = self.ectx.CreatePrimary(inSensitive, inPublic)[0]
+        handle = self.ectx.create_primary(inSensitive, inPublic)[0]
 
         seqHandle = self.ectx.hmac_start(handle, None, TPM2_ALG.SHA256)
         self.assertNotEqual(seqHandle, 0)
@@ -1664,7 +1664,7 @@ class TestEsys(TSS2_EsapiTest):
         )
         inSensitive = TPM2B_SENSITIVE_CREATE()
 
-        handle, outpub, _, _, _ = self.ectx.CreatePrimary(inSensitive, inPublic)
+        handle, outpub, _, _, _ = self.ectx.create_primary(inSensitive, inPublic)
 
         ctx = self.ectx.ContextSave(handle)
 
@@ -1686,7 +1686,7 @@ class TestEsys(TSS2_EsapiTest):
         )
         inSensitive = TPM2B_SENSITIVE_CREATE()
 
-        handle, _, _, _, _ = self.ectx.CreatePrimary(inSensitive, inPublic)
+        handle, _, _, _, _ = self.ectx.create_primary(inSensitive, inPublic)
 
         self.ectx.FlushContext(handle)
         with self.assertRaises(TSS2_Exception) as e:
@@ -1706,7 +1706,7 @@ class TestEsys(TSS2_EsapiTest):
         )
         inSensitive = TPM2B_SENSITIVE_CREATE()
 
-        handle, _, _, _, _ = self.ectx.CreatePrimary(inSensitive, inPublic)
+        handle, _, _, _, _ = self.ectx.create_primary(inSensitive, inPublic)
 
         self.ectx.EvictControl(
             ESYS_TR.OWNER, handle, 0x81000081, session1=ESYS_TR.PASSWORD
@@ -2133,7 +2133,7 @@ class TestEsys(TSS2_EsapiTest):
         )
         inSensitive = TPM2B_SENSITIVE_CREATE()
 
-        eccHandle, signPub, _, _, _ = self.ectx.CreatePrimary(inSensitive, inPublic)
+        eccHandle, signPub, _, _, _ = self.ectx.create_primary(inSensitive, inPublic)
 
         qualifyingData = TPM2B_DATA(b"qdata")
         inScheme = TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL)
@@ -2212,7 +2212,7 @@ class TestEsys(TSS2_EsapiTest):
         )
         inSensitive = TPM2B_SENSITIVE_CREATE()
 
-        eccHandle = self.ectx.CreatePrimary(inSensitive, inPublic)[0]
+        eccHandle = self.ectx.create_primary(inSensitive, inPublic)[0]
 
         qualifyingData = TPM2B_DATA()
         inScheme = TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL)
@@ -2278,7 +2278,7 @@ class TestEsys(TSS2_EsapiTest):
         )
         inSensitive = TPM2B_SENSITIVE_CREATE()
 
-        eccHandle, _, _, creationHash, creationTicket = self.ectx.CreatePrimary(
+        eccHandle, _, _, creationHash, creationTicket = self.ectx.create_primary(
             inSensitive, inPublic
         )
 
@@ -2391,7 +2391,7 @@ class TestEsys(TSS2_EsapiTest):
         )
         inSensitive = TPM2B_SENSITIVE_CREATE()
 
-        keyhandle, _, _, _, _ = self.ectx.CreatePrimary(inSensitive, inPublic)
+        keyhandle, _, _, _, _ = self.ectx.create_primary(inSensitive, inPublic)
 
         with self.assertRaises(TSS2_Exception) as e:
             self.ectx.FieldUpgradeStart(
@@ -2506,9 +2506,9 @@ class TestEsys(TSS2_EsapiTest):
 
         inSensitive = TPM2B_SENSITIVE_CREATE()
 
-        primary1, _, _, _, _ = self.ectx.CreatePrimary(inSensitive, inPublic,)
+        primary1, _, _, _, _ = self.ectx.create_primary(inSensitive, inPublic,)
 
-        primary2, _, _, _, _ = self.ectx.CreatePrimary(inSensitive, inPublic)
+        primary2, _, _, _, _ = self.ectx.create_primary(inSensitive, inPublic)
 
         inPublic = TPM2B_PUBLIC(
             TPMT_PUBLIC.parse(
@@ -2705,9 +2705,9 @@ class TestEsys(TSS2_EsapiTest):
 
         inSensitive = TPM2B_SENSITIVE_CREATE()
 
-        primary1, _, _, _, _ = self.ectx.CreatePrimary(inSensitive, inPublic)
+        primary1, _, _, _, _ = self.ectx.create_primary(inSensitive, inPublic)
 
-        primary2, _, _, _, _ = self.ectx.CreatePrimary(inSensitive, inPublic)
+        primary2, _, _, _, _ = self.ectx.create_primary(inSensitive, inPublic)
 
         inPublic = TPM2B_PUBLIC(
             TPMT_PUBLIC.parse(
@@ -2819,9 +2819,9 @@ class TestEsys(TSS2_EsapiTest):
 
         inSensitive = TPM2B_SENSITIVE_CREATE()
 
-        primary1, _, _, _, _ = self.ectx.CreatePrimary(inSensitive, inPublic)
+        primary1, _, _, _, _ = self.ectx.create_primary(inSensitive, inPublic)
 
-        primary2, _, _, _, _ = self.ectx.CreatePrimary(inSensitive, inPublic)
+        primary2, _, _, _, _ = self.ectx.create_primary(inSensitive, inPublic)
 
         inPublic = TPM2B_PUBLIC(
             TPMT_PUBLIC.parse(
@@ -2914,7 +2914,7 @@ class TestEsys(TSS2_EsapiTest):
 
         inSensitive = TPM2B_SENSITIVE_CREATE(TPMS_SENSITIVE_CREATE())
 
-        parentHandle = self.ectx.CreatePrimary(inSensitive, inPublic)[0]
+        parentHandle = self.ectx.create_primary(inSensitive, inPublic)[0]
 
         quote, signature = self.ectx.quote(
             parentHandle, "sha256:1,2,3,4", TPM2B_DATA(b"123456789")
@@ -2973,7 +2973,7 @@ class TestEsys(TSS2_EsapiTest):
         )
         inSensitive = TPM2B_SENSITIVE_CREATE(TPMS_SENSITIVE_CREATE())
 
-        signHandle = self.ectx.CreatePrimary(inSensitive, inPublic)[0]
+        signHandle = self.ectx.create_primary(inSensitive, inPublic)[0]
 
         sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL,)
 
@@ -3137,7 +3137,7 @@ class TestEsys(TSS2_EsapiTest):
             )
         )
 
-        signHandle = self.ectx.CreatePrimary(TPM2B_SENSITIVE_CREATE(), inPublic)[0]
+        signHandle = self.ectx.create_primary(TPM2B_SENSITIVE_CREATE(), inPublic)[0]
 
         sym = TPMT_SYM_DEF(
             algorithm=TPM2_ALG.XOR,
@@ -3204,7 +3204,7 @@ class TestEsys(TSS2_EsapiTest):
         )
         inSensitive = TPM2B_SENSITIVE_CREATE(TPMS_SENSITIVE_CREATE())
 
-        signHandle = self.ectx.CreatePrimary(inSensitive, inPublic)[0]
+        signHandle = self.ectx.create_primary(inSensitive, inPublic)[0]
 
         auditInfo, signature = self.ectx.get_time(signHandle, b"12345678")
         self.assertTrue(type(auditInfo), TPM2B_ATTEST)
@@ -3255,7 +3255,7 @@ class TestEsys(TSS2_EsapiTest):
             ),
         )
 
-        signHandle = self.ectx.CreatePrimary(TPM2B_SENSITIVE_CREATE(), p)[0]
+        signHandle = self.ectx.create_primary(TPM2B_SENSITIVE_CREATE(), p)[0]
 
         P1 = TPM2B_ECC_POINT()
         s2 = TPM2B_SENSITIVE_DATA()
@@ -3289,7 +3289,7 @@ class TestEsys(TSS2_EsapiTest):
 
     def test_Sign(self):
 
-        sign_handle = self.ectx.CreatePrimary(
+        sign_handle = self.ectx.create_primary(
             TPM2B_SENSITIVE_CREATE(),
             TPM2B_PUBLIC.parse(
                 "rsa",
@@ -3337,7 +3337,7 @@ class TestEsys(TSS2_EsapiTest):
 
     def test_VerifySignature(self):
 
-        sign_handle = self.ectx.CreatePrimary(
+        sign_handle = self.ectx.create_primary(
             TPM2B_SENSITIVE_CREATE(),
             TPM2B_PUBLIC.parse(
                 "rsa",
@@ -3592,7 +3592,7 @@ class TestEsys(TSS2_EsapiTest):
 
     def test_PolicySigned(self):
 
-        handle = self.ectx.CreatePrimary(
+        handle = self.ectx.create_primary(
             TPM2B_SENSITIVE_CREATE(),
             TPM2B_PUBLIC.parse(
                 "rsa:rsapss:null",
@@ -3889,7 +3889,7 @@ class TestEsys(TSS2_EsapiTest):
             )
 
     def test_PolicyTicket(self):
-        handle = self.ectx.CreatePrimary(
+        handle = self.ectx.create_primary(
             TPM2B_SENSITIVE_CREATE(),
             TPM2B_PUBLIC.parse(
                 "rsa:rsapss:null",
@@ -4433,7 +4433,7 @@ class TestEsys(TSS2_EsapiTest):
 
     def test_PolicyAuthorize(self):
 
-        handle = self.ectx.CreatePrimary(
+        handle = self.ectx.create_primary(
             TPM2B_SENSITIVE_CREATE(),
             TPM2B_PUBLIC.parse(
                 "rsa:rsapss:null",

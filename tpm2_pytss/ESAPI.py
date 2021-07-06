@@ -2611,13 +2611,13 @@ class ESAPI:
             )
         )
 
-    def CreatePrimary(
+    def create_primary(
         self,
-        inSensitive,
-        inPublic="rsa2048",
-        primaryHandle=ESYS_TR.OWNER,
-        outsideInfo=TPM2B_DATA(),
-        creationPCR=TPML_PCR_SELECTION(),
+        in_sensitive,
+        in_public="rsa2048",
+        primary_handle=ESYS_TR.OWNER,
+        outside_info=TPM2B_DATA(),
+        creation_pcr=TPML_PCR_SELECTION(),
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
@@ -2628,16 +2628,16 @@ class ESAPI:
         check_handle_type(session3, "session3")
 
         inPublic_cdata = get_cdata(
-            inPublic,
+            in_public,
             TPM2B_PUBLIC,
-            "inPublic",
+            "in_public",
             objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS,
         )
         inSensitive_cdata = get_cdata(
-            inSensitive, TPM2B_SENSITIVE_CREATE, "inSensitive"
+            in_sensitive, TPM2B_SENSITIVE_CREATE, "in_sensitive"
         )
-        outsideInfo_cdata = get_cdata(outsideInfo, TPM2B_DATA, "outsideInfo")
-        creationPCR_cdata = get_cdata(creationPCR, TPML_PCR_SELECTION, "creationPCR")
+        outsideInfo_cdata = get_cdata(outside_info, TPM2B_DATA, "outside_info")
+        creationPCR_cdata = get_cdata(creation_pcr, TPML_PCR_SELECTION, "creation_pcr")
 
         objectHandle = ffi.new("ESYS_TR *")
         outPublic = ffi.new("TPM2B_PUBLIC **")
@@ -2647,7 +2647,7 @@ class ESAPI:
         _chkrc(
             lib.Esys_CreatePrimary(
                 self.ctx,
-                primaryHandle,
+                primary_handle,
                 session1,
                 session2,
                 session3,
