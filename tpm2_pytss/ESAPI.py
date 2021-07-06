@@ -3059,10 +3059,10 @@ class ESAPI:
             lib.Esys_ClockSet(self.ctx, auth, session1, session2, session3, new_time)
         )
 
-    def ClockRateAdjust(
+    def clock_rate_adjust(
         self,
         auth,
-        rateAdjust,
+        rate_adjust,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
@@ -3071,7 +3071,7 @@ class ESAPI:
         check_handle_type(auth, "auth")
         _chkrc(
             lib.Esys_ClockRateAdjust(
-                self.ctx, auth, session1, session2, session3, rateAdjust
+                self.ctx, auth, session1, session2, session3, rate_adjust
             )
         )
 

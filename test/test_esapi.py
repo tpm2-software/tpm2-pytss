@@ -1783,7 +1783,7 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(e.exception.error, TPM2_RC.VALUE)
 
     def test_ClockRateAdjust(self):
-        self.ectx.ClockRateAdjust(
+        self.ectx.clock_rate_adjust(
             ESYS_TR.OWNER, TPM2_CLOCK.COARSE_SLOWER, session1=ESYS_TR.PASSWORD
         )
 
