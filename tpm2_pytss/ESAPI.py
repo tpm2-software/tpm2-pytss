@@ -2217,12 +2217,12 @@ class ESAPI:
             )
         )
 
-    def PolicyNV(
+    def policy_nv(
         self,
-        authHandle,
-        nvIndex,
-        policySession,
-        operandB,
+        auth_handle,
+        nv_index,
+        policy_session,
+        operand_b,
         operation,
         offset=0,
         session1=ESYS_TR.PASSWORD,
@@ -2230,14 +2230,16 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
 
-        check_friendly_int(authHandle, "authHandle", ESYS_TR)
+        check_friendly_int(auth_handle, "auth_handle", ESYS_TR)
 
-        if not isinstance(nvIndex, int):
-            raise TypeError(f"Expected nvIndex to be of type int, got {type(nvIndex)}")
+        if not isinstance(nv_index, int):
+            raise TypeError(
+                f"Expected nv_index to be of type int, got {type(nv_index)}"
+            )
 
-        check_handle_type(policySession, "policySession")
+        check_handle_type(policy_session, "policy_session")
 
-        operandB_cdata = get_cdata(operandB, TPM2B_OPERAND, "operandB")
+        operandB_cdata = get_cdata(operand_b, TPM2B_OPERAND, "operand_b")
 
         check_friendly_int(operation, "operation", TPM2_EO)
 
@@ -2251,9 +2253,9 @@ class ESAPI:
         _chkrc(
             lib.Esys_PolicyNV(
                 self.ctx,
-                authHandle,
-                nvIndex,
-                policySession,
+                auth_handle,
+                nv_index,
+                policy_session,
                 session1,
                 session2,
                 session3,
