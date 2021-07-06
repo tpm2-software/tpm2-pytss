@@ -2951,15 +2951,15 @@ class ESAPI:
             )
         )
 
-    def FieldUpgradeData(
+    def field_upgrade_data(
         self,
-        fuData,
+        fu_data,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        fuData_cdata = get_cdata(fuData, TPM2B_MAX_BUFFER, "fuData")
+        fuData_cdata = get_cdata(fu_data, TPM2B_MAX_BUFFER, "fu_data")
         nextDigest = ffi.new("TPMT_HA **")
         firstDigest = ffi.new("TPMT_HA **")
         _chkrc(

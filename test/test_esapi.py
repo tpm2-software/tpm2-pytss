@@ -2405,7 +2405,7 @@ class TestEsys(TSS2_EsapiTest):
 
     def test_FieldUpgradeData(self):
         with self.assertRaises(TSS2_Exception) as e:
-            self.ectx.FieldUpgradeData(b"")
+            self.ectx.field_upgrade_data(b"")
         self.assertEqual(e.exception.error, TPM2_RC.COMMAND_CODE)
 
     def test_FirmwareRead(self):
