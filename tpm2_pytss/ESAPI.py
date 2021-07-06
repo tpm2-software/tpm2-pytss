@@ -3406,25 +3406,25 @@ class ESAPI:
         )
         return TPM2B_MAX_NV_BUFFER(get_ptr(data))
 
-    def NV_ReadLock(
+    def nv_read_lock(
         self,
-        nvIndex,
-        authHandle=0,
+        nv_index,
+        auth_handle=0,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        if authHandle == 0:
-            authHandle = nvIndex
-        check_handle_type(nvIndex, "nvIndex")
-        check_handle_type(authHandle, "authHandle")
+        if auth_handle == 0:
+            auth_handle = nv_index
+        check_handle_type(nv_index, "nv_index")
+        check_handle_type(auth_handle, "auth_handle")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
         _chkrc(
             lib.Esys_NV_ReadLock(
-                self.ctx, authHandle, nvIndex, session1, session2, session3
+                self.ctx, auth_handle, nv_index, session1, session2, session3
             )
         )
 
