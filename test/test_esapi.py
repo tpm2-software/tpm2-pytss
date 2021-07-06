@@ -3699,33 +3699,33 @@ class TestEsys(TSS2_EsapiTest):
             )
 
     def test_hierarchy_control(self):
-        self.ectx.HierarchyControl(
+        self.ectx.hierarchy_control(
             ESYS_TR.RH_ENDORSEMENT, ESYS_TR.RH_ENDORSEMENT, False
         )
 
         with self.assertRaises(ValueError):
-            self.ectx.HierarchyControl(ESYS_TR.RH_NULL, ESYS_TR.RH_ENDORSEMENT, False)
+            self.ectx.hierarchy_control(ESYS_TR.RH_NULL, ESYS_TR.RH_ENDORSEMENT, False)
 
         with self.assertRaises(ValueError):
-            self.ectx.HierarchyControl(ESYS_TR.RH_ENDORSEMENT, ESYS_TR.RH_NULL, False)
+            self.ectx.hierarchy_control(ESYS_TR.RH_ENDORSEMENT, ESYS_TR.RH_NULL, False)
 
         with self.assertRaises(TypeError):
-            self.ectx.HierarchyControl(
+            self.ectx.hierarchy_control(
                 ESYS_TR.RH_ENDORSEMENT, ESYS_TR.RH_ENDORSEMENT, b"bad"
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.HierarchyControl(
+            self.ectx.hierarchy_control(
                 ESYS_TR.RH_ENDORSEMENT, ESYS_TR.RH_ENDORSEMENT, False, session1=None
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.HierarchyControl(
+            self.ectx.hierarchy_control(
                 ESYS_TR.RH_ENDORSEMENT, ESYS_TR.RH_ENDORSEMENT, False, session2=None
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.HierarchyControl(
+            self.ectx.hierarchy_control(
                 ESYS_TR.RH_ENDORSEMENT, ESYS_TR.RH_ENDORSEMENT, False, session3=None
             )
 

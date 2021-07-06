@@ -2671,9 +2671,9 @@ class ESAPI:
             TPMT_TK_CREATION(_cdata=get_ptr(creationTicket)),
         )
 
-    def HierarchyControl(
+    def hierarchy_control(
         self,
-        authHandle,
+        auth_handle,
         enable,
         state,
         session1=ESYS_TR.PASSWORD,
@@ -2681,8 +2681,8 @@ class ESAPI:
         session3=ESYS_TR.NONE,
     ):
         check_handle_type(
-            authHandle,
-            "authHandle",
+            auth_handle,
+            "auth_handle",
             expected=(ESYS_TR.RH_ENDORSEMENT, ESYS_TR.RH_OWNER, ESYS_TR.RH_PLATFORM),
         )
         check_handle_type(
@@ -2697,7 +2697,7 @@ class ESAPI:
 
         _chkrc(
             lib.Esys_HierarchyControl(
-                self.ctx, authHandle, session1, session2, session3, enable, state
+                self.ctx, auth_handle, session1, session2, session3, enable, state
             )
         )
 
