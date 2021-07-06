@@ -3279,27 +3279,33 @@ class ESAPI:
             )
         )
 
-    def NV_Extend(
+    def nv_extend(
         self,
-        nvIndex,
+        nv_index,
         data,
-        authHandle=0,
+        auth_handle=0,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        if authHandle == 0:
-            authHandle = nvIndex
-        check_handle_type(authHandle, "authHandle")
-        check_handle_type(nvIndex, "nvIndex")
+        if auth_handle == 0:
+            auth_handle = nv_index
+        check_handle_type(auth_handle, "auth_handle")
+        check_handle_type(nv_index, "nv_index")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
         data_cdata = get_cdata(data, TPM2B_MAX_NV_BUFFER, "data")
         _chkrc(
             lib.Esys_NV_Extend(
-                self.ctx, authHandle, nvIndex, session1, session2, session3, data_cdata
+                self.ctx,
+                auth_handle,
+                nv_index,
+                session1,
+                session2,
+                session3,
+                data_cdata,
             )
         )
 
