@@ -179,7 +179,7 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(len(n), 68)
         self.assertTrue(isinstance(n, str))
 
-        self.ectx.NV_UndefineSpace(nv_index)
+        self.ectx.nv_undefine_space(nv_index)
 
         with self.assertRaises(TSS2_Exception):
             public, name = self.ectx.NV_ReadPublic(nv_index)
