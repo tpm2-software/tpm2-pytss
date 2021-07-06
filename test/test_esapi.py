@@ -2023,7 +2023,7 @@ class TestEsys(TSS2_EsapiTest):
 
         nvhandle = self.ectx.nv_define_space(b"", nvpub)
 
-        self.ectx.NV_GlobalWriteLock()
+        self.ectx.nv_global_write_lock()
 
         indata = b"12345678"
         with self.assertRaises(TSS2_Exception) as e:
