@@ -1942,9 +1942,9 @@ class TestEsys(TSS2_EsapiTest):
         nvhandle = self.ectx.nv_define_space(b"", nvpub)
 
         bits = 0b1010
-        self.ectx.NV_SetBits(nvhandle, bits, authHandle=ESYS_TR.RH_OWNER)
+        self.ectx.nv_set_bits(nvhandle, bits, auth_handle=ESYS_TR.RH_OWNER)
         bits = 0b1011
-        self.ectx.NV_SetBits(nvhandle, bits)
+        self.ectx.nv_set_bits(nvhandle, bits)
 
         data = self.ectx.NV_Read(nvhandle, 8, 0, authHandle=ESYS_TR.RH_OWNER)
 
@@ -1952,22 +1952,22 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(b, bytes(data))
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_SetBits("not a handle", bits)
+            self.ectx.nv_set_bits("not a handle", bits)
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_SetBits(nvhandle, object())
+            self.ectx.nv_set_bits(nvhandle, object())
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_SetBits(nvhandle, bits, authHandle=45.6)
+            self.ectx.nv_set_bits(nvhandle, bits, auth_handle=45.6)
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_SetBits(nvhandle, bits, session1="foo")
+            self.ectx.nv_set_bits(nvhandle, bits, session1="foo")
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_SetBits(nvhandle, bits, session2=45.6)
+            self.ectx.nv_set_bits(nvhandle, bits, session2=45.6)
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_SetBits(nvhandle, bits, session3=object())
+            self.ectx.nv_set_bits(nvhandle, bits, session3=object())
 
     def test_NV_WriteLock(self):
         nvpub = TPM2B_NV_PUBLIC(
