@@ -4255,19 +4255,19 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
 
-        self.ectx.PolicyPhysicalPresence(session)
+        self.ectx.policy_physical_presence(session)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyPhysicalPresence("session")
+            self.ectx.policy_physical_presence("session")
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyPhysicalPresence(session, session1="bar")
+            self.ectx.policy_physical_presence(session, session1="bar")
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyPhysicalPresence(session, session2=list())
+            self.ectx.policy_physical_presence(session, session2=list())
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyPhysicalPresence(session, session3=42.2)
+            self.ectx.policy_physical_presence(session, session3=42.2)
 
     def test_PolicyCPHash(self):
 
