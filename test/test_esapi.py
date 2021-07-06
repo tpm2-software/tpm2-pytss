@@ -4539,19 +4539,19 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
 
-        self.ectx.PolicyPassword(session)
+        self.ectx.policy_password(session)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyPassword("session")
+            self.ectx.policy_password("session")
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyPassword(session, session1=45.6)
+            self.ectx.policy_password(session, session1=45.6)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyPassword(session, session2=object)
+            self.ectx.policy_password(session, session2=object)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyPassword(session, session3="baz")
+            self.ectx.policy_password(session, session3="baz")
 
     def test_PolicyNVWritten(self):
 
