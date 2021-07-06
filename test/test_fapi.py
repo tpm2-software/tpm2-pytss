@@ -271,7 +271,7 @@ class TestFapi:
         blob_data, blob_type = self.fapi.get_esys_blob(path=nv_ordinary)
         assert blob_type == lib.FAPI_ESYSBLOB_DESERIALIZE
         esys_handle = esys.load_blob(blob_data, blob_type)
-        esys.NV_ReadPublic(esys_handle)
+        esys.nv_read_public(esys_handle)
 
     def test_sign(self, sign_key):
         # create signature
