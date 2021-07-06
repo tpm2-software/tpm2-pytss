@@ -2051,27 +2051,27 @@ class TestEsys(TSS2_EsapiTest):
         indata = b"12345678"
         self.ectx.nv_write(nvhandle, indata, auth_handle=ESYS_TR.RH_OWNER)
 
-        self.ectx.NV_ReadLock(nvhandle, authHandle=ESYS_TR.RH_OWNER)
-        self.ectx.NV_ReadLock(nvhandle)
+        self.ectx.nv_read_lock(nvhandle, auth_handle=ESYS_TR.RH_OWNER)
+        self.ectx.nv_read_lock(nvhandle)
         with self.assertRaises(TSS2_Exception) as e:
             self.ectx.nv_read(nvhandle, 8, auth_handle=ESYS_TR.RH_OWNER)
 
         self.assertEqual(e.exception.error, TPM2_RC.NV_LOCKED)
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_ReadLock("handle")
+            self.ectx.nv_read_lock("handle")
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_ReadLock(nvhandle, authHandle=45.6)
+            self.ectx.nv_read_lock(nvhandle, auth_handle=45.6)
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_ReadLock(nvhandle, session1=56.9)
+            self.ectx.nv_read_lock(nvhandle, session1=56.9)
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_ReadLock(nvhandle, sesiosn2=object())
+            self.ectx.nv_read_lock(nvhandle, sesiosn2=object())
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_ReadLock(nvhandle, session3="baz")
+            self.ectx.nv_read_lock(nvhandle, session3="baz")
 
     def test_NV_ChangeAuth(self):
         # pre-generated TPM2_PolicyCommandCode(TPM2_CC_NV_ChangeAuth)
