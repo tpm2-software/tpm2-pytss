@@ -2486,7 +2486,7 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
 
-        self.ectx.PolicyAuthValue(session)
+        self.ectx.policy_auth_value(session)
         self.ectx.policy_command_code(session, TPM2_CC.Duplicate)
         policyDigest = self.ectx.PolicyGetDigest(session)
         self.ectx.FlushContext(session)
@@ -2534,7 +2534,7 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
 
-        self.ectx.PolicyAuthValue(session)
+        self.ectx.policy_auth_value(session)
         self.ectx.policy_command_code(session, TPM2_CC.Duplicate)
 
         encryptionKey = TPM2B_DATA("is sixteen bytes")
@@ -2613,10 +2613,10 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
 
-        self.ectx.PolicyAuthValue(session)
+        self.ectx.policy_auth_value(session)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyAuthValue(b"1234")
+            self.ectx.policy_auth_value(b"1234")
 
     def test_PolicyCommandCode(self):
 
@@ -2663,7 +2663,7 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
 
-        self.ectx.PolicyAuthValue(session)
+        self.ectx.policy_auth_value(session)
         self.ectx.policy_command_code(session, TPM2_CC.Duplicate)
         policyDigest = self.ectx.PolicyGetDigest(session)
         self.assertTrue(type(policyDigest), TPM2B_DIGEST)
@@ -2685,7 +2685,7 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
 
-        self.ectx.PolicyAuthValue(session)
+        self.ectx.policy_auth_value(session)
         self.ectx.policy_command_code(session, TPM2_CC.Duplicate)
         policyDigest = self.ectx.PolicyGetDigest(session)
         self.ectx.FlushContext(session)
@@ -2733,7 +2733,7 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
 
-        self.ectx.PolicyAuthValue(session)
+        self.ectx.policy_auth_value(session)
         self.ectx.policy_command_code(session, TPM2_CC.Duplicate)
 
         encryptionKey = TPM2B_DATA("is sixteen bytes")
@@ -2799,7 +2799,7 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
 
-        self.ectx.PolicyAuthValue(session)
+        self.ectx.policy_auth_value(session)
         self.ectx.policy_command_code(session, TPM2_CC.Duplicate)
         policyDigest = self.ectx.PolicyGetDigest(session)
         self.ectx.FlushContext(session)
@@ -2847,7 +2847,7 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
 
-        self.ectx.PolicyAuthValue(session)
+        self.ectx.policy_auth_value(session)
         self.ectx.policy_command_code(session, TPM2_CC.Duplicate)
 
         sym = TPMT_SYM_DEF_OBJECT(algorithm=TPM2_ALG.NULL,)
