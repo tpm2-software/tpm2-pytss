@@ -3037,7 +3037,7 @@ class ESAPI:
         newObjectHandleObject = newObjectHandle[0]
         return newObjectHandleObject
 
-    def ReadClock(
+    def read_clock(
         self, session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE
     ):
 
