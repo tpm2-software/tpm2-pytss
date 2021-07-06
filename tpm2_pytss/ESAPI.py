@@ -3181,23 +3181,23 @@ class ESAPI:
             )
         )
 
-    def NV_UndefineSpaceSpecial(
+    def nv_undefine_space_special(
         self,
-        nvIndex,
+        nv_index,
         platform=ESYS_TR.RH_PLATFORM,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(nvIndex, "nvIndex")
+        check_handle_type(nv_index, "nv_index")
         check_handle_type(platform, "platform")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
         _chkrc(
             lib.Esys_NV_UndefineSpaceSpecial(
-                self.ctx, nvIndex, platform, session1, session2, session3
+                self.ctx, nv_index, platform, session1, session2, session3
             )
         )
 
