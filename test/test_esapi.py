@@ -59,25 +59,25 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(type(creation_data), TPM2B_CREATION_DATA)
         self.assertEqual(type(digest), TPM2B_DIGEST)
         self.assertEqual(type(ticket), TPMT_TK_CREATION)
-        self.ectx.FlushContext(handle)
+        self.ectx.flush_context(handle)
 
         handle, _, _, _, _ = self.ectx.create_primary(inSensitive,)
         self.assertNotEqual(handle, 0)
-        self.ectx.FlushContext(handle)
+        self.ectx.flush_context(handle)
 
         handle, _, _, _, _ = self.ectx.create_primary(inSensitive, inPublic)
         self.assertNotEqual(handle, 0)
-        self.ectx.FlushContext(handle)
+        self.ectx.flush_context(handle)
 
         handle, _, _, _, _ = self.ectx.create_primary(inSensitive, "ecc256")
         self.assertNotEqual(handle, 0)
-        self.ectx.FlushContext(handle)
+        self.ectx.flush_context(handle)
 
         handle, _, _, _, _ = self.ectx.create_primary(
             inSensitive, "ecc256", creation_pcr="sha256:4,6,7"
         )
         self.assertNotEqual(handle, 0)
-        self.ectx.FlushContext(handle)
+        self.ectx.flush_context(handle)
 
         with self.assertRaises(TypeError):
             self.ectx.create_primary(
@@ -1459,15 +1459,15 @@ class TestEsys(TSS2_EsapiTest):
 
         seqHandle = self.ectx.hmac_start(handle, None, TPM2_ALG.SHA256)
         self.assertNotEqual(seqHandle, 0)
-        self.ectx.FlushContext(seqHandle)
+        self.ectx.flush_context(seqHandle)
 
         seqHandle = self.ectx.hmac_start(handle, b"1234", TPM2_ALG.SHA256)
         self.assertNotEqual(seqHandle, 0)
-        self.ectx.FlushContext(seqHandle)
+        self.ectx.flush_context(seqHandle)
 
         seqHandle = self.ectx.hmac_start(handle, "1234", TPM2_ALG.SHA256)
         self.assertNotEqual(seqHandle, 0)
-        self.ectx.FlushContext(seqHandle)
+        self.ectx.flush_context(seqHandle)
 
         seqHandle = self.ectx.hmac_start(handle, TPM2B_AUTH(b"1234"), TPM2_ALG.SHA256)
         self.assertNotEqual(seqHandle, 0)
@@ -1513,15 +1513,15 @@ class TestEsys(TSS2_EsapiTest):
 
         seqHandle = self.ectx.hash_sequence_start(None, TPM2_ALG.SHA256)
         self.assertNotEqual(seqHandle, 0)
-        self.ectx.FlushContext(seqHandle)
+        self.ectx.flush_context(seqHandle)
 
         seqHandle = self.ectx.hash_sequence_start(b"1234", TPM2_ALG.SHA256)
         self.assertNotEqual(seqHandle, 0)
-        self.ectx.FlushContext(seqHandle)
+        self.ectx.flush_context(seqHandle)
 
         seqHandle = self.ectx.hash_sequence_start("1234", TPM2_ALG.SHA256)
         self.assertNotEqual(seqHandle, 0)
-        self.ectx.FlushContext(seqHandle)
+        self.ectx.flush_context(seqHandle)
 
         seqHandle = self.ectx.hash_sequence_start(TPM2B_AUTH(b"1234"), TPM2_ALG.SHA256)
         self.assertNotEqual(seqHandle, 0)
@@ -1688,7 +1688,7 @@ class TestEsys(TSS2_EsapiTest):
 
         handle, _, _, _, _ = self.ectx.create_primary(inSensitive, inPublic)
 
-        self.ectx.FlushContext(handle)
+        self.ectx.flush_context(handle)
         with self.assertRaises(TSS2_Exception) as e:
             self.ectx.tr_get_name(handle)
         self.assertEqual(e.exception.error, TSS2_Exception.ESYS_RC_BAD_TR)
@@ -2489,7 +2489,7 @@ class TestEsys(TSS2_EsapiTest):
         self.ectx.policy_auth_value(session)
         self.ectx.policy_command_code(session, TPM2_CC.Duplicate)
         policyDigest = self.ectx.policy_get_digest(session)
-        self.ectx.FlushContext(session)
+        self.ectx.flush_context(session)
         session = None
 
         inPublic = TPM2B_PUBLIC(
@@ -2688,7 +2688,7 @@ class TestEsys(TSS2_EsapiTest):
         self.ectx.policy_auth_value(session)
         self.ectx.policy_command_code(session, TPM2_CC.Duplicate)
         policyDigest = self.ectx.policy_get_digest(session)
-        self.ectx.FlushContext(session)
+        self.ectx.flush_context(session)
         session = None
 
         inPublic = TPM2B_PUBLIC(
@@ -2802,7 +2802,7 @@ class TestEsys(TSS2_EsapiTest):
         self.ectx.policy_auth_value(session)
         self.ectx.policy_command_code(session, TPM2_CC.Duplicate)
         policyDigest = self.ectx.policy_get_digest(session)
-        self.ectx.FlushContext(session)
+        self.ectx.flush_context(session)
         session = None
 
         inPublic = TPM2B_PUBLIC(
@@ -3937,7 +3937,7 @@ class TestEsys(TSS2_EsapiTest):
             handle, session, nonce, b"", b"", expiration, signature
         )
 
-        self.ectx.FlushContext(session)
+        self.ectx.flush_context(session)
 
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
