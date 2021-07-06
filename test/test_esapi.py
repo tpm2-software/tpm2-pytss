@@ -1818,7 +1818,7 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.policy_command_code(session, TPM2_CC.NV_UndefineSpaceSpecial)
 
-        self.ectx.NV_UndefineSpaceSpecial(
+        self.ectx.nv_undefine_space_special(
             nvhandle, session1=session, session2=ESYS_TR.PASSWORD
         )
 
