@@ -4566,24 +4566,24 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
 
-        self.ectx.PolicyNvWritten(session)
+        self.ectx.policy_nv_written(session)
         self.ectx.policy_restart(session)
-        self.ectx.PolicyNvWritten(session, False)
+        self.ectx.policy_nv_written(session, False)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyNvWritten(43.2)
+            self.ectx.policy_nv_written(43.2)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyNvWritten(session, "False")
+            self.ectx.policy_nv_written(session, "False")
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyNvWritten(session, session1=45.6)
+            self.ectx.policy_nv_written(session, session1=45.6)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyNvWritten(session, session2=object())
+            self.ectx.policy_nv_written(session, session2=object())
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyNvWritten(session, session3="baz")
+            self.ectx.policy_nv_written(session, session3="baz")
 
     def test_PolicyTemplate(self):
 
