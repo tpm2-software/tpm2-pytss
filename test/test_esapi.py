@@ -4207,36 +4207,38 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
 
-        self.ectx.PolicyCounterTimer(session, b"12345678", TPM2_EO.EQ)
-        self.ectx.PolicyCounterTimer(session, TPM2B_OPERAND(b"12345678"), TPM2_EO.EQ, 4)
+        self.ectx.policy_counter_timer(session, b"12345678", TPM2_EO.EQ)
+        self.ectx.policy_counter_timer(
+            session, TPM2B_OPERAND(b"12345678"), TPM2_EO.EQ, 4
+        )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyCounterTimer(object, b"12345678", TPM2_EO.EQ)
+            self.ectx.policy_counter_timer(object, b"12345678", TPM2_EO.EQ)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyCounterTimer(session, TPM2B_ATTEST(), TPM2_EO.EQ)
+            self.ectx.policy_counter_timer(session, TPM2B_ATTEST(), TPM2_EO.EQ)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyCounterTimer(session, b"12345678", 42.2)
+            self.ectx.policy_counter_timer(session, b"12345678", 42.2)
 
         with self.assertRaises(ValueError):
-            self.ectx.PolicyCounterTimer(session, b"12345678", 42)
+            self.ectx.policy_counter_timer(session, b"12345678", 42)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyCounterTimer(session, b"12345678", TPM2_EO.EQ, "bar")
+            self.ectx.policy_counter_timer(session, b"12345678", TPM2_EO.EQ, "bar")
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyCounterTimer(
+            self.ectx.policy_counter_timer(
                 session, b"12345678", TPM2_EO.EQ, session1="baz"
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyCounterTimer(
+            self.ectx.policy_counter_timer(
                 session, b"12345678", TPM2_EO.EQ, session2=object()
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyCounterTimer(
+            self.ectx.policy_counter_timer(
                 session, b"12345678", TPM2_EO.EQ, session3=45.6
             )
 
