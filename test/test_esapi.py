@@ -3761,19 +3761,19 @@ class TestEsys(TSS2_EsapiTest):
             )
 
     def test_change_pps(self):
-        self.ectx.ChangePPS()
+        self.ectx.change_pps()
 
         with self.assertRaises(TypeError):
-            self.ectx.ChangePPS(session1=None)
+            self.ectx.change_pps(session1=None)
 
         with self.assertRaises(TypeError):
-            self.ectx.ChangePPS(session2=None)
+            self.ectx.change_pps(session2=None)
 
         with self.assertRaises(TypeError):
-            self.ectx.ChangePPS(session2=None)
+            self.ectx.change_pps(session2=None)
 
         with self.assertRaises(ValueError):
-            self.ectx.ChangePPS(authHandle=ESYS_TR.RH_OWNER)
+            self.ectx.change_pps(auth_handle=ESYS_TR.RH_OWNER)
 
     def test_change_eps(self):
         self.ectx.ChangeEPS()
