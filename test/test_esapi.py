@@ -4598,29 +4598,29 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
 
-        self.ectx.PolicyTemplate(session, b"0123456789ABCDEF01234567890ABCDE")
-        self.ectx.PolicyTemplate(
+        self.ectx.policy_template(session, b"0123456789ABCDEF01234567890ABCDE")
+        self.ectx.policy_template(
             session, TPM2B_DIGEST(b"0123456789ABCDEF01234567890ABCDE")
         )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyTemplate(object(), b"0123456789ABCDEF01234567890ABCDE")
+            self.ectx.policy_template(object(), b"0123456789ABCDEF01234567890ABCDE")
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyTemplate(session, list())
+            self.ectx.policy_template(session, list())
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyTemplate(
+            self.ectx.policy_template(
                 session, b"0123456789ABCDEF01234567890ABCDE", session1="bar"
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyTemplate(
+            self.ectx.policy_template(
                 session, b"0123456789ABCDEF01234567890ABCDE", session2=object
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyTemplate(
+            self.ectx.policy_template(
                 session, b"0123456789ABCDEF01234567890ABCDE", session3=45.6
             )
 
