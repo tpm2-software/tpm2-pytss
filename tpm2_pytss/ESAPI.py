@@ -2524,20 +2524,20 @@ class ESAPI:
         )
         return TPM2B_DIGEST(get_ptr(policyDigest))
 
-    def PolicyNvWritten(
+    def policy_nv_written(
         self,
-        policySession,
-        writtenSet=True,
+        policy_session,
+        written_set=True,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(policySession, "policySession")
+        check_handle_type(policy_session, "policy_session")
 
-        if not isinstance(writtenSet, bool):
+        if not isinstance(written_set, bool):
             raise TypeError(
-                f"Expected writtenSet to be type bool, got {type(writtenSet)}"
+                f"Expected written_set to be type bool, got {type(written_set)}"
             )
 
         check_handle_type(session1, "session1")
@@ -2546,7 +2546,7 @@ class ESAPI:
 
         _chkrc(
             lib.Esys_PolicyNvWritten(
-                self.ctx, policySession, session1, session2, session3, writtenSet
+                self.ctx, policy_session, session1, session2, session3, written_set
             )
         )
 
