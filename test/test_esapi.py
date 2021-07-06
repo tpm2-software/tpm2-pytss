@@ -186,13 +186,13 @@ class TestEsys(TSS2_EsapiTest):
 
     def test_hierarchychangeauth(self):
 
-        self.ectx.HierarchyChangeAuth(ESYS_TR.OWNER, "passwd")
+        self.ectx.hierarchy_change_auth(ESYS_TR.OWNER, "passwd")
 
         # force esys to forget about the 'good' password
         self.ectx.set_auth(ESYS_TR.OWNER, "badpasswd")
 
         with self.assertRaises(TSS2_Exception):
-            self.ectx.HierarchyChangeAuth(ESYS_TR.OWNER, "anotherpasswd")
+            self.ectx.hierarchy_change_auth(ESYS_TR.OWNER, "anotherpasswd")
 
     def test_fulltest_YES(self):
         self.ectx.self_test(True)
@@ -255,13 +255,13 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
         self.assertTrue(hmac_session)
-        self.ectx.HierarchyChangeAuth(ESYS_TR.OWNER, "passwd", session1=hmac_session)
+        self.ectx.hierarchy_change_auth(ESYS_TR.OWNER, "passwd", session1=hmac_session)
 
         # force esys to forget about the 'good' password
         self.ectx.set_auth(ESYS_TR.OWNER, "badpasswd")
 
         with self.assertRaises(TSS2_Exception):
-            self.ectx.HierarchyChangeAuth(
+            self.ectx.hierarchy_change_auth(
                 ESYS_TR.OWNER, "anotherpasswd", session1=hmac_session
             )
 

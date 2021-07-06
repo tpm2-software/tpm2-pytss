@@ -2808,10 +2808,10 @@ class ESAPI:
             lib.Esys_ClearControl(self.ctx, auth, session1, session2, session3, disable)
         )
 
-    def HierarchyChangeAuth(
+    def hierarchy_change_auth(
         self,
-        authHandle,
-        newAuth,
+        auth_handle,
+        new_auth,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
@@ -2820,11 +2820,11 @@ class ESAPI:
         _chkrc(
             lib.Esys_HierarchyChangeAuth(
                 self.ctx,
-                authHandle,
+                auth_handle,
                 session1,
                 session2,
                 session3,
-                TPM2B_pack(newAuth, t="TPM2B_AUTH"),
+                TPM2B_pack(new_auth, t="TPM2B_AUTH"),
             )
         )
 
