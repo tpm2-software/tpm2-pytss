@@ -158,7 +158,7 @@ class TestEsys(TSS2_EsapiTest):
 
         # No password NV index
         nv_index = self.ectx.nv_define_space(None, nv_public)
-        self.ectx.NV_Write(nv_index, b"hello world")
+        self.ectx.nv_write(nv_index, b"hello world")
 
         value = self.ectx.NV_Read(nv_index, 11)
         self.assertEqual(bytes(value), b"hello world")
@@ -1991,7 +1991,7 @@ class TestEsys(TSS2_EsapiTest):
 
         indata = b"12345678"
         with self.assertRaises(TSS2_Exception) as e:
-            self.ectx.NV_Write(nvhandle, indata, authHandle=ESYS_TR.RH_OWNER)
+            self.ectx.nv_write(nvhandle, indata, auth_handle=ESYS_TR.RH_OWNER)
 
         self.assertEqual(e.exception.error, TPM2_RC.NV_LOCKED)
 
@@ -2027,7 +2027,7 @@ class TestEsys(TSS2_EsapiTest):
 
         indata = b"12345678"
         with self.assertRaises(TSS2_Exception) as e:
-            self.ectx.NV_Write(nvhandle, indata, authHandle=ESYS_TR.RH_OWNER)
+            self.ectx.nv_write(nvhandle, indata, auth_handle=ESYS_TR.RH_OWNER)
 
         self.assertEqual(e.exception.error, TPM2_RC.NV_LOCKED)
 
@@ -2049,7 +2049,7 @@ class TestEsys(TSS2_EsapiTest):
         nvhandle = self.ectx.nv_define_space(b"", nvpub)
 
         indata = b"12345678"
-        self.ectx.NV_Write(nvhandle, indata, authHandle=ESYS_TR.RH_OWNER)
+        self.ectx.nv_write(nvhandle, indata, auth_handle=ESYS_TR.RH_OWNER)
 
         self.ectx.NV_ReadLock(nvhandle, authHandle=ESYS_TR.RH_OWNER)
         self.ectx.NV_ReadLock(nvhandle)
@@ -2087,7 +2087,7 @@ class TestEsys(TSS2_EsapiTest):
         )
 
         nvhandle = self.ectx.nv_define_space(b"first", nvpub)
-        self.ectx.NV_Write(nvhandle, b"sometest", authHandle=ESYS_TR.RH_OWNER)
+        self.ectx.nv_write(nvhandle, b"sometest", auth_handle=ESYS_TR.RH_OWNER)
 
         self.ectx.NV_Read(nvhandle, 8, authHandle=nvhandle)
 
@@ -2121,7 +2121,7 @@ class TestEsys(TSS2_EsapiTest):
         )
 
         nvhandle = self.ectx.nv_define_space(b"", nvpub)
-        self.ectx.NV_Write(nvhandle, b"sometest", authHandle=ESYS_TR.RH_OWNER)
+        self.ectx.nv_write(nvhandle, b"sometest", auth_handle=ESYS_TR.RH_OWNER)
 
         inPublic = TPM2B_PUBLIC(
             TPMT_PUBLIC.parse(
