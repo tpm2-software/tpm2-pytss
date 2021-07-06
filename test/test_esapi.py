@@ -4649,26 +4649,26 @@ class TestEsys(TSS2_EsapiTest):
             auth_hash=TPM2_ALG.SHA256,
         )
 
-        self.ectx.PolicyAuthorizeNV(nv_index, session)
-        self.ectx.PolicyAuthorizeNV(nv_index, session, authHandle=ESYS_TR.OWNER)
+        self.ectx.policy_authorize_nv(nv_index, session)
+        self.ectx.policy_authorize_nv(nv_index, session, auth_handle=ESYS_TR.OWNER)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyAuthorizeNV("not an index", session)
+            self.ectx.policy_authorize_nv("not an index", session)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyAuthorizeNV(nv_index, object())
+            self.ectx.policy_authorize_nv(nv_index, object())
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyAuthorizeNV(nv_index, session, authHandle=object)
+            self.ectx.policy_authorize_nv(nv_index, session, auth_handle=object)
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyAuthorizeNV(nv_index, session, session1="foo")
+            self.ectx.policy_authorize_nv(nv_index, session, session1="foo")
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyAuthorizeNV(nv_index, session, session2=object())
+            self.ectx.policy_authorize_nv(nv_index, session, session2=object())
 
         with self.assertRaises(TypeError):
-            self.ectx.PolicyAuthorizeNV(nv_index, session, session3=45.6)
+            self.ectx.policy_authorize_nv(nv_index, session, session3=45.6)
 
 
 if __name__ == "__main__":

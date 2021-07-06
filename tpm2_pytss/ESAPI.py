@@ -2578,22 +2578,22 @@ class ESAPI:
             )
         )
 
-    def PolicyAuthorizeNV(
+    def policy_authorize_nv(
         self,
-        nvIndex,
-        policySession,
-        authHandle=0,
+        nv_index,
+        policy_session,
+        auth_handle=0,
         session1=ESYS_TR.PASSWORD,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        if authHandle == 0:
-            authHandle = nvIndex
+        if auth_handle == 0:
+            auth_handle = nv_index
 
-        check_handle_type(authHandle, "authHandle")
-        check_handle_type(nvIndex, "nvIndex")
-        check_handle_type(policySession, "policySession")
+        check_handle_type(auth_handle, "auth_handle")
+        check_handle_type(nv_index, "nv_index")
+        check_handle_type(policy_session, "policy_session")
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
@@ -2602,9 +2602,9 @@ class ESAPI:
         _chkrc(
             lib.Esys_PolicyAuthorizeNV(
                 self.ctx,
-                authHandle,
-                nvIndex,
-                policySession,
+                auth_handle,
+                nv_index,
+                policy_session,
                 session1,
                 session2,
                 session3,
