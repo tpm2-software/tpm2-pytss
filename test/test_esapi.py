@@ -3100,28 +3100,28 @@ class TestEsys(TSS2_EsapiTest):
             self.ectx.dictionary_attack_lock_reset(lock_handle=None)
 
     def test_DictionaryAttackParameters(self):
-        self.ectx.DictionaryAttackParameters(1, 2, 3)
+        self.ectx.dictionary_attack_parameters(1, 2, 3)
 
         with self.assertRaises(TypeError):
-            self.ectx.DictionaryAttackParameters(None, 2, 3)
+            self.ectx.dictionary_attack_parameters(None, 2, 3)
 
         with self.assertRaises(TypeError):
-            self.ectx.DictionaryAttackParameters(1, None, 3)
+            self.ectx.dictionary_attack_parameters(1, None, 3)
 
         with self.assertRaises(TypeError):
-            self.ectx.DictionaryAttackParameters(1, 2, None)
+            self.ectx.dictionary_attack_parameters(1, 2, None)
 
         with self.assertRaises(TypeError):
-            self.ectx.DictionaryAttackParameters(1, 2, 3, session2=set(3, 2, 1))
+            self.ectx.dictionary_attack_parameters(1, 2, 3, session2=set(3, 2, 1))
 
         with self.assertRaises(TypeError):
-            self.ectx.DictionaryAttackParameters(1, 2, 3, session1=set(4, 3, 2))
+            self.ectx.dictionary_attack_parameters(1, 2, 3, session1=set(4, 3, 2))
 
         with self.assertRaises(TypeError):
-            self.ectx.DictionaryAttackParameters(1, 2, 3, session3=set(5, 4, 3))
+            self.ectx.dictionary_attack_parameters(1, 2, 3, session3=set(5, 4, 3))
 
         with self.assertRaises(TypeError):
-            self.ectx.DictionaryAttackParameters(1, 2, 3, lockHandle=None)
+            self.ectx.dictionary_attack_parameters(1, 2, 3, lock_handle=None)
 
     def test_GetCommandAuditDigest(self):
 
