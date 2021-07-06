@@ -1708,11 +1708,11 @@ class TestEsys(TSS2_EsapiTest):
 
         handle, _, _, _, _ = self.ectx.create_primary(inSensitive, inPublic)
 
-        self.ectx.EvictControl(
+        self.ectx.evict_control(
             ESYS_TR.OWNER, handle, 0x81000081, session1=ESYS_TR.PASSWORD
         )
         phandle = self.ectx.tr_from_tpmpublic(0x81000081)
-        self.ectx.EvictControl(
+        self.ectx.evict_control(
             ESYS_TR.OWNER, phandle, 0x81000081, session1=ESYS_TR.PASSWORD
         )
         with self.assertRaises(TSS2_Exception) as e:
