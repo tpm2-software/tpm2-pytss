@@ -3075,11 +3075,11 @@ class ESAPI:
             )
         )
 
-    def GetCapability(
+    def get_capability(
         self,
         capability,
         prop,
-        propertyCount=1,
+        property_count=1,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
@@ -3090,9 +3090,9 @@ class ESAPI:
         if not isinstance(prop, int):
             raise TypeError(f"Expected prop to be an int, got {type(prop)}")
 
-        if not isinstance(propertyCount, int):
+        if not isinstance(property_count, int):
             raise TypeError(
-                f"Expected propertyCount to be an int, got {type(propertyCount)}"
+                f"Expected property_count to be an int, got {type(property_count)}"
             )
 
         check_handle_type(session1, "session1")
@@ -3109,7 +3109,7 @@ class ESAPI:
                 session3,
                 capability,
                 prop,
-                propertyCount,
+                property_count,
                 moreData,
                 capabilityData,
             )

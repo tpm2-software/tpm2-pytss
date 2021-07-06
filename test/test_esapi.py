@@ -1722,33 +1722,33 @@ class TestEsys(TSS2_EsapiTest):
     def test_GetCapability(self):
         more = True
         while more:
-            more, capdata = self.ectx.GetCapability(
+            more, capdata = self.ectx.get_capability(
                 TPM2_CAP.COMMANDS, TPM2_CC.FIRST, TPM2_MAX.CAP_CC
             )
             for c in capdata.data.command:
                 pass
 
         with self.assertRaises(TypeError):
-            self.ectx.GetCapability("Not valid", TPM2_CC.FIRST, TPM2_MAX.CAP_CC)
+            self.ectx.get_capability("Not valid", TPM2_CC.FIRST, TPM2_MAX.CAP_CC)
 
         with self.assertRaises(TypeError):
-            self.ectx.GetCapability(TPM2_CAP.COMMANDS, 45.6, TPM2_MAX.CAP_CC)
+            self.ectx.get_capability(TPM2_CAP.COMMANDS, 45.6, TPM2_MAX.CAP_CC)
 
         with self.assertRaises(TypeError):
-            self.ectx.GetCapability(TPM2_CAP.COMMANDS, TPM2_CC.FIRST, [])
+            self.ectx.get_capability(TPM2_CAP.COMMANDS, TPM2_CC.FIRST, [])
 
         with self.assertRaises(TypeError):
-            self.ectx.GetCapability(
+            self.ectx.get_capability(
                 TPM2_CAP.COMMANDS, TPM2_CC.FIRST, TPM2_MAX.CAP_CC, session1=56.7
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.GetCapability(
+            self.ectx.get_capability(
                 TPM2_CAP.COMMANDS, TPM2_CC.FIRST, TPM2_MAX.CAP_CC, session2=object()
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.GetCapability(
+            self.ectx.get_capability(
                 TPM2_CAP.COMMANDS, TPM2_CC.FIRST, TPM2_MAX.CAP_CC, session3="baz"
             )
 
@@ -2990,7 +2990,7 @@ class TestEsys(TSS2_EsapiTest):
             session, TPMA_SESSION.AUDIT | TPMA_SESSION.CONTINUESESSION
         )
 
-        self.ectx.GetCapability(
+        self.ectx.get_capability(
             TPM2_CAP.COMMANDS, TPM2_CC.FIRST, TPM2_MAX.CAP_CC, session1=session
         )
 
@@ -3158,7 +3158,7 @@ class TestEsys(TSS2_EsapiTest):
             session, TPMA_SESSION.AUDIT | TPMA_SESSION.CONTINUESESSION
         )
 
-        self.ectx.GetCapability(
+        self.ectx.get_capability(
             TPM2_CAP.COMMANDS, TPM2_CC.FIRST, TPM2_MAX.CAP_CC, session1=session
         )
 

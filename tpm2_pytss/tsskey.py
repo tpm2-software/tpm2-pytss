@@ -161,7 +161,7 @@ class TSSPrivKey(object):
         more = True
         al = list()
         while more:
-            more, data = ectx.GetCapability(TPM2_CAP.ALGS, 0, lib.TPM2_MAX_CAP_ALGS)
+            more, data = ectx.get_capability(TPM2_CAP.ALGS, 0, lib.TPM2_MAX_CAP_ALGS)
             algs = data.data.algorithms
             for i in range(0, algs.count):
                 al.append(algs.algProperties[i].alg)
