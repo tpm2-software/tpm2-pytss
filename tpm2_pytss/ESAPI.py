@@ -3116,7 +3116,7 @@ class ESAPI:
         )
         return (bool(moreData[0]), TPMS_CAPABILITY_DATA(get_ptr(capabilityData)))
 
-    def TestParms(
+    def test_parms(
         self,
         parameters,
         session1=ESYS_TR.NONE,

@@ -1759,11 +1759,11 @@ class TestEsys(TSS2_EsapiTest):
         parms.parameters.rsaDetail.keyBits = 2048
         parms.parameters.rsaDetail.exponent = 0
 
-        self.ectx.TestParms(parms)
+        self.ectx.test_parms(parms)
 
         parms.parameters.rsaDetail.keyBits = 1234
         with self.assertRaises(TSS2_Exception) as e:
-            self.ectx.TestParms(parms)
+            self.ectx.test_parms(parms)
         self.assertEqual(e.exception.error, TPM2_RC.VALUE)
         self.assertEqual(e.exception.parameter, 1)
 
