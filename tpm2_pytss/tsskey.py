@@ -180,12 +180,12 @@ class TSSPrivKey(object):
         if template is None:
             raise RuntimeError("Unable to find supported parent key typ")
         inpub = TPM2B_PUBLIC(publicArea=template)
-        phandle, _, _, _, _ = ectx.CreatePrimary(
-            primaryHandle=ESYS_TR.RH_OWNER,
-            inSensitive=TPM2B_SENSITIVE_CREATE(),
-            inPublic=inpub,
-            outsideInfo=TPM2B_DATA(),
-            creationPCR=TPML_PCR_SELECTION(),
+        phandle, _, _, _, _ = ectx.create_primary(
+            primary_handle=ESYS_TR.RH_OWNER,
+            in_sensitive=TPM2B_SENSITIVE_CREATE(),
+            in_public=inpub,
+            outside_info=TPM2B_DATA(),
+            creation_pcr=TPML_PCR_SELECTION(),
             session1=ESYS_TR.PASSWORD,
         )
         return phandle

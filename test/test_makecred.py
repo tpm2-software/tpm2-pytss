@@ -68,7 +68,7 @@ KSAYtlNKSN4ZDI//wn0f7zBvUc7FqaRPA9LL6k6C1YfdOi/yvTB7Y4Tgaw==
 class MakeCredTest(TSS2_EsapiTest):
     def test_generate_seed_rsa(self):
         insens = TPM2B_SENSITIVE_CREATE()
-        _, public, _, _, _ = self.ectx.CreatePrimary(insens)
+        _, public, _, _, _ = self.ectx.create_primary(insens)
         seed, enc_seed = generate_seed(public.publicArea, b"test")
 
         public.publicArea.nameAlg = TPM2_ALG.LAST + 1
@@ -85,7 +85,7 @@ class MakeCredTest(TSS2_EsapiTest):
 
     def test_generate_seed_ecc(self):
         insens = TPM2B_SENSITIVE_CREATE()
-        _, public, _, _, _ = self.ectx.CreatePrimary(insens, "ecc")
+        _, public, _, _, _ = self.ectx.create_primary(insens, "ecc")
         seed, enc_seed = generate_seed(public.publicArea, b"test")
 
         public.publicArea.nameAlg = TPM2_ALG.LAST + 1
@@ -97,7 +97,7 @@ class MakeCredTest(TSS2_EsapiTest):
 
     def test_MakeCredential_rsa(self):
         insens = TPM2B_SENSITIVE_CREATE()
-        phandle, parent, _, _, _ = self.ectx.CreatePrimary(insens)
+        phandle, parent, _, _, _ = self.ectx.create_primary(insens)
         private, public, _, _, _ = self.ectx.create(phandle, insens)
         credblob, secret = MakeCredential(parent, b"credential data", public.getName())
         handle = self.ectx.load(phandle, private, public)
@@ -106,7 +106,7 @@ class MakeCredTest(TSS2_EsapiTest):
 
     def test_MakeCredential_ecc(self):
         insens = TPM2B_SENSITIVE_CREATE()
-        phandle, parent, _, _, _ = self.ectx.CreatePrimary(insens, "ecc")
+        phandle, parent, _, _, _ = self.ectx.create_primary(insens, "ecc")
         private, public, _, _, _ = self.ectx.create(phandle, insens, "ecc")
         credblob, secret = MakeCredential(parent, b"credential data", public.getName())
         handle = self.ectx.load(phandle, private, public)
@@ -115,7 +115,7 @@ class MakeCredTest(TSS2_EsapiTest):
 
     def test_Wrap_rsa(self):
         insens = TPM2B_SENSITIVE_CREATE()
-        phandle, parent, _, _, _ = self.ectx.CreatePrimary(insens)
+        phandle, parent, _, _, _ = self.ectx.create_primary(insens)
         public = TPM2B_PUBLIC.fromPEM(rsa_public_key)
         sensitive = TPM2B_SENSITIVE.fromPEM(rsa_private_key)
         symdef = TPMT_SYM_DEF_OBJECT(algorithm=TPM2_ALG.AES)
@@ -142,7 +142,7 @@ class MakeCredTest(TSS2_EsapiTest):
 
     def test_Wrap_ecc(self):
         insens = TPM2B_SENSITIVE_CREATE()
-        phandle, parent, _, _, _ = self.ectx.CreatePrimary(insens, "ecc")
+        phandle, parent, _, _, _ = self.ectx.create_primary(insens, "ecc")
         public = TPM2B_PUBLIC.fromPEM(ecc_public_key)
         sensitive = TPM2B_SENSITIVE.fromPEM(ecc_private_key)
         symdef = TPMT_SYM_DEF_OBJECT(algorithm=TPM2_ALG.AES)

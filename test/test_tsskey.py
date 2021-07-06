@@ -47,7 +47,7 @@ class TSSKeyTest(TSS2_EsapiTest):
     def test_persistent_parent_rsa(self):
         insens = TPM2B_SENSITIVE_CREATE()
         inpublic = TPM2B_PUBLIC(publicArea=parent_rsa_template)
-        parent, _, _, _, _ = self.ectx.CreatePrimary(insens, inpublic)
+        parent, _, _, _, _ = self.ectx.create_primary(insens, inpublic)
         phandle = self.ectx.EvictControl(
             ESYS_TR.RH_OWNER, parent, 0x81000081, session1=ESYS_TR.PASSWORD
         )
@@ -59,7 +59,7 @@ class TSSKeyTest(TSS2_EsapiTest):
     def test_persistent_parent_ecc(self):
         insens = TPM2B_SENSITIVE_CREATE()
         inpublic = TPM2B_PUBLIC(publicArea=parent_ecc_template)
-        parent, _, _, _, _ = self.ectx.CreatePrimary(insens, inpublic)
+        parent, _, _, _, _ = self.ectx.create_primary(insens, inpublic)
         phandle = self.ectx.EvictControl(
             ESYS_TR.RH_OWNER, parent, 0x81000081, session1=ESYS_TR.PASSWORD
         )
