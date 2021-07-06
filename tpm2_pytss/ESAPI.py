@@ -2388,25 +2388,25 @@ class ESAPI:
             )
         )
 
-    def PolicyDuplicationSelect(
+    def policy_duplication_select(
         self,
-        policySession,
-        objectName,
-        newParentName,
-        includeObject=False,
+        policy_session,
+        object_name,
+        new_parent_name,
+        include_object=False,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(policySession, "policySession")
+        check_handle_type(policy_session, "policy_session")
 
-        objectName_cdata = get_cdata(objectName, TPM2B_NAME, "objectName")
-        newParentName_cdata = get_cdata(newParentName, TPM2B_NAME, "newParentName")
+        objectName_cdata = get_cdata(object_name, TPM2B_NAME, "object_name")
+        newParentName_cdata = get_cdata(new_parent_name, TPM2B_NAME, "new_parent_name")
 
-        if not isinstance(includeObject, bool):
+        if not isinstance(include_object, bool):
             raise TypeError(
-                f"Expected includeObject to be type bool, got {type(includeObject)}"
+                f"Expected include_object to be type bool, got {type(include_object)}"
             )
 
         check_handle_type(session1, "session1")
@@ -2416,13 +2416,13 @@ class ESAPI:
         _chkrc(
             lib.Esys_PolicyDuplicationSelect(
                 self.ctx,
-                policySession,
+                policy_session,
                 session1,
                 session2,
                 session3,
                 objectName_cdata,
                 newParentName_cdata,
-                includeObject,
+                include_object,
             )
         )
 
