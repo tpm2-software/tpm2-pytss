@@ -2921,28 +2921,28 @@ class ESAPI:
             )
         )
 
-    def FieldUpgradeStart(
+    def field_upgrade_start(
         self,
         authorization,
-        keyHandle,
-        fuDigest,
-        manifestSignature,
+        key_handle,
+        fu_digest,
+        manifest_signature,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
         check_handle_type(authorization, "authorization")
-        check_handle_type(keyHandle, "keyHandle")
-        fuDigest_cdata = get_cdata(fuDigest, TPM2B_DIGEST, "fuDigest")
+        check_handle_type(key_handle, "key_handle")
+        fuDigest_cdata = get_cdata(fu_digest, TPM2B_DIGEST, "fu_digest")
         manifestSignature_cdata = get_cdata(
-            manifestSignature, TPMT_SIGNATURE, "manifestSignature"
+            manifest_signature, TPMT_SIGNATURE, "manifest_signature"
         )
         _chkrc(
             lib.Esys_FieldUpgradeStart(
                 self.ctx,
                 authorization,
-                keyHandle,
+                key_handle,
                 session1,
                 session2,
                 session3,
