@@ -1986,8 +1986,8 @@ class TestEsys(TSS2_EsapiTest):
 
         nvhandle = self.ectx.nv_define_space(b"", nvpub)
 
-        self.ectx.NV_WriteLock(nvhandle, authHandle=ESYS_TR.RH_OWNER)
-        self.ectx.NV_WriteLock(nvhandle)
+        self.ectx.nv_write_lock(nvhandle, auth_handle=ESYS_TR.RH_OWNER)
+        self.ectx.nv_write_lock(nvhandle)
 
         indata = b"12345678"
         with self.assertRaises(TSS2_Exception) as e:
@@ -1996,19 +1996,19 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(e.exception.error, TPM2_RC.NV_LOCKED)
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_WriteLock(list())
+            self.ectx.nv_write_lock(list())
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_WriteLock(nvhandle, authHandle=42.3)
+            self.ectx.nv_write_lock(nvhandle, auth_handle=42.3)
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_WriteLock(nvhandle, session1="baz")
+            self.ectx.nv_write_lock(nvhandle, session1="baz")
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_WriteLock(nvhandle, session2=45.6)
+            self.ectx.nv_write_lock(nvhandle, session2=45.6)
 
         with self.assertRaises(TypeError):
-            self.ectx.NV_WriteLock(nvhandle, session3=list())
+            self.ectx.nv_write_lock(nvhandle, session3=list())
 
     def test_NV_GlobalWriteLock(self):
         nvpub = TPM2B_NV_PUBLIC(
