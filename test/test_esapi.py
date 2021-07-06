@@ -163,7 +163,7 @@ class TestEsys(TSS2_EsapiTest):
         value = self.ectx.NV_Read(nv_index, 11)
         self.assertEqual(bytes(value), b"hello world")
 
-        public, name = self.ectx.NV_ReadPublic(nv_index)
+        public, name = self.ectx.nv_read_public(nv_index)
         self.assertEqual(public.nvPublic.nvIndex, TPM2_HC.NV_INDEX_FIRST)
         self.assertEqual(public.nvPublic.nameAlg, TPM2_ALG.SHA256)
         self.assertEqual(
@@ -182,7 +182,7 @@ class TestEsys(TSS2_EsapiTest):
         self.ectx.nv_undefine_space(nv_index)
 
         with self.assertRaises(TSS2_Exception):
-            public, name = self.ectx.NV_ReadPublic(nv_index)
+            public, name = self.ectx.nv_read_public(nv_index)
 
     def test_hierarchychangeauth(self):
 
@@ -1835,7 +1835,7 @@ class TestEsys(TSS2_EsapiTest):
 
         nvhandle = self.ectx.nv_define_space(b"", nvpub)
 
-        pubout, name = self.ectx.NV_ReadPublic(nvhandle)
+        pubout, name = self.ectx.nv_read_public(nvhandle)
 
         self.assertEqual(nvpub.getName().name, name.name)
 

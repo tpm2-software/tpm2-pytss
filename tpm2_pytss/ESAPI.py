@@ -3201,15 +3201,15 @@ class ESAPI:
             )
         )
 
-    def NV_ReadPublic(
+    def nv_read_public(
         self,
-        nvIndex,
+        nv_index,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(nvIndex, "nvIndex")
+        check_handle_type(nv_index, "nv_index")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
@@ -3217,7 +3217,7 @@ class ESAPI:
         nvName = ffi.new("TPM2B_NAME **")
         _chkrc(
             lib.Esys_NV_ReadPublic(
-                self.ctx, nvIndex, session1, session2, session3, nvPublic, nvName
+                self.ctx, nv_index, session1, session2, session3, nvPublic, nvName
             )
         )
         return (
