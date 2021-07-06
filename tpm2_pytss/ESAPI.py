@@ -2426,24 +2426,26 @@ class ESAPI:
             )
         )
 
-    def PolicyAuthorize(
+    def policy_authorize(
         self,
-        policySession,
-        approvedPolicy,
-        policyRef,
-        keySign,
-        checkTicket,
+        policy_session,
+        approved_policy,
+        policy_ref,
+        key_sign,
+        check_ticket,
         session1=ESYS_TR.NONE,
         session2=ESYS_TR.NONE,
         session3=ESYS_TR.NONE,
     ):
 
-        check_handle_type(policySession, "policySession")
+        check_handle_type(policy_session, "policy_session")
 
-        approvedPolicy_cdata = get_cdata(approvedPolicy, TPM2B_DIGEST, "approvedPolicy")
-        policyRef_cdata = get_cdata(policyRef, TPM2B_NONCE, "policyRef")
-        keySign_cdata = get_cdata(keySign, TPM2B_NAME, "keySign")
-        checkTicket_cdata = get_cdata(checkTicket, TPMT_TK_VERIFIED, "checkTicket")
+        approvedPolicy_cdata = get_cdata(
+            approved_policy, TPM2B_DIGEST, "approved_policy"
+        )
+        policyRef_cdata = get_cdata(policy_ref, TPM2B_NONCE, "policy_ref")
+        keySign_cdata = get_cdata(key_sign, TPM2B_NAME, "key_sign")
+        checkTicket_cdata = get_cdata(check_ticket, TPMT_TK_VERIFIED, "check_ticket")
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
@@ -2452,7 +2454,7 @@ class ESAPI:
         _chkrc(
             lib.Esys_PolicyAuthorize(
                 self.ctx,
-                policySession,
+                policy_session,
                 session1,
                 session2,
                 session3,
