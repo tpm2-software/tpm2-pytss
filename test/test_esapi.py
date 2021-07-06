@@ -1668,7 +1668,7 @@ class TestEsys(TSS2_EsapiTest):
 
         ctx = self.ectx.context_save(handle)
 
-        nhandle = self.ectx.ContextLoad(ctx)
+        nhandle = self.ectx.context_load(ctx)
         name = self.ectx.tr_get_name(nhandle)
 
         self.assertEqual(bytes(outpub.getName()), bytes(name))
