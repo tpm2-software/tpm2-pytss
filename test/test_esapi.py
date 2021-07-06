@@ -2394,7 +2394,7 @@ class TestEsys(TSS2_EsapiTest):
         keyhandle, _, _, _, _ = self.ectx.create_primary(inSensitive, inPublic)
 
         with self.assertRaises(TSS2_Exception) as e:
-            self.ectx.FieldUpgradeStart(
+            self.ectx.field_upgrade_start(
                 ESYS_TR.PLATFORM,
                 keyhandle,
                 b"",
