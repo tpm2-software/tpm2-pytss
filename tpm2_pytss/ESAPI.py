@@ -6,7 +6,7 @@ from ._libtpm2_pytss import lib
 
 from .types import *
 
-from .utils import _chkrc, TPM2B_pack
+from .utils import _chkrc
 from .TCTI import TCTI
 
 from typing import Union, Tuple, List
@@ -126,10 +126,13 @@ class ESAPI:
         )
         return obj[0]
 
-    def set_auth(self, esys_tr: ESYS_TR, auth: str):
+    def set_auth(self, esys_tr: ESYS_TR, auth: Union[TPM2B_AUTH, bytes, str, None]):
 
-        auth_p = TPM2B_pack(auth, "TPM2B_AUTH")
-        _chkrc(lib.Esys_TR_SetAuth(self._ctx, esys_tr, auth_p))
+        if auth is None:
+            auth = TPM2B_AUTH()
+
+        auth_cdata = get_cdata(auth, TPM2B_AUTH, "auth")
+        _chkrc(lib.Esys_TR_SetAuth(self._ctx, esys_tr, auth_cdata))
 
     def tr_get_name(self, handle: ESYS_TR) -> TPM2B_NAME:
 
