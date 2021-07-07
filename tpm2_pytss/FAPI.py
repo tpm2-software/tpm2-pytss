@@ -11,7 +11,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from ._libtpm2_pytss import ffi, lib
 from .callbacks import Callback, CallbackType, get_callback, unlock_callback
 from .fapi_info import FapiInfo
-from .utils import _chkrc, to_bytes_or_null
+from .utils import _chkrc, to_bytes_or_null, get_dptr
 from .TCTI import TCTI
 
 logger = logging.getLogger(__name__)
@@ -23,10 +23,6 @@ FAPI_CONFIG_PATHS = [
     "/etc/tpm2-tss/fapi-config.json",
     "/usr/local/etc/tpm2-tss/fapi-config.json",
 ]
-
-
-def get_ptr(dptr):
-    return ffi.gc(dptr[0], lib.Fapi_Free)
 
 
 class FapiConfig(contextlib.ExitStack):
@@ -236,7 +232,7 @@ class FAPI:
         data = ffi.new("uint8_t **")
         ret = lib.Fapi_GetRandom(self._ctx, num_bytes, data)
         _chkrc(ret)
-        return bytes(ffi.unpack(get_ptr(data), num_bytes))
+        return bytes(ffi.unpack(get_dptr(data, lib.Fapi_Free), num_bytes))
 
     def get_info(self) -> str:
         """Get Fapi information, containing library info, TPM capabilities and more.
@@ -250,7 +246,7 @@ class FAPI:
         info = ffi.new("char **")
         ret = lib.Fapi_GetInfo(self._ctx, info)
         _chkrc(ret)
-        return ffi.string(get_ptr(info)).decode(self.encoding)
+        return ffi.string(get_dptr(info, lib.Fapi_Free)).decode(self.encoding)
 
     def list(self, search_path: Optional[Union[bytes, str]] = None) -> List[str]:
         """Get a list of all Fapi current object paths.
@@ -268,7 +264,11 @@ class FAPI:
         path_list = ffi.new("char **")
         ret = lib.Fapi_List(self._ctx, search_path, path_list)
         _chkrc(ret)
-        return ffi.string(get_ptr(path_list)).decode(self.encoding).split(":")
+        return (
+            ffi.string(get_dptr(path_list, lib.Fapi_Free))
+            .decode(self.encoding)
+            .split(":")
+        )
 
     def create_key(
         self,
@@ -342,9 +342,9 @@ class FAPI:
         )
         _chkrc(ret)
         return (
-            bytes(ffi.unpack(get_ptr(signature), signature_size[0])),
-            ffi.string(get_ptr(public_key)),
-            ffi.string(get_ptr(certificate)),
+            bytes(ffi.unpack(get_dptr(signature, lib.Fapi_Free), signature_size[0])),
+            ffi.string(get_dptr(public_key, lib.Fapi_Free)),
+            ffi.string(get_dptr(certificate, lib.Fapi_Free)),
         )
 
     def verify_signature(
@@ -389,7 +389,9 @@ class FAPI:
             self._ctx, path, plaintext, len(plaintext), ciphertext, ciphertext_size
         )
         _chkrc(ret)
-        return bytes(ffi.unpack(get_ptr(ciphertext), ciphertext_size[0]))
+        return bytes(
+            ffi.unpack(get_dptr(ciphertext, lib.Fapi_Free), ciphertext_size[0])
+        )
 
     def decrypt(self, path: Union[bytes, str], ciphertext: bytes) -> bytes:
         """Decrypt the ciphertext and return the plaintext.
@@ -473,7 +475,7 @@ class FAPI:
         data_size = ffi.new("size_t *")
         ret = lib.Fapi_Unseal(self._ctx, path, data, data_size)
         _chkrc(ret)
-        return bytes(ffi.unpack(get_ptr(data), data_size[0]))
+        return bytes(ffi.unpack(get_dptr(data, lib.Fapi_Free), data_size[0]))
 
     def import_object(
         self,
@@ -552,7 +554,7 @@ class FAPI:
         exported_data = ffi.new("char **")
         ret = lib.Fapi_ExportKey(self._ctx, path, new_path, exported_data)
         _chkrc(ret)
-        return ffi.string(get_ptr(exported_data)).decode(self.encoding)
+        return ffi.string(get_dptr(exported_data, lib.Fapi_Free)).decode(self.encoding)
 
     def set_description(
         self, path: Union[bytes, str], description: Optional[Union[bytes, str]] = None
@@ -588,7 +590,7 @@ class FAPI:
         ret = lib.Fapi_GetDescription(self._ctx, path, description)
         _chkrc(ret)
         # description is guaranteed to be a null-terminated string
-        return ffi.string(get_ptr(description)).decode()
+        return ffi.string(get_dptr(description, lib.Fapi_Free)).decode()
 
     def set_app_data(
         self, path: Union[bytes, str], app_data: Optional[Union[bytes, str]] = None
@@ -630,7 +632,7 @@ class FAPI:
         _chkrc(ret)
         if app_data[0] == ffi.NULL:
             return None
-        return bytes(ffi.unpack(get_ptr(app_data), app_data_size[0]))
+        return bytes(ffi.unpack(get_dptr(app_data, lib.Fapi_Free), app_data_size[0]))
 
     def set_certificate(
         self, path: Union[bytes, str], certificate: Optional[Union[bytes, str]] = None
@@ -666,7 +668,7 @@ class FAPI:
         ret = lib.Fapi_GetCertificate(self._ctx, path, certificate)
         _chkrc(ret)
         # certificate is guaranteed to be a null-terminated string
-        return ffi.string(get_ptr(certificate)).decode()
+        return ffi.string(get_dptr(certificate, lib.Fapi_Free)).decode()
 
     def get_platform_certificates(self, no_cert_ok: bool = False) -> bytes:
         """Get the platform certificate and the so-called delta certificates.
@@ -690,7 +692,9 @@ class FAPI:
         _chkrc(ret, acceptable=lib.TSS2_FAPI_RC_NO_CERT if no_cert_ok else None)
         if no_cert_ok and ret == lib.TSS2_FAPI_RC_NO_CERT:
             return b""
-        return bytes(ffi.unpack(get_ptr(certificate), certificates_size))
+        return bytes(
+            ffi.unpack(get_dptr(certificate, lib.Fapi_Free), certificates_size)
+        )
 
     def get_tpm_blobs(self, path: Union[bytes, str]) -> Tuple[Any, Any, str]:
         """Get the TPM data blobs and the policy associates with a Fapi object.
@@ -727,14 +731,17 @@ class FAPI:
         offs = ffi.new("size_t *", 0)
         tpm_2b_public_unmarsh = ffi.new("TPM2B_PUBLIC *")
         ret = lib.Tss2_MU_TPM2B_PUBLIC_Unmarshal(
-            get_ptr(tpm_2b_public), tpm_2b_public_size[0], offs, tpm_2b_public_unmarsh
+            get_dptr(tpm_2b_public, lib.Fapi_Free),
+            tpm_2b_public_size[0],
+            offs,
+            tpm_2b_public_unmarsh,
         )
         _chkrc(ret)
 
         offs[0] = 0
         tpm_2b_private_unmarsh = ffi.new("TPM2B_PRIVATE *")
         ret = lib.Tss2_MU_TPM2B_PRIVATE_Unmarshal(
-            get_ptr(tpm_2b_private),
+            get_dptr(tpm_2b_private, lib.Fapi_Free),
             tpm_2b_private_size[0],
             offs,
             tpm_2b_private_unmarsh,
@@ -767,7 +774,7 @@ class FAPI:
         length = ffi.new("size_t *")
         ret = lib.Fapi_GetEsysBlob(self._ctx, path, type, data, length)
         _chkrc(ret)
-        return bytes(ffi.unpack(get_ptr(data), length[0])), type[0]
+        return bytes(ffi.unpack(get_dptr(data, lib.Fapi_Free), length[0])), type[0]
 
     def export_policy(self, path: Union[bytes, str]) -> str:
         """Export a policy from the key store as a JSON-encoded string.
@@ -785,7 +792,7 @@ class FAPI:
         policy = ffi.new("char **")
         ret = lib.Fapi_ExportPolicy(self._ctx, path, policy)
         _chkrc(ret)
-        return ffi.string(get_ptr(policy)).decode()
+        return ffi.string(get_dptr(policy, lib.Fapi_Free)).decode()
 
     def authorize_policy(
         self,
@@ -834,8 +841,8 @@ class FAPI:
         ret = lib.Fapi_PcrRead(self._ctx, index, value, value_size, log)
         _chkrc(ret)
         return (
-            bytes(ffi.unpack(get_ptr(value), value_size[0])),
-            ffi.string(get_ptr(log)).decode(),
+            bytes(ffi.unpack(get_dptr(value, lib.Fapi_Free), value_size[0])),
+            ffi.string(get_dptr(log, lib.Fapi_Free)).decode(),
         )
 
     def pcr_extend(
@@ -918,10 +925,10 @@ class FAPI:
         )
         _chkrc(ret)
         return (
-            ffi.string(get_ptr(quote_info)).decode(),
-            bytes(ffi.unpack(get_ptr(signature), signature_len[0])),
-            ffi.string(get_ptr(pcr_log)).decode(),
-            ffi.string(get_ptr(certificate)).decode(),
+            ffi.string(get_dptr(quote_info, lib.Fapi_Free)).decode(),
+            bytes(ffi.unpack(get_dptr(signature, lib.Fapi_Free), signature_len[0])),
+            ffi.string(get_dptr(pcr_log, lib.Fapi_Free)).decode(),
+            ffi.string(get_dptr(certificate, lib.Fapi_Free)).decode(),
         )
 
     def verify_quote(
@@ -1011,8 +1018,8 @@ class FAPI:
         ret = lib.Fapi_NvRead(self._ctx, path, data, data_size, log)
         _chkrc(ret)
         return (
-            bytes(ffi.unpack(get_ptr(data), data_size[0])),
-            ffi.string(get_ptr(log)).decode(),
+            bytes(ffi.unpack(get_dptr(data, lib.Fapi_Free), data_size[0])),
+            ffi.string(get_dptr(log, lib.Fapi_Free)).decode(),
         )
 
     def nv_write(self, path: Union[bytes, str], data: Union[bytes, str]) -> None:
