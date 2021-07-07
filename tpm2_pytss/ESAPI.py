@@ -4,7 +4,7 @@ SPDX-License-Identifier: BSD-2
 
 from .types import *
 
-from .utils import _chkrc, get_dptr
+from .utils import _chkrc, get_dptr, check_friendly_int
 from .TCTI import TCTI
 
 from typing import Union, Tuple, List
@@ -55,17 +55,6 @@ def check_handle_type(handle, varname, expected=None, cls=ESYS_TR):
             msg = f"expected {varname} to be {cls.to_string(expected[0])}, got {cls.to_string(handle)}"
 
         raise ValueError(msg)
-
-
-def check_friendly_int(friendly, varname, clazz):
-
-    if not isinstance(friendly, int):
-        raise TypeError(f"expected {varname} to be type int, got {type(friendly)}")
-
-    if not clazz.contains(friendly):
-        raise ValueError(
-            f"expected {varname} value of {friendly} in class {str(clazz)}, however it's not found."
-        )
 
 
 class ESAPI:
