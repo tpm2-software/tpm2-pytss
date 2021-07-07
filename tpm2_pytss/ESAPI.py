@@ -2,8 +2,6 @@
 SPDX-License-Identifier: BSD-2
 """
 
-from ._libtpm2_pytss import lib
-
 from .types import *
 
 from .utils import _chkrc
