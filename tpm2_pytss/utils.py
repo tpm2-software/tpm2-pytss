@@ -51,19 +51,6 @@ def TPM2B_unpack(x, n="buffer"):
     return b
 
 
-def TPM2B_pack(x, t="DIGEST"):
-    if t.startswith("TPM2B_"):
-        t = t[6:]
-    r = ffi.new("TPM2B_{0} *".format(t))
-    if x is None:
-        return r
-    if isinstance(x, str):
-        x = x.encode()
-    r.size = len(x)
-    ffi.memmove(r.buffer, x, len(x))
-    return r
-
-
 def CLASS_INT_ATTRS_from_string(cls, str_value, fixup_map=None):
     """
     Given a class, lookup int attributes by name and return that attribute value.
