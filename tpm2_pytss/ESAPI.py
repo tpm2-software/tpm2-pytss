@@ -10,7 +10,7 @@ from .TCTI import TCTI
 from typing import Union, Tuple, List
 
 
-def get_cdata(value, expected, varname, allow_none=False, *args, **kwargs):
+def _get_cdata(value, expected, varname, allow_none=False, *args, **kwargs):
     tname = expected.__name__
 
     if value is None and allow_none:
@@ -114,7 +114,7 @@ class ESAPI:
         if auth is None:
             auth = TPM2B_AUTH()
 
-        auth_cdata = get_cdata(auth, TPM2B_AUTH, "auth")
+        auth_cdata = _get_cdata(auth, TPM2B_AUTH, "auth")
         _chkrc(lib.Esys_TR_SetAuth(self._ctx, esys_tr, auth_cdata))
 
     def tr_get_name(self, handle: ESYS_TR) -> TPM2B_NAME:
@@ -176,7 +176,7 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        toTest_cdata = get_cdata(to_test, TPML_ALG, "to_test")
+        toTest_cdata = _get_cdata(to_test, TPML_ALG, "to_test")
 
         toDoList = ffi.new("TPML_ALG **")
         _chkrc(
@@ -231,10 +231,10 @@ class ESAPI:
         check_friendly_int(session_type, "session_type", TPM2_SE)
         check_friendly_int(auth_hash, "auth_hash", TPM2_ALG)
 
-        nonceCaller_cdata = get_cdata(
+        nonceCaller_cdata = _get_cdata(
             nonce_caller, TPM2B_NONCE, "nonce_caller", allow_none=True
         )
-        symmetric_cdata = get_cdata(symmetric, TPMT_SYM_DEF, "symmetric")
+        symmetric_cdata = _get_cdata(symmetric, TPMT_SYM_DEF, "symmetric")
 
         sessionHandle = ffi.new("ESYS_TR *")
         _chkrc(
@@ -317,12 +317,12 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        inPublic_cdata = get_cdata(in_public, TPM2B_PUBLIC, "in_public")
-        inSensitive_cdata = get_cdata(
+        inPublic_cdata = _get_cdata(in_public, TPM2B_PUBLIC, "in_public")
+        inSensitive_cdata = _get_cdata(
             in_sensitive, TPM2B_SENSITIVE_CREATE, "in_sensitive"
         )
-        outsideInfo_cdata = get_cdata(outside_info, TPM2B_DATA, "outside_info")
-        creationPCR_cdata = get_cdata(creation_pcr, TPML_PCR_SELECTION, "creation_pcr")
+        outsideInfo_cdata = _get_cdata(outside_info, TPM2B_DATA, "outside_info")
+        creationPCR_cdata = _get_cdata(creation_pcr, TPML_PCR_SELECTION, "creation_pcr")
 
         outPrivate = ffi.new("TPM2B_PRIVATE **")
         outPublic = ffi.new("TPM2B_PUBLIC **")
@@ -370,8 +370,8 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        inPublic_cdata = get_cdata(in_public, TPM2B_PUBLIC, "in_public")
-        inPrivate_cdata = get_cdata(in_private, TPM2B_PRIVATE, "in_private")
+        inPublic_cdata = _get_cdata(in_public, TPM2B_PUBLIC, "in_public")
+        inPrivate_cdata = _get_cdata(in_private, TPM2B_PRIVATE, "in_private")
 
         objectHandle = ffi.new("ESYS_TR *")
         _chkrc(
@@ -405,11 +405,11 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        inPrivate_cdata = get_cdata(
+        inPrivate_cdata = _get_cdata(
             in_private, TPM2B_SENSITIVE, "in_private", allow_none=True
         )
 
-        inPublic_cdata = get_cdata(in_public, TPM2B_PUBLIC, "in_public")
+        inPublic_cdata = _get_cdata(in_public, TPM2B_PUBLIC, "in_public")
 
         objectHandle = ffi.new("ESYS_TR *")
         _chkrc(
@@ -479,10 +479,10 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        credentialBlob_cdata = get_cdata(
+        credentialBlob_cdata = _get_cdata(
             credential_blob, TPM2B_ID_OBJECT, "credential_blob"
         )
-        secret_cdata = get_cdata(secret, TPM2B_ENCRYPTED_SECRET, "secret")
+        secret_cdata = _get_cdata(secret, TPM2B_ENCRYPTED_SECRET, "secret")
 
         certInfo = ffi.new("TPM2B_DIGEST **")
         _chkrc(
@@ -516,8 +516,8 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        credential_cdata = get_cdata(credential, TPM2B_DIGEST, "credential")
-        objectName_cdata = get_cdata(object_name, TPM2B_NAME, "object_name")
+        credential_cdata = _get_cdata(credential, TPM2B_DIGEST, "credential")
+        objectName_cdata = _get_cdata(object_name, TPM2B_NAME, "object_name")
 
         credentialBlob = ffi.new("TPM2B_ID_OBJECT **")
         secret = ffi.new("TPM2B_ENCRYPTED_SECRET **")
@@ -578,7 +578,7 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        newAuth_cdata = get_cdata(new_auth, TPM2B_AUTH, "new_auth")
+        newAuth_cdata = _get_cdata(new_auth, TPM2B_AUTH, "new_auth")
 
         outPrivate = ffi.new("TPM2B_PRIVATE **")
         _chkrc(
@@ -614,10 +614,10 @@ class ESAPI:
         if isinstance(in_public, str):
             in_public = TPM2B_TEMPLATE(TPMT_PUBLIC.parse(in_public).Marshal())
 
-        inSensitive_cdata = get_cdata(
+        inSensitive_cdata = _get_cdata(
             in_sensitive, TPM2B_SENSITIVE_CREATE, "in_sensitive"
         )
-        inPublic_cdata = get_cdata(in_public, TPM2B_TEMPLATE, "in_public")
+        inPublic_cdata = _get_cdata(in_public, TPM2B_TEMPLATE, "in_public")
 
         objectHandle = ffi.new("ESYS_TR *")
         outPrivate = ffi.new("TPM2B_PRIVATE **")
@@ -660,10 +660,10 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        encryptionKeyIn_cdata = get_cdata(
+        encryptionKeyIn_cdata = _get_cdata(
             encryption_key_in, TPM2B_DATA, "encryption_key_in", allow_none=True
         )
-        symmetricAlg_cdata = get_cdata(
+        symmetricAlg_cdata = _get_cdata(
             symmetric_alg, TPMT_SYM_DEF_OBJECT, "symmetric_alg"
         )
 
@@ -710,11 +710,11 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        inDuplicate_cdata = get_cdata(in_duplicate, TPM2B_PRIVATE, "in_duplicate")
+        inDuplicate_cdata = _get_cdata(in_duplicate, TPM2B_PRIVATE, "in_duplicate")
 
-        inSymSeed_cdata = get_cdata(in_sym_seed, TPM2B_ENCRYPTED_SECRET, "in_sym_seed")
+        inSymSeed_cdata = _get_cdata(in_sym_seed, TPM2B_ENCRYPTED_SECRET, "in_sym_seed")
 
-        name_cdata = get_cdata(name, TPM2B_NAME, "name")
+        name_cdata = _get_cdata(name, TPM2B_NAME, "name")
 
         outDuplicate = ffi.new("TPM2B_PRIVATE **")
         outSymSeed = ffi.new("TPM2B_ENCRYPTED_SECRET **")
@@ -756,15 +756,15 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        encryptionKey_cdata = get_cdata(encryption_key, TPM2B_DATA, "encryption_key")
+        encryptionKey_cdata = _get_cdata(encryption_key, TPM2B_DATA, "encryption_key")
 
-        objectPublic_cdata = get_cdata(object_public, TPM2B_PUBLIC, "object_public")
+        objectPublic_cdata = _get_cdata(object_public, TPM2B_PUBLIC, "object_public")
 
-        duplicate_cdata = get_cdata(duplicate, TPM2B_PRIVATE, "duplicate")
+        duplicate_cdata = _get_cdata(duplicate, TPM2B_PRIVATE, "duplicate")
 
-        inSymSeed_cdata = get_cdata(in_sym_seed, TPM2B_ENCRYPTED_SECRET, "in_sym_seed")
+        inSymSeed_cdata = _get_cdata(in_sym_seed, TPM2B_ENCRYPTED_SECRET, "in_sym_seed")
 
-        symmetricAlg_cdata = get_cdata(
+        symmetricAlg_cdata = _get_cdata(
             symmetricAlg, TPMT_SYM_DEF_OBJECT, "symmetricAlg"
         )
 
@@ -802,9 +802,9 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        inScheme_cdata = get_cdata(in_scheme, TPMT_RSA_DECRYPT, "in_scheme")
-        message_cdata = get_cdata(message, TPM2B_PUBLIC_KEY_RSA, "message")
-        label_cdata = get_cdata(label, TPM2B_DATA, "label", allow_none=True)
+        inScheme_cdata = _get_cdata(in_scheme, TPMT_RSA_DECRYPT, "in_scheme")
+        message_cdata = _get_cdata(message, TPM2B_PUBLIC_KEY_RSA, "message")
+        label_cdata = _get_cdata(label, TPM2B_DATA, "label", allow_none=True)
 
         outData = ffi.new("TPM2B_PUBLIC_KEY_RSA **")
         _chkrc(
@@ -838,9 +838,9 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        inScheme_cdata = get_cdata(in_scheme, TPMT_RSA_DECRYPT, "in_scheme")
-        cipherText_cdata = get_cdata(cipher_text, TPM2B_PUBLIC_KEY_RSA, "cipher_text")
-        label_cdata = get_cdata(label, TPM2B_DATA, "label", allow_none=True)
+        inScheme_cdata = _get_cdata(in_scheme, TPMT_RSA_DECRYPT, "in_scheme")
+        cipherText_cdata = _get_cdata(cipher_text, TPM2B_PUBLIC_KEY_RSA, "cipher_text")
+        label_cdata = _get_cdata(label, TPM2B_DATA, "label", allow_none=True)
 
         message = ffi.new("TPM2B_PUBLIC_KEY_RSA **")
         _chkrc(
@@ -897,7 +897,7 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        inPoint_cdata = get_cdata(in_point, TPM2B_ECC_POINT, "in_point")
+        inPoint_cdata = _get_cdata(in_point, TPM2B_ECC_POINT, "in_point")
 
         outPoint = ffi.new("TPM2B_ECC_POINT **")
         _chkrc(
@@ -963,8 +963,8 @@ class ESAPI:
                 f"Expected counter to be in range of uint16_t, got {counter}"
             )
 
-        inQsB_cdata = get_cdata(in_qs_b, TPM2B_ECC_POINT, "in_qs_b")
-        inQeB_cdata = get_cdata(in_qe_b, TPM2B_ECC_POINT, "in_qe_b")
+        inQsB_cdata = _get_cdata(in_qs_b, TPM2B_ECC_POINT, "in_qs_b")
+        inQeB_cdata = _get_cdata(in_qe_b, TPM2B_ECC_POINT, "in_qe_b")
 
         outZ1 = ffi.new("TPM2B_ECC_POINT **")
         outZ2 = ffi.new("TPM2B_ECC_POINT **")
@@ -1009,8 +1009,8 @@ class ESAPI:
 
         check_friendly_int(mode, "mode", TPM2_ALG)
 
-        ivIn_cdata = get_cdata(iv_in, TPM2B_IV, "iv_in")
-        inData_cdata = get_cdata(in_data, TPM2B_MAX_BUFFER, "in_data")
+        ivIn_cdata = _get_cdata(iv_in, TPM2B_IV, "iv_in")
+        inData_cdata = _get_cdata(in_data, TPM2B_MAX_BUFFER, "in_data")
 
         if not isinstance(decrypt, bool):
             raise TypeError(f"Expected decrypt to be type bool, got {type(decrypt)}")
@@ -1057,8 +1057,8 @@ class ESAPI:
 
         check_friendly_int(mode, "mode", TPM2_ALG)
 
-        ivIn_cdata = get_cdata(iv_in, TPM2B_IV, "iv_in")
-        inData_cdata = get_cdata(in_data, TPM2B_MAX_BUFFER, "in_data")
+        ivIn_cdata = _get_cdata(iv_in, TPM2B_IV, "iv_in")
+        inData_cdata = _get_cdata(in_data, TPM2B_MAX_BUFFER, "in_data")
 
         if not isinstance(decrypt, bool):
             raise TypeError("Expected decrypt to be type bool, got {type(decrypt)}")
@@ -1101,7 +1101,7 @@ class ESAPI:
 
         check_friendly_int(hash_alg, "hash_alg", TPM2_ALG)
 
-        data_cdata = get_cdata(data, TPM2B_MAX_BUFFER, "data")
+        data_cdata = _get_cdata(data, TPM2B_MAX_BUFFER, "data")
 
         outHash = ffi.new("TPM2B_DIGEST **")
         validation = ffi.new("TPMT_TK_HASHCHECK **")
@@ -1140,7 +1140,7 @@ class ESAPI:
 
         check_friendly_int(hash_alg, "hash_alg", TPM2_ALG)
 
-        buffer_cdata = get_cdata(buffer, TPM2B_MAX_BUFFER, "buffer")
+        buffer_cdata = _get_cdata(buffer, TPM2B_MAX_BUFFER, "buffer")
 
         outHMAC = ffi.new("TPM2B_DIGEST **")
         _chkrc(
@@ -1195,7 +1195,7 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        inData_cdata = get_cdata(in_data, TPM2B_SENSITIVE_DATA, "in_data")
+        inData_cdata = _get_cdata(in_data, TPM2B_SENSITIVE_DATA, "in_data")
 
         _chkrc(
             lib.Esys_StirRandom(self._ctx, session1, session2, session3, inData_cdata)
@@ -1222,7 +1222,7 @@ class ESAPI:
         if auth is None:
             auth = TPM2B_AUTH()
 
-        auth_cdata = get_cdata(auth, TPM2B_AUTH, "auth")
+        auth_cdata = _get_cdata(auth, TPM2B_AUTH, "auth")
 
         sequenceHandle = ffi.new("ESYS_TR *")
         _chkrc(
@@ -1258,7 +1258,7 @@ class ESAPI:
         if auth is None:
             auth = TPM2B_AUTH()
 
-        auth_cdata = get_cdata(auth, TPM2B_AUTH, "auth")
+        auth_cdata = _get_cdata(auth, TPM2B_AUTH, "auth")
 
         sequenceHandle = ffi.new("ESYS_TR *")
         _chkrc(
@@ -1289,7 +1289,7 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        buffer_cdata = get_cdata(buffer, TPM2B_MAX_BUFFER, "buffer", allow_none=True)
+        buffer_cdata = _get_cdata(buffer, TPM2B_MAX_BUFFER, "buffer", allow_none=True)
 
         _chkrc(
             lib.Esys_SequenceUpdate(
@@ -1314,7 +1314,7 @@ class ESAPI:
 
         check_friendly_int(hierarchy, "hierarchy", ESYS_TR)
 
-        buffer_cdata = get_cdata(buffer, TPM2B_MAX_BUFFER, "buffer", allow_none=True)
+        buffer_cdata = _get_cdata(buffer, TPM2B_MAX_BUFFER, "buffer", allow_none=True)
 
         result = ffi.new("TPM2B_DIGEST **")
         validation = ffi.new("TPMT_TK_HASHCHECK **")
@@ -1354,7 +1354,7 @@ class ESAPI:
 
         check_friendly_int(pcr_handle, "pcr_handle", ESYS_TR)
 
-        buffer_cdata = get_cdata(buffer, TPM2B_MAX_BUFFER, "buffer", allow_none=True)
+        buffer_cdata = _get_cdata(buffer, TPM2B_MAX_BUFFER, "buffer", allow_none=True)
 
         results = ffi.new("TPML_DIGEST_VALUES **")
         _chkrc(
@@ -1388,8 +1388,10 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        qualifyingData_cdata = get_cdata(qualifying_data, TPM2B_DATA, "qualifying_data")
-        inScheme_cdata = get_cdata(in_scheme, TPMT_SIG_SCHEME, "in_scheme")
+        qualifyingData_cdata = _get_cdata(
+            qualifying_data, TPM2B_DATA, "qualifying_data"
+        )
+        inScheme_cdata = _get_cdata(in_scheme, TPMT_SIG_SCHEME, "in_scheme")
 
         certifyInfo = ffi.new("TPM2B_ATTEST **")
         signature = ffi.new("TPMT_SIGNATURE **")
@@ -1431,10 +1433,12 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        qualifyingData_cdata = get_cdata(qualifying_data, TPM2B_DATA, "qualifying_data")
-        inScheme_cdata = get_cdata(in_scheme, TPMT_SIG_SCHEME, "in_scheme")
-        creationHash_cdata = get_cdata(creation_hash, TPM2B_DIGEST, "creation_hash")
-        creationTicket_cdata = get_cdata(
+        qualifyingData_cdata = _get_cdata(
+            qualifying_data, TPM2B_DATA, "qualifying_data"
+        )
+        inScheme_cdata = _get_cdata(in_scheme, TPMT_SIG_SCHEME, "in_scheme")
+        creationHash_cdata = _get_cdata(creation_hash, TPM2B_DIGEST, "creation_hash")
+        creationTicket_cdata = _get_cdata(
             creation_ticket, TPMT_TK_CREATION, "creation_ticket"
         )
 
@@ -1477,11 +1481,13 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        qualifyingData_cdata = get_cdata(qualifying_data, TPM2B_DATA, "qualifying_data")
+        qualifyingData_cdata = _get_cdata(
+            qualifying_data, TPM2B_DATA, "qualifying_data"
+        )
 
-        inScheme_cdata = get_cdata(in_scheme, TPMT_SIG_SCHEME, "in_scheme")
+        inScheme_cdata = _get_cdata(in_scheme, TPMT_SIG_SCHEME, "in_scheme")
 
-        PCRselect_cdata = get_cdata(pcr_select, TPML_PCR_SELECTION, "pcr_select")
+        PCRselect_cdata = _get_cdata(pcr_select, TPML_PCR_SELECTION, "pcr_select")
 
         quoted = ffi.new("TPM2B_ATTEST **")
         signature = ffi.new("TPMT_SIGNATURE **")
@@ -1527,11 +1533,11 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        qualifyingData_cdata = get_cdata(
+        qualifyingData_cdata = _get_cdata(
             qualifying_data, TPM2B_DATA, "qualifying_data", allow_none=True
         )
 
-        inScheme_cdata = get_cdata(in_scheme, TPMT_SIG_SCHEME, "in_scheme")
+        inScheme_cdata = _get_cdata(in_scheme, TPMT_SIG_SCHEME, "in_scheme")
 
         auditInfo = ffi.new("TPM2B_ATTEST **")
         signature = ffi.new("TPMT_SIGNATURE **")
@@ -1574,11 +1580,11 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        qualifyingData_cdata = get_cdata(
+        qualifyingData_cdata = _get_cdata(
             qualifying_data, TPM2B_DATA, "qualifying_data", allow_none=True
         )
 
-        inScheme_cdata = get_cdata(in_scheme, TPMT_SIG_SCHEME, "in_scheme")
+        inScheme_cdata = _get_cdata(in_scheme, TPMT_SIG_SCHEME, "in_scheme")
 
         auditInfo = ffi.new("TPM2B_ATTEST **")
         signature = ffi.new("TPMT_SIGNATURE **")
@@ -1620,11 +1626,11 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        qualifyingData_cdata = get_cdata(
+        qualifyingData_cdata = _get_cdata(
             qualifying_data, TPM2B_DATA, "qualifying_data", allow_none=True
         )
 
-        inScheme_cdata = get_cdata(in_scheme, TPMT_SIG_SCHEME, "in_scheme")
+        inScheme_cdata = _get_cdata(in_scheme, TPMT_SIG_SCHEME, "in_scheme")
 
         timeInfo = ffi.new("TPM2B_ATTEST **")
         signature = ffi.new("TPMT_SIGNATURE **")
@@ -1663,9 +1669,9 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        P1_cdata = get_cdata(p1, TPM2B_ECC_POINT, "p1")
-        s2_cdata = get_cdata(s2, TPM2B_SENSITIVE_DATA, "s2")
-        y2_cdata = get_cdata(y2, TPM2B_ECC_PARAMETER, "y2")
+        P1_cdata = _get_cdata(p1, TPM2B_ECC_POINT, "p1")
+        s2_cdata = _get_cdata(s2, TPM2B_SENSITIVE_DATA, "s2")
+        y2_cdata = _get_cdata(y2, TPM2B_ECC_PARAMETER, "y2")
 
         K = ffi.new("TPM2B_ECC_POINT **")
         L = ffi.new("TPM2B_ECC_POINT **")
@@ -1731,8 +1737,8 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        digest_cdata = get_cdata(digest, TPM2B_DIGEST, "digest")
-        signature_cdata = get_cdata(signature, TPMT_SIGNATURE, "signature")
+        digest_cdata = _get_cdata(digest, TPM2B_DIGEST, "digest")
+        signature_cdata = _get_cdata(signature, TPMT_SIGNATURE, "signature")
 
         validation = ffi.new("TPMT_TK_VERIFIED **")
         _chkrc(
@@ -1765,9 +1771,9 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        digest_cdata = get_cdata(digest, TPM2B_DIGEST, "digest")
-        inScheme_cdata = get_cdata(in_scheme, TPMT_SIG_SCHEME, "in_scheme")
-        validation_cdata = get_cdata(validation, TPMT_TK_HASHCHECK, "validation")
+        digest_cdata = _get_cdata(digest, TPM2B_DIGEST, "digest")
+        inScheme_cdata = _get_cdata(in_scheme, TPMT_SIG_SCHEME, "in_scheme")
+        validation_cdata = _get_cdata(validation, TPMT_TK_HASHCHECK, "validation")
 
         signature = ffi.new("TPMT_SIGNATURE **")
         _chkrc(
@@ -1804,8 +1810,8 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        setList_cdata = get_cdata(set_list, TPML_CC, "set_list")
-        clearList_cdata = get_cdata(clear_list, TPML_CC, "digest")
+        setList_cdata = _get_cdata(set_list, TPML_CC, "set_list")
+        clearList_cdata = _get_cdata(clear_list, TPML_CC, "digest")
 
         _chkrc(
             lib.Esys_SetCommandCodeAuditStatus(
@@ -1831,7 +1837,7 @@ class ESAPI:
 
         check_handle_type(pcr_handle, "pcr_handle")
 
-        digests_cdata = get_cdata(digests, TPML_DIGEST_VALUES, "digests")
+        digests_cdata = _get_cdata(digests, TPML_DIGEST_VALUES, "digests")
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
@@ -1858,7 +1864,7 @@ class ESAPI:
 
         check_handle_type(pcr_handle, "pcr_handle")
 
-        eventData_cdata = get_cdata(event_data, TPM2B_EVENT, "event_data")
+        eventData_cdata = _get_cdata(event_data, TPM2B_EVENT, "event_data")
 
         digests = ffi.new("TPML_DIGEST_VALUES **")
         _chkrc(
@@ -1886,7 +1892,7 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        pcrSelectionIn_cdata = get_cdata(
+        pcrSelectionIn_cdata = _get_cdata(
             pcr_selection_in, TPML_PCR_SELECTION, "pcr_selection_in"
         )
 
@@ -1926,7 +1932,7 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        pcrAllocation_cdata = get_cdata(
+        pcrAllocation_cdata = _get_cdata(
             pcr_allocation, TPML_PCR_SELECTION, "pcr_allocation"
         )
 
@@ -1966,7 +1972,7 @@ class ESAPI:
         check_friendly_int(hash_alg, "hash_alg", TPM2_ALG)
         check_friendly_int(pcr_num, "pcr_num", ESYS_TR)
 
-        authPolicy_cdata = get_cdata(auth_policy, TPM2B_DIGEST, "auth_policy")
+        authPolicy_cdata = _get_cdata(auth_policy, TPM2B_DIGEST, "auth_policy")
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
@@ -1996,7 +2002,7 @@ class ESAPI:
 
         check_friendly_int(pcr_handle, "pcr_handle", ESYS_TR)
 
-        auth_cdata = get_cdata(auth, TPM2B_DIGEST, "auth")
+        auth_cdata = _get_cdata(auth, TPM2B_DIGEST, "auth")
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
@@ -2051,10 +2057,10 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        nonceTPM_cdata = get_cdata(nonce_tpm, TPM2B_NONCE, "nonce_tpm")
-        cpHashA_cdata = get_cdata(cp_hash_a, TPM2B_DIGEST, "cp_hash_a")
-        policyRef_cdata = get_cdata(policy_ref, TPM2B_NONCE, "policy_ref")
-        auth_cdata = get_cdata(auth, TPMT_SIGNATURE, "auth")
+        nonceTPM_cdata = _get_cdata(nonce_tpm, TPM2B_NONCE, "nonce_tpm")
+        cpHashA_cdata = _get_cdata(cp_hash_a, TPM2B_DIGEST, "cp_hash_a")
+        policyRef_cdata = _get_cdata(policy_ref, TPM2B_NONCE, "policy_ref")
+        auth_cdata = _get_cdata(auth, TPMT_SIGNATURE, "auth")
 
         timeout = ffi.new("TPM2B_TIMEOUT **")
         policyTicket = ffi.new("TPMT_TK_AUTH **")
@@ -2106,9 +2112,9 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        nonceTPM_cdata = get_cdata(nonce_tpm, TPM2B_NONCE, "nonce_tpm")
-        cpHashA_cdata = get_cdata(cp_hash_a, TPM2B_DIGEST, "cp_hash_a")
-        policyRef_cdata = get_cdata(policy_ref, TPM2B_NONCE, "policy_ref")
+        nonceTPM_cdata = _get_cdata(nonce_tpm, TPM2B_NONCE, "nonce_tpm")
+        cpHashA_cdata = _get_cdata(cp_hash_a, TPM2B_DIGEST, "cp_hash_a")
+        policyRef_cdata = _get_cdata(policy_ref, TPM2B_NONCE, "policy_ref")
 
         timeout = ffi.new("TPM2B_TIMEOUT **")
         policyTicket = ffi.new("TPMT_TK_AUTH **")
@@ -2152,11 +2158,11 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        timeout_cdata = get_cdata(timeout, TPM2B_TIMEOUT, "timeout")
-        cpHashA_cdata = get_cdata(cp_hash_a, TPM2B_DIGEST, "cp_hash_a")
-        policyRef_cdata = get_cdata(policy_ref, TPM2B_NONCE, "policy_ref")
-        authName_cdata = get_cdata(auth_name, TPM2B_NAME, "auth_name")
-        ticket_cdata = get_cdata(ticket, TPMT_TK_AUTH, "ticket")
+        timeout_cdata = _get_cdata(timeout, TPM2B_TIMEOUT, "timeout")
+        cpHashA_cdata = _get_cdata(cp_hash_a, TPM2B_DIGEST, "cp_hash_a")
+        policyRef_cdata = _get_cdata(policy_ref, TPM2B_NONCE, "policy_ref")
+        authName_cdata = _get_cdata(auth_name, TPM2B_NAME, "auth_name")
+        ticket_cdata = _get_cdata(ticket, TPMT_TK_AUTH, "ticket")
 
         _chkrc(
             lib.Esys_PolicyTicket(
@@ -2188,7 +2194,7 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        pHashList_cdata = get_cdata(p_hash_list, TPML_DIGEST, "p_hash_list")
+        pHashList_cdata = _get_cdata(p_hash_list, TPML_DIGEST, "p_hash_list")
 
         _chkrc(
             lib.Esys_PolicyOR(
@@ -2212,8 +2218,8 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        pcrDigest_cdata = get_cdata(pcr_digest, TPM2B_DIGEST, "pcr_digest")
-        pcrs_cdata = get_cdata(pcrs, TPML_PCR_SELECTION, "pcrs")
+        pcrDigest_cdata = _get_cdata(pcr_digest, TPM2B_DIGEST, "pcr_digest")
+        pcrs_cdata = _get_cdata(pcrs, TPML_PCR_SELECTION, "pcrs")
 
         _chkrc(
             lib.Esys_PolicyPCR(
@@ -2279,7 +2285,7 @@ class ESAPI:
 
         check_handle_type(policy_session, "policy_session")
 
-        operandB_cdata = get_cdata(operand_b, TPM2B_OPERAND, "operand_b")
+        operandB_cdata = _get_cdata(operand_b, TPM2B_OPERAND, "operand_b")
 
         check_friendly_int(operation, "operation", TPM2_EO)
 
@@ -2318,7 +2324,7 @@ class ESAPI:
 
         check_handle_type(policy_session, "policy_session")
 
-        operandB_cdata = get_cdata(operand_b, TPM2B_OPERAND, "operand_b")
+        operandB_cdata = _get_cdata(operand_b, TPM2B_OPERAND, "operand_b")
 
         check_friendly_int(operation, "operation", TPM2_EO)
 
@@ -2393,7 +2399,7 @@ class ESAPI:
 
         check_handle_type(policy_session, "policy_session")
 
-        cpHashA_cdata = get_cdata(cp_hash_a, TPM2B_DIGEST, "cp_hash_a")
+        cpHashA_cdata = _get_cdata(cp_hash_a, TPM2B_DIGEST, "cp_hash_a")
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
@@ -2416,7 +2422,7 @@ class ESAPI:
 
         check_handle_type(policy_session, "policy_session")
 
-        nameHash_cdata = get_cdata(name_hash, TPM2B_DIGEST, "name_hash")
+        nameHash_cdata = _get_cdata(name_hash, TPM2B_DIGEST, "name_hash")
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
@@ -2441,8 +2447,8 @@ class ESAPI:
 
         check_handle_type(policy_session, "policy_session")
 
-        objectName_cdata = get_cdata(object_name, TPM2B_NAME, "object_name")
-        newParentName_cdata = get_cdata(new_parent_name, TPM2B_NAME, "new_parent_name")
+        objectName_cdata = _get_cdata(object_name, TPM2B_NAME, "object_name")
+        newParentName_cdata = _get_cdata(new_parent_name, TPM2B_NAME, "new_parent_name")
 
         if not isinstance(include_object, bool):
             raise TypeError(
@@ -2480,12 +2486,12 @@ class ESAPI:
 
         check_handle_type(policy_session, "policy_session")
 
-        approvedPolicy_cdata = get_cdata(
+        approvedPolicy_cdata = _get_cdata(
             approved_policy, TPM2B_DIGEST, "approved_policy"
         )
-        policyRef_cdata = get_cdata(policy_ref, TPM2B_NONCE, "policy_ref")
-        keySign_cdata = get_cdata(key_sign, TPM2B_NAME, "key_sign")
-        checkTicket_cdata = get_cdata(check_ticket, TPMT_TK_VERIFIED, "check_ticket")
+        policyRef_cdata = _get_cdata(policy_ref, TPM2B_NONCE, "policy_ref")
+        keySign_cdata = _get_cdata(key_sign, TPM2B_NAME, "key_sign")
+        checkTicket_cdata = _get_cdata(check_ticket, TPMT_TK_VERIFIED, "check_ticket")
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
@@ -2601,7 +2607,7 @@ class ESAPI:
 
         check_handle_type(policy_session, "policy_session")
 
-        templateHash_cdata = get_cdata(template_hash, TPM2B_DIGEST, "template_hash")
+        templateHash_cdata = _get_cdata(template_hash, TPM2B_DIGEST, "template_hash")
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
@@ -2667,17 +2673,17 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        inPublic_cdata = get_cdata(
+        inPublic_cdata = _get_cdata(
             in_public,
             TPM2B_PUBLIC,
             "in_public",
             objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS,
         )
-        inSensitive_cdata = get_cdata(
+        inSensitive_cdata = _get_cdata(
             in_sensitive, TPM2B_SENSITIVE_CREATE, "in_sensitive"
         )
-        outsideInfo_cdata = get_cdata(outside_info, TPM2B_DATA, "outside_info")
-        creationPCR_cdata = get_cdata(creation_pcr, TPML_PCR_SELECTION, "creation_pcr")
+        outsideInfo_cdata = _get_cdata(outside_info, TPM2B_DATA, "outside_info")
+        creationPCR_cdata = _get_cdata(creation_pcr, TPML_PCR_SELECTION, "creation_pcr")
 
         objectHandle = ffi.new("ESYS_TR *")
         outPublic = ffi.new("TPM2B_PUBLIC **")
@@ -2763,7 +2769,7 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        authPolicy_cdata = get_cdata(auth_policy, TPM2B_DIGEST, "auth_policy")
+        authPolicy_cdata = _get_cdata(auth_policy, TPM2B_DIGEST, "auth_policy")
         check_friendly_int(hash_alg, "hash_alg", TPM2_ALG)
 
         _chkrc(
@@ -2869,7 +2875,7 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
-        new_auth_cdata = get_cdata(new_auth, TPM2B_AUTH, "new_auth")
+        new_auth_cdata = _get_cdata(new_auth, TPM2B_AUTH, "new_auth")
 
         _chkrc(
             lib.Esys_HierarchyChangeAuth(
@@ -2952,8 +2958,8 @@ class ESAPI:
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
-        setList_cdata = get_cdata(set_list, TPML_CC, "set_list")
-        clearList_cdata = get_cdata(clear_list, TPML_CC, "clear_list")
+        setList_cdata = _get_cdata(set_list, TPML_CC, "set_list")
+        clearList_cdata = _get_cdata(clear_list, TPML_CC, "clear_list")
         _chkrc(
             lib.Esys_PP_Commands(
                 self._ctx,
@@ -2998,8 +3004,8 @@ class ESAPI:
 
         check_handle_type(authorization, "authorization")
         check_handle_type(key_handle, "key_handle")
-        fuDigest_cdata = get_cdata(fu_digest, TPM2B_DIGEST, "fu_digest")
-        manifestSignature_cdata = get_cdata(
+        fuDigest_cdata = _get_cdata(fu_digest, TPM2B_DIGEST, "fu_digest")
+        manifestSignature_cdata = _get_cdata(
             manifest_signature, TPMT_SIGNATURE, "manifest_signature"
         )
 
@@ -3028,7 +3034,7 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> Tuple[TPMT_HA, TPMT_HA]:
 
-        fuData_cdata = get_cdata(fu_data, TPM2B_MAX_BUFFER, "fu_data")
+        fuData_cdata = _get_cdata(fu_data, TPM2B_MAX_BUFFER, "fu_data")
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
@@ -3084,7 +3090,7 @@ class ESAPI:
         return TPMS_CONTEXT(get_dptr(context, lib.Esys_Free))
 
     def context_load(self, context: TPMS_CONTEXT) -> ESYS_TR:
-        context_cdata = get_cdata(context, TPMS_CONTEXT, "context")
+        context_cdata = _get_cdata(context, TPMS_CONTEXT, "context")
         loadedHandle = ffi.new("ESYS_TR *")
         _chkrc(lib.Esys_ContextLoad(self._ctx, context_cdata, loadedHandle))
         loadedHandleObject = loadedHandle[0]
@@ -3238,7 +3244,7 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        parameters_cdata = get_cdata(parameters, TPMT_PUBLIC_PARMS, "parameters")
+        parameters_cdata = _get_cdata(parameters, TPMT_PUBLIC_PARMS, "parameters")
         _chkrc(
             lib.Esys_TestParms(
                 self._ctx, session1, session2, session3, parameters_cdata
@@ -3259,8 +3265,8 @@ class ESAPI:
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
-        auth_cdata = get_cdata(auth, TPM2B_AUTH, "auth", allow_none=True)
-        publicInfo_cdata = get_cdata(public_info, TPM2B_NV_PUBLIC, "public_info")
+        auth_cdata = _get_cdata(auth, TPM2B_AUTH, "auth", allow_none=True)
+        publicInfo_cdata = _get_cdata(public_info, TPM2B_NV_PUBLIC, "public_info")
         nvHandle = ffi.new("ESYS_TR *")
         _chkrc(
             lib.Esys_NV_DefineSpace(
@@ -3359,7 +3365,7 @@ class ESAPI:
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
-        data_cdata = get_cdata(data, TPM2B_MAX_NV_BUFFER, "data")
+        data_cdata = _get_cdata(data, TPM2B_MAX_NV_BUFFER, "data")
         _chkrc(
             lib.Esys_NV_Write(
                 self._ctx,
@@ -3412,7 +3418,7 @@ class ESAPI:
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
-        data_cdata = get_cdata(data, TPM2B_MAX_NV_BUFFER, "data")
+        data_cdata = _get_cdata(data, TPM2B_MAX_NV_BUFFER, "data")
         _chkrc(
             lib.Esys_NV_Extend(
                 self._ctx,
@@ -3570,7 +3576,7 @@ class ESAPI:
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
-        newAuth_cdata = get_cdata(new_auth, TPM2B_DIGEST, "new_auth")
+        newAuth_cdata = _get_cdata(new_auth, TPM2B_DIGEST, "new_auth")
         _chkrc(
             lib.Esys_NV_ChangeAuth(
                 self._ctx, nv_index, session1, session2, session3, newAuth_cdata
@@ -3599,8 +3605,10 @@ class ESAPI:
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
-        qualifyingData_cdata = get_cdata(qualifying_data, TPM2B_DATA, "qualifying_data")
-        inScheme_cdata = get_cdata(in_scheme, TPMT_SIG_SCHEME, "in_scheme")
+        qualifyingData_cdata = _get_cdata(
+            qualifying_data, TPM2B_DATA, "qualifying_data"
+        )
+        inScheme_cdata = _get_cdata(in_scheme, TPMT_SIG_SCHEME, "in_scheme")
 
         if not isinstance(size, int):
             raise TypeError(f"Expected size to be of type int, got: {type(size)}")
@@ -3639,7 +3647,7 @@ class ESAPI:
         session2: ESYS_TR = ESYS_TR.NONE,
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> TPM2B_DATA:
-        inputData_cdata = get_cdata(input_data, TPM2B_DATA, "input_data")
+        inputData_cdata = _get_cdata(input_data, TPM2B_DATA, "input_data")
         outputData = ffi.new("TPM2B_DATA **")
         _chkrc(
             lib.Esys_Vendor_TCG_Test(
