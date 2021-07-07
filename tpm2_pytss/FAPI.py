@@ -124,22 +124,22 @@ class FAPI:
     def __init__(self, uri: Optional[Union[bytes, str]] = None):
         self.encoding = "utf-8"
 
-        self.ctx_pp = ffi.new("FAPI_CONTEXT **")
+        self._ctx_pp = ffi.new("FAPI_CONTEXT **")
         uri = to_bytes_or_null(uri)
-        ret = lib.Fapi_Initialize(self.ctx_pp, uri)
+        ret = lib.Fapi_Initialize(self._ctx_pp, uri)
         _chkrc(ret)
 
         # set callbacks
         self.callbacks: Dict[CallbackType, Optional[Callback]] = {}
 
     @property
-    def ctx(self):
+    def _ctx(self):
         """Get the Feature API C context used by the library to hold state.
 
         Returns:
             The Feature API C context.
         """
-        return self.ctx_pp[0]
+        return self._ctx_pp[0]
 
     def __enter__(self):
         return self
@@ -149,7 +149,7 @@ class FAPI:
 
     def close(self) -> None:
         """Finalize the Feature API. This frees allocated memory and invalidates the FAPI object."""
-        lib.Fapi_Finalize(self.ctx_pp)
+        lib.Fapi_Finalize(self._ctx_pp)
 
         for callback_type, callback in self.callbacks.items():
             if callback is not None:
@@ -177,7 +177,7 @@ class FAPI:
     def tcti(self):  # TODO doc, test
         tcti = ffi.new("TSS2_TCTI_CONTEXT **")
         # returns the actual tcti context, not a copy (so no extra memory is allocated by the fapi)
-        ret = lib.Fapi_GetTcti(self.ctx, tcti)
+        ret = lib.Fapi_GetTcti(self._ctx, tcti)
         _chkrc(ret)
         return TCTI(tcti[0])
 
@@ -207,7 +207,7 @@ class FAPI:
         auth_value_sh = to_bytes_or_null(auth_value_sh)
         auth_value_lockout = to_bytes_or_null(auth_value_lockout, allow_null=False)
         ret = lib.Fapi_Provision(
-            self.ctx, auth_value_eh, auth_value_sh, auth_value_lockout
+            self._ctx, auth_value_eh, auth_value_sh, auth_value_lockout
         )
         _chkrc(
             ret,
@@ -234,7 +234,7 @@ class FAPI:
                 "Requesting a large number of bytes. This may take a while: {num_bytes}"
             )
         data = ffi.new("uint8_t **")
-        ret = lib.Fapi_GetRandom(self.ctx, num_bytes, data)
+        ret = lib.Fapi_GetRandom(self._ctx, num_bytes, data)
         _chkrc(ret)
         return bytes(ffi.unpack(get_ptr(data), num_bytes))
 
@@ -248,7 +248,7 @@ class FAPI:
             str: JSON-encoded info string.
         """
         info = ffi.new("char **")
-        ret = lib.Fapi_GetInfo(self.ctx, info)
+        ret = lib.Fapi_GetInfo(self._ctx, info)
         _chkrc(ret)
         return ffi.string(get_ptr(info)).decode(self.encoding)
 
@@ -266,7 +266,7 @@ class FAPI:
         """
         search_path = to_bytes_or_null(search_path, allow_null=False)
         path_list = ffi.new("char **")
-        ret = lib.Fapi_List(self.ctx, search_path, path_list)
+        ret = lib.Fapi_List(self._ctx, search_path, path_list)
         _chkrc(ret)
         return ffi.string(get_ptr(path_list)).decode(self.encoding).split(":")
 
@@ -296,7 +296,7 @@ class FAPI:
         type = to_bytes_or_null(type)
         policy_path = to_bytes_or_null(policy_path)
         auth_value = to_bytes_or_null(auth_value)
-        ret = lib.Fapi_CreateKey(self.ctx, path, type, policy_path, auth_value)
+        ret = lib.Fapi_CreateKey(self._ctx, path, type, policy_path, auth_value)
         _chkrc(
             ret, acceptable=lib.TSS2_FAPI_RC_PATH_ALREADY_EXISTS if exists_ok else None
         )
@@ -330,7 +330,7 @@ class FAPI:
         certificate = ffi.new("char **")
 
         ret = lib.Fapi_Sign(
-            self.ctx,
+            self._ctx,
             path,
             padding,
             digest,
@@ -362,7 +362,7 @@ class FAPI:
         """
         path = to_bytes_or_null(path)
         ret = lib.Fapi_VerifySignature(
-            self.ctx, path, digest, len(digest), signature, len(signature)
+            self._ctx, path, digest, len(digest), signature, len(signature)
         )
         _chkrc(ret)
 
@@ -386,7 +386,7 @@ class FAPI:
         ciphertext = ffi.new("uint8_t **")
         ciphertext_size = ffi.new("size_t *")
         ret = lib.Fapi_Encrypt(
-            self.ctx, path, plaintext, len(plaintext), ciphertext, ciphertext_size
+            self._ctx, path, plaintext, len(plaintext), ciphertext, ciphertext_size
         )
         _chkrc(ret)
         return bytes(ffi.unpack(get_ptr(ciphertext), ciphertext_size[0]))
@@ -408,7 +408,7 @@ class FAPI:
         plaintext = ffi.new("uint8_t **")
         plaintext_size = ffi.new("size_t *")
         ret = lib.Fapi_Decrypt(
-            self.ctx, path, ciphertext, len(ciphertext), plaintext, plaintext_size
+            self._ctx, path, ciphertext, len(ciphertext), plaintext, plaintext_size
         )
         _chkrc(ret)
         return bytes(ffi.unpack(plaintext[0], plaintext_size[0]))
@@ -449,7 +449,7 @@ class FAPI:
         policy_path = to_bytes_or_null(policy_path)
         auth_value = to_bytes_or_null(auth_value)
         ret = lib.Fapi_CreateSeal(
-            self.ctx, path, type, data_len, policy_path, auth_value, data
+            self._ctx, path, type, data_len, policy_path, auth_value, data
         )
         _chkrc(
             ret, acceptable=lib.TSS2_FAPI_RC_PATH_ALREADY_EXISTS if exists_ok else None
@@ -471,7 +471,7 @@ class FAPI:
         path = to_bytes_or_null(path)
         data = ffi.new("uint8_t **")
         data_size = ffi.new("size_t *")
-        ret = lib.Fapi_Unseal(self.ctx, path, data, data_size)
+        ret = lib.Fapi_Unseal(self._ctx, path, data, data_size)
         _chkrc(ret)
         return bytes(ffi.unpack(get_ptr(data), data_size[0]))
 
@@ -496,7 +496,7 @@ class FAPI:
         """
         path = to_bytes_or_null(path)
         import_data = to_bytes_or_null(import_data)
-        ret = lib.Fapi_Import(self.ctx, path, import_data)
+        ret = lib.Fapi_Import(self._ctx, path, import_data)
         _chkrc(
             ret, acceptable=lib.TSS2_FAPI_RC_PATH_ALREADY_EXISTS if exists_ok else None
         )
@@ -512,7 +512,7 @@ class FAPI:
             TSS2_Exception: If Fapi returned an error code.
         """
         path = to_bytes_or_null(path)
-        ret = lib.Fapi_Delete(self.ctx, path)
+        ret = lib.Fapi_Delete(self._ctx, path)
         _chkrc(ret)
 
     def change_auth(
@@ -529,7 +529,7 @@ class FAPI:
         """
         path = to_bytes_or_null(path)
         auth_value = to_bytes_or_null(auth_value)
-        ret = lib.Fapi_ChangeAuth(self.ctx, path, auth_value)
+        ret = lib.Fapi_ChangeAuth(self._ctx, path, auth_value)
         _chkrc(ret)
 
     def export_key(
@@ -550,7 +550,7 @@ class FAPI:
         path = to_bytes_or_null(path)
         new_path = to_bytes_or_null(new_path)
         exported_data = ffi.new("char **")
-        ret = lib.Fapi_ExportKey(self.ctx, path, new_path, exported_data)
+        ret = lib.Fapi_ExportKey(self._ctx, path, new_path, exported_data)
         _chkrc(ret)
         return ffi.string(get_ptr(exported_data)).decode(self.encoding)
 
@@ -568,7 +568,7 @@ class FAPI:
         """
         path = to_bytes_or_null(path)
         description = to_bytes_or_null(description)
-        ret = lib.Fapi_SetDescription(self.ctx, path, description)
+        ret = lib.Fapi_SetDescription(self._ctx, path, description)
         _chkrc(ret)
 
     def get_description(self, path: Union[bytes, str] = None) -> str:
@@ -585,7 +585,7 @@ class FAPI:
         """
         path = to_bytes_or_null(path)
         description = ffi.new("char **")
-        ret = lib.Fapi_GetDescription(self.ctx, path, description)
+        ret = lib.Fapi_GetDescription(self._ctx, path, description)
         _chkrc(ret)
         # description is guaranteed to be a null-terminated string
         return ffi.string(get_ptr(description)).decode()
@@ -608,7 +608,7 @@ class FAPI:
         else:
             app_data_len = len(app_data)
         app_data = to_bytes_or_null(app_data)
-        ret = lib.Fapi_SetAppData(self.ctx, path, app_data, app_data_len)
+        ret = lib.Fapi_SetAppData(self._ctx, path, app_data, app_data_len)
         _chkrc(ret)
 
     def get_app_data(self, path: Union[bytes, str]) -> Optional[bytes]:
@@ -626,7 +626,7 @@ class FAPI:
         path = to_bytes_or_null(path)
         app_data = ffi.new("uint8_t **")
         app_data_size = ffi.new("size_t *")
-        ret = lib.Fapi_GetAppData(self.ctx, path, app_data, app_data_size)
+        ret = lib.Fapi_GetAppData(self._ctx, path, app_data, app_data_size)
         _chkrc(ret)
         if app_data[0] == ffi.NULL:
             return None
@@ -646,7 +646,7 @@ class FAPI:
         """
         path = to_bytes_or_null(path)
         certificate = to_bytes_or_null(certificate)
-        ret = lib.Fapi_SetCertificate(self.ctx, path, certificate)
+        ret = lib.Fapi_SetCertificate(self._ctx, path, certificate)
         _chkrc(ret)
 
     def get_certificate(self, path: Union[bytes, str]) -> str:
@@ -663,7 +663,7 @@ class FAPI:
         """
         path = to_bytes_or_null(path)
         certificate = ffi.new("char **")
-        ret = lib.Fapi_GetCertificate(self.ctx, path, certificate)
+        ret = lib.Fapi_GetCertificate(self._ctx, path, certificate)
         _chkrc(ret)
         # certificate is guaranteed to be a null-terminated string
         return ffi.string(get_ptr(certificate)).decode()
@@ -684,7 +684,9 @@ class FAPI:
         # TODO why bytes? is this DER?
         certificate = ffi.new("uint8_t **")
         certificates_size = ffi.new("size_t *")
-        ret = lib.Fapi_GetPlatformCertificates(self.ctx, certificate, certificates_size)
+        ret = lib.Fapi_GetPlatformCertificates(
+            self._ctx, certificate, certificates_size
+        )
         _chkrc(ret, acceptable=lib.TSS2_FAPI_RC_NO_CERT if no_cert_ok else None)
         if no_cert_ok and ret == lib.TSS2_FAPI_RC_NO_CERT:
             return b""
@@ -709,7 +711,7 @@ class FAPI:
         tpm_2b_private_size = ffi.new("size_t *")
         policy = ffi.new("char **")
         ret = lib.Fapi_GetTpmBlobs(
-            self.ctx,
+            self._ctx,
             path,
             tpm_2b_public,
             tpm_2b_public_size,
@@ -763,7 +765,7 @@ class FAPI:
         type = ffi.new("uint8_t *")
         data = ffi.new("uint8_t **")
         length = ffi.new("size_t *")
-        ret = lib.Fapi_GetEsysBlob(self.ctx, path, type, data, length)
+        ret = lib.Fapi_GetEsysBlob(self._ctx, path, type, data, length)
         _chkrc(ret)
         return bytes(ffi.unpack(get_ptr(data), length[0])), type[0]
 
@@ -781,7 +783,7 @@ class FAPI:
         """
         path = to_bytes_or_null(path)
         policy = ffi.new("char **")
-        ret = lib.Fapi_ExportPolicy(self.ctx, path, policy)
+        ret = lib.Fapi_ExportPolicy(self._ctx, path, policy)
         _chkrc(ret)
         return ffi.string(get_ptr(policy)).decode()
 
@@ -809,7 +811,7 @@ class FAPI:
             policy_ref_len = len(policy_ref)
         policy_ref = to_bytes_or_null(policy_ref)
         ret = lib.Fapi_AuthorizePolicy(
-            self.ctx, policy_path, key_path, policy_ref, policy_ref_len
+            self._ctx, policy_path, key_path, policy_ref, policy_ref_len
         )
         _chkrc(ret)
 
@@ -829,7 +831,7 @@ class FAPI:
         value = ffi.new("uint8_t **")
         value_size = ffi.new("size_t *")
         log = ffi.new("char **")
-        ret = lib.Fapi_PcrRead(self.ctx, index, value, value_size, log)
+        ret = lib.Fapi_PcrRead(self._ctx, index, value, value_size, log)
         _chkrc(ret)
         return (
             bytes(ffi.unpack(get_ptr(value), value_size[0])),
@@ -862,7 +864,7 @@ class FAPI:
         # TODO "extend", formula in doc
         log = to_bytes_or_null(log)
         data = to_bytes_or_null(data)
-        ret = lib.Fapi_PcrExtend(self.ctx, index, data, len(data), log)
+        ret = lib.Fapi_PcrExtend(self._ctx, index, data, len(data), log)
         _chkrc(ret)
 
     def quote(
@@ -901,7 +903,7 @@ class FAPI:
         pcr_log = ffi.new("char **")
         certificate = ffi.new("char **")
         ret = lib.Fapi_Quote(
-            self.ctx,
+            self._ctx,
             pcrs,
             len(pcrs),
             path,
@@ -952,7 +954,7 @@ class FAPI:
         quote_info = to_bytes_or_null(quote_info)
         pcr_log = to_bytes_or_null(pcr_log)
         ret = lib.Fapi_VerifyQuote(
-            self.ctx,
+            self._ctx,
             path,
             qualifying_data,
             qualifying_data_len,
@@ -987,7 +989,7 @@ class FAPI:
         type = to_bytes_or_null(type)
         policy_path = to_bytes_or_null(policy_path)
         auth_value = to_bytes_or_null(auth_value)
-        ret = lib.Fapi_CreateNv(self.ctx, path, type, size, policy_path, auth_value)
+        ret = lib.Fapi_CreateNv(self._ctx, path, type, size, policy_path, auth_value)
         _chkrc(ret)
 
     def nv_read(self, path: Union[bytes, str]) -> Tuple[bytes, str]:
@@ -1006,7 +1008,7 @@ class FAPI:
         data = ffi.new("uint8_t **")
         data_size = ffi.new("size_t *")
         log = ffi.new("char **")
-        ret = lib.Fapi_NvRead(self.ctx, path, data, data_size, log)
+        ret = lib.Fapi_NvRead(self._ctx, path, data, data_size, log)
         _chkrc(ret)
         return (
             bytes(ffi.unpack(get_ptr(data), data_size[0])),
@@ -1025,7 +1027,7 @@ class FAPI:
         """
         path = to_bytes_or_null(path)
         data = to_bytes_or_null(data)
-        ret = lib.Fapi_NvWrite(self.ctx, path, data, len(data))
+        ret = lib.Fapi_NvWrite(self._ctx, path, data, len(data))
         _chkrc(ret)
 
     def nv_extend(
@@ -1049,7 +1051,7 @@ class FAPI:
         path = to_bytes_or_null(path)
         data = to_bytes_or_null(data)
         log = to_bytes_or_null(log)
-        ret = lib.Fapi_NvExtend(self.ctx, path, data, len(data), log)
+        ret = lib.Fapi_NvExtend(self._ctx, path, data, len(data), log)
         _chkrc(ret)
 
     def nv_increment(self, path: Union[bytes, str]) -> None:
@@ -1062,7 +1064,7 @@ class FAPI:
             TSS2_Exception: If Fapi returned an error code.
         """
         path = to_bytes_or_null(path)
-        ret = lib.Fapi_NvIncrement(self.ctx, path)
+        ret = lib.Fapi_NvIncrement(self._ctx, path)
         _chkrc(ret)
 
     def nv_set_bits(self, path: Union[bytes, str], bitmap: int) -> None:
@@ -1076,7 +1078,7 @@ class FAPI:
             TSS2_Exception: If Fapi returned an error code.
         """
         path = to_bytes_or_null(path)
-        ret = lib.Fapi_NvSetBits(self.ctx, path, bitmap)
+        ret = lib.Fapi_NvSetBits(self._ctx, path, bitmap)
         _chkrc(ret)
 
     def write_authorize_nv(
@@ -1093,7 +1095,7 @@ class FAPI:
         """
         nv_path = to_bytes_or_null(nv_path)
         policy_path = to_bytes_or_null(policy_path)
-        ret = lib.Fapi_WriteAuthorizeNv(self.ctx, nv_path, policy_path)
+        ret = lib.Fapi_WriteAuthorizeNv(self._ctx, nv_path, policy_path)
         _chkrc(ret)
 
     def _register_callback(
@@ -1180,7 +1182,7 @@ class FAPI:
             CallbackType.FAPI_AUTH, callback_wrapper, unlock=callback is None
         )
 
-        ret = lib.Fapi_SetAuthCB(self.ctx, c_callback, user_data)
+        ret = lib.Fapi_SetAuthCB(self._ctx, c_callback, user_data)
         _chkrc(ret)
 
     def set_branch_callback(
@@ -1234,7 +1236,7 @@ class FAPI:
         c_callback = self._register_callback(
             CallbackType.FAPI_BRANCH, callback_wrapper, unlock=callback is None
         )
-        ret = lib.Fapi_SetBranchCB(self.ctx, c_callback, user_data)
+        ret = lib.Fapi_SetBranchCB(self._ctx, c_callback, user_data)
         _chkrc(ret)
 
     def set_sign_callback(
@@ -1306,7 +1308,7 @@ class FAPI:
         c_callback = self._register_callback(
             CallbackType.FAPI_SIGN, callback_wrapper, unlock=callback is None
         )
-        ret = lib.Fapi_SetSignCB(self.ctx, c_callback, user_data)
+        ret = lib.Fapi_SetSignCB(self._ctx, c_callback, user_data)
         _chkrc(ret)
 
     def set_policy_action_callback(
@@ -1350,5 +1352,5 @@ class FAPI:
         c_callback = self._register_callback(
             CallbackType.FAPI_POLICYACTION, callback_wrapper, unlock=callback is None
         )
-        ret = lib.Fapi_SetPolicyActionCB(self.ctx, c_callback, user_data)
+        ret = lib.Fapi_SetPolicyActionCB(self._ctx, c_callback, user_data)
         _chkrc(ret)
