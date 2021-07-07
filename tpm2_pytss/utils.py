@@ -163,3 +163,7 @@ def fixup_classname(tipe):
 
 def mock_bail():
     return __MOCK__
+
+
+def get_dptr(dptr, free_func):
+    return ffi.gc(dptr[0], free_func)
