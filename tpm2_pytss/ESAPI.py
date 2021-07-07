@@ -42,7 +42,7 @@ def _get_cdata(value, expected, varname, allow_none=False, *args, **kwargs):
     return value._cdata
 
 
-def check_handle_type(handle, varname, expected=None, cls=ESYS_TR):
+def _check_handle_type(handle, varname, expected=None, cls=ESYS_TR):
     if not isinstance(handle, int):
         raise TypeError(
             f"expected {varname} to be type int aka ESYS_TR, got {type(handle)}"
@@ -95,11 +95,11 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> ESYS_TR:
 
-        check_handle_type(handle, "handle")
+        _check_handle_type(handle, "handle")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         obj = ffi.new("ESYS_TR *")
         _chkrc(
@@ -119,7 +119,7 @@ class ESAPI:
 
     def tr_get_name(self, handle: ESYS_TR) -> TPM2B_NAME:
 
-        check_handle_type(handle, "handle")
+        _check_handle_type(handle, "handle")
 
         name = ffi.new("TPM2B_NAME **")
         _chkrc(lib.Esys_TR_GetName(self._ctx, handle, name))
@@ -141,9 +141,9 @@ class ESAPI:
 
         check_friendly_int(shutdown_type, "shutdown_type", TPM2_SU)
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         _chkrc(
             lib.Esys_Shutdown(self._ctx, session1, session2, session3, shutdown_type)
@@ -172,9 +172,9 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> TPML_ALG:
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         toTest_cdata = _get_cdata(to_test, TPML_ALG, "to_test")
 
@@ -193,9 +193,9 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ):
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         outData = ffi.new("TPM2B_MAX_BUFFER **")
         testResult = ffi.new("TPM2_RC *")
@@ -222,11 +222,11 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ):
 
-        check_handle_type(tpm_key, "tpm_key")
-        check_handle_type(bind, "bind")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(tpm_key, "tpm_key")
+        _check_handle_type(bind, "bind")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         check_friendly_int(session_type, "session_type", TPM2_SE)
         check_friendly_int(auth_hash, "auth_hash", TPM2_ALG)
@@ -259,7 +259,7 @@ class ESAPI:
         self, session: ESYS_TR, attributes: int, mask: int = 0xFF
     ):
 
-        check_handle_type(session, "session")
+        _check_handle_type(session, "session")
 
         if not isinstance(attributes, int):
             raise TypeError(
@@ -273,7 +273,7 @@ class ESAPI:
 
     def trsess_get_nonce_tpm(self, session: ESYS_TR) -> TPM2B_NONCE:
 
-        check_handle_type(session, "session")
+        _check_handle_type(session, "session")
 
         nonce = ffi.new("TPM2B_NONCE **")
 
@@ -289,10 +289,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ):
 
-        check_handle_type(session_handle, "session_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session_handle, "session_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         _chkrc(
             lib.Esys_PolicyRestart(
@@ -312,10 +312,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ):
 
-        check_handle_type(parent_handle, "parent_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(parent_handle, "parent_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         inPublic_cdata = _get_cdata(in_public, TPM2B_PUBLIC, "in_public")
         inSensitive_cdata = _get_cdata(
@@ -365,10 +365,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> ESYS_TR:
 
-        check_handle_type(parent_handle, "parent_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(parent_handle, "parent_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         inPublic_cdata = _get_cdata(in_public, TPM2B_PUBLIC, "in_public")
         inPrivate_cdata = _get_cdata(in_private, TPM2B_PRIVATE, "in_private")
@@ -401,9 +401,9 @@ class ESAPI:
 
         check_friendly_int(hierarchy, "hierarchy", ESYS_TR)
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         inPrivate_cdata = _get_cdata(
             in_private, TPM2B_SENSITIVE, "in_private", allow_none=True
@@ -435,10 +435,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> Tuple[TPM2B_PUBLIC, TPM2B_NAME, TPM2B_NAME]:
 
-        check_handle_type(object_handle, "object_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(object_handle, "object_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         outPublic = ffi.new("TPM2B_PUBLIC **")
         name = ffi.new("TPM2B_NAME **")
@@ -472,12 +472,12 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> TPM2B_DIGEST:
 
-        check_handle_type(activate_handle, "activate_handle")
-        check_handle_type(key_handle, "key_handle")
+        _check_handle_type(activate_handle, "activate_handle")
+        _check_handle_type(key_handle, "key_handle")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         credentialBlob_cdata = _get_cdata(
             credential_blob, TPM2B_ID_OBJECT, "credential_blob"
@@ -510,11 +510,11 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> Tuple[TPM2B_ID_OBJECT, TPM2B_ENCRYPTED_SECRET]:
 
-        check_handle_type(handle, "handle")
+        _check_handle_type(handle, "handle")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         credential_cdata = _get_cdata(credential, TPM2B_DIGEST, "credential")
         objectName_cdata = _get_cdata(object_name, TPM2B_NAME, "object_name")
@@ -547,11 +547,11 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> TPM2B_SENSITIVE_DATA:
 
-        check_handle_type(item_handle, "item_handle")
+        _check_handle_type(item_handle, "item_handle")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         outData = ffi.new("TPM2B_SENSITIVE_DATA **")
         _chkrc(
@@ -571,12 +571,12 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> TPM2B_PRIVATE:
 
-        check_handle_type(object_handle, "object_handle")
-        check_handle_type(parent_handle, "parent_handle")
+        _check_handle_type(object_handle, "object_handle")
+        _check_handle_type(parent_handle, "parent_handle")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         newAuth_cdata = _get_cdata(new_auth, TPM2B_AUTH, "new_auth")
 
@@ -605,11 +605,11 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> Tuple[ESYS_TR, TPM2B_PRIVATE, TPM2B_PUBLIC]:
 
-        check_handle_type(parent_handle, "parent_handle")
+        _check_handle_type(parent_handle, "parent_handle")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         if isinstance(in_public, str):
             in_public = TPM2B_TEMPLATE(TPMT_PUBLIC.parse(in_public).Marshal())
@@ -654,11 +654,11 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> Tuple[TPM2B_DATA, TPM2B_PRIVATE, TPM2B_ENCRYPTED_SECRET]:
 
-        check_handle_type(object_handle, "object_handle")
-        check_handle_type(new_parent_handle, "new_parent_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(object_handle, "object_handle")
+        _check_handle_type(new_parent_handle, "new_parent_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         encryptionKeyIn_cdata = _get_cdata(
             encryption_key_in, TPM2B_DATA, "encryption_key_in", allow_none=True
@@ -704,11 +704,11 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> Tuple[TPM2B_PRIVATE, TPM2B_ENCRYPTED_SECRET]:
 
-        check_handle_type(old_parent, "old_parent")
-        check_handle_type(new_parent, "new_parent")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(old_parent, "old_parent")
+        _check_handle_type(new_parent, "new_parent")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         inDuplicate_cdata = _get_cdata(in_duplicate, TPM2B_PRIVATE, "in_duplicate")
 
@@ -751,10 +751,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> TPM2B_PRIVATE:
 
-        check_handle_type(parent_handle, "parent_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(parent_handle, "parent_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         encryptionKey_cdata = _get_cdata(encryption_key, TPM2B_DATA, "encryption_key")
 
@@ -797,10 +797,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> TPM2B_PUBLIC_KEY_RSA:
 
-        check_handle_type(key_handle, "key_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(key_handle, "key_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         inScheme_cdata = _get_cdata(in_scheme, TPMT_RSA_DECRYPT, "in_scheme")
         message_cdata = _get_cdata(message, TPM2B_PUBLIC_KEY_RSA, "message")
@@ -833,10 +833,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> TPM2B_PUBLIC_KEY_RSA:
 
-        check_handle_type(key_handle, "key_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(key_handle, "key_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         inScheme_cdata = _get_cdata(in_scheme, TPMT_RSA_DECRYPT, "in_scheme")
         cipherText_cdata = _get_cdata(cipher_text, TPM2B_PUBLIC_KEY_RSA, "cipher_text")
@@ -866,10 +866,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> Tuple[TPM2B_ECC_POINT, TPM2B_ECC_POINT]:
 
-        check_handle_type(key_handle, "key_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(key_handle, "key_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         zPoint = ffi.new("TPM2B_ECC_POINT **")
         pubPoint = ffi.new("TPM2B_ECC_POINT **")
@@ -892,10 +892,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> TPM2B_ECC_POINT:
 
-        check_handle_type(key_handle, "key_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(key_handle, "key_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         inPoint_cdata = _get_cdata(in_point, TPM2B_ECC_POINT, "in_point")
 
@@ -923,9 +923,9 @@ class ESAPI:
 
         check_friendly_int(curve_id, "curve_id", TPM2_ECC_CURVE)
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         parameters = ffi.new("TPMS_ALGORITHM_DETAIL_ECC **")
         _chkrc(
@@ -947,11 +947,11 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> Tuple[TPM2B_ECC_POINT]:
 
-        check_handle_type(session1, "key_a")
+        _check_handle_type(session1, "key_a")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         check_friendly_int(in_scheme, "in_scheme", TPM2_ALG)
 
@@ -1001,11 +1001,11 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> Tuple[TPM2B_MAX_BUFFER, TPM2B_IV]:
 
-        check_handle_type(key_handle, "key_handle")
+        _check_handle_type(key_handle, "key_handle")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         check_friendly_int(mode, "mode", TPM2_ALG)
 
@@ -1049,11 +1049,11 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> Tuple[TPM2B_MAX_BUFFER, TPM2B_IV]:
 
-        check_handle_type(key_handle, "key_handle")
+        _check_handle_type(key_handle, "key_handle")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         check_friendly_int(mode, "mode", TPM2_ALG)
 
@@ -1095,9 +1095,9 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> Tuple[TPM2B_DIGEST, TPMT_TK_HASHCHECK]:
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         check_friendly_int(hash_alg, "hash_alg", TPM2_ALG)
 
@@ -1133,10 +1133,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> TPM2B_DIGEST:
 
-        check_handle_type(handle, "handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(handle, "handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         check_friendly_int(hash_alg, "hash_alg", TPM2_ALG)
 
@@ -1165,9 +1165,9 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> TPM2B_DIGEST:
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         if not isinstance(bytes_requested, int):
             raise TypeError(
@@ -1191,9 +1191,9 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ):
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         inData_cdata = _get_cdata(in_data, TPM2B_SENSITIVE_DATA, "in_data")
 
@@ -1211,11 +1211,11 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> ESYS_TR:
 
-        check_handle_type(handle, "handle")
+        _check_handle_type(handle, "handle")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         check_friendly_int(hash_alg, "hash_alg", TPM2_ALG)
 
@@ -1249,9 +1249,9 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> ESYS_TR:
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         check_friendly_int(hash_alg, "hash_alg", TPM2_ALG)
 
@@ -1284,10 +1284,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(sequence_handle, "sequence_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(sequence_handle, "sequence_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         buffer_cdata = _get_cdata(buffer, TPM2B_MAX_BUFFER, "buffer", allow_none=True)
 
@@ -1307,10 +1307,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> Tuple[TPM2B_DIGEST, TPMT_TK_HASHCHECK]:
 
-        check_handle_type(sequence_handle, "sequence_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(sequence_handle, "sequence_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         check_friendly_int(hierarchy, "hierarchy", ESYS_TR)
 
@@ -1347,10 +1347,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> TPML_DIGEST_VALUES:
 
-        check_handle_type(sequence_handle, "sequence_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(sequence_handle, "sequence_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         check_friendly_int(pcr_handle, "pcr_handle", ESYS_TR)
 
@@ -1382,11 +1382,11 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> Tuple[TPM2B_ATTEST, TPMT_SIGNATURE]:
 
-        check_handle_type(object_handle, "object_handle")
-        check_handle_type(sign_handle, "sign_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(object_handle, "object_handle")
+        _check_handle_type(sign_handle, "sign_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         qualifyingData_cdata = _get_cdata(
             qualifying_data, TPM2B_DATA, "qualifying_data"
@@ -1427,11 +1427,11 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> Tuple[TPM2B_ATTEST, TPMT_SIGNATURE]:
 
-        check_handle_type(object_handle, "object_handle")
-        check_handle_type(sign_handle, "sign_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(object_handle, "object_handle")
+        _check_handle_type(sign_handle, "sign_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         qualifyingData_cdata = _get_cdata(
             qualifying_data, TPM2B_DATA, "qualifying_data"
@@ -1476,10 +1476,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> Tuple[TPM2B_ATTEST, TPMT_SIGNATURE]:
 
-        check_handle_type(sign_handle, "sign_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(sign_handle, "sign_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         qualifyingData_cdata = _get_cdata(
             qualifying_data, TPM2B_DATA, "qualifying_data"
@@ -1522,16 +1522,16 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> Tuple[TPM2B_ATTEST, TPMT_SIGNATURE]:
 
-        check_handle_type(session_handle, "session_handle")
-        check_handle_type(
+        _check_handle_type(session_handle, "session_handle")
+        _check_handle_type(
             privacy_admin_handle,
             "privacy_admin_handle",
             expected=[ESYS_TR.RH_ENDORSEMENT],
         )
-        check_handle_type(sign_handle, "sign_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(sign_handle, "sign_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         qualifyingData_cdata = _get_cdata(
             qualifying_data, TPM2B_DATA, "qualifying_data", allow_none=True
@@ -1572,13 +1572,13 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> Tuple[TPM2B_ATTEST, TPMT_SIGNATURE]:
 
-        check_handle_type(
+        _check_handle_type(
             privacy_handle, "privacy_handle", expected=[ESYS_TR.RH_ENDORSEMENT]
         )
-        check_handle_type(sign_handle, "sign_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(sign_handle, "sign_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         qualifyingData_cdata = _get_cdata(
             qualifying_data, TPM2B_DATA, "qualifying_data", allow_none=True
@@ -1618,13 +1618,13 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> Tuple[TPM2B_ATTEST, TPMT_SIGNATURE]:
 
-        check_handle_type(
+        _check_handle_type(
             privacy_admin_handle, "privacy_admin_handle", expected=[ESYS_TR.ENDORSEMENT]
         )
-        check_handle_type(sign_handle, "sign_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(sign_handle, "sign_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         qualifyingData_cdata = _get_cdata(
             qualifying_data, TPM2B_DATA, "qualifying_data", allow_none=True
@@ -1664,10 +1664,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> Tuple[TPM2B_ECC_POINT, TPM2B_ECC_POINT, TPM2B_ECC_POINT, int]:
 
-        check_handle_type(sign_handle, "sign_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(sign_handle, "sign_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         P1_cdata = _get_cdata(p1, TPM2B_ECC_POINT, "p1")
         s2_cdata = _get_cdata(s2, TPM2B_SENSITIVE_DATA, "s2")
@@ -1709,9 +1709,9 @@ class ESAPI:
     ) -> Tuple[TPM2B_ECC_POINT, int]:
 
         check_friendly_int(curve_id, "curve_id", TPM2_ECC_CURVE)
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         Q = ffi.new("TPM2B_ECC_POINT **")
         counter = ffi.new("UINT16 *")
@@ -1732,10 +1732,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> TPMT_TK_VERIFIED:
 
-        check_handle_type(key_handle, "key_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(key_handle, "key_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         digest_cdata = _get_cdata(digest, TPM2B_DIGEST, "digest")
         signature_cdata = _get_cdata(signature, TPMT_SIGNATURE, "signature")
@@ -1766,10 +1766,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> TPMT_SIGNATURE:
 
-        check_handle_type(key_handle, "key_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(key_handle, "key_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         digest_cdata = _get_cdata(digest, TPM2B_DIGEST, "digest")
         inScheme_cdata = _get_cdata(in_scheme, TPMT_SIG_SCHEME, "in_scheme")
@@ -1802,13 +1802,13 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(auth, "auth", expected=[ESYS_TR.OWNER, ESYS_TR.PLATFORM])
+        _check_handle_type(auth, "auth", expected=[ESYS_TR.OWNER, ESYS_TR.PLATFORM])
 
         check_friendly_int(audit_alg, "audit_alg", TPM2_ALG)
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         setList_cdata = _get_cdata(set_list, TPML_CC, "set_list")
         clearList_cdata = _get_cdata(clear_list, TPML_CC, "digest")
@@ -1835,13 +1835,13 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(pcr_handle, "pcr_handle")
+        _check_handle_type(pcr_handle, "pcr_handle")
 
         digests_cdata = _get_cdata(digests, TPML_DIGEST_VALUES, "digests")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         _chkrc(
             lib.Esys_PCR_Extend(
@@ -1858,11 +1858,11 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> TPML_DIGEST_VALUES:
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
-        check_handle_type(pcr_handle, "pcr_handle")
+        _check_handle_type(pcr_handle, "pcr_handle")
 
         eventData_cdata = _get_cdata(event_data, TPM2B_EVENT, "event_data")
 
@@ -1888,9 +1888,9 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> Tuple[int, TPML_PCR_SELECTION, TPML_DIGEST]:
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         pcrSelectionIn_cdata = _get_cdata(
             pcr_selection_in, TPML_PCR_SELECTION, "pcr_selection_in"
@@ -1927,10 +1927,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> Tuple[bool, int, int, int]:
 
-        check_handle_type(auth_handle, "auth_handle", expected=[ESYS_TR.PLATFORM])
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(auth_handle, "auth_handle", expected=[ESYS_TR.PLATFORM])
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         pcrAllocation_cdata = _get_cdata(
             pcr_allocation, TPML_PCR_SELECTION, "pcr_allocation"
@@ -1967,16 +1967,16 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(auth_handle, "auth_handle", expected=[ESYS_TR.PLATFORM])
+        _check_handle_type(auth_handle, "auth_handle", expected=[ESYS_TR.PLATFORM])
 
         check_friendly_int(hash_alg, "hash_alg", TPM2_ALG)
         check_friendly_int(pcr_num, "pcr_num", ESYS_TR)
 
         authPolicy_cdata = _get_cdata(auth_policy, TPM2B_DIGEST, "auth_policy")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         _chkrc(
             lib.Esys_PCR_SetAuthPolicy(
@@ -2004,9 +2004,9 @@ class ESAPI:
 
         auth_cdata = _get_cdata(auth, TPM2B_DIGEST, "auth")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         _chkrc(
             lib.Esys_PCR_SetAuthValue(
@@ -2024,9 +2024,9 @@ class ESAPI:
 
         check_friendly_int(pcr_handle, "pcr_handle", ESYS_TR)
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         _chkrc(lib.Esys_PCR_Reset(self._ctx, pcr_handle, session1, session2, session3))
 
@@ -2044,18 +2044,18 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> Tuple[TPM2B_TIMEOUT, TPMT_TK_AUTH]:
 
-        check_handle_type(auth_object, "auth_object")
+        _check_handle_type(auth_object, "auth_object")
 
-        check_handle_type(policy_session, "policy_session")
+        _check_handle_type(policy_session, "policy_session")
 
         if not isinstance(expiration, int):
             raise TypeError(
                 f"expected expiration to be type int, got {type(expiration)}"
             )
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         nonceTPM_cdata = _get_cdata(nonce_tpm, TPM2B_NONCE, "nonce_tpm")
         cpHashA_cdata = _get_cdata(cp_hash_a, TPM2B_DIGEST, "cp_hash_a")
@@ -2099,7 +2099,7 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> Tuple[TPM2B_TIMEOUT, TPMT_TK_AUTH]:
 
-        check_handle_type(policy_session, "policy_session")
+        _check_handle_type(policy_session, "policy_session")
 
         if not isinstance(expiration, int):
             raise TypeError(
@@ -2108,9 +2108,9 @@ class ESAPI:
 
         check_friendly_int(auth_handle, "auth_handle", ESYS_TR)
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         nonceTPM_cdata = _get_cdata(nonce_tpm, TPM2B_NONCE, "nonce_tpm")
         cpHashA_cdata = _get_cdata(cp_hash_a, TPM2B_DIGEST, "cp_hash_a")
@@ -2152,11 +2152,11 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(policy_session, "policy_session")
+        _check_handle_type(policy_session, "policy_session")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         timeout_cdata = _get_cdata(timeout, TPM2B_TIMEOUT, "timeout")
         cpHashA_cdata = _get_cdata(cp_hash_a, TPM2B_DIGEST, "cp_hash_a")
@@ -2188,11 +2188,11 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(policy_session, "policy_session")
+        _check_handle_type(policy_session, "policy_session")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         pHashList_cdata = _get_cdata(p_hash_list, TPML_DIGEST, "p_hash_list")
 
@@ -2212,11 +2212,11 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(policy_session, "policy_session")
+        _check_handle_type(policy_session, "policy_session")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         pcrDigest_cdata = _get_cdata(pcr_digest, TPM2B_DIGEST, "pcr_digest")
         pcrs_cdata = _get_cdata(pcrs, TPML_PCR_SELECTION, "pcrs")
@@ -2242,11 +2242,11 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(policy_session, "policy_session")
+        _check_handle_type(policy_session, "policy_session")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         if not isinstance(locality, int):
             raise TypeError(
@@ -2281,9 +2281,9 @@ class ESAPI:
     ) -> None:
 
         check_friendly_int(auth_handle, "auth_handle", ESYS_TR)
-        check_handle_type(nv_index, "nv_index")
+        _check_handle_type(nv_index, "nv_index")
 
-        check_handle_type(policy_session, "policy_session")
+        _check_handle_type(policy_session, "policy_session")
 
         operandB_cdata = _get_cdata(operand_b, TPM2B_OPERAND, "operand_b")
 
@@ -2292,9 +2292,9 @@ class ESAPI:
         if not isinstance(offset, int):
             raise TypeError(f"Expected offset to be of type int, got {type(offset)}")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         _chkrc(
             lib.Esys_PolicyNV(
@@ -2322,7 +2322,7 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(policy_session, "policy_session")
+        _check_handle_type(policy_session, "policy_session")
 
         operandB_cdata = _get_cdata(operand_b, TPM2B_OPERAND, "operand_b")
 
@@ -2331,9 +2331,9 @@ class ESAPI:
         if not isinstance(offset, int):
             raise TypeError(f"Expected offset to be of type int, got {type(offset)}")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         _chkrc(
             lib.Esys_PolicyCounterTimer(
@@ -2357,10 +2357,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(policy_session, "policy_session")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(policy_session, "policy_session")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
         check_friendly_int(code, "code", TPM2_CC)
 
         _chkrc(
@@ -2377,10 +2377,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(policy_session, "policy_session")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(policy_session, "policy_session")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         _chkrc(
             lib.Esys_PolicyPhysicalPresence(
@@ -2397,13 +2397,13 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(policy_session, "policy_session")
+        _check_handle_type(policy_session, "policy_session")
 
         cpHashA_cdata = _get_cdata(cp_hash_a, TPM2B_DIGEST, "cp_hash_a")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         _chkrc(
             lib.Esys_PolicyCpHash(
@@ -2420,13 +2420,13 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(policy_session, "policy_session")
+        _check_handle_type(policy_session, "policy_session")
 
         nameHash_cdata = _get_cdata(name_hash, TPM2B_DIGEST, "name_hash")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         _chkrc(
             lib.Esys_PolicyNameHash(
@@ -2445,7 +2445,7 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(policy_session, "policy_session")
+        _check_handle_type(policy_session, "policy_session")
 
         objectName_cdata = _get_cdata(object_name, TPM2B_NAME, "object_name")
         newParentName_cdata = _get_cdata(new_parent_name, TPM2B_NAME, "new_parent_name")
@@ -2455,9 +2455,9 @@ class ESAPI:
                 f"Expected include_object to be type bool, got {type(include_object)}"
             )
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         _chkrc(
             lib.Esys_PolicyDuplicationSelect(
@@ -2484,7 +2484,7 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(policy_session, "policy_session")
+        _check_handle_type(policy_session, "policy_session")
 
         approvedPolicy_cdata = _get_cdata(
             approved_policy, TPM2B_DIGEST, "approved_policy"
@@ -2493,9 +2493,9 @@ class ESAPI:
         keySign_cdata = _get_cdata(key_sign, TPM2B_NAME, "key_sign")
         checkTicket_cdata = _get_cdata(check_ticket, TPMT_TK_VERIFIED, "check_ticket")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         _chkrc(
             lib.Esys_PolicyAuthorize(
@@ -2519,10 +2519,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(policy_session, "policy_session")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(policy_session, "policy_session")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         _chkrc(
             lib.Esys_PolicyAuthValue(
@@ -2538,10 +2538,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(policy_session, "policy_session")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(policy_session, "policy_session")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         _chkrc(
             lib.Esys_PolicyPassword(
@@ -2557,10 +2557,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(policy_session, "policy_session")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(policy_session, "policy_session")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         policyDigest = ffi.new("TPM2B_DIGEST **")
         _chkrc(
@@ -2579,16 +2579,16 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(policy_session, "policy_session")
+        _check_handle_type(policy_session, "policy_session")
 
         if not isinstance(written_set, bool):
             raise TypeError(
                 f"Expected written_set to be type bool, got {type(written_set)}"
             )
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         _chkrc(
             lib.Esys_PolicyNvWritten(
@@ -2605,13 +2605,13 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(policy_session, "policy_session")
+        _check_handle_type(policy_session, "policy_session")
 
         templateHash_cdata = _get_cdata(template_hash, TPM2B_DIGEST, "template_hash")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         _chkrc(
             lib.Esys_PolicyTemplate(
@@ -2637,13 +2637,13 @@ class ESAPI:
         if auth_handle == 0:
             auth_handle = nv_index
 
-        check_handle_type(auth_handle, "auth_handle")
-        check_handle_type(nv_index, "nv_index")
-        check_handle_type(policy_session, "policy_session")
+        _check_handle_type(auth_handle, "auth_handle")
+        _check_handle_type(nv_index, "nv_index")
+        _check_handle_type(policy_session, "policy_session")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         _chkrc(
             lib.Esys_PolicyAuthorizeNV(
@@ -2669,9 +2669,9 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> Tuple[ESYS_TR, TPM2B_PUBLIC, TPM2B_CREATION_DATA, TPMT_TK_CREATION]:
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         inPublic_cdata = _get_cdata(
             in_public,
@@ -2726,12 +2726,12 @@ class ESAPI:
         session2: ESYS_TR = ESYS_TR.NONE,
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
-        check_handle_type(
+        _check_handle_type(
             auth_handle,
             "auth_handle",
             expected=(ESYS_TR.RH_ENDORSEMENT, ESYS_TR.RH_OWNER, ESYS_TR.RH_PLATFORM),
         )
-        check_handle_type(
+        _check_handle_type(
             enable,
             "enable",
             expected=(ESYS_TR.RH_ENDORSEMENT, ESYS_TR.RH_OWNER, ESYS_TR.RH_PLATFORM),
@@ -2740,9 +2740,9 @@ class ESAPI:
         if not isinstance(state, bool):
             raise TypeError(f"Expected state to be a bool, got {type(state)}")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         _chkrc(
             lib.Esys_HierarchyControl(
@@ -2759,15 +2759,15 @@ class ESAPI:
         session2: ESYS_TR = ESYS_TR.NONE,
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
-        check_handle_type(
+        _check_handle_type(
             auth_handle,
             "auth_handle",
             expected=(ESYS_TR.RH_ENDORSEMENT, ESYS_TR.RH_OWNER, ESYS_TR.RH_PLATFORM),
         )
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         authPolicy_cdata = _get_cdata(auth_policy, TPM2B_DIGEST, "auth_policy")
         check_friendly_int(hash_alg, "hash_alg", TPM2_ALG)
@@ -2792,11 +2792,11 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(auth_handle, "auth_handle", expected=(ESYS_TR.RH_PLATFORM,))
+        _check_handle_type(auth_handle, "auth_handle", expected=(ESYS_TR.RH_PLATFORM,))
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         _chkrc(lib.Esys_ChangePPS(self._ctx, auth_handle, session1, session2, session3))
 
@@ -2808,11 +2808,11 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(auth_handle, "auth_handle", expected=(ESYS_TR.RH_PLATFORM,))
+        _check_handle_type(auth_handle, "auth_handle", expected=(ESYS_TR.RH_PLATFORM,))
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         _chkrc(lib.Esys_ChangeEPS(self._ctx, auth_handle, session1, session2, session3))
 
@@ -2824,15 +2824,15 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(
+        _check_handle_type(
             auth_handle,
             "auth_handle",
             expected=(ESYS_TR.RH_PLATFORM, ESYS_TR.RH_LOCKOUT),
         )
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         _chkrc(lib.Esys_Clear(self._ctx, auth_handle, session1, session2, session3))
 
@@ -2845,13 +2845,13 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(
+        _check_handle_type(
             auth, "auth", expected=(ESYS_TR.RH_PLATFORM, ESYS_TR.RH_LOCKOUT)
         )
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         if not isinstance(disable, bool):
             raise TypeError(f"Expected disable to be a bool, got {type(disable)}")
@@ -2871,9 +2871,9 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         new_auth_cdata = _get_cdata(new_auth, TPM2B_AUTH, "new_auth")
 
@@ -2891,10 +2891,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(lock_handle, "lock_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(lock_handle, "lock_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
         _chkrc(
             lib.Esys_DictionaryAttackLockReset(
                 self._ctx, lock_handle, session1, session2, session3
@@ -2927,10 +2927,10 @@ class ESAPI:
                 f"Expected lockout_recovery to be an int, got {type(lockout_recovery)}"
             )
 
-        check_handle_type(lock_handle, "lock_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(lock_handle, "lock_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
         _chkrc(
             lib.Esys_DictionaryAttackParameters(
                 self._ctx,
@@ -2954,10 +2954,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(auth, "auth")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(auth, "auth")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
         setList_cdata = _get_cdata(set_list, TPML_CC, "set_list")
         clearList_cdata = _get_cdata(clear_list, TPML_CC, "clear_list")
         _chkrc(
@@ -2981,10 +2981,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(auth_handle, "auth_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(auth_handle, "auth_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
         _chkrc(
             lib.Esys_SetAlgorithmSet(
                 self._ctx, auth_handle, session1, session2, session3, algorithm_set
@@ -3002,16 +3002,16 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(authorization, "authorization")
-        check_handle_type(key_handle, "key_handle")
+        _check_handle_type(authorization, "authorization")
+        _check_handle_type(key_handle, "key_handle")
         fuDigest_cdata = _get_cdata(fu_digest, TPM2B_DIGEST, "fu_digest")
         manifestSignature_cdata = _get_cdata(
             manifest_signature, TPMT_SIGNATURE, "manifest_signature"
         )
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         _chkrc(
             lib.Esys_FieldUpgradeStart(
@@ -3036,9 +3036,9 @@ class ESAPI:
 
         fuData_cdata = _get_cdata(fu_data, TPM2B_MAX_BUFFER, "fu_data")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         nextDigest = ffi.new("TPMT_HA **")
         firstDigest = ffi.new("TPMT_HA **")
@@ -3071,9 +3071,9 @@ class ESAPI:
                 f"Expected sequence_number to be an int, got {type(sequence_number)}"
             )
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         fuData = ffi.new("TPM2B_MAX_BUFFER **")
         _chkrc(
@@ -3084,7 +3084,7 @@ class ESAPI:
         return TPM2B_MAX_BUFFER(get_dptr(fuData, lib.Esys_Free))
 
     def context_save(self, save_handle: ESYS_TR) -> TPMS_CONTEXT:
-        check_handle_type(save_handle, "save_handle")
+        _check_handle_type(save_handle, "save_handle")
         context = ffi.new("TPMS_CONTEXT **")
         _chkrc(lib.Esys_ContextSave(self._ctx, save_handle, context))
         return TPMS_CONTEXT(get_dptr(context, lib.Esys_Free))
@@ -3097,7 +3097,7 @@ class ESAPI:
         return loadedHandleObject
 
     def flush_context(self, flush_handle: ESYS_TR) -> None:
-        check_handle_type(flush_handle, "flush_handle")
+        _check_handle_type(flush_handle, "flush_handle")
         _chkrc(lib.Esys_FlushContext(self._ctx, flush_handle))
 
     def evict_control(
@@ -3110,13 +3110,13 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> ESYS_TR:
 
-        check_handle_type(auth, "auth")
-        check_handle_type(object_handle, "object_handle")
-        check_handle_type(persistent_handle, "persistent_handle")
+        _check_handle_type(auth, "auth")
+        _check_handle_type(object_handle, "object_handle")
+        _check_handle_type(persistent_handle, "persistent_handle")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         newObjectHandle = ffi.new("ESYS_TR *")
         _chkrc(
@@ -3141,9 +3141,9 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> TPMS_TIME_INFO:
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         currentTime = ffi.new("TPMS_TIME_INFO **")
         _chkrc(lib.Esys_ReadClock(self._ctx, session1, session2, session3, currentTime))
@@ -3158,14 +3158,14 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ):
 
-        check_handle_type(auth, "auth")
+        _check_handle_type(auth, "auth")
 
         if not isinstance(new_time, int):
             raise TypeError(f"Expected new_time to be an int, got {type(new_time)}")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         _chkrc(
             lib.Esys_ClockSet(self._ctx, auth, session1, session2, session3, new_time)
@@ -3180,11 +3180,11 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(auth, "auth")
+        _check_handle_type(auth, "auth")
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         _chkrc(
             lib.Esys_ClockRateAdjust(
@@ -3212,9 +3212,9 @@ class ESAPI:
                 f"Expected property_count to be an int, got {type(property_count)}"
             )
 
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         moreData = ffi.new("TPMI_YES_NO *")
         capabilityData = ffi.new("TPMS_CAPABILITY_DATA **")
@@ -3261,10 +3261,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> ESYS_TR:
 
-        check_handle_type(auth_handle, "auth_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(auth_handle, "auth_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
         auth_cdata = _get_cdata(auth, TPM2B_AUTH, "auth", allow_none=True)
         publicInfo_cdata = _get_cdata(public_info, TPM2B_NV_PUBLIC, "public_info")
         nvHandle = ffi.new("ESYS_TR *")
@@ -3292,11 +3292,11 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(auth_handle, "auth_handle")
-        check_handle_type(nv_index, "nv_index")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(auth_handle, "auth_handle")
+        _check_handle_type(nv_index, "nv_index")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
         _chkrc(
             lib.Esys_NV_UndefineSpace(
                 self._ctx, auth_handle, nv_index, session1, session2, session3
@@ -3312,11 +3312,11 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(nv_index, "nv_index")
-        check_handle_type(platform, "platform")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(nv_index, "nv_index")
+        _check_handle_type(platform, "platform")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
         _chkrc(
             lib.Esys_NV_UndefineSpaceSpecial(
                 self._ctx, nv_index, platform, session1, session2, session3
@@ -3331,10 +3331,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> Tuple[TPM2B_NV_PUBLIC, TPM2B_NAME]:
 
-        check_handle_type(nv_index, "nv_index")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(nv_index, "nv_index")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
         nvPublic = ffi.new("TPM2B_NV_PUBLIC **")
         nvName = ffi.new("TPM2B_NAME **")
         _chkrc(
@@ -3360,11 +3360,11 @@ class ESAPI:
 
         if auth_handle == 0:
             auth_handle = nv_index
-        check_handle_type(nv_index, "nv_index")
-        check_handle_type(auth_handle, "auth_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(nv_index, "nv_index")
+        _check_handle_type(auth_handle, "auth_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
         data_cdata = _get_cdata(data, TPM2B_MAX_NV_BUFFER, "data")
         _chkrc(
             lib.Esys_NV_Write(
@@ -3390,11 +3390,11 @@ class ESAPI:
 
         if auth_handle == 0:
             auth_handle = nv_index
-        check_handle_type(auth_handle, "auth_handle")
-        check_handle_type(nv_index, "nv_index")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(auth_handle, "auth_handle")
+        _check_handle_type(nv_index, "nv_index")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
         _chkrc(
             lib.Esys_NV_Increment(
                 self._ctx, auth_handle, nv_index, session1, session2, session3
@@ -3413,11 +3413,11 @@ class ESAPI:
 
         if auth_handle == 0:
             auth_handle = nv_index
-        check_handle_type(auth_handle, "auth_handle")
-        check_handle_type(nv_index, "nv_index")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(auth_handle, "auth_handle")
+        _check_handle_type(nv_index, "nv_index")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
         data_cdata = _get_cdata(data, TPM2B_MAX_NV_BUFFER, "data")
         _chkrc(
             lib.Esys_NV_Extend(
@@ -3444,15 +3444,15 @@ class ESAPI:
         if auth_handle == 0:
             auth_handle = nv_index
 
-        check_handle_type(auth_handle, "auth_handle")
+        _check_handle_type(auth_handle, "auth_handle")
 
         if not isinstance(bits, int):
             raise TypeError(f"Expected bits to be an int, got {type(bits)}")
 
-        check_handle_type(nv_index, "nv_index")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(nv_index, "nv_index")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
         _chkrc(
             lib.Esys_NV_SetBits(
                 self._ctx, auth_handle, nv_index, session1, session2, session3, bits
@@ -3470,11 +3470,11 @@ class ESAPI:
 
         if auth_handle == 0:
             auth_handle = nv_index
-        check_handle_type(auth_handle, "auth_handle")
-        check_handle_type(nv_index, "nv_index")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(auth_handle, "auth_handle")
+        _check_handle_type(nv_index, "nv_index")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
         _chkrc(
             lib.Esys_NV_WriteLock(
                 self._ctx, auth_handle, nv_index, session1, session2, session3
@@ -3489,10 +3489,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(auth_handle, "auth_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(auth_handle, "auth_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
         _chkrc(
             lib.Esys_NV_GlobalWriteLock(
                 self._ctx, auth_handle, session1, session2, session3
@@ -3512,7 +3512,7 @@ class ESAPI:
 
         if auth_handle == 0:
             auth_handle = nv_index
-        check_handle_type(nv_index, "nv_index")
+        _check_handle_type(nv_index, "nv_index")
 
         if not isinstance(size, int):
             raise TypeError(f"Expected size to be an int, got {type(size)}")
@@ -3520,10 +3520,10 @@ class ESAPI:
         if not isinstance(offset, int):
             raise TypeError(f"Expected offset to be an int, got {type(offset)}")
 
-        check_handle_type(auth_handle, "auth_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(auth_handle, "auth_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
 
         data = ffi.new("TPM2B_MAX_NV_BUFFER **")
         _chkrc(
@@ -3552,11 +3552,11 @@ class ESAPI:
 
         if auth_handle == 0:
             auth_handle = nv_index
-        check_handle_type(nv_index, "nv_index")
-        check_handle_type(auth_handle, "auth_handle")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(nv_index, "nv_index")
+        _check_handle_type(auth_handle, "auth_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
         _chkrc(
             lib.Esys_NV_ReadLock(
                 self._ctx, auth_handle, nv_index, session1, session2, session3
@@ -3572,10 +3572,10 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
 
-        check_handle_type(nv_index, "nv_index")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(nv_index, "nv_index")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
         newAuth_cdata = _get_cdata(new_auth, TPM2B_DIGEST, "new_auth")
         _chkrc(
             lib.Esys_NV_ChangeAuth(
@@ -3599,12 +3599,12 @@ class ESAPI:
 
         if auth_handle == 0:
             auth_handle = nv_index
-        check_handle_type(sign_handle, "sign_handle")
-        check_handle_type(auth_handle, "auth_handle")
-        check_handle_type(nv_index, "nv_index")
-        check_handle_type(session1, "session1")
-        check_handle_type(session2, "session2")
-        check_handle_type(session3, "session3")
+        _check_handle_type(sign_handle, "sign_handle")
+        _check_handle_type(auth_handle, "auth_handle")
+        _check_handle_type(nv_index, "nv_index")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
         qualifyingData_cdata = _get_cdata(
             qualifying_data, TPM2B_DATA, "qualifying_data"
         )
@@ -3656,7 +3656,9 @@ class ESAPI:
         )
         return TPM2B_DATA(get_dptr(outputData, lib.Esys_Free))
 
-    def load_blob(self, data: bytes, type_: int = lib.FAPI_ESYSBLOB_CONTEXTLOAD) -> ESYS_TR:
+    def load_blob(
+        self, data: bytes, type_: int = lib.FAPI_ESYSBLOB_CONTEXTLOAD
+    ) -> ESYS_TR:
         """load binary ESAPI object as binary blob. Supported are the types :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_CONTEXTLOAD` and :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_DESERIALIZE`.
 
         Args:
