@@ -3656,7 +3656,7 @@ class ESAPI:
         )
         return TPM2B_DATA(get_dptr(outputData, lib.Esys_Free))
 
-    def load_blob(self, data: bytes, type_: int = lib.FAPI_ESYSBLOB_CONTEXTLOAD) -> int:
+    def load_blob(self, data: bytes, type_: int = lib.FAPI_ESYSBLOB_CONTEXTLOAD) -> ESYS_TR:
         """load binary ESAPI object as binary blob. Supported are the types :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_CONTEXTLOAD` and :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_DESERIALIZE`.
 
         Args:
@@ -3664,7 +3664,7 @@ class ESAPI:
             type_ (int, optional): :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_CONTEXTLOAD` or :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_DESERIALIZE`. Defaults to :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_CONTEXTLOAD`.
 
         Returns:
-            int: The ESAPI handle to the loaded object.
+            ESYS_TR: The ESAPI handle to the loaded object.
         """
         esys_handle = ffi.new("ESYS_TR *")
         if type_ == lib.FAPI_ESYSBLOB_CONTEXTLOAD:
