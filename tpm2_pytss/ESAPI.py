@@ -9,6 +9,8 @@ from .types import *
 from .utils import _chkrc, TPM2B_pack
 from .TCTI import TCTI
 
+from typing import Union, Tuple, List
+
 
 def get_ptr(dptr):
     return ffi.gc(dptr[0], lib.Esys_Free)
@@ -73,8 +75,7 @@ def check_friendly_int(friendly, varname, clazz):
 
 
 class ESAPI:
-    def __init__(self, tcti=None):
-
+    def __init__(self, tcti: TCTI = None):
         self._tcti = tcti
         tctx = ffi.NULL if tcti is None else tcti._tcti_context
 
@@ -85,14 +86,14 @@ class ESAPI:
     def __enter__(self):
         return self
 
-    def __exit__(self, _type, value, traceback):
+    def __exit__(self, _type, value, traceback) -> None:
         self.close()
 
-    def close(self):
+    def close(self) -> None:
         lib.Esys_Finalize(self.ctx_pp)
         self.ctx = ffi.NULL
 
-    def GetTcti(self):
+    def GetTcti(self) -> TCTI:
         if hasattr(self._tcti, "_tcti_context"):
             return self._tcti
         tctx = ffi.new("TSS2_TCTI_CONTEXT **")
@@ -100,16 +101,16 @@ class ESAPI:
         return TCTI(tctx[0])
 
     @property
-    def tcti(self):
+    def tcti(self) -> TCTI:
         return self.GetTcti()
 
     def tr_from_tpmpublic(
         self,
-        handle,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        handle: ESYS_TR,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> ESYS_TR:
 
         check_handle_type(handle, "handle")
 
@@ -125,12 +126,12 @@ class ESAPI:
         )
         return obj[0]
 
-    def set_auth(self, esys_tr, auth):
+    def set_auth(self, esys_tr: ESYS_TR, auth: str):
 
         auth_p = TPM2B_pack(auth, "TPM2B_AUTH")
         _chkrc(lib.Esys_TR_SetAuth(self.ctx, esys_tr, auth_p))
 
-    def tr_get_name(self, handle):
+    def tr_get_name(self, handle: ESYS_TR) -> TPM2B_NAME:
 
         check_handle_type(handle, "handle")
 
@@ -138,7 +139,7 @@ class ESAPI:
         _chkrc(lib.Esys_TR_GetName(self.ctx, handle, name))
         return TPM2B_NAME(_cdata=get_ptr(name))
 
-    def startup(self, startup_type):
+    def startup(self, startup_type: TPM2_SU):
 
         check_friendly_int(startup_type, "startup_type", TPM2_SU)
 
@@ -146,10 +147,10 @@ class ESAPI:
 
     def shutdown(
         self,
-        shutdown_type=TPM2_SU.STATE,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
+        shutdown_type: TPM2_SU = TPM2_SU.STATE,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
     ):
 
         check_friendly_int(shutdown_type, "shutdown_type", TPM2_SU)
@@ -162,10 +163,10 @@ class ESAPI:
 
     def self_test(
         self,
-        full_test,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
+        full_test: bool,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
     ):
 
         if not isinstance(full_test, bool):
@@ -177,11 +178,11 @@ class ESAPI:
 
     def incremental_self_test(
         self,
-        to_test,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        to_test: TPML_ALG,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> TPML_ALG:
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
@@ -198,7 +199,10 @@ class ESAPI:
         return TPML_ALG(get_ptr(toDoList))
 
     def get_test_result(
-        self, session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE
+        self,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
     ):
 
         check_handle_type(session1, "session1")
@@ -216,15 +220,15 @@ class ESAPI:
 
     def start_auth_session(
         self,
-        tpm_key,
-        bind,
-        nonce_caller,
-        session_type,
-        symmetric,
-        auth_hash,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
+        tpm_key: ESYS_TR,
+        bind: ESYS_TR,
+        nonce_caller: Union[TPM2B_NONCE, None],
+        session_type: TPM2_SE,
+        symmetric: TPMT_SYM_DEF,
+        auth_hash: TPM2_ALG,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
     ):
 
         check_handle_type(tpm_key, "tpm_key")
@@ -260,7 +264,9 @@ class ESAPI:
         sessionHandleObject = sessionHandle[0]
         return sessionHandleObject
 
-    def trsess_set_attributes(self, session, attributes, mask=0xFF):
+    def trsess_set_attributes(
+        self, session: ESYS_TR, attributes: int, mask: int = 0xFF
+    ):
 
         check_handle_type(session, "session")
 
@@ -274,7 +280,7 @@ class ESAPI:
 
         _chkrc(lib.Esys_TRSess_SetAttributes(self.ctx, session, attributes, mask))
 
-    def trsess_get_nonce_tpm(self, session):
+    def trsess_get_nonce_tpm(self, session: ESYS_TR) -> TPM2B_NONCE:
 
         check_handle_type(session, "session")
 
@@ -286,10 +292,10 @@ class ESAPI:
 
     def policy_restart(
         self,
-        session_handle,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
+        session_handle: ESYS_TR,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
     ):
 
         check_handle_type(session_handle, "session_handle")
@@ -305,14 +311,14 @@ class ESAPI:
 
     def create(
         self,
-        parent_handle,
-        in_sensitive,
-        in_public="rsa2048",
-        outside_info=TPM2B_DATA(),
-        creation_pcr=TPML_PCR_SELECTION(),
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
+        parent_handle: ESYS_TR,
+        in_sensitive: TPM2B_SENSITIVE_CREATE,
+        in_public: Union[TPM2B_PUBLIC, str] = "rsa2048",
+        outside_info: TPM2B_DATA = TPM2B_DATA(),
+        creation_pcr: TPML_PCR_SELECTION = TPML_PCR_SELECTION(),
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
     ):
 
         check_handle_type(parent_handle, "parent_handle")
@@ -360,13 +366,13 @@ class ESAPI:
 
     def load(
         self,
-        parent_handle,
-        in_private,
-        in_public,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        parent_handle: ESYS_TR,
+        in_private: TPM2B_PRIVATE,
+        in_public: TPM2B_PUBLIC,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> ESYS_TR:
 
         check_handle_type(parent_handle, "parent_handle")
         check_handle_type(session1, "session1")
@@ -394,13 +400,13 @@ class ESAPI:
 
     def load_external(
         self,
-        in_private,
-        in_public,
+        in_private: TPM2B_SENSITIVE,
+        in_public: TPM2B_PUBLIC,
         hierarchy=ESYS_TR.NULL,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> ESYS_TR:
 
         check_friendly_int(hierarchy, "hierarchy", ESYS_TR)
 
@@ -432,11 +438,11 @@ class ESAPI:
 
     def read_public(
         self,
-        object_handle,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        object_handle: ESYS_TR,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[TPM2B_PUBLIC, TPM2B_NAME, TPM2B_NAME]:
 
         check_handle_type(object_handle, "object_handle")
         check_handle_type(session1, "session1")
@@ -466,14 +472,14 @@ class ESAPI:
 
     def activate_credential(
         self,
-        activate_handle,
-        key_handle,
-        credential_blob,
-        secret,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.PASSWORD,
-        session3=ESYS_TR.NONE,
-    ):
+        activate_handle: ESYS_TR,
+        key_handle: ESYS_TR,
+        credential_blob: TPM2B_ID_OBJECT,
+        secret: TPM2B_ENCRYPTED_SECRET,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.PASSWORD,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> TPM2B_DIGEST:
 
         check_handle_type(activate_handle, "activate_handle")
         check_handle_type(key_handle, "key_handle")
@@ -505,13 +511,13 @@ class ESAPI:
 
     def make_credential(
         self,
-        handle,
-        credential,
-        object_name,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        handle: ESYS_TR,
+        credential: TPM2B_DIGEST,
+        object_name: TPM2B_NAME,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[TPM2B_ID_OBJECT, TPM2B_ENCRYPTED_SECRET]:
 
         check_handle_type(handle, "handle")
 
@@ -544,11 +550,11 @@ class ESAPI:
 
     def unseal(
         self,
-        item_handle,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        item_handle: ESYS_TR,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> TPM2B_SENSITIVE_DATA:
 
         check_handle_type(item_handle, "item_handle")
 
@@ -566,13 +572,13 @@ class ESAPI:
 
     def object_change_auth(
         self,
-        object_handle,
-        parent_handle,
-        new_auth,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        object_handle: ESYS_TR,
+        parent_handle: ESYS_TR,
+        new_auth: Union[TPM2B_AUTH, str, bytes],
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> TPM2B_PRIVATE:
 
         check_handle_type(object_handle, "object_handle")
         check_handle_type(parent_handle, "parent_handle")
@@ -600,13 +606,13 @@ class ESAPI:
 
     def create_loaded(
         self,
-        parent_handle,
-        in_sensitive,
-        in_public="rsa2048",
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        parent_handle: ESYS_TR,
+        in_sensitive: TPM2B_SENSITIVE_CREATE,
+        in_public: Union[TPM2B_PUBLIC, str] = "rsa2048",
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[ESYS_TR, TPM2B_PRIVATE, TPM2B_PUBLIC]:
 
         check_handle_type(parent_handle, "parent_handle")
 
@@ -648,14 +654,14 @@ class ESAPI:
 
     def duplicate(
         self,
-        object_handle,
-        new_parent_handle,
-        encryption_key_in,
-        symmetric_alg,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        object_handle: ESYS_TR,
+        new_parent_handle: ESYS_TR,
+        encryption_key_in: TPM2B_DATA,
+        symmetric_alg: TPMT_SYM_DEF_OBJECT,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[TPM2B_DATA, TPM2B_PRIVATE, TPM2B_ENCRYPTED_SECRET]:
 
         check_handle_type(object_handle, "object_handle")
         check_handle_type(new_parent_handle, "new_parent_handle")
@@ -697,15 +703,15 @@ class ESAPI:
 
     def rewrap(
         self,
-        old_parent,
-        new_parent,
-        in_duplicate,
-        name,
-        in_sym_seed,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        old_parent: ESYS_TR,
+        new_parent: ESYS_TR,
+        in_duplicate: TPM2B_PRIVATE,
+        name: Union[TPM2B_NAME, bytes, str],
+        in_sym_seed: TPM2B_ENCRYPTED_SECRET,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[TPM2B_PRIVATE, TPM2B_ENCRYPTED_SECRET]:
 
         check_handle_type(old_parent, "old_parent")
         check_handle_type(new_parent, "new_parent")
@@ -743,16 +749,16 @@ class ESAPI:
 
     def import_(
         self,
-        parent_handle,
-        encryption_key,
-        object_public,
-        duplicate,
-        in_sym_seed,
-        symmetricAlg,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        parent_handle: ESYS_TR,
+        encryption_key: Union[TPM2B_DATA, bytes, str],
+        object_public: TPM2B_PUBLIC,
+        duplicate: TPM2B_PRIVATE,
+        in_sym_seed: TPM2B_ENCRYPTED_SECRET,
+        symmetricAlg: TPMT_SYM_DEF_OBJECT,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> TPM2B_PRIVATE:
 
         check_handle_type(parent_handle, "parent_handle")
         check_handle_type(session1, "session1")
@@ -791,14 +797,14 @@ class ESAPI:
 
     def rsa_encrypt(
         self,
-        key_handle,
-        message,
-        in_scheme,
-        label=None,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        key_handle: ESYS_TR,
+        message: Union[TPM2B_PUBLIC_KEY_RSA, bytes, str],
+        in_scheme: TPMT_RSA_DECRYPT,
+        label: Union[TPM2B_DATA, bytes, str, None] = None,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> TPM2B_PUBLIC_KEY_RSA:
 
         check_handle_type(key_handle, "key_handle")
         check_handle_type(session1, "session1")
@@ -827,14 +833,14 @@ class ESAPI:
 
     def rsa_decrypt(
         self,
-        key_handle,
-        cipher_text,
-        in_scheme,
-        label=None,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        key_handle: ESYS_TR,
+        cipher_text: Union[TPM2B_PUBLIC_KEY_RSA, bytes, str],
+        in_scheme: TPMT_RSA_DECRYPT,
+        label: Union[TPM2B_DATA, bytes, str, None] = None,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> TPM2B_PUBLIC_KEY_RSA:
 
         check_handle_type(key_handle, "key_handle")
         check_handle_type(session1, "session1")
@@ -863,11 +869,11 @@ class ESAPI:
 
     def ecdh_key_gen(
         self,
-        key_handle,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        key_handle: ESYS_TR,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[TPM2B_ECC_POINT, TPM2B_ECC_POINT]:
 
         check_handle_type(key_handle, "key_handle")
         check_handle_type(session1, "session1")
@@ -885,12 +891,12 @@ class ESAPI:
 
     def ecdh_zgen(
         self,
-        key_handle,
-        in_point,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        key_handle: ESYS_TR,
+        in_point=TPM2B_ECC_POINT,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> TPM2B_ECC_POINT:
 
         check_handle_type(key_handle, "key_handle")
         check_handle_type(session1, "session1")
@@ -915,11 +921,11 @@ class ESAPI:
 
     def ecc_parameters(
         self,
-        curve_id,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        curve_id: TPM2_ECC_CURVE,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> TPMS_ALGORITHM_DETAIL_ECC:
 
         check_friendly_int(curve_id, "curve_id", TPM2_ECC_CURVE)
 
@@ -937,15 +943,15 @@ class ESAPI:
 
     def zgen_2_phase(
         self,
-        key_a,
-        in_qs_b,
-        in_qe_b,
-        in_scheme,
-        counter,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        key_a: ESYS_TR,
+        in_qs_b: TPM2B_ECC_POINT,
+        in_qe_b: TPM2B_ECC_POINT,
+        in_scheme: TPM2_ALG,
+        counter: int,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[TPM2B_ECC_POINT]:
 
         check_handle_type(session1, "key_a")
 
@@ -988,15 +994,15 @@ class ESAPI:
 
     def encrypt_decrypt(
         self,
-        key_handle,
-        decrypt,
-        mode,
-        iv_in,
-        in_data,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        key_handle: ESYS_TR,
+        decrypt: bool,
+        mode: TPM2_ALG,
+        iv_in: Union[TPM2B_IV, bytes, str],
+        in_data: Union[TPM2B_MAX_BUFFER, bytes, str],
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[TPM2B_MAX_BUFFER, TPM2B_IV]:
 
         check_handle_type(key_handle, "key_handle")
 
@@ -1033,15 +1039,15 @@ class ESAPI:
 
     def encrypt_decrypt_2(
         self,
-        key_handle,
-        decrypt,
-        mode,
-        iv_in,
-        in_data,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        key_handle: ESYS_TR,
+        decrypt: bool,
+        mode: TPM2_ALG,
+        iv_in: Union[TPM2B_IV, bytes, str],
+        in_data: Union[TPM2B_MAX_BUFFER, bytes, str],
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[TPM2B_MAX_BUFFER, TPM2B_IV]:
 
         check_handle_type(key_handle, "key_handle")
 
@@ -1078,13 +1084,13 @@ class ESAPI:
 
     def hash(
         self,
-        data,
-        hash_alg,
-        hierarchy=ESYS_TR.OWNER,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        data: Union[TPM2B_MAX_BUFFER, bytes, str],
+        hash_alg: TPM2_ALG,
+        hierarchy: ESYS_TR = ESYS_TR.OWNER,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[TPM2B_DIGEST, TPMT_TK_HASHCHECK]:
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
@@ -1113,13 +1119,13 @@ class ESAPI:
 
     def hmac(
         self,
-        handle,
-        buffer,
-        hash_alg,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        handle: ESYS_TR,
+        buffer: Union[TPM2B_MAX_BUFFER, bytes, str],
+        hash_alg: TPM2_ALG,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> TPM2B_DIGEST:
 
         check_handle_type(handle, "handle")
         check_handle_type(session1, "session1")
@@ -1147,11 +1153,11 @@ class ESAPI:
 
     def get_random(
         self,
-        bytes_requested,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        bytes_requested: int,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> TPM2B_DIGEST:
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
@@ -1173,10 +1179,10 @@ class ESAPI:
 
     def stir_random(
         self,
-        in_data,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
+        in_data: Union[TPM2B_SENSITIVE_DATA, bytes, str],
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
     ):
 
         check_handle_type(session1, "session1")
@@ -1191,13 +1197,13 @@ class ESAPI:
 
     def hmac_start(
         self,
-        handle,
-        auth,
-        hash_alg,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        handle: ESYS_TR,
+        auth: Union[TPM2B_AUTH, bytes, str],
+        hash_alg: TPM2_ALG,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> ESYS_TR:
 
         check_handle_type(handle, "handle")
 
@@ -1230,12 +1236,12 @@ class ESAPI:
 
     def hash_sequence_start(
         self,
-        auth,
-        hash_alg,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        auth: Union[TPM2B_AUTH, bytes, str],
+        hash_alg: TPM2_ALG,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> ESYS_TR:
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
@@ -1265,12 +1271,12 @@ class ESAPI:
 
     def sequence_update(
         self,
-        sequence_handle,
-        buffer,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        sequence_handle: ESYS_TR,
+        buffer: Union[TPM2B_MAX_BUFFER, bytes, str],
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(sequence_handle, "sequence_handle")
         check_handle_type(session1, "session1")
@@ -1287,13 +1293,13 @@ class ESAPI:
 
     def sequence_complete(
         self,
-        sequence_handle,
-        buffer,
-        hierarchy=ESYS_TR.OWNER,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        sequence_handle: ESYS_TR,
+        buffer: Union[TPM2B_MAX_BUFFER, bytes, str],
+        hierarchy: ESYS_TR = ESYS_TR.OWNER,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[TPM2B_DIGEST, TPMT_TK_HASHCHECK]:
 
         check_handle_type(sequence_handle, "sequence_handle")
         check_handle_type(session1, "session1")
@@ -1324,13 +1330,13 @@ class ESAPI:
 
     def event_sequence_complete(
         self,
-        pcr_handle,
-        sequence_handle,
-        buffer,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.PASSWORD,
-        session3=ESYS_TR.NONE,
-    ):
+        pcr_handle: ESYS_TR,
+        sequence_handle: ESYS_TR,
+        buffer: Union[TPM2B_MAX_BUFFER, bytes, str],
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.PASSWORD,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> TPML_DIGEST_VALUES:
 
         check_handle_type(sequence_handle, "sequence_handle")
         check_handle_type(session1, "session1")
@@ -1358,14 +1364,14 @@ class ESAPI:
 
     def certify(
         self,
-        object_handle,
-        sign_handle,
-        qualifying_data,
-        in_scheme,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.PASSWORD,
-        session3=ESYS_TR.NONE,
-    ):
+        object_handle: ESYS_TR,
+        sign_handle: ESYS_TR,
+        qualifying_data: Union[TPM2B_DATA, bytes, str],
+        in_scheme: TPMT_SIG_SCHEME,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.PASSWORD,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[TPM2B_ATTEST, TPMT_SIGNATURE]:
 
         check_handle_type(object_handle, "object_handle")
         check_handle_type(sign_handle, "sign_handle")
@@ -1396,16 +1402,16 @@ class ESAPI:
 
     def certify_creation(
         self,
-        sign_handle,
-        object_handle,
-        qualifying_data,
-        creation_hash,
-        in_scheme,
-        creation_ticket,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        sign_handle: ESYS_TR,
+        object_handle: ESYS_TR,
+        qualifying_data: Union[TPM2B_DATA, bytes, str],
+        creation_hash: Union[TPM2B_DIGEST, bytes, str],
+        in_scheme: TPMT_SIG_SCHEME,
+        creation_ticket: TPMT_TK_CREATION,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[TPM2B_ATTEST, TPMT_SIGNATURE]:
 
         check_handle_type(object_handle, "object_handle")
         check_handle_type(sign_handle, "sign_handle")
@@ -1442,14 +1448,14 @@ class ESAPI:
 
     def quote(
         self,
-        sign_handle,
-        pcr_select,
-        qualifying_data,
-        in_scheme=TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL),
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        sign_handle: ESYS_TR,
+        pcr_select: Union[TPML_PCR_SELECTION, str],
+        qualifying_data: Union[TPM2B_DATA, bytes, str],
+        in_scheme: TPMT_SIG_SCHEME = TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL),
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[TPM2B_ATTEST, TPMT_SIGNATURE]:
 
         check_handle_type(sign_handle, "sign_handle")
         check_handle_type(session1, "session1")
@@ -1482,15 +1488,15 @@ class ESAPI:
 
     def get_session_audit_digest(
         self,
-        sign_handle,
-        session_handle,
-        qualifying_data,
-        in_scheme=TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL),
-        privacy_admin_handle=ESYS_TR.RH_ENDORSEMENT,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.PASSWORD,
-        session3=ESYS_TR.NONE,
-    ):
+        sign_handle: ESYS_TR,
+        session_handle: ESYS_TR,
+        qualifying_data: Union[TPM2B_DATA, bytes, str],
+        in_scheme: TPMT_SIG_SCHEME = TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL),
+        privacy_admin_handle: ESYS_TR = ESYS_TR.RH_ENDORSEMENT,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.PASSWORD,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[TPM2B_ATTEST, TPMT_SIGNATURE]:
 
         check_handle_type(session_handle, "session_handle")
         check_handle_type(
@@ -1530,14 +1536,14 @@ class ESAPI:
 
     def get_command_audit_digest(
         self,
-        sign_handle,
-        qualifying_data,
-        in_scheme=TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL),
-        privacy_handle=ESYS_TR.RH_ENDORSEMENT,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.PASSWORD,
-        session3=ESYS_TR.NONE,
-    ):
+        sign_handle: ESYS_TR,
+        qualifying_data: Union[TPM2B_DATA, bytes, str],
+        in_scheme: TPMT_SIG_SCHEME = TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL),
+        privacy_handle: ESYS_TR = ESYS_TR.RH_ENDORSEMENT,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.PASSWORD,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[TPM2B_ATTEST, TPMT_SIGNATURE]:
 
         check_handle_type(
             privacy_handle, "privacy_handle", expected=[ESYS_TR.RH_ENDORSEMENT]
@@ -1573,14 +1579,14 @@ class ESAPI:
 
     def get_time(
         self,
-        sign_handle,
-        qualifying_data,
-        in_scheme=TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL),
-        privacy_admin_handle=ESYS_TR.RH_ENDORSEMENT,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.PASSWORD,
-        session3=ESYS_TR.NONE,
-    ):
+        sign_handle: ESYS_TR,
+        qualifying_data: Union[TPM2B_DATA, bytes, str],
+        in_scheme: TPMT_SIG_SCHEME = TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL),
+        privacy_admin_handle: ESYS_TR = ESYS_TR.RH_ENDORSEMENT,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.PASSWORD,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[TPM2B_ATTEST, TPMT_SIGNATURE]:
 
         check_handle_type(
             privacy_admin_handle, "privacy_admin_handle", expected=[ESYS_TR.ENDORSEMENT]
@@ -1616,14 +1622,14 @@ class ESAPI:
 
     def commit(
         self,
-        sign_handle,
-        p1,
-        s2,
-        y2,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        sign_handle: ESYS_TR,
+        p1: TPM2B_ECC_POINT,
+        s2: Union[TPM2B_SENSITIVE_DATA, bytes, str],
+        y2: Union[TPM2B_ECC_PARAMETER, bytes, str],
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[TPM2B_ECC_POINT, TPM2B_ECC_POINT, TPM2B_ECC_POINT, int]:
 
         check_handle_type(sign_handle, "sign_handle")
         check_handle_type(session1, "session1")
@@ -1663,11 +1669,16 @@ class ESAPI:
 
     def ec_ephemeral(
         self,
-        curve_id,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        curve_id: TPM2_ECC_CURVE,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[TPM2B_ECC_POINT, int]:
+
+        check_friendly_int(curve_id, "curve_id", TPM2_ECC_CURVE)
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
 
         Q = ffi.new("TPM2B_ECC_POINT **")
         counter = ffi.new("UINT16 *")
@@ -1680,13 +1691,13 @@ class ESAPI:
 
     def verify_signature(
         self,
-        key_handle,
-        digest,
-        signature,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        key_handle: ESYS_TR,
+        digest: Union[TPM2B_DIGEST, bytes, int],
+        signature: TPMT_SIGNATURE,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> TPMT_TK_VERIFIED:
 
         check_handle_type(key_handle, "key_handle")
         check_handle_type(session1, "session1")
@@ -1713,14 +1724,14 @@ class ESAPI:
 
     def sign(
         self,
-        key_handle,
-        digest,
-        in_scheme,
-        validation,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        key_handle: ESYS_TR,
+        digest: Union[TPM2B_DIGEST, bytes, str],
+        in_scheme: TPMT_SIG_SCHEME,
+        validation: TPMT_TK_HASHCHECK,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> TPMT_SIGNATURE:
 
         check_handle_type(key_handle, "key_handle")
         check_handle_type(session1, "session1")
@@ -1749,14 +1760,14 @@ class ESAPI:
 
     def set_command_code_audit_status(
         self,
-        audit_alg,
-        set_list,
-        clear_list,
-        auth=ESYS_TR.OWNER,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        audit_alg: TPM2_ALG,
+        set_list: TPML_CC,
+        clear_list: TPML_CC,
+        auth: ESYS_TR = ESYS_TR.OWNER,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(auth, "auth", expected=[ESYS_TR.OWNER, ESYS_TR.PLATFORM])
 
@@ -1784,12 +1795,12 @@ class ESAPI:
 
     def pcr_extend(
         self,
-        pcr_handle,
-        digests,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        pcr_handle: ESYS_TR,
+        digests: TPML_DIGEST_VALUES,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(pcr_handle, "pcr_handle")
 
@@ -1807,12 +1818,12 @@ class ESAPI:
 
     def pcr_event(
         self,
-        pcr_handle,
-        event_data,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        pcr_handle: ESYS_TR,
+        event_data: Union[TPM2B_EVENT, bytes, str],
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> TPML_DIGEST_VALUES:
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
@@ -1838,11 +1849,11 @@ class ESAPI:
 
     def pcr_read(
         self,
-        pcr_selection_in,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        pcr_selection_in: Union[TPML_PCR_SELECTION, str],
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[int, TPML_PCR_SELECTION, TPML_DIGEST]:
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
@@ -1876,12 +1887,12 @@ class ESAPI:
 
     def pcr_allocate(
         self,
-        pcr_allocation,
-        auth_handle=ESYS_TR.PLATFORM,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        pcr_allocation: Union[TPML_PCR_SELECTION, str],
+        auth_handle: ESYS_TR = ESYS_TR.PLATFORM,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[bool, int, int, int]:
 
         check_handle_type(auth_handle, "auth_handle", expected=[ESYS_TR.PLATFORM])
         check_handle_type(session1, "session1")
@@ -1914,14 +1925,14 @@ class ESAPI:
 
     def pcr_set_auth_policy(
         self,
-        auth_policy,
-        hash_alg,
-        pcr_num,
-        auth_handle=ESYS_TR.PLATFORM,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        auth_policy: Union[TPM2B_DIGEST, bytes, str],
+        hash_alg: TPM2_ALG,
+        pcr_num: ESYS_TR,
+        auth_handle: ESYS_TR = ESYS_TR.PLATFORM,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(auth_handle, "auth_handle", expected=[ESYS_TR.PLATFORM])
 
@@ -1949,12 +1960,12 @@ class ESAPI:
 
     def pcr_set_auth_value(
         self,
-        pcr_handle,
-        auth,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        pcr_handle: ESYS_TR,
+        auth: Union[TPM2B_DIGEST, bytes, str],
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_friendly_int(pcr_handle, "pcr_handle", ESYS_TR)
 
@@ -1972,11 +1983,11 @@ class ESAPI:
 
     def pcr_reset(
         self,
-        pcr_handle,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        pcr_handle: ESYS_TR,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_friendly_int(pcr_handle, "pcr_handle", ESYS_TR)
 
@@ -1988,17 +1999,17 @@ class ESAPI:
 
     def policy_signed(
         self,
-        auth_object,
-        policy_session,
-        nonce_tpm,
-        cp_hash_a,
-        policy_ref,
-        expiration,
-        auth,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        auth_object: ESYS_TR,
+        policy_session: ESYS_TR,
+        nonce_tpm: Union[TPM2B_NONCE, bytes, str],
+        cp_hash_a: Union[TPM2B_DIGEST, bytes, str],
+        policy_ref: Union[TPM2B_NONCE, bytes, str],
+        expiration: int,
+        auth: TPMT_SIGNATURE,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[TPM2B_TIMEOUT, TPMT_TK_AUTH]:
 
         check_handle_type(auth_object, "auth_object")
 
@@ -2041,16 +2052,16 @@ class ESAPI:
 
     def policy_secret(
         self,
-        auth_handle,
-        policy_session,
-        nonce_tpm,
-        cp_hash_a,
-        policy_ref,
-        expiration,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        auth_handle: ESYS_TR,
+        policy_session: ESYS_TR,
+        nonce_tpm: Union[TPM2B_NONCE, bytes, str],
+        cp_hash_a: Union[TPM2B_DIGEST, bytes, str],
+        policy_ref: Union[TPM2B_NONCE, bytes, str],
+        expiration: int,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[TPM2B_TIMEOUT, TPMT_TK_AUTH]:
 
         check_handle_type(policy_session, "policy_session")
 
@@ -2091,16 +2102,16 @@ class ESAPI:
 
     def policy_ticket(
         self,
-        policy_session,
-        timeout,
-        cp_hash_a,
-        policy_ref,
-        auth_name,
-        ticket,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        policy_session: ESYS_TR,
+        timeout: TPM2B_TIMEOUT,
+        cp_hash_a: Union[TPM2B_DIGEST, bytes, str],
+        policy_ref: Union[TPM2B_NONCE, bytes, str],
+        auth_name: Union[TPM2B_NAME, bytes, str],
+        ticket: TPMT_TK_AUTH,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(policy_session, "policy_session")
 
@@ -2131,12 +2142,12 @@ class ESAPI:
 
     def policy_or(
         self,
-        policy_session,
-        p_hash_list,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        policy_session: ESYS_TR,
+        p_hash_list: TPML_DIGEST,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(policy_session, "policy_session")
 
@@ -2154,13 +2165,13 @@ class ESAPI:
 
     def policy_pcr(
         self,
-        policy_session,
-        pcr_digest,
-        pcrs,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        policy_session: ESYS_TR,
+        pcr_digest: Union[TPM2B_DIGEST, bytes, str],
+        pcrs: Union[TPML_PCR_SELECTION, str],
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(policy_session, "policy_session")
 
@@ -2185,12 +2196,12 @@ class ESAPI:
 
     def policy_locality(
         self,
-        policy_session,
-        locality,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        policy_session: ESYS_TR,
+        locality: int,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(policy_session, "policy_session")
 
@@ -2219,23 +2230,19 @@ class ESAPI:
 
     def policy_nv(
         self,
-        auth_handle,
-        nv_index,
-        policy_session,
-        operand_b,
-        operation,
-        offset=0,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        auth_handle: ESYS_TR,
+        nv_index: ESYS_TR,
+        policy_session: ESYS_TR,
+        operand_b: TPM2B_OPERAND,
+        operation: TPM2_EO,
+        offset: int = 0,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_friendly_int(auth_handle, "auth_handle", ESYS_TR)
-
-        if not isinstance(nv_index, int):
-            raise TypeError(
-                f"Expected nv_index to be of type int, got {type(nv_index)}"
-            )
+        check_handle_type(nv_index, "nv_index")
 
         check_handle_type(policy_session, "policy_session")
 
@@ -2267,14 +2274,14 @@ class ESAPI:
 
     def policy_counter_timer(
         self,
-        policy_session,
-        operand_b,
-        operation,
-        offset=0,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        policy_session: ESYS_TR,
+        operand_b: TPM2B_OPERAND,
+        operation: TPM2_EO,
+        offset: int = 0,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(policy_session, "policy_session")
 
@@ -2304,12 +2311,12 @@ class ESAPI:
 
     def policy_command_code(
         self,
-        policy_session,
-        code,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        policy_session: ESYS_TR,
+        code: TPM2_CC,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(policy_session, "policy_session")
         check_handle_type(session1, "session1")
@@ -2325,11 +2332,11 @@ class ESAPI:
 
     def policy_physical_presence(
         self,
-        policy_session,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        policy_session: ESYS_TR,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(policy_session, "policy_session")
         check_handle_type(session1, "session1")
@@ -2344,12 +2351,12 @@ class ESAPI:
 
     def policy_cp_hash(
         self,
-        policy_session,
-        cp_hash_a,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        policy_session: ESYS_TR,
+        cp_hash_a: Union[TPM2B_DIGEST, bytes, str],
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(policy_session, "policy_session")
 
@@ -2367,12 +2374,12 @@ class ESAPI:
 
     def policy_name_hash(
         self,
-        policy_session,
-        name_hash,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        policy_session: ESYS_TR,
+        name_hash: Union[TPM2B_DIGEST, bytes, str],
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(policy_session, "policy_session")
 
@@ -2390,14 +2397,14 @@ class ESAPI:
 
     def policy_duplication_select(
         self,
-        policy_session,
-        object_name,
-        new_parent_name,
-        include_object=False,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        policy_session: ESYS_TR,
+        object_name: Union[TPM2B_NAME, bytes, str],
+        new_parent_name: Union[TPM2B_NAME, bytes, str],
+        include_object: bool = False,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(policy_session, "policy_session")
 
@@ -2428,15 +2435,15 @@ class ESAPI:
 
     def policy_authorize(
         self,
-        policy_session,
-        approved_policy,
-        policy_ref,
-        key_sign,
-        check_ticket,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        policy_session: ESYS_TR,
+        approved_policy: Union[TPM2B_DIGEST, bytes, str],
+        policy_ref: Union[TPM2B_NONCE, bytes, str],
+        key_sign: Union[TPM2B_NAME, bytes, str],
+        check_ticket: TPMT_TK_VERIFIED,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(policy_session, "policy_session")
 
@@ -2467,11 +2474,11 @@ class ESAPI:
 
     def policy_auth_value(
         self,
-        policy_session,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        policy_session: ESYS_TR,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(policy_session, "policy_session")
         check_handle_type(session1, "session1")
@@ -2486,11 +2493,11 @@ class ESAPI:
 
     def policy_password(
         self,
-        policy_session,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        policy_session: ESYS_TR,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(policy_session, "policy_session")
         check_handle_type(session1, "session1")
@@ -2505,11 +2512,11 @@ class ESAPI:
 
     def policy_get_digest(
         self,
-        policy_session,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        policy_session: ESYS_TR,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(policy_session, "policy_session")
         check_handle_type(session1, "session1")
@@ -2526,12 +2533,12 @@ class ESAPI:
 
     def policy_nv_written(
         self,
-        policy_session,
-        written_set=True,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        policy_session: ESYS_TR,
+        written_set: bool = True,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(policy_session, "policy_session")
 
@@ -2552,12 +2559,12 @@ class ESAPI:
 
     def policy_template(
         self,
-        policy_session,
-        template_hash,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        policy_session: ESYS_TR,
+        template_hash: Union[TPM2B_DIGEST, bytes, str],
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(policy_session, "policy_session")
 
@@ -2580,13 +2587,13 @@ class ESAPI:
 
     def policy_authorize_nv(
         self,
-        nv_index,
-        policy_session,
-        auth_handle=0,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        nv_index: ESYS_TR,
+        policy_session: ESYS_TR,
+        auth_handle: ESYS_TR = 0,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         if auth_handle == 0:
             auth_handle = nv_index
@@ -2613,15 +2620,15 @@ class ESAPI:
 
     def create_primary(
         self,
-        in_sensitive,
-        in_public="rsa2048",
-        primary_handle=ESYS_TR.OWNER,
-        outside_info=TPM2B_DATA(),
-        creation_pcr=TPML_PCR_SELECTION(),
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        in_sensitive: TPM2B_SENSITIVE_CREATE,
+        in_public: Union[TPM2B_PUBLIC, str] = "rsa2048",
+        primary_handle: ESYS_TR = ESYS_TR.OWNER,
+        outside_info: Union[TPM2B_DATA, bytes, str] = TPM2B_DATA(),
+        creation_pcr: Union[TPML_PCR_SELECTION, str] = TPML_PCR_SELECTION(),
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[ESYS_TR, TPM2B_PUBLIC, TPM2B_CREATION_DATA, TPMT_TK_CREATION]:
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
@@ -2673,13 +2680,13 @@ class ESAPI:
 
     def hierarchy_control(
         self,
-        auth_handle,
-        enable,
-        state,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        auth_handle: ESYS_TR,
+        enable: ESYS_TR,
+        state: bool,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
         check_handle_type(
             auth_handle,
             "auth_handle",
@@ -2690,6 +2697,9 @@ class ESAPI:
             "enable",
             expected=(ESYS_TR.RH_ENDORSEMENT, ESYS_TR.RH_OWNER, ESYS_TR.RH_PLATFORM),
         )
+
+        if not isinstance(state, bool):
+            raise TypeError(f"Expected state to be a bool, got {type(state)}")
 
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
@@ -2703,13 +2713,13 @@ class ESAPI:
 
     def set_primary_policy(
         self,
-        auth_handle,
-        auth_policy,
-        hash_alg,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        auth_handle: ESYS_TR,
+        auth_policy: Union[TPM2B_DIGEST, bytes, str],
+        hash_alg: TPM2_ALG,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
         check_handle_type(
             auth_handle,
             "auth_handle",
@@ -2737,11 +2747,11 @@ class ESAPI:
 
     def change_pps(
         self,
-        auth_handle=ESYS_TR.RH_PLATFORM,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        auth_handle: ESYS_TR = ESYS_TR.RH_PLATFORM,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(auth_handle, "auth_handle", expected=(ESYS_TR.RH_PLATFORM,))
 
@@ -2753,11 +2763,11 @@ class ESAPI:
 
     def change_eps(
         self,
-        auth_handle=ESYS_TR.RH_PLATFORM,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        auth_handle: ESYS_TR = ESYS_TR.RH_PLATFORM,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(auth_handle, "auth_handle", expected=(ESYS_TR.RH_PLATFORM,))
 
@@ -2769,11 +2779,11 @@ class ESAPI:
 
     def clear(
         self,
-        auth_handle,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        auth_handle: ESYS_TR,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(
             auth_handle,
@@ -2789,12 +2799,12 @@ class ESAPI:
 
     def clear_control(
         self,
-        auth,
-        disable,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        auth: ESYS_TR,
+        disable: bool,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(
             auth, "auth", expected=(ESYS_TR.RH_PLATFORM, ESYS_TR.RH_LOCKOUT)
@@ -2804,37 +2814,41 @@ class ESAPI:
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
 
+        if not isinstance(disable, bool):
+            raise TypeError(f"Expected disable to be a bool, got {type(disable)}")
+
         _chkrc(
             lib.Esys_ClearControl(self.ctx, auth, session1, session2, session3, disable)
         )
 
     def hierarchy_change_auth(
         self,
-        auth_handle,
-        new_auth,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        auth_handle: ESYS_TR,
+        new_auth: Union[TPM2B_AUTH, bytes, str],
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
+        new_auth_cdata = get_cdata(new_auth, TPM2B_AUTH, "new_auth")
 
         _chkrc(
             lib.Esys_HierarchyChangeAuth(
-                self.ctx,
-                auth_handle,
-                session1,
-                session2,
-                session3,
-                TPM2B_pack(new_auth, t="TPM2B_AUTH"),
+                self.ctx, auth_handle, session1, session2, session3, new_auth_cdata,
             )
         )
 
     def dictionary_attack_lock_reset(
         self,
-        lock_handle=ESYS_TR.RH_LOCKOUT,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        lock_handle: ESYS_TR = ESYS_TR.RH_LOCKOUT,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(lock_handle, "lock_handle")
         check_handle_type(session1, "session1")
@@ -2848,14 +2862,29 @@ class ESAPI:
 
     def dictionary_attack_parameters(
         self,
-        new_max_tries,
-        new_recovery_time,
-        lockout_recovery,
+        new_max_tries: int,
+        new_recovery_time: int,
+        lockout_recovery: int,
         lock_handle=ESYS_TR.RH_LOCKOUT,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
+
+        if not isinstance(new_max_tries, int):
+            raise TypeError(
+                f"Expected new_max_tries to be an int, got {type(new_max_tries)}"
+            )
+
+        if not isinstance(new_recovery_time, int):
+            raise TypeError(
+                f"Expected new_recovery_time to be an int, got {type(new_recovery_time)}"
+            )
+
+        if not isinstance(lockout_recovery, int):
+            raise TypeError(
+                f"Expected lockout_recovery to be an int, got {type(lockout_recovery)}"
+            )
 
         check_handle_type(lock_handle, "lock_handle")
         check_handle_type(session1, "session1")
@@ -2876,13 +2905,13 @@ class ESAPI:
 
     def pp_commands(
         self,
-        set_list,
-        clear_list,
-        auth=ESYS_TR.PLATFORM,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        set_list: TPML_CC,
+        clear_list: TPML_CC,
+        auth: ESYS_TR = ESYS_TR.PLATFORM,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(auth, "auth")
         check_handle_type(session1, "session1")
@@ -2904,12 +2933,12 @@ class ESAPI:
 
     def set_algorithm_set(
         self,
-        algorithm_set,
-        auth_handle=ESYS_TR.PLATFORM,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        algorithm_set: Union[List[int], int],
+        auth_handle: ESYS_TR = ESYS_TR.PLATFORM,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(auth_handle, "auth_handle")
         check_handle_type(session1, "session1")
@@ -2923,14 +2952,14 @@ class ESAPI:
 
     def field_upgrade_start(
         self,
-        authorization,
-        key_handle,
-        fu_digest,
-        manifest_signature,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        authorization: ESYS_TR,
+        key_handle: ESYS_TR,
+        fu_digest: Union[TPM2B_DIGEST, bytes, str],
+        manifest_signature: TPMT_SIGNATURE,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(authorization, "authorization")
         check_handle_type(key_handle, "key_handle")
@@ -2938,6 +2967,11 @@ class ESAPI:
         manifestSignature_cdata = get_cdata(
             manifest_signature, TPMT_SIGNATURE, "manifest_signature"
         )
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
         _chkrc(
             lib.Esys_FieldUpgradeStart(
                 self.ctx,
@@ -2953,13 +2987,18 @@ class ESAPI:
 
     def field_upgrade_data(
         self,
-        fu_data,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        fu_data: Union[TPM2B_MAX_BUFFER, bytes, str],
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[TPMT_HA, TPMT_HA]:
 
         fuData_cdata = get_cdata(fu_data, TPM2B_MAX_BUFFER, "fu_data")
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
         nextDigest = ffi.new("TPMT_HA **")
         firstDigest = ffi.new("TPMT_HA **")
         _chkrc(
@@ -2977,11 +3016,20 @@ class ESAPI:
 
     def firmware_read(
         self,
-        sequence_number,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
+        sequence_number: int,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
     ):
+
+        if not isinstance(sequence_number, int):
+            raise TypeError(
+                f"Expected sequence_number to be an int, got {type(sequence_number)}"
+            )
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
 
         fuData = ffi.new("TPM2B_MAX_BUFFER **")
         _chkrc(
@@ -2991,36 +3039,41 @@ class ESAPI:
         )
         return TPM2B_MAX_BUFFER(get_ptr(fuData))
 
-    def context_save(self, save_handle):
+    def context_save(self, save_handle: ESYS_TR) -> TPMS_CONTEXT:
         check_handle_type(save_handle, "save_handle")
         context = ffi.new("TPMS_CONTEXT **")
         _chkrc(lib.Esys_ContextSave(self.ctx, save_handle, context))
         return TPMS_CONTEXT(get_ptr(context))
 
-    def context_load(self, context):
+    def context_load(self, context: TPMS_CONTEXT) -> ESYS_TR:
         context_cdata = get_cdata(context, TPMS_CONTEXT, "context")
         loadedHandle = ffi.new("ESYS_TR *")
         _chkrc(lib.Esys_ContextLoad(self.ctx, context_cdata, loadedHandle))
         loadedHandleObject = loadedHandle[0]
         return loadedHandleObject
 
-    def flush_context(self, flush_handle):
+    def flush_context(self, flush_handle: ESYS_TR) -> None:
         check_handle_type(flush_handle, "flush_handle")
         _chkrc(lib.Esys_FlushContext(self.ctx, flush_handle))
 
     def evict_control(
         self,
-        auth,
+        auth: ESYS_TR,
         object_handle,
-        persistent_handle,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        persistent_handle: int,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> ESYS_TR:
 
         check_handle_type(auth, "auth")
         check_handle_type(object_handle, "object_handle")
         check_handle_type(persistent_handle, "persistent_handle")
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
         newObjectHandle = ffi.new("ESYS_TR *")
         _chkrc(
             lib.Esys_EvictControl(
@@ -3038,8 +3091,15 @@ class ESAPI:
         return newObjectHandleObject
 
     def read_clock(
-        self, session1=ESYS_TR.NONE, session2=ESYS_TR.NONE, session3=ESYS_TR.NONE
-    ):
+        self,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> TPMS_TIME_INFO:
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
 
         currentTime = ffi.new("TPMS_TIME_INFO **")
         _chkrc(lib.Esys_ReadClock(self.ctx, session1, session2, session3, currentTime))
@@ -3047,28 +3107,41 @@ class ESAPI:
 
     def clock_set(
         self,
-        auth,
-        new_time,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
+        auth: ESYS_TR,
+        new_time: int,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
     ):
 
         check_handle_type(auth, "auth")
+
+        if not isinstance(new_time, int):
+            raise TypeError(f"Expected new_time to be an int, got {type(new_time)}")
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
         _chkrc(
             lib.Esys_ClockSet(self.ctx, auth, session1, session2, session3, new_time)
         )
 
     def clock_rate_adjust(
         self,
-        auth,
-        rate_adjust,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        auth: ESYS_TR,
+        rate_adjust: TPM2_CLOCK,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(auth, "auth")
+
+        check_handle_type(session1, "session1")
+        check_handle_type(session2, "session2")
+        check_handle_type(session3, "session3")
+
         _chkrc(
             lib.Esys_ClockRateAdjust(
                 self.ctx, auth, session1, session2, session3, rate_adjust
@@ -3077,13 +3150,13 @@ class ESAPI:
 
     def get_capability(
         self,
-        capability,
-        prop,
-        property_count=1,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        capability: TPM2_CAP,
+        prop: int,
+        property_count: int = 1,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[bool, TPMS_CAPABILITY_DATA]:
 
         check_friendly_int(capability, "capability", TPM2_CAP)
 
@@ -3118,11 +3191,11 @@ class ESAPI:
 
     def test_parms(
         self,
-        parameters,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        parameters: TPMT_PUBLIC_PARMS,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         parameters_cdata = get_cdata(parameters, TPMT_PUBLIC_PARMS, "parameters")
         _chkrc(
@@ -3131,13 +3204,13 @@ class ESAPI:
 
     def nv_define_space(
         self,
-        auth,
-        public_info,
-        auth_handle=ESYS_TR.OWNER,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        auth: ESYS_TR,
+        public_info: TPM2B_NV_PUBLIC,
+        auth_handle: ESYS_TR = ESYS_TR.OWNER,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> ESYS_TR:
 
         check_handle_type(auth_handle, "auth_handle")
         check_handle_type(session1, "session1")
@@ -3163,12 +3236,12 @@ class ESAPI:
 
     def nv_undefine_space(
         self,
-        nv_index,
-        auth_handle=ESYS_TR.RH_OWNER,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        nv_index: ESYS_TR,
+        auth_handle: ESYS_TR = ESYS_TR.RH_OWNER,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(auth_handle, "auth_handle")
         check_handle_type(nv_index, "nv_index")
@@ -3183,12 +3256,12 @@ class ESAPI:
 
     def nv_undefine_space_special(
         self,
-        nv_index,
-        platform=ESYS_TR.RH_PLATFORM,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        nv_index: ESYS_TR,
+        platform: ESYS_TR = ESYS_TR.RH_PLATFORM,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(nv_index, "nv_index")
         check_handle_type(platform, "platform")
@@ -3203,11 +3276,11 @@ class ESAPI:
 
     def nv_read_public(
         self,
-        nv_index,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        nv_index: ESYS_TR,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[TPM2B_NV_PUBLIC, TPM2B_NAME]:
 
         check_handle_type(nv_index, "nv_index")
         check_handle_type(session1, "session1")
@@ -3227,14 +3300,14 @@ class ESAPI:
 
     def nv_write(
         self,
-        nv_index,
-        data,
-        offset=0,
-        auth_handle=0,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        nv_index: ESYS_TR,
+        data: Union[TPM2B_MAX_NV_BUFFER, bytes, str],
+        offset: int = 0,
+        auth_handle: ESYS_TR = 0,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         if auth_handle == 0:
             auth_handle = nv_index
@@ -3259,12 +3332,12 @@ class ESAPI:
 
     def nv_increment(
         self,
-        nv_index,
-        auth_handle=0,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        nv_index: ESYS_TR,
+        auth_handle: ESYS_TR = 0,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         if auth_handle == 0:
             auth_handle = nv_index
@@ -3281,13 +3354,13 @@ class ESAPI:
 
     def nv_extend(
         self,
-        nv_index,
-        data,
-        auth_handle=0,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        nv_index: ESYS_TR,
+        data: Union[TPM2B_MAX_NV_BUFFER, bytes, str],
+        auth_handle: ESYS_TR = 0,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         if auth_handle == 0:
             auth_handle = nv_index
@@ -3311,17 +3384,22 @@ class ESAPI:
 
     def nv_set_bits(
         self,
-        nv_index,
-        bits,
+        nv_index: ESYS_TR,
+        bits: int,
         auth_handle=0,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         if auth_handle == 0:
             auth_handle = nv_index
+
         check_handle_type(auth_handle, "auth_handle")
+
+        if not isinstance(bits, int):
+            raise TypeError(f"Expected bits to be an int, got {type(bits)}")
+
         check_handle_type(nv_index, "nv_index")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
@@ -3334,12 +3412,12 @@ class ESAPI:
 
     def nv_write_lock(
         self,
-        nv_index,
-        auth_handle=0,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        nv_index: ESYS_TR,
+        auth_handle: ESYS_TR = 0,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         if auth_handle == 0:
             auth_handle = nv_index
@@ -3356,11 +3434,11 @@ class ESAPI:
 
     def nv_global_write_lock(
         self,
-        auth_handle=ESYS_TR.RH_OWNER,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        auth_handle: ESYS_TR = ESYS_TR.RH_OWNER,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(auth_handle, "auth_handle")
         check_handle_type(session1, "session1")
@@ -3374,22 +3452,30 @@ class ESAPI:
 
     def nv_read(
         self,
-        nv_index,
-        size,
-        offset=0,
-        auth_handle=0,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        nv_index: ESYS_TR,
+        size: int,
+        offset: int = 0,
+        auth_handle: ESYS_TR = 0,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> TPM2B_MAX_NV_BUFFER:
 
         if auth_handle == 0:
             auth_handle = nv_index
         check_handle_type(nv_index, "nv_index")
+
+        if not isinstance(size, int):
+            raise TypeError(f"Expected size to be an int, got {type(size)}")
+
+        if not isinstance(offset, int):
+            raise TypeError(f"Expected offset to be an int, got {type(offset)}")
+
         check_handle_type(auth_handle, "auth_handle")
         check_handle_type(session1, "session1")
         check_handle_type(session2, "session2")
         check_handle_type(session3, "session3")
+
         data = ffi.new("TPM2B_MAX_NV_BUFFER **")
         _chkrc(
             lib.Esys_NV_Read(
@@ -3408,12 +3494,12 @@ class ESAPI:
 
     def nv_read_lock(
         self,
-        nv_index,
-        auth_handle=0,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        nv_index: ESYS_TR,
+        auth_handle: ESYS_TR = 0,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         if auth_handle == 0:
             auth_handle = nv_index
@@ -3430,12 +3516,12 @@ class ESAPI:
 
     def nv_change_auth(
         self,
-        nv_index,
-        new_auth,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        nv_index: ESYS_TR,
+        new_auth: Union[TPM2B_DIGEST, bytes, str],
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
 
         check_handle_type(nv_index, "nv_index")
         check_handle_type(session1, "session1")
@@ -3450,17 +3536,17 @@ class ESAPI:
 
     def nv_certify(
         self,
-        sign_handle,
-        nv_index,
-        qualifying_data,
-        in_scheme,
-        size,
-        offset=0,
-        auth_handle=0,
-        session1=ESYS_TR.PASSWORD,
-        session2=ESYS_TR.PASSWORD,
-        session3=ESYS_TR.NONE,
-    ):
+        sign_handle: ESYS_TR,
+        nv_index: ESYS_TR,
+        qualifying_data: Union[TPM2B_DATA, bytes, str],
+        in_scheme: TPMT_SIG_SCHEME,
+        size: int,
+        offset: int = 0,
+        auth_handle: ESYS_TR = 0,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.PASSWORD,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[TPM2B_ATTEST, TPMT_SIGNATURE]:
 
         if auth_handle == 0:
             auth_handle = nv_index
@@ -3472,6 +3558,9 @@ class ESAPI:
         check_handle_type(session3, "session3")
         qualifyingData_cdata = get_cdata(qualifying_data, TPM2B_DATA, "qualifying_data")
         inScheme_cdata = get_cdata(in_scheme, TPMT_SIG_SCHEME, "in_scheme")
+
+        if not isinstance(size, int):
+            raise TypeError(f"Expected size to be of type int, got: {type(size)}")
 
         if not isinstance(offset, int):
             raise TypeError(f"Expected offset to be of type int, got: {type(offset)}")
@@ -3499,11 +3588,11 @@ class ESAPI:
 
     def vendor_tcg_test(
         self,
-        input_data,
-        session1=ESYS_TR.NONE,
-        session2=ESYS_TR.NONE,
-        session3=ESYS_TR.NONE,
-    ):
+        input_data: Union[TPM2B_DATA, bytes, str],
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> TPM2B_DATA:
         inputData_cdata = get_cdata(input_data, TPM2B_DATA, "input_data")
         outputData = ffi.new("TPM2B_DATA **")
         _chkrc(
