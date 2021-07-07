@@ -4,14 +4,10 @@ SPDX-License-Identifier: BSD-2
 
 from .types import *
 
-from .utils import _chkrc
+from .utils import _chkrc, get_dptr
 from .TCTI import TCTI
 
 from typing import Union, Tuple, List
-
-
-def get_dptr(dptr):
-    return ffi.gc(dptr[0], lib.Esys_Free)
 
 
 def get_cdata(value, expected, varname, allow_none=False, *args, **kwargs):
@@ -138,7 +134,7 @@ class ESAPI:
 
         name = ffi.new("TPM2B_NAME **")
         _chkrc(lib.Esys_TR_GetName(self._ctx, handle, name))
-        return TPM2B_NAME(_cdata=get_dptr(name))
+        return TPM2B_NAME(_cdata=get_dptr(name, lib.Esys_Free))
 
     def startup(self, startup_type: TPM2_SU):
 
@@ -199,7 +195,7 @@ class ESAPI:
                 self._ctx, session1, session2, session3, toTest_cdata, toDoList
             )
         )
-        return TPML_ALG(get_dptr(toDoList))
+        return TPML_ALG(get_dptr(toDoList, lib.Esys_Free))
 
     def get_test_result(
         self,
@@ -219,7 +215,10 @@ class ESAPI:
                 self._ctx, session1, session2, session3, outData, testResult
             )
         )
-        return (TPM2B_MAX_BUFFER(get_dptr(outData)), TPM2_RC(testResult[0]))
+        return (
+            TPM2B_MAX_BUFFER(get_dptr(outData, lib.Esys_Free)),
+            TPM2_RC(testResult[0]),
+        )
 
     def start_auth_session(
         self,
@@ -291,7 +290,7 @@ class ESAPI:
 
         _chkrc(lib.Esys_TRSess_GetNonceTPM(self._ctx, session, nonce))
 
-        return TPM2B_NONCE(get_dptr(nonce))
+        return TPM2B_NONCE(get_dptr(nonce, lib.Esys_Free))
 
     def policy_restart(
         self,
@@ -360,11 +359,11 @@ class ESAPI:
             )
         )
         return (
-            TPM2B_PRIVATE(get_dptr(outPrivate)),
-            TPM2B_PUBLIC(get_dptr(outPublic)),
-            TPM2B_CREATION_DATA(get_dptr(creationData)),
-            TPM2B_DIGEST(get_dptr(creationHash)),
-            TPMT_TK_CREATION(get_dptr(creationTicket)),
+            TPM2B_PRIVATE(get_dptr(outPrivate, lib.Esys_Free)),
+            TPM2B_PUBLIC(get_dptr(outPublic, lib.Esys_Free)),
+            TPM2B_CREATION_DATA(get_dptr(creationData, lib.Esys_Free)),
+            TPM2B_DIGEST(get_dptr(creationHash, lib.Esys_Free)),
+            TPMT_TK_CREATION(get_dptr(creationTicket, lib.Esys_Free)),
         )
 
     def load(
@@ -468,9 +467,9 @@ class ESAPI:
             )
         )
         return (
-            TPM2B_PUBLIC(get_dptr(outPublic)),
-            TPM2B_NAME(get_dptr(name)),
-            TPM2B_NAME(get_dptr(qualifiedName)),
+            TPM2B_PUBLIC(get_dptr(outPublic, lib.Esys_Free)),
+            TPM2B_NAME(get_dptr(name, lib.Esys_Free)),
+            TPM2B_NAME(get_dptr(qualifiedName, lib.Esys_Free)),
         )
 
     def activate_credential(
@@ -510,7 +509,7 @@ class ESAPI:
                 certInfo,
             )
         )
-        return TPM2B_DIGEST(get_dptr(certInfo))
+        return TPM2B_DIGEST(get_dptr(certInfo, lib.Esys_Free))
 
     def make_credential(
         self,
@@ -547,8 +546,8 @@ class ESAPI:
             )
         )
         return (
-            TPM2B_ID_OBJECT(get_dptr(credentialBlob)),
-            TPM2B_ENCRYPTED_SECRET(get_dptr(secret)),
+            TPM2B_ID_OBJECT(get_dptr(credentialBlob, lib.Esys_Free)),
+            TPM2B_ENCRYPTED_SECRET(get_dptr(secret, lib.Esys_Free)),
         )
 
     def unseal(
@@ -571,7 +570,7 @@ class ESAPI:
                 self._ctx, item_handle, session1, session2, session3, outData
             )
         )
-        return TPM2B_SENSITIVE_DATA(get_dptr(outData))
+        return TPM2B_SENSITIVE_DATA(get_dptr(outData, lib.Esys_Free))
 
     def object_change_auth(
         self,
@@ -605,7 +604,7 @@ class ESAPI:
                 outPrivate,
             )
         )
-        return TPM2B_PRIVATE(get_dptr(outPrivate))
+        return TPM2B_PRIVATE(get_dptr(outPrivate, lib.Esys_Free))
 
     def create_loaded(
         self,
@@ -651,8 +650,8 @@ class ESAPI:
         objectHandleObject = objectHandle[0]
         return (
             objectHandleObject,
-            TPM2B_PRIVATE(get_dptr(outPrivate)),
-            TPM2B_PUBLIC(get_dptr(outPublic)),
+            TPM2B_PRIVATE(get_dptr(outPrivate, lib.Esys_Free)),
+            TPM2B_PUBLIC(get_dptr(outPublic, lib.Esys_Free)),
         )
 
     def duplicate(
@@ -699,9 +698,9 @@ class ESAPI:
         )
 
         return (
-            TPM2B_DATA(get_dptr(encryptionKeyOut)),
-            TPM2B_PRIVATE(get_dptr(duplicate)),
-            TPM2B_ENCRYPTED_SECRET(get_dptr(outSymSeed)),
+            TPM2B_DATA(get_dptr(encryptionKeyOut, lib.Esys_Free)),
+            TPM2B_PRIVATE(get_dptr(duplicate, lib.Esys_Free)),
+            TPM2B_ENCRYPTED_SECRET(get_dptr(outSymSeed, lib.Esys_Free)),
         )
 
     def rewrap(
@@ -746,8 +745,8 @@ class ESAPI:
             )
         )
         return (
-            TPM2B_PRIVATE(get_dptr(outDuplicate)),
-            TPM2B_ENCRYPTED_SECRET(get_dptr(outSymSeed)),
+            TPM2B_PRIVATE(get_dptr(outDuplicate, lib.Esys_Free)),
+            TPM2B_ENCRYPTED_SECRET(get_dptr(outSymSeed, lib.Esys_Free)),
         )
 
     def import_(
@@ -796,7 +795,7 @@ class ESAPI:
                 outPrivate,
             )
         )
-        return TPM2B_PRIVATE(get_dptr(outPrivate))
+        return TPM2B_PRIVATE(get_dptr(outPrivate, lib.Esys_Free))
 
     def rsa_encrypt(
         self,
@@ -832,7 +831,7 @@ class ESAPI:
                 outData,
             )
         )
-        return TPM2B_PUBLIC_KEY_RSA(get_dptr(outData))
+        return TPM2B_PUBLIC_KEY_RSA(get_dptr(outData, lib.Esys_Free))
 
     def rsa_decrypt(
         self,
@@ -868,7 +867,7 @@ class ESAPI:
                 message,
             )
         )
-        return TPM2B_PUBLIC_KEY_RSA(get_dptr(message))
+        return TPM2B_PUBLIC_KEY_RSA(get_dptr(message, lib.Esys_Free))
 
     def ecdh_key_gen(
         self,
@@ -890,7 +889,10 @@ class ESAPI:
                 self._ctx, key_handle, session1, session2, session3, zPoint, pubPoint
             )
         )
-        return (TPM2B_ECC_POINT(get_dptr(zPoint)), TPM2B_ECC_POINT(get_dptr(pubPoint)))
+        return (
+            TPM2B_ECC_POINT(get_dptr(zPoint, lib.Esys_Free)),
+            TPM2B_ECC_POINT(get_dptr(pubPoint, lib.Esys_Free)),
+        )
 
     def ecdh_zgen(
         self,
@@ -920,7 +922,7 @@ class ESAPI:
                 outPoint,
             )
         )
-        return TPM2B_ECC_POINT(get_dptr(outPoint))
+        return TPM2B_ECC_POINT(get_dptr(outPoint, lib.Esys_Free))
 
     def ecc_parameters(
         self,
@@ -942,7 +944,7 @@ class ESAPI:
                 self._ctx, session1, session2, session3, curve_id, parameters
             )
         )
-        return TPMS_ALGORITHM_DETAIL_ECC(get_dptr(parameters))
+        return TPMS_ALGORITHM_DETAIL_ECC(get_dptr(parameters, lib.Esys_Free))
 
     def zgen_2_phase(
         self,
@@ -993,7 +995,10 @@ class ESAPI:
             )
         )
 
-        return (TPM2B_ECC_POINT(get_dptr(outZ1)), TPM2B_ECC_POINT(get_dptr(outZ2)))
+        return (
+            TPM2B_ECC_POINT(get_dptr(outZ1, lib.Esys_Free)),
+            TPM2B_ECC_POINT(get_dptr(outZ2, lib.Esys_Free)),
+        )
 
     def encrypt_decrypt(
         self,
@@ -1038,7 +1043,10 @@ class ESAPI:
                 ivOut,
             )
         )
-        return (TPM2B_MAX_BUFFER(get_dptr(outData)), TPM2B_IV(get_dptr(ivOut)))
+        return (
+            TPM2B_MAX_BUFFER(get_dptr(outData, lib.Esys_Free)),
+            TPM2B_IV(get_dptr(ivOut, lib.Esys_Free)),
+        )
 
     def encrypt_decrypt_2(
         self,
@@ -1083,7 +1091,10 @@ class ESAPI:
                 ivOut,
             )
         )
-        return (TPM2B_MAX_BUFFER(get_dptr(outData)), TPM2B_IV(get_dptr(ivOut)))
+        return (
+            TPM2B_MAX_BUFFER(get_dptr(outData, lib.Esys_Free)),
+            TPM2B_IV(get_dptr(ivOut, lib.Esys_Free)),
+        )
 
     def hash(
         self,
@@ -1119,8 +1130,8 @@ class ESAPI:
             )
         )
         return (
-            TPM2B_DIGEST(get_dptr(outHash)),
-            TPMT_TK_HASHCHECK(get_dptr(validation)),
+            TPM2B_DIGEST(get_dptr(outHash, lib.Esys_Free)),
+            TPMT_TK_HASHCHECK(get_dptr(validation, lib.Esys_Free)),
         )
 
     def hmac(
@@ -1155,7 +1166,7 @@ class ESAPI:
                 outHMAC,
             )
         )
-        return TPM2B_DIGEST(get_dptr(outHMAC))
+        return TPM2B_DIGEST(get_dptr(outHMAC, lib.Esys_Free))
 
     def get_random(
         self,
@@ -1181,7 +1192,7 @@ class ESAPI:
             )
         )
 
-        return TPM2B_DIGEST(get_dptr(randomBytes))
+        return TPM2B_DIGEST(get_dptr(randomBytes, lib.Esys_Free))
 
     def stir_random(
         self,
@@ -1332,7 +1343,10 @@ class ESAPI:
             )
         )
 
-        return (TPM2B_DIGEST(get_dptr(result)), TPMT_TK_HASHCHECK(get_dptr(validation)))
+        return (
+            TPM2B_DIGEST(get_dptr(result, lib.Esys_Free)),
+            TPMT_TK_HASHCHECK(get_dptr(validation, lib.Esys_Free)),
+        )
 
     def event_sequence_complete(
         self,
@@ -1366,7 +1380,7 @@ class ESAPI:
                 results,
             )
         )
-        return TPML_DIGEST_VALUES(get_dptr(results))
+        return TPML_DIGEST_VALUES(get_dptr(results, lib.Esys_Free))
 
     def certify(
         self,
@@ -1405,8 +1419,8 @@ class ESAPI:
             )
         )
         return (
-            TPM2B_ATTEST(get_dptr(certifyInfo)),
-            TPMT_SIGNATURE(get_dptr(signature)),
+            TPM2B_ATTEST(get_dptr(certifyInfo, lib.Esys_Free)),
+            TPMT_SIGNATURE(get_dptr(signature, lib.Esys_Free)),
         )
 
     def certify_creation(
@@ -1454,8 +1468,8 @@ class ESAPI:
             )
         )
         return (
-            TPM2B_ATTEST(get_dptr(certifyInfo)),
-            TPMT_SIGNATURE(get_dptr(signature)),
+            TPM2B_ATTEST(get_dptr(certifyInfo, lib.Esys_Free)),
+            TPMT_SIGNATURE(get_dptr(signature, lib.Esys_Free)),
         )
 
     def quote(
@@ -1496,7 +1510,10 @@ class ESAPI:
                 signature,
             )
         )
-        return (TPM2B_ATTEST(get_dptr(quoted)), TPMT_SIGNATURE(get_dptr(signature)))
+        return (
+            TPM2B_ATTEST(get_dptr(quoted, lib.Esys_Free)),
+            TPMT_SIGNATURE(get_dptr(signature, lib.Esys_Free)),
+        )
 
     def get_session_audit_digest(
         self,
@@ -1544,7 +1561,10 @@ class ESAPI:
                 signature,
             )
         )
-        return (TPM2B_ATTEST(get_dptr(auditInfo)), TPMT_SIGNATURE(get_dptr(signature)))
+        return (
+            TPM2B_ATTEST(get_dptr(auditInfo, lib.Esys_Free)),
+            TPMT_SIGNATURE(get_dptr(signature, lib.Esys_Free)),
+        )
 
     def get_command_audit_digest(
         self,
@@ -1587,7 +1607,10 @@ class ESAPI:
                 signature,
             )
         )
-        return (TPM2B_ATTEST(get_dptr(auditInfo)), TPMT_SIGNATURE(get_dptr(signature)))
+        return (
+            TPM2B_ATTEST(get_dptr(auditInfo, lib.Esys_Free)),
+            TPMT_SIGNATURE(get_dptr(signature, lib.Esys_Free)),
+        )
 
     def get_time(
         self,
@@ -1630,7 +1653,10 @@ class ESAPI:
                 signature,
             )
         )
-        return (TPM2B_ATTEST(get_dptr(timeInfo)), TPMT_SIGNATURE(get_dptr(signature)))
+        return (
+            TPM2B_ATTEST(get_dptr(timeInfo, lib.Esys_Free)),
+            TPMT_SIGNATURE(get_dptr(signature, lib.Esys_Free)),
+        )
 
     def commit(
         self,
@@ -1673,9 +1699,9 @@ class ESAPI:
             )
         )
         return (
-            TPM2B_ECC_POINT(get_dptr(K)),
-            TPM2B_ECC_POINT(get_dptr(L)),
-            TPM2B_ECC_POINT(get_dptr(E)),
+            TPM2B_ECC_POINT(get_dptr(K, lib.Esys_Free)),
+            TPM2B_ECC_POINT(get_dptr(L, lib.Esys_Free)),
+            TPM2B_ECC_POINT(get_dptr(E, lib.Esys_Free)),
             counter[0],
         )
 
@@ -1699,7 +1725,7 @@ class ESAPI:
                 self._ctx, session1, session2, session3, curve_id, Q, counter
             )
         )
-        return (TPM2B_ECC_POINT(get_dptr(Q)), counter[0])
+        return (TPM2B_ECC_POINT(get_dptr(Q, lib.Esys_Free)), counter[0])
 
     def verify_signature(
         self,
@@ -1732,7 +1758,7 @@ class ESAPI:
                 validation,
             )
         )
-        return TPMT_TK_VERIFIED(get_dptr(validation))
+        return TPMT_TK_VERIFIED(get_dptr(validation, lib.Esys_Free))
 
     def sign(
         self,
@@ -1768,7 +1794,7 @@ class ESAPI:
                 signature,
             )
         )
-        return TPMT_SIGNATURE(get_dptr(signature))
+        return TPMT_SIGNATURE(get_dptr(signature, lib.Esys_Free))
 
     def set_command_code_audit_status(
         self,
@@ -1857,7 +1883,7 @@ class ESAPI:
                 digests,
             )
         )
-        return TPML_DIGEST_VALUES(get_dptr(digests))
+        return TPML_DIGEST_VALUES(get_dptr(digests, lib.Esys_Free))
 
     def pcr_read(
         self,
@@ -1893,8 +1919,8 @@ class ESAPI:
 
         return (
             pcrUpdateCounter[0],
-            TPML_PCR_SELECTION(_cdata=get_dptr(pcrSelectionOut)),
-            TPML_DIGEST(_cdata=get_dptr(pcrValues)),
+            TPML_PCR_SELECTION(_cdata=get_dptr(pcrSelectionOut, lib.Esys_Free)),
+            TPML_DIGEST(_cdata=get_dptr(pcrValues, lib.Esys_Free)),
         )
 
     def pcr_allocate(
@@ -2060,7 +2086,10 @@ class ESAPI:
                 policyTicket,
             )
         )
-        return (TPM2B_TIMEOUT(get_dptr(timeout)), TPMT_TK_AUTH(get_dptr(policyTicket)))
+        return (
+            TPM2B_TIMEOUT(get_dptr(timeout, lib.Esys_Free)),
+            TPMT_TK_AUTH(get_dptr(policyTicket, lib.Esys_Free)),
+        )
 
     def policy_secret(
         self,
@@ -2110,7 +2139,10 @@ class ESAPI:
                 policyTicket,
             )
         )
-        return (TPM2B_TIMEOUT(get_dptr(timeout)), TPMT_TK_AUTH(get_dptr(policyTicket)))
+        return (
+            TPM2B_TIMEOUT(get_dptr(timeout, lib.Esys_Free)),
+            TPMT_TK_AUTH(get_dptr(policyTicket, lib.Esys_Free)),
+        )
 
     def policy_ticket(
         self,
@@ -2541,7 +2573,7 @@ class ESAPI:
                 self._ctx, policy_session, session1, session2, session3, policyDigest
             )
         )
-        return TPM2B_DIGEST(get_dptr(policyDigest))
+        return TPM2B_DIGEST(get_dptr(policyDigest, lib.Esys_Free))
 
     def policy_nv_written(
         self,
@@ -2684,10 +2716,10 @@ class ESAPI:
 
         return (
             ESYS_TR(objectHandle[0]),
-            TPM2B_PUBLIC(_cdata=get_dptr(outPublic)),
-            TPM2B_CREATION_DATA(_cdata=get_dptr(creationData)),
-            TPM2B_DIGEST(_cdata=get_dptr(creationHash)),
-            TPMT_TK_CREATION(_cdata=get_dptr(creationTicket)),
+            TPM2B_PUBLIC(_cdata=get_dptr(outPublic, lib.Esys_Free)),
+            TPM2B_CREATION_DATA(_cdata=get_dptr(creationData, lib.Esys_Free)),
+            TPM2B_DIGEST(_cdata=get_dptr(creationHash, lib.Esys_Free)),
+            TPMT_TK_CREATION(_cdata=get_dptr(creationTicket, lib.Esys_Free)),
         )
 
     def hierarchy_control(
@@ -3026,7 +3058,10 @@ class ESAPI:
                 firstDigest,
             )
         )
-        return (TPMT_HA(get_dptr(nextDigest)), TPMT_HA(get_dptr(firstDigest)))
+        return (
+            TPMT_HA(get_dptr(nextDigest, lib.Esys_Free)),
+            TPMT_HA(get_dptr(firstDigest, lib.Esys_Free)),
+        )
 
     def firmware_read(
         self,
@@ -3051,13 +3086,13 @@ class ESAPI:
                 self._ctx, session1, session2, session3, sequence_number, fuData
             )
         )
-        return TPM2B_MAX_BUFFER(get_dptr(fuData))
+        return TPM2B_MAX_BUFFER(get_dptr(fuData, lib.Esys_Free))
 
     def context_save(self, save_handle: ESYS_TR) -> TPMS_CONTEXT:
         check_handle_type(save_handle, "save_handle")
         context = ffi.new("TPMS_CONTEXT **")
         _chkrc(lib.Esys_ContextSave(self._ctx, save_handle, context))
-        return TPMS_CONTEXT(get_dptr(context))
+        return TPMS_CONTEXT(get_dptr(context, lib.Esys_Free))
 
     def context_load(self, context: TPMS_CONTEXT) -> ESYS_TR:
         context_cdata = get_cdata(context, TPMS_CONTEXT, "context")
@@ -3117,7 +3152,7 @@ class ESAPI:
 
         currentTime = ffi.new("TPMS_TIME_INFO **")
         _chkrc(lib.Esys_ReadClock(self._ctx, session1, session2, session3, currentTime))
-        return TPMS_TIME_INFO(get_dptr(currentTime))
+        return TPMS_TIME_INFO(get_dptr(currentTime, lib.Esys_Free))
 
     def clock_set(
         self,
@@ -3201,7 +3236,10 @@ class ESAPI:
                 capabilityData,
             )
         )
-        return (bool(moreData[0]), TPMS_CAPABILITY_DATA(get_dptr(capabilityData)))
+        return (
+            bool(moreData[0]),
+            TPMS_CAPABILITY_DATA(get_dptr(capabilityData, lib.Esys_Free)),
+        )
 
     def test_parms(
         self,
@@ -3310,8 +3348,8 @@ class ESAPI:
             )
         )
         return (
-            TPM2B_NV_PUBLIC(_cdata=get_dptr(nvPublic)),
-            TPM2B_NAME(_cdata=get_dptr(nvName)),
+            TPM2B_NV_PUBLIC(_cdata=get_dptr(nvPublic, lib.Esys_Free)),
+            TPM2B_NAME(_cdata=get_dptr(nvName, lib.Esys_Free)),
         )
 
     def nv_write(
@@ -3506,7 +3544,7 @@ class ESAPI:
                 data,
             )
         )
-        return TPM2B_MAX_NV_BUFFER(get_dptr(data))
+        return TPM2B_MAX_NV_BUFFER(get_dptr(data, lib.Esys_Free))
 
     def nv_read_lock(
         self,
@@ -3601,8 +3639,8 @@ class ESAPI:
             )
         )
         return (
-            TPM2B_ATTEST(get_dptr(certifyInfo)),
-            TPMT_SIGNATURE(get_dptr(signature)),
+            TPM2B_ATTEST(get_dptr(certifyInfo, lib.Esys_Free)),
+            TPMT_SIGNATURE(get_dptr(signature, lib.Esys_Free)),
         )
 
     def vendor_tcg_test(
@@ -3619,7 +3657,7 @@ class ESAPI:
                 self._ctx, session1, session2, session3, inputData_cdata, outputData
             )
         )
-        return TPM2B_DATA(get_dptr(outputData))
+        return TPM2B_DATA(get_dptr(outputData, lib.Esys_Free))
 
     def load_blob(self, data: bytes, type_: int = lib.FAPI_ESYSBLOB_CONTEXTLOAD) -> int:
         """load binary ESAPI object as binary blob. Supported are the types :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_CONTEXTLOAD` and :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_DESERIALIZE`.
