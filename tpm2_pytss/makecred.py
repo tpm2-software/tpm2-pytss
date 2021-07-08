@@ -76,6 +76,19 @@ def encrypt(cipher, key, data):
 
 
 def make_credential(public, credential, name):
+    """Encrypts credential for use with activate_credential
+
+    Args:
+        public (TPMT_PUBLIC): The public area of the activation key
+        credential (bytes): The credential to be encrypted
+        name (bytes): The name of the key associated with the credential
+
+    Returns:
+        A tuple of (TPM2B_ID_OBJECT, TPM2B_ENCRYPTED_SECRET)
+
+    Raises:
+        ValueError: If the public key type is not supported
+    """
     if isinstance(public, TPM2B_PUBLIC):
         public = public.publicArea
     if isinstance(credential, bytes):
@@ -100,6 +113,21 @@ def make_credential(public, credential, name):
 
 
 def wrap(newparent, public, sensitive, symkey, symdef):
+    """Wraps key under a TPM key hierarchy
+
+    Args:
+        newparent (TPMT_PUBLIC): The public area of the parent
+        public (TPM2B_PUBLIC): The public area of the key
+        sensitive (TPM2B_SENSITIVE): The sensitive area of the key
+        symkey (bytes or None): Symmetric key for inner encryption
+        symdef (TPMT_SYMDEF_OBJECT): Symmetric algorithm to be used for inner encryption
+
+    Returns:
+        A tuple of (TPM2B_DATA, TPM2B_PRIVATE, TPM2B_ENCRYPTED_SECRET)
+
+    Raises:
+        ValueError: If the public key type or symmetric algorithm are not supported
+    """
     enckeyout = TPM2B_DATA()
     outsymseed = TPM2B_ENCRYPTED_SECRET()
     sensb = sensitive.Marshal()
