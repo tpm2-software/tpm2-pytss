@@ -305,13 +305,13 @@ class CryptoTest(TSS2_EsapiTest):
         priv = types.TPM2B_SENSITIVE.fromPEM(ecc_private_key)
         handle = self.ectx.load_external(priv, pub, types.ESYS_TR.RH_NULL)
         ename = self.ectx.tr_get_name(handle)
-        oname = pub.getName()
+        oname = pub.get_name()
 
         self.assertEqual(ename.name, oname.name)
 
         pub.publicArea.nameAlg = TPM2_ALG.ERROR
         with self.assertRaises(ValueError) as e:
-            pub.getName()
+            pub.get_name()
         self.assertEqual(str(e.exception), "unsupported digest algorithm: 0")
 
     def test_nv_getname(self):
@@ -321,7 +321,7 @@ class CryptoTest(TSS2_EsapiTest):
             attributes=TPMA_NV.AUTHREAD | TPMA_NV.AUTHWRITE,
             dataSize=123,
         )
-        oname = nv.getName()
+        oname = nv.get_name()
         nv2b = TPM2B_NV_PUBLIC(nvPublic=nv)
 
         handle = self.ectx.nv_define_space(b"1234", nv2b)

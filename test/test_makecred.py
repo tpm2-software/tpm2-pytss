@@ -99,7 +99,9 @@ class MakeCredTest(TSS2_EsapiTest):
         insens = TPM2B_SENSITIVE_CREATE()
         phandle, parent, _, _, _ = self.ectx.create_primary(insens)
         private, public, _, _, _ = self.ectx.create(phandle, insens)
-        credblob, secret = make_credential(parent, b"credential data", public.getName())
+        credblob, secret = make_credential(
+            parent, b"credential data", public.get_name()
+        )
         handle = self.ectx.load(phandle, private, public)
         certinfo = self.ectx.activate_credential(handle, phandle, credblob, secret)
         self.assertEqual(b"credential data", bytes(certinfo))
@@ -108,7 +110,9 @@ class MakeCredTest(TSS2_EsapiTest):
         insens = TPM2B_SENSITIVE_CREATE()
         phandle, parent, _, _, _ = self.ectx.create_primary(insens, "ecc")
         private, public, _, _, _ = self.ectx.create(phandle, insens, "ecc")
-        credblob, secret = make_credential(parent, b"credential data", public.getName())
+        credblob, secret = make_credential(
+            parent, b"credential data", public.get_name()
+        )
         handle = self.ectx.load(phandle, private, public)
         certinfo = self.ectx.activate_credential(handle, phandle, credblob, secret)
         self.assertEqual(b"credential data", bytes(certinfo))
