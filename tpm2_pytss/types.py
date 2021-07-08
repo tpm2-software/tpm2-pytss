@@ -1647,7 +1647,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
         return templ
 
     @classmethod
-    def fromPEM(
+    def from_pem(
         cls,
         data,
         nameAlg=TPM2_ALG.SHA256,
@@ -1760,7 +1760,7 @@ class TPM2B_PRIVATE_VENDOR_SPECIFIC(TPM2B_SIMPLE_OBJECT):
 
 class TPM2B_PUBLIC(TPM_OBJECT):
     @classmethod
-    def fromPEM(
+    def from_pem(
         cls,
         data,
         nameAlg=TPM2_ALG.SHA256,
@@ -1770,7 +1770,7 @@ class TPM2B_PUBLIC(TPM_OBJECT):
         symmetric=None,
         scheme=None,
     ):
-        pa = TPMT_PUBLIC.fromPEM(data, nameAlg, objectAttributes, symmetric, scheme)
+        pa = TPMT_PUBLIC.from_pem(data, nameAlg, objectAttributes, symmetric, scheme)
         p = cls(publicArea=pa)
         return p
 
@@ -1797,8 +1797,8 @@ class TPM2B_PUBLIC_KEY_RSA(TPM2B_SIMPLE_OBJECT):
 
 class TPM2B_SENSITIVE(TPM_OBJECT):
     @classmethod
-    def fromPEM(cls, data):
-        p = TPMT_SENSITIVE.fromPEM(data)
+    def from_pem(cls, data):
+        p = TPMT_SENSITIVE.from_pem(data)
         return cls(sensitiveArea=p)
 
 
@@ -2185,7 +2185,7 @@ class TPMU_PUBLIC_ID(TPM_OBJECT):
 
 class TPMT_SENSITIVE(TPM_OBJECT):
     @classmethod
-    def fromPEM(cls, data):
+    def from_pem(cls, data):
         p = cls()
         private_from_encoding(data, p)
         return p

@@ -180,7 +180,7 @@ class CryptoTest(TSS2_EsapiTest):
         )
 
     def test_loadexternal_rsa(self):
-        pub = types.TPM2B_PUBLIC.fromPEM(rsa_public_key)
+        pub = types.TPM2B_PUBLIC.from_pem(rsa_public_key)
         self.assertEqual(pub.publicArea.nameAlg, TPM2_ALG.SHA256)
         self.assertEqual(
             pub.publicArea.objectAttributes,
@@ -193,7 +193,7 @@ class CryptoTest(TSS2_EsapiTest):
             pub.publicArea.parameters.rsaDetail.scheme.scheme, TPM2_ALG.NULL
         )
 
-        priv = types.TPM2B_SENSITIVE.fromPEM(rsa_private_key)
+        priv = types.TPM2B_SENSITIVE.from_pem(rsa_private_key)
 
         # test without Hierarchy
         handle = self.ectx.load_external(priv, pub)
@@ -246,7 +246,7 @@ class CryptoTest(TSS2_EsapiTest):
         )
 
     def test_loadexternal_ecc(self):
-        pub = types.TPM2B_PUBLIC.fromPEM(ecc_public_key)
+        pub = types.TPM2B_PUBLIC.from_pem(ecc_public_key)
         self.assertEqual(pub.publicArea.nameAlg, TPM2_ALG.SHA256)
         self.assertEqual(
             pub.publicArea.objectAttributes,
@@ -260,28 +260,28 @@ class CryptoTest(TSS2_EsapiTest):
         )
         self.assertEqual(pub.publicArea.parameters.eccDetail.kdf.scheme, TPM2_ALG.NULL)
 
-        priv = types.TPM2B_SENSITIVE.fromPEM(ecc_private_key)
+        priv = types.TPM2B_SENSITIVE.from_pem(ecc_private_key)
 
         self.ectx.load_external(priv, pub, types.ESYS_TR.RH_NULL)
 
     def test_loadexternal_public_rsa(self):
-        pub = types.TPM2B_PUBLIC.fromPEM(rsa_public_key)
+        pub = types.TPM2B_PUBLIC.from_pem(rsa_public_key)
         self.ectx.load_external(None, pub, types.ESYS_TR.RH_NULL)
 
     def test_public_to_pem_rsa(self):
-        pub = types.TPM2B_PUBLIC.fromPEM(rsa_public_key)
+        pub = types.TPM2B_PUBLIC.from_pem(rsa_public_key)
         pem = crypto.public_to_pem(pub.publicArea)
 
         self.assertEqual(pem, rsa_public_key)
 
     def test_public_to_pem_ecc(self):
-        pub = types.TPM2B_PUBLIC.fromPEM(ecc_public_key)
+        pub = types.TPM2B_PUBLIC.from_pem(ecc_public_key)
         pem = crypto.public_to_pem(pub.publicArea)
 
         self.assertEqual(pem, ecc_public_key)
 
     def test_public_to_pem_bad_key(self):
-        pub = types.TPM2B_PUBLIC.fromPEM(ecc_public_key)
+        pub = types.TPM2B_PUBLIC.from_pem(ecc_public_key)
         pub.publicArea.type = TPM2_ALG.NULL
 
         with self.assertRaises(ValueError) as e:
@@ -289,20 +289,20 @@ class CryptoTest(TSS2_EsapiTest):
         self.assertEqual(str(e.exception), f"unsupported key type: {TPM2_ALG.NULL}")
 
     def test_topem_rsa(self):
-        pub = types.TPM2B_PUBLIC.fromPEM(rsa_public_key)
+        pub = types.TPM2B_PUBLIC.from_pem(rsa_public_key)
         pem = pub.toPEM()
 
         self.assertEqual(pem, rsa_public_key)
 
     def test_topem_ecc(self):
-        pub = types.TPM2B_PUBLIC.fromPEM(ecc_public_key)
+        pub = types.TPM2B_PUBLIC.from_pem(ecc_public_key)
         pem = pub.toPEM()
 
         self.assertEqual(pem, ecc_public_key)
 
     def test_public_getname(self):
-        pub = types.TPM2B_PUBLIC.fromPEM(ecc_public_key)
-        priv = types.TPM2B_SENSITIVE.fromPEM(ecc_private_key)
+        pub = types.TPM2B_PUBLIC.from_pem(ecc_public_key)
+        priv = types.TPM2B_SENSITIVE.from_pem(ecc_private_key)
         handle = self.ectx.load_external(priv, pub, types.ESYS_TR.RH_NULL)
         ename = self.ectx.tr_get_name(handle)
         oname = pub.get_name()
@@ -504,17 +504,17 @@ class CryptoTest(TSS2_EsapiTest):
         )
 
     def test_ssh_key_ecc(self):
-        eccpub = TPM2B_PUBLIC.fromPEM(ssh_ecc_public)
+        eccpub = TPM2B_PUBLIC.from_pem(ssh_ecc_public)
         self.assertEqual(eccpub.publicArea.type, types.TPM2_ALG.ECC)
         self.assertEqual(
             eccpub.publicArea.parameters.eccDetail.curveID, types.TPM2_ECC.NIST_P256
         )
 
-        eccsens = TPM2B_SENSITIVE.fromPEM(ssh_ecc_private)
+        eccsens = TPM2B_SENSITIVE.from_pem(ssh_ecc_private)
         self.assertEqual(eccsens.sensitiveArea.sensitiveType, types.TPM2_ALG.ECC)
 
     def test_topem_encodings(self):
-        pub = types.TPM2B_PUBLIC.fromPEM(ecc_public_key)
+        pub = types.TPM2B_PUBLIC.from_pem(ecc_public_key)
 
         pem = pub.toPEM(encoding="PEM")
         self.assertTrue(pem.startswith(b"-----BEGIN PUBLIC KEY-----"))
@@ -530,15 +530,15 @@ class CryptoTest(TSS2_EsapiTest):
         self.assertEqual(str(e.exception), "unsupported encoding: madeup")
 
     def test_rsa_exponent(self):
-        pub = TPMT_PUBLIC.fromPEM(rsa_three_exponent)
+        pub = TPMT_PUBLIC.from_pem(rsa_three_exponent)
         self.assertEqual(pub.parameters.rsaDetail.exponent, 3)
 
     def test_ecc_bad_curves(self):
         with self.assertRaises(ValueError) as e:
-            pub = TPMT_PUBLIC.fromPEM(ecc_bad_curve)
+            pub = TPMT_PUBLIC.from_pem(ecc_bad_curve)
         self.assertEqual(str(e.exception), "unsupported curve: sect163r2")
 
-        pub = TPMT_PUBLIC.fromPEM(ecc_public_key)
+        pub = TPMT_PUBLIC.from_pem(ecc_public_key)
         pub.parameters.eccDetail.curveID = TPM2_ECC.NONE
         with self.assertRaises(ValueError) as e:
             pub.toPEM()

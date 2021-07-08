@@ -120,8 +120,8 @@ class MakeCredTest(TSS2_EsapiTest):
     def test_Wrap_rsa(self):
         insens = TPM2B_SENSITIVE_CREATE()
         phandle, parent, _, _, _ = self.ectx.create_primary(insens)
-        public = TPM2B_PUBLIC.fromPEM(rsa_public_key)
-        sensitive = TPM2B_SENSITIVE.fromPEM(rsa_private_key)
+        public = TPM2B_PUBLIC.from_pem(rsa_public_key)
+        sensitive = TPM2B_SENSITIVE.from_pem(rsa_private_key)
         symdef = TPMT_SYM_DEF_OBJECT(algorithm=TPM2_ALG.AES)
         symdef.mode.sym = TPM2_ALG.CFB
         symdef.keyBits.sym = 128
@@ -147,8 +147,8 @@ class MakeCredTest(TSS2_EsapiTest):
     def test_Wrap_ecc(self):
         insens = TPM2B_SENSITIVE_CREATE()
         phandle, parent, _, _, _ = self.ectx.create_primary(insens, "ecc")
-        public = TPM2B_PUBLIC.fromPEM(ecc_public_key)
-        sensitive = TPM2B_SENSITIVE.fromPEM(ecc_private_key)
+        public = TPM2B_PUBLIC.from_pem(ecc_public_key)
+        sensitive = TPM2B_SENSITIVE.from_pem(ecc_private_key)
         symdef = TPMT_SYM_DEF_OBJECT(algorithm=TPM2_ALG.AES)
         symdef.mode.sym = TPM2_ALG.CFB
         symdef.keyBits.sym = 128
