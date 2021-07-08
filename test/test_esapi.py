@@ -3827,7 +3827,7 @@ class TestEsys(TSS2_EsapiTest):
             self.ectx.clear_control(ESYS_TR.RH_LOCKOUT, b"bad")
 
     def test_gettcti(self):
-        tcti = self.ectx.GetTcti()
+        tcti = self.ectx.get_tcti()
         self.assertTrue(isinstance(tcti, TCTI))
 
         self.assertEqual(tcti, self.ectx.tcti)
