@@ -99,7 +99,7 @@ def make_credential(public, credential, name):
     return (credblob, secret)
 
 
-def Wrap(newparent, public, sensitive, symkey, symdef):
+def wrap(newparent, public, sensitive, symkey, symdef):
     enckeyout = TPM2B_DATA()
     outsymseed = TPM2B_ENCRYPTED_SECRET()
     sensb = sensitive.Marshal()

@@ -121,13 +121,13 @@ class MakeCredTest(TSS2_EsapiTest):
         symdef = TPMT_SYM_DEF_OBJECT(algorithm=TPM2_ALG.AES)
         symdef.mode.sym = TPM2_ALG.CFB
         symdef.keyBits.sym = 128
-        enckey, duplicate, outsymseed = Wrap(
+        enckey, duplicate, outsymseed = wrap(
             parent.publicArea, public, sensitive, b"", symdef
         )
 
         self.ectx.import_(phandle, enckey, public, duplicate, outsymseed, symdef)
 
-        enckey, duplicate, outsymseed = Wrap(
+        enckey, duplicate, outsymseed = wrap(
             parent.publicArea, public, sensitive, b"", None
         )
 
@@ -148,13 +148,13 @@ class MakeCredTest(TSS2_EsapiTest):
         symdef = TPMT_SYM_DEF_OBJECT(algorithm=TPM2_ALG.AES)
         symdef.mode.sym = TPM2_ALG.CFB
         symdef.keyBits.sym = 128
-        enckey, duplicate, outsymseed = Wrap(
+        enckey, duplicate, outsymseed = wrap(
             parent.publicArea, public, sensitive, b"\xA1" * 16, symdef
         )
 
         self.ectx.import_(phandle, enckey, public, duplicate, outsymseed, symdef)
 
-        enckey, duplicate, outsymseed = Wrap(
+        enckey, duplicate, outsymseed = wrap(
             parent.publicArea, public, sensitive, b"", None
         )
 
