@@ -89,7 +89,7 @@ class ESAPI:
 
     def tr_from_tpmpublic(
         self,
-        handle: ESYS_TR,
+        handle: TPM2_HANDLE,
         session1: ESYS_TR = ESYS_TR.NONE,
         session2: ESYS_TR = ESYS_TR.NONE,
         session3: ESYS_TR = ESYS_TR.NONE,
