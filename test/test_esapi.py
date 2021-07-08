@@ -4674,6 +4674,28 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.policy_authorize_nv(nv_index, session, session3=45.6)
 
+    def test_serialize_deserialize(self):
+
+        handle = self.ectx.create_primary(TPM2B_SENSITIVE_CREATE())[0]
+
+        buffer = self.ectx.tr_serialize(handle)
+        self.assertEqual(type(buffer), bytes)
+
+        handle2 = self.ectx.tr_deserialize(buffer)
+        self.assertEqual(type(handle2), ESYS_TR)
+
+        with self.assertRaises(TypeError):
+            self.ectx.tr_serialize("bad")
+
+        with self.assertRaises(TSS2_Exception):
+            self.ectx.tr_serialize(123456)
+
+        with self.assertRaises(TypeError):
+            self.ectx.tr_deserialize(42)
+
+        with self.assertRaises(TSS2_Exception):
+            self.ectx.tr_deserialize(b"0123456890")
+
 
 if __name__ == "__main__":
     unittest.main()
