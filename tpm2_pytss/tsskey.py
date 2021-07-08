@@ -241,8 +241,8 @@ class TSSPrivKey(object):
             raise TypeError("unsupported key type")
         emptyAuth = seq["emptyAuth"].native
         parent = seq["parent"].native
-        public, _ = TPM2B_PUBLIC.Unmarshal(bytes(seq["public"]))
-        private, _ = TPM2B_PRIVATE.Unmarshal(bytes(seq["private"]))
+        public, _ = TPM2B_PUBLIC.unmarshal(bytes(seq["public"]))
+        private, _ = TPM2B_PRIVATE.unmarshal(bytes(seq["private"]))
         return cls(private, public, emptyAuth, parent)
 
     @classmethod
