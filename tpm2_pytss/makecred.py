@@ -131,7 +131,7 @@ def wrap(newparent, public, sensitive, symkey, symdef):
     enckeyout = TPM2B_DATA()
     outsymseed = TPM2B_ENCRYPTED_SECRET()
     sensb = sensitive.marshal()
-    name = bytes(public.getName())
+    name = bytes(public.get_name())
     if symdef and symdef.algorithm != TPM2_ALG.NULL:
         cipher, mode, bits = symdef_to_crypt(symdef)
         if not symkey:

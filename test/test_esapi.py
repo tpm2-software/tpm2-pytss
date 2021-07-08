@@ -1671,7 +1671,7 @@ class TestEsys(TSS2_EsapiTest):
         nhandle = self.ectx.context_load(ctx)
         name = self.ectx.tr_get_name(nhandle)
 
-        self.assertEqual(bytes(outpub.getName()), bytes(name))
+        self.assertEqual(bytes(outpub.get_name()), bytes(name))
 
     def test_FlushContext(self):
         inPublic = TPM2B_PUBLIC(
@@ -1837,7 +1837,7 @@ class TestEsys(TSS2_EsapiTest):
 
         pubout, name = self.ectx.nv_read_public(nvhandle)
 
-        self.assertEqual(nvpub.getName().name, name.name)
+        self.assertEqual(nvpub.get_name().name, name.name)
 
     def test_NV_Increment(self):
         nvpub = TPM2B_NV_PUBLIC(
@@ -2155,7 +2155,7 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(att.type, TPM2_ST.ATTEST_NV)
         self.assertEqual(bytes(att.extraData), b"qdata")
         nvpub.nvPublic.attributes = nvpub.nvPublic.attributes | TPMA_NV.WRITTEN
-        self.assertEqual(bytes(att.attested.nv.indexName), bytes(nvpub.getName()))
+        self.assertEqual(bytes(att.attested.nv.indexName), bytes(nvpub.get_name()))
         self.assertEqual(att.attested.nv.offset, 0)
         self.assertEqual(att.attested.nv.nvContents.buffer, b"sometest")
 
@@ -2750,7 +2750,7 @@ class TestEsys(TSS2_EsapiTest):
             childHandle, primary2, encryptionKey, sym, session1=session
         )
 
-        keyName = pub.publicArea.getName()
+        keyName = pub.publicArea.get_name()
         duplicate, symSeed = self.ectx.rewrap(
             primary2, primary1, duplicate, keyName, symSeed
         )

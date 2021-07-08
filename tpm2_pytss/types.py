@@ -1676,7 +1676,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
     def toPEM(self, encoding="pem"):
         return public_to_pem(self, encoding)
 
-    def getName(self):
+    def get_name(self):
         name = getname(self)
         return TPM2B_NAME(name)
 
@@ -1742,8 +1742,8 @@ class TPM2B_NAME(TPM2B_SIMPLE_OBJECT):
 
 
 class TPM2B_NV_PUBLIC(TPM_OBJECT):
-    def getName(self):
-        return self.nvPublic.getName()
+    def get_name(self):
+        return self.nvPublic.get_name()
 
 
 class TPM2B_PRIVATE(TPM2B_SIMPLE_OBJECT):
@@ -1777,8 +1777,8 @@ class TPM2B_PUBLIC(TPM_OBJECT):
     def toPEM(self, encoding="pem"):
         return self.publicArea.toPEM(encoding)
 
-    def getName(self):
-        return self.publicArea.getName()
+    def get_name(self):
+        return self.publicArea.get_name()
 
     @classmethod
     def parse(
@@ -2011,7 +2011,7 @@ class TPMS_NV_PIN_COUNTER_PARAMETERS(TPM_OBJECT):
 
 
 class TPMS_NV_PUBLIC(TPM_OBJECT):
-    def getName(self):
+    def get_name(self):
         name = getname(self)
         return TPM2B_NAME(name)
 
