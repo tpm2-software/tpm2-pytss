@@ -41,7 +41,7 @@ def generate_ecc_seed(key, hashAlg, label):
     epoint = TPMS_ECC_POINT(
         x=TPM2B_ECC_PARAMETER(buffer=exbytes), y=TPM2B_ECC_PARAMETER(buffer=eybytes)
     )
-    secret = epoint.Marshal()
+    secret = epoint.marshal()
     shared_key = ekey.exchange(ECDH(), key)
     pubnum = key.public_numbers()
     xbytes = pubnum.x.to_bytes(plength, "big")
@@ -100,12 +100,12 @@ def make_credential(public, credential, name):
     (cipher, symmode, symbits) = symdef_to_crypt(public.parameters.asymDetail.symmetric)
     symkey = kdfa(public.nameAlg, seed, b"STORAGE", name, b"", symbits)
 
-    enc_cred = encrypt(cipher, symkey, credential.Marshal())
+    enc_cred = encrypt(cipher, symkey, credential.marshal())
 
     halg = _get_digest(public.nameAlg)
     hmackey = kdfa(public.nameAlg, seed, b"INTEGRITY", b"", b"", halg.digest_size * 8)
     outerhmac = hmac(halg, hmackey, enc_cred, name)
-    hmacdata = TPM2B_DIGEST(buffer=outerhmac).Marshal()
+    hmacdata = TPM2B_DIGEST(buffer=outerhmac).marshal()
 
     credblob = TPM2B_ID_OBJECT(credential=hmacdata + enc_cred)
     secret = TPM2B_ENCRYPTED_SECRET(secret=enc_seed)
@@ -130,7 +130,7 @@ def wrap(newparent, public, sensitive, symkey, symdef):
     """
     enckeyout = TPM2B_DATA()
     outsymseed = TPM2B_ENCRYPTED_SECRET()
-    sensb = sensitive.Marshal()
+    sensb = sensitive.marshal()
     name = bytes(public.getName())
     if symdef and symdef.algorithm != TPM2_ALG.NULL:
         cipher, mode, bits = symdef_to_crypt(symdef)
@@ -141,7 +141,7 @@ def wrap(newparent, public, sensitive, symkey, symdef):
         h = hashes.Hash(halg(), backend=default_backend())
         h.update(sensb)
         h.update(name)
-        innerint = TPM2B_DIGEST(buffer=h.finalize()).Marshal()
+        innerint = TPM2B_DIGEST(buffer=h.finalize()).marshal()
         encsens = encrypt(cipher, symkey, innerint + sensb)
         enckeyout.buffer = symkey
     else:
@@ -157,7 +157,7 @@ def wrap(newparent, public, sensitive, symkey, symdef):
         newparent.nameAlg, seed, b"INTEGRITY", b"", b"", halg.digest_size * 8
     )
     outerhmac = hmac(halg, hmackey, dupsens, name)
-    hmacdata = TPM2B_DIGEST(buffer=outerhmac).Marshal()
+    hmacdata = TPM2B_DIGEST(buffer=outerhmac).marshal()
 
     duplicate = TPM2B_PRIVATE(buffer=hmacdata + dupsens)
 

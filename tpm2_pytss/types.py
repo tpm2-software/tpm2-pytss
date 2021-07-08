@@ -1012,7 +1012,7 @@ class TPM_OBJECT(object):
             # recurse so we can get handling of setattr with Python wrapped data
             setattr(self, key, value)
 
-    def Marshal(self):
+    def marshal(self):
         mfunc = getattr(lib, f"Tss2_MU_{self.__class__.__name__}_Marshal", None)
         if mfunc is None:
             raise RuntimeError(

@@ -574,7 +574,7 @@ class TypesTest(unittest.TestCase):
     def test_marshal(self):
         pb = TPM2B_PUBLIC()
         pb.publicArea.authPolicy.buffer = b"password"
-        b = pb.publicArea.authPolicy.Marshal()
+        b = pb.publicArea.authPolicy.marshal()
         self.assertEqual(b, b"\x00\x08password")
 
     def test_unmarshal(self):

@@ -612,7 +612,7 @@ class ESAPI:
         _check_handle_type(session3, "session3")
 
         if isinstance(in_public, str):
-            in_public = TPM2B_TEMPLATE(TPMT_PUBLIC.parse(in_public).Marshal())
+            in_public = TPM2B_TEMPLATE(TPMT_PUBLIC.parse(in_public).marshal())
 
         inSensitive_cdata = _get_cdata(
             in_sensitive, TPM2B_SENSITIVE_CREATE, "in_sensitive"
