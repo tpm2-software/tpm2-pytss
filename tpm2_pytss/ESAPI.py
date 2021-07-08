@@ -3670,6 +3670,11 @@ class ESAPI:
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> TPM2B_DATA:
         input_data_cdata = _get_cdata(input_data, TPM2B_DATA, "input_data")
+
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
+
         output_data = ffi.new("TPM2B_DATA **")
         _chkrc(
             lib.Esys_Vendor_TCG_Test(
