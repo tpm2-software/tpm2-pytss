@@ -909,6 +909,10 @@ class TPM2_MAX(TPM_FRIENDLY_INT):
     CONTEXT_SIZE = lib.TPM2_MAX_CONTEXT_SIZE
 
 
+class TPM2_HANDLE(int):
+    pass
+
+
 class TPM_OBJECT(object):
     def __init__(self, _cdata=None, **kwargs):
 
