@@ -3700,3 +3700,71 @@ class ESAPI:
             _chkrc(lib.Esys_TR_Deserialize(self._ctx, data, len(data), esys_handle))
 
         return ESYS_TR(esys_handle[0])
+
+    def tr_serialize(self, esys_handle: ESYS_TR) -> bytes:
+        """Serialization of an ESYS_TR into a byte buffer.
+
+        Serialize the metadata of an ESYS_TR object into a byte buffer such that it
+        can be stored on disk for later use by a different program or context.
+        The serialized object can be deserialized suing tr_deserialize.
+
+        Args:
+            esys_handle (ESYS_TR): The ESYS_TR object to serialize.
+
+        C Function: Esys_TR_Serialize
+
+        Raises:
+            - TypeError: If esys_handle is not an ESYS_TR.
+
+            - TSS2_Exception:
+                - TSS2_ESYS_RC_BAD_TR if the ESYS_TR object is unknown to the
+                  ESYS_CONTEXT.
+
+                - TSS2_ESYS_RC_MEMORY if the buffer for marshaling the object can't
+                  be allocated.
+
+                - TSS2_ESYS_RC_BAD_VALUE For invalid ESYS data to be marshaled.
+
+                - TSS2_RCs produced by lower layers of the software stack.
+        """
+        _check_handle_type(esys_handle, "esys_handle")
+
+        buffer_size = ffi.new("size_t *")
+        buffer = ffi.new("uint8_t **")
+        _chkrc(lib.Esys_TR_Serialize(self._ctx, esys_handle, buffer, buffer_size))
+        buffer_size = buffer_size[0]
+        buffer = get_dptr(buffer, lib.Esys_Free)
+        return bytes(ffi.buffer(buffer, buffer_size))
+
+    def tr_deserialize(self, buffer: bytes) -> ESYS_TR:
+        """Deserialization of an ESYS_TR from a byte buffer.
+
+        Deserialize the metadata of an ESYS_TR object from a byte buffer that was
+        stored on disk for later use by a different program or context.
+        An object can be serialized suing Esys_TR_Serialize.
+
+        Args:
+            esys_handle (ESYS_TR): The ESYS_TR object to serialize.
+
+        Returns:
+          The buffer (bytes) containing the serialized metadata.
+
+        C_Function: Esys_TR_Deserialize
+
+        Raises:
+            - TypeError: If a parameter is the incorrect type.
+
+            - TSS2_Exception:
+
+                 - TSS2_ESYS_RC_MEMORY if the object can not be allocated.
+
+                 - TSS2_RCs produced by lower layers of the software stack.
+        """
+
+        if not isinstance(buffer, bytes):
+            raise TypeError(f"Expected buffer to be of type bytes, got: {type(buffer)}")
+
+        esys_handle = ffi.new("ESYS_TR *")
+        _chkrc(lib.Esys_TR_Deserialize(self._ctx, buffer, len(buffer), esys_handle))
+
+        return ESYS_TR(esys_handle[0])
