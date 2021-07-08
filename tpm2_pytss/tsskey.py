@@ -146,9 +146,9 @@ class TSSPrivKey(object):
         seq["type"] = loadablekey_oid.native
         seq["emptyAuth"] = self.emptyAuth
         seq["parent"] = self.parent
-        pub = self.public.Marshal()
+        pub = self.public.marshal()
         seq["public"] = pub
-        priv = self.private.Marshal()
+        priv = self.private.marshal()
         seq["private"] = priv
         return seq.dump()
 

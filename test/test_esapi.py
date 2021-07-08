@@ -865,7 +865,7 @@ class TestEsys(TSS2_EsapiTest):
         templ = TPMT_PUBLIC.parse(
             alg="rsa2048", objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS
         )
-        childInPublic = TPM2B_TEMPLATE(templ.Marshal())
+        childInPublic = TPM2B_TEMPLATE(templ.marshal())
         childInSensitive = TPM2B_SENSITIVE_CREATE(
             TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("childpassword"))
         )
@@ -913,7 +913,7 @@ class TestEsys(TSS2_EsapiTest):
         templ = TPMT_PUBLIC.parse(
             alg="rsa2048", objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS
         )
-        childInPublic = TPM2B_TEMPLATE(templ.Marshal())
+        childInPublic = TPM2B_TEMPLATE(templ.marshal())
         childInSensitive = TPM2B_SENSITIVE_CREATE(
             TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("childpassword"))
         )
@@ -987,7 +987,7 @@ class TestEsys(TSS2_EsapiTest):
         templ = TPMT_PUBLIC.parse(
             alg="rsa2048", objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS
         )
-        childInPublic = TPM2B_TEMPLATE(templ.Marshal())
+        childInPublic = TPM2B_TEMPLATE(templ.marshal())
         childInSensitive = TPM2B_SENSITIVE_CREATE(
             TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("childpassword"))
         )
@@ -1159,7 +1159,7 @@ class TestEsys(TSS2_EsapiTest):
         inSensitive = TPM2B_SENSITIVE_CREATE()
         parentHandle = self.ectx.create_primary(inSensitive, "ecc")[0]
 
-        inPublic = TPM2B_TEMPLATE(TPMT_PUBLIC.parse(alg="aes").Marshal())
+        inPublic = TPM2B_TEMPLATE(TPMT_PUBLIC.parse(alg="aes").marshal())
         aesKeyHandle = self.ectx.create_loaded(parentHandle, inSensitive, inPublic)[0]
 
         ivIn = TPM2B_IV(b"thisis16byteszxc")
@@ -1236,7 +1236,7 @@ class TestEsys(TSS2_EsapiTest):
         inSensitive = TPM2B_SENSITIVE_CREATE()
         parentHandle = self.ectx.create_primary(inSensitive, "ecc")[0]
 
-        inPublic = TPM2B_TEMPLATE(TPMT_PUBLIC.parse(alg="aes").Marshal())
+        inPublic = TPM2B_TEMPLATE(TPMT_PUBLIC.parse(alg="aes").marshal())
         aesKeyHandle = self.ectx.create_loaded(parentHandle, inSensitive, inPublic)[0]
 
         ivIn = TPM2B_IV(b"thisis16byteszxc")
