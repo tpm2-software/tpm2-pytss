@@ -290,13 +290,13 @@ class CryptoTest(TSS2_EsapiTest):
 
     def test_topem_rsa(self):
         pub = types.TPM2B_PUBLIC.from_pem(rsa_public_key)
-        pem = pub.toPEM()
+        pem = pub.to_pem()
 
         self.assertEqual(pem, rsa_public_key)
 
     def test_topem_ecc(self):
         pub = types.TPM2B_PUBLIC.from_pem(ecc_public_key)
-        pem = pub.toPEM()
+        pem = pub.to_pem()
 
         self.assertEqual(pem, ecc_public_key)
 
@@ -516,17 +516,17 @@ class CryptoTest(TSS2_EsapiTest):
     def test_topem_encodings(self):
         pub = types.TPM2B_PUBLIC.from_pem(ecc_public_key)
 
-        pem = pub.toPEM(encoding="PEM")
+        pem = pub.to_pem(encoding="PEM")
         self.assertTrue(pem.startswith(b"-----BEGIN PUBLIC KEY-----"))
 
-        der = pub.toPEM(encoding="der")
+        der = pub.to_pem(encoding="der")
         self.assertTrue(der.startswith(b"0Y0\x13\x06\x07"))
 
-        ssh = pub.toPEM(encoding="ssh")
+        ssh = pub.to_pem(encoding="ssh")
         self.assertTrue(ssh.startswith(b"ecdsa-sha2-nistp256"))
 
         with self.assertRaises(ValueError) as e:
-            pub.toPEM(encoding="madeup")
+            pub.to_pem(encoding="madeup")
         self.assertEqual(str(e.exception), "unsupported encoding: madeup")
 
     def test_rsa_exponent(self):
@@ -541,5 +541,5 @@ class CryptoTest(TSS2_EsapiTest):
         pub = TPMT_PUBLIC.from_pem(ecc_public_key)
         pub.parameters.eccDetail.curveID = TPM2_ECC.NONE
         with self.assertRaises(ValueError) as e:
-            pub.toPEM()
+            pub.to_pem()
         self.assertEqual(str(e.exception), "unsupported curve: 0")
