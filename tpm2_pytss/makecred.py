@@ -75,7 +75,7 @@ def encrypt(cipher, key, data):
     return encdata
 
 
-def MakeCredential(public, credential, name):
+def make_credential(public, credential, name):
     if isinstance(public, TPM2B_PUBLIC):
         public = public.publicArea
     if isinstance(credential, bytes):
