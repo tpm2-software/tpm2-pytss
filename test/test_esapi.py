@@ -2150,7 +2150,7 @@ class TestEsys(TSS2_EsapiTest):
             session1=ESYS_TR.PASSWORD,
             session2=ESYS_TR.PASSWORD,
         )
-        att, _ = TPMS_ATTEST.Unmarshal(bytes(certifyInfo))
+        att, _ = TPMS_ATTEST.unmarshal(bytes(certifyInfo))
         self.assertEqual(att.magic, TPM2_GENERATED_VALUE(0xFF544347))
         self.assertEqual(att.type, TPM2_ST.ATTEST_NV)
         self.assertEqual(bytes(att.extraData), b"qdata")

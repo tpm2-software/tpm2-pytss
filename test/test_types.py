@@ -579,7 +579,7 @@ class TypesTest(unittest.TestCase):
 
     def test_unmarshal(self):
         buf = b"\x00\x05test1"
-        d, offset = TPM2B_DIGEST.Unmarshal(buf)
+        d, offset = TPM2B_DIGEST.unmarshal(buf)
         self.assertEqual(offset, 7)
         self.assertEqual(d.size, 5)
         db = d.buffer

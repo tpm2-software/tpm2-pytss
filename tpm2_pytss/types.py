@@ -1028,7 +1028,7 @@ class TPM_OBJECT(object):
         return bytes(buf[0 : offset[0]])
 
     @classmethod
-    def Unmarshal(cls, buf):
+    def unmarshal(cls, buf):
         umfunc = getattr(lib, f"Tss2_MU_{cls.__name__}_Unmarshal", None)
         if umfunc is None:
             raise RuntimeError(f"No unmarshal function found for {cls.__name__}")
