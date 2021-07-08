@@ -10,7 +10,7 @@ from .TSS2_BaseTest import TSS2_EsapiTest
 
 
 class TestEsys(TSS2_EsapiTest):
-    def testGetRandom(self):
+    def test_get_random(self):
         r = self.ectx.get_random(5)
         self.assertEqual(len(r), 5)
 
@@ -26,7 +26,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.get_random(5, session3=56.7)
 
-    def testCreatePrimary(self):
+    def test_create_primary(self):
         inSensitive = TPM2B_SENSITIVE_CREATE()
         inPublic = TPM2B_PUBLIC()
         outsideInfo = TPM2B_DATA()
@@ -123,7 +123,7 @@ class TestEsys(TSS2_EsapiTest):
                 inSensitive, "ecc256", session3=object()
             )
 
-    def testPCRRead(self):
+    def test_pcr_read(self):
 
         pcrsels = TPML_PCR_SELECTION.parse("sha1:3+sha256:all")
         _, _, digests, = self.ectx.pcr_read(pcrsels)
@@ -145,7 +145,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.pcr_read(pcrsels, session3=object())
 
-    def test_plain_NV_define_write_read_undefine(self):
+    def test_plain_nv_define_write_read_undefine(self):
 
         nv_public = TPM2B_NV_PUBLIC(
             nvPublic=TPMS_NV_PUBLIC(
@@ -194,10 +194,10 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TSS2_Exception):
             self.ectx.hierarchy_change_auth(ESYS_TR.OWNER, "anotherpasswd")
 
-    def test_fulltest_YES(self):
+    def test_fulltest_yes(self):
         self.ectx.self_test(True)
 
-    def test_fulltest_NO(self):
+    def test_fulltest_no(self):
         self.ectx.self_test(False)
 
     def test_incremental_self_test(self):
@@ -311,7 +311,7 @@ class TestEsys(TSS2_EsapiTest):
                 ESYS_TR.NONE, ESYS_TR.NONE, None, TPM2_SE.HMAC, sym, TPM2B_SYM_KEY()
             )
 
-    def test_start_authSession_enckey(self):
+    def test_start_auth_session_enckey(self):
 
         inSensitive = TPM2B_SENSITIVE_CREATE()
 
@@ -339,7 +339,7 @@ class TestEsys(TSS2_EsapiTest):
         random = self.ectx.get_random(4, session1=session)
         self.assertEqual(len(random), 4)
 
-    def test_start_authSession_enckey_bindkey(self):
+    def test_start_auth_session_enckey_bindkey(self):
 
         inSensitive = TPM2B_SENSITIVE_CREATE(
             TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
@@ -369,7 +369,7 @@ class TestEsys(TSS2_EsapiTest):
         random = self.ectx.get_random(4, session1=session)
         self.assertEqual(len(random), 4)
 
-    def test_TRSess_SetAttributes(self):
+    def test_tr_sess_set_attributes(self):
 
         inSensitive = TPM2B_SENSITIVE_CREATE(
             TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
@@ -407,7 +407,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.trsess_set_attributes(session, 1, 75.6)
 
-    def test_start_authSession_noncecaller(self):
+    def test_start_auth_session_noncecaller(self):
 
         inSensitive = TPM2B_SENSITIVE_CREATE(
             TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
@@ -437,7 +437,7 @@ class TestEsys(TSS2_EsapiTest):
         random = self.ectx.get_random(4, session1=session)
         self.assertEqual(len(random), 4)
 
-    def test_start_authSession_noncecaller_bad(self):
+    def test_start_auth_session_noncecaller_bad(self):
 
         sym = TPMT_SYM_DEF(
             algorithm=TPM2_ALG.XOR,
@@ -601,7 +601,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.read_public(childHandle, session3=42.5)
 
-    def test_MakeCredential(self):
+    def test_make_credential(self):
 
         inSensitive = TPM2B_SENSITIVE_CREATE(
             TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
@@ -672,7 +672,7 @@ class TestEsys(TSS2_EsapiTest):
                 childHandle, credential, primaryKeyName, session3=object()
             )
 
-    def test_ActivateCredential(self):
+    def test_activate_credential(self):
 
         inSensitive = TPM2B_SENSITIVE_CREATE(
             TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
@@ -801,7 +801,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.unseal(childHandle, session3="bar")
 
-    def test_objectChangeAuth(self):
+    def test_object_change_auth(self):
 
         inSensitive = TPM2B_SENSITIVE_CREATE(
             TPMS_SENSITIVE_CREATE(userAuth=TPM2B_AUTH("password"))
@@ -1008,7 +1008,7 @@ class TestEsys(TSS2_EsapiTest):
 
         self.assertEqual(bytes(message), bytes(message2))
 
-    def test_ECDH_KeyGen(self):
+    def test_ecdh_key_gen(self):
 
         inSensitive = TPM2B_SENSITIVE_CREATE()
 
@@ -1032,7 +1032,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.ecdh_key_gen(parentHandle, session3=45.6)
 
-    def test_ECDH_ZGen(self):
+    def test_ecdh_z_gen(self):
 
         alg = "ecc256:ecdh"
         attrs = (
@@ -1076,7 +1076,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.ecdh_zgen(parentHandle, inPoint, session3=89.6)
 
-    def test_ECC_Parameters(self):
+    def test_ecc_parameters(self):
 
         params = self.ectx.ecc_parameters(TPM2_ECC_CURVE.NIST_P256)
         self.assertEqual(type(params), TPMS_ALGORITHM_DETAIL_ECC)
@@ -1096,7 +1096,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.ecc_parameters(TPM2_ECC_CURVE.NIST_P256, session3=TPM2B_DATA())
 
-    def test_ZGen_2Phase(self):
+    def test_z_gen_2_phase(self):
 
         alg = "ecc256:ecdh-sha256"
         attrs = (
@@ -1154,7 +1154,7 @@ class TestEsys(TSS2_EsapiTest):
                 eccHandle, inQsB, inQeB, TPM2_ALG.ECDH, counter, session3=45.5
             )
 
-    def test_EncryptDecrypt(self):
+    def test_encrypt_decrypt(self):
 
         inSensitive = TPM2B_SENSITIVE_CREATE()
         parentHandle = self.ectx.create_primary(inSensitive, "ecc")[0]
@@ -1231,7 +1231,7 @@ class TestEsys(TSS2_EsapiTest):
                 aesKeyHandle, "bad Bool", TPM2_ALG.CFB, ivIn, inData
             )
 
-    def test_EncryptDecrypt2(self):
+    def test_encrypt_decrypt2(self):
 
         inSensitive = TPM2B_SENSITIVE_CREATE()
         parentHandle = self.ectx.create_primary(inSensitive, "ecc")[0]
@@ -1309,7 +1309,7 @@ class TestEsys(TSS2_EsapiTest):
                 aesKeyHandle, "Not Bool", TPM2_ALG.CFB, ivIn, inData
             )
 
-    def test_Hash(self):
+    def test_hash(self):
 
         # Null hierarchy default
         digest, ticket = self.ectx.hash(b"1234", TPM2_ALG.SHA256)
@@ -1371,7 +1371,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.hash(inData, TPM2_ALG.SHA256, session3=object())
 
-    def test_HMAC(self):
+    def test_hmac(self):
 
         attrs = (
             TPMA_OBJECT.SIGN_ENCRYPT
@@ -1422,7 +1422,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.hmac(primaryHandle, inData, TPM2_ALG.SHA256, session3=45.6)
 
-    def test_StirRandom(self):
+    def test_stir_random(self):
 
         self.ectx.stir_random(b"1234")
         self.ectx.stir_random("1234")
@@ -1440,7 +1440,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.stir_random("1234", session3=object())
 
-    def test_HMAC_Sequence(self):
+    def test_hmac_sequence(self):
 
         inPublic = TPM2B_PUBLIC(
             TPMT_PUBLIC.parse(
@@ -1509,7 +1509,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.hmac_start(handle, "1234", TPM2_ALG.SHA256, session3=45.6)
 
-    def test_HashSequence(self):
+    def test_hash_sequence(self):
 
         seqHandle = self.ectx.hash_sequence_start(None, TPM2_ALG.SHA256)
         self.assertNotEqual(seqHandle, 0)
@@ -1604,7 +1604,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.sequence_complete(seqHandle, "AnotherBuffer", session3=object())
 
-    def test_EventSequenceComplete(self):
+    def test_event_sequence_complete(self):
 
         seqHandle = self.ectx.hash_sequence_start(TPM2B_AUTH(b"1234"), TPM2_ALG.NULL)
         self.assertNotEqual(seqHandle, 0)
@@ -1651,7 +1651,7 @@ class TestEsys(TSS2_EsapiTest):
                 ESYS_TR.PCR16, seqHandle, None, sequence3=object()
             )
 
-    def test_ContextSave_ContextLoad(self):
+    def test_context_save_context_load(self):
         inPublic = TPM2B_PUBLIC(
             TPMT_PUBLIC.parse(
                 alg="rsa:rsassa-sha256",
@@ -1673,7 +1673,7 @@ class TestEsys(TSS2_EsapiTest):
 
         self.assertEqual(bytes(outpub.get_name()), bytes(name))
 
-    def test_FlushContext(self):
+    def test_flush_context(self):
         inPublic = TPM2B_PUBLIC(
             TPMT_PUBLIC.parse(
                 alg="rsa:rsassa-sha256",
@@ -1693,7 +1693,7 @@ class TestEsys(TSS2_EsapiTest):
             self.ectx.tr_get_name(handle)
         self.assertEqual(e.exception.error, TSS2_Exception.ESYS_RC_BAD_TR)
 
-    def test_EvictControl(self):
+    def test_evict_control(self):
         inPublic = TPM2B_PUBLIC(
             TPMT_PUBLIC.parse(
                 alg="rsa:rsassa-sha256",
@@ -1719,7 +1719,7 @@ class TestEsys(TSS2_EsapiTest):
             self.ectx.tr_from_tpmpublic(0x81000081)
         self.assertEqual(e.exception.error, TPM2_RC.HANDLE)
 
-    def test_GetCapability(self):
+    def test_get_capability(self):
         more = True
         while more:
             more, capdata = self.ectx.get_capability(
@@ -1752,7 +1752,7 @@ class TestEsys(TSS2_EsapiTest):
                 TPM2_CAP.COMMANDS, TPM2_CC.FIRST, TPM2_MAX.CAP_CC, session3="baz"
             )
 
-    def test_TestParms(self):
+    def test_test_parms(self):
         parms = TPMT_PUBLIC_PARMS(type=TPM2_ALG.RSA)
         parms.parameters.rsaDetail.symmetric.algorithm = TPM2_ALG.NULL
         parms.parameters.rsaDetail.scheme.scheme = TPM2_ALG.NULL
@@ -1767,12 +1767,12 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(e.exception.error, TPM2_RC.VALUE)
         self.assertEqual(e.exception.parameter, 1)
 
-    def test_ReadClock(self):
+    def test_read_clock(self):
         ctime = self.ectx.read_clock()
         self.assertGreater(ctime.time, 0)
         self.assertGreater(ctime.clockInfo.clock, 0)
 
-    def test_ClockSet(self):
+    def test_clock_set(self):
         newtime = 0xFA1AFE1
         self.ectx.clock_set(ESYS_TR.OWNER, newtime, session1=ESYS_TR.PASSWORD)
         ntime = self.ectx.read_clock()
@@ -1782,12 +1782,12 @@ class TestEsys(TSS2_EsapiTest):
             self.ectx.clock_set(ESYS_TR.OWNER, 0, session1=ESYS_TR.PASSWORD)
         self.assertEqual(e.exception.error, TPM2_RC.VALUE)
 
-    def test_ClockRateAdjust(self):
+    def test_clock_rate_adjust(self):
         self.ectx.clock_rate_adjust(
             ESYS_TR.OWNER, TPM2_CLOCK.COARSE_SLOWER, session1=ESYS_TR.PASSWORD
         )
 
-    def test_NV_UndefineSpaceSpecial(self):
+    def test_nv_undefine_space_special(self):
         # pre-generated TPM2_PolicyCommandCode(TPM2_CC_NV_UndefineSpaceSpecial)
         pol = b"\x1d-\xc4\x85\xe1w\xdd\xd0\xa4\n4I\x13\xce\xebB\x0c\xaa\t<BX}.\x1b\x13+\x15|\xcb]\xb0"
         nvpub = TPM2B_NV_PUBLIC(
@@ -1822,7 +1822,7 @@ class TestEsys(TSS2_EsapiTest):
             nvhandle, session1=session, session2=ESYS_TR.PASSWORD
         )
 
-    def test_NV_ReadPublic(self):
+    def test_nv_read_public(self):
         nvpub = TPM2B_NV_PUBLIC(
             nvPublic=TPMS_NV_PUBLIC(
                 nvIndex=0x1000000,
@@ -1839,7 +1839,7 @@ class TestEsys(TSS2_EsapiTest):
 
         self.assertEqual(nvpub.get_name().name, name.name)
 
-    def test_NV_Increment(self):
+    def test_nv_increment(self):
         nvpub = TPM2B_NV_PUBLIC(
             nvPublic=TPMS_NV_PUBLIC(
                 nvIndex=0x1000000,
@@ -1880,7 +1880,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.nv_increment(nvhandle, session3="baz")
 
-    def test_NV_Extend(self):
+    def test_nv_extend(self):
         nvpub = TPM2B_NV_PUBLIC(
             nvPublic=TPMS_NV_PUBLIC(
                 nvIndex=0x1000000,
@@ -1924,7 +1924,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.nv_extend(nvhandle, edata, session3=object)
 
-    def test_NV_SetBits(self):
+    def test_nv_set_bits(self):
         nvpub = TPM2B_NV_PUBLIC(
             nvPublic=TPMS_NV_PUBLIC(
                 nvIndex=0x1000000,
@@ -1969,7 +1969,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.nv_set_bits(nvhandle, bits, session3=object())
 
-    def test_NV_WriteLock(self):
+    def test_nv_write_lock(self):
         nvpub = TPM2B_NV_PUBLIC(
             nvPublic=TPMS_NV_PUBLIC(
                 nvIndex=0x1000000,
@@ -2010,7 +2010,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.nv_write_lock(nvhandle, session3=list())
 
-    def test_NV_GlobalWriteLock(self):
+    def test_nv_global_write_lock(self):
         nvpub = TPM2B_NV_PUBLIC(
             nvPublic=TPMS_NV_PUBLIC(
                 nvIndex=0x1000000,
@@ -2031,7 +2031,7 @@ class TestEsys(TSS2_EsapiTest):
 
         self.assertEqual(e.exception.error, TPM2_RC.NV_LOCKED)
 
-    def test_NV_ReadLock(self):
+    def test_nv_read_lock(self):
         nvpub = TPM2B_NV_PUBLIC(
             nvPublic=TPMS_NV_PUBLIC(
                 nvIndex=0x1000000,
@@ -2073,7 +2073,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.nv_read_lock(nvhandle, session3="baz")
 
-    def test_NV_ChangeAuth(self):
+    def test_nv_change_auth(self):
         # pre-generated TPM2_PolicyCommandCode(TPM2_CC_NV_ChangeAuth)
         pol = b"D^\xd9S`\x1a\x04U\x04U\t\x99\xbf,\xbb)\x92\xcb\xa2\xdb\xb5\x12\x1b\xcf\x03\x86\x9fe\xb5\x0c&\xe5"
         nvpub = TPM2B_NV_PUBLIC(
@@ -2106,7 +2106,7 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.nv_read(nvhandle, 8, auth_handle=nvhandle)
 
-    def test_NV_Certify(self):
+    def test_nv_certify(self):
         nvpub = TPM2B_NV_PUBLIC(
             nvPublic=TPMS_NV_PUBLIC(
                 nvIndex=0x1000000,
@@ -2201,7 +2201,7 @@ class TestEsys(TSS2_EsapiTest):
                 eccHandle, nvhandle, qualifyingData, inScheme, 8, session3=[]
             )
 
-    def test_Certify(self):
+    def test_certify(self):
         inPublic = TPM2B_PUBLIC(
             TPMT_PUBLIC.parse(
                 alg="rsa:rsassa-sha256",
@@ -2267,7 +2267,7 @@ class TestEsys(TSS2_EsapiTest):
                 eccHandle, eccHandle, qualifyingData, inScheme, session3=object()
             )
 
-    def test_CertifyCreation(self):
+    def test_certify_creation(self):
         inPublic = TPM2B_PUBLIC(
             TPMT_PUBLIC.parse(
                 alg="rsa:rsassa-sha256",
@@ -2366,7 +2366,7 @@ class TestEsys(TSS2_EsapiTest):
                 session3="baz",
             )
 
-    def test_Vendor_TCG_Test(self):
+    def test_vendor_tcg_test(self):
         with self.assertRaises(TSS2_Exception):
             self.ectx.vendor_tcg_test(b"random data")
 
@@ -2380,7 +2380,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.vendor_tcg_test(TPM2B_PUBLIC())
 
-    def test_FieldUpgradeStart(self):
+    def test_field_upgrade_start(self):
         inPublic = TPM2B_PUBLIC(
             TPMT_PUBLIC.parse(
                 alg="rsa:rsassa-sha256",
@@ -2405,12 +2405,12 @@ class TestEsys(TSS2_EsapiTest):
             )
         self.assertEqual(e.exception.error, TPM2_RC.COMMAND_CODE)
 
-    def test_FieldUpgradeData(self):
+    def test_field_upgrade_data(self):
         with self.assertRaises(TSS2_Exception) as e:
             self.ectx.field_upgrade_data(b"")
         self.assertEqual(e.exception.error, TPM2_RC.COMMAND_CODE)
 
-    def test_FirmwareRead(self):
+    def test_firmware_read(self):
         with self.assertRaises(TSS2_Exception) as e:
             self.ectx.firmware_read(0)
         self.assertEqual(e.exception.error, TPM2_RC.COMMAND_CODE)
@@ -2598,7 +2598,7 @@ class TestEsys(TSS2_EsapiTest):
                 session3="foo",
             )
 
-    def test_PolicyAuthValue(self):
+    def test_policy_auth_value(self):
 
         sym = TPMT_SYM_DEF(
             algorithm=TPM2_ALG.XOR,
@@ -2620,7 +2620,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.policy_auth_value(b"1234")
 
-    def test_PolicyCommandCode(self):
+    def test_policy_command_code(self):
 
         sym = TPMT_SYM_DEF(
             algorithm=TPM2_ALG.XOR,
@@ -2648,7 +2648,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(ValueError):
             self.ectx.policy_command_code(session, 42)
 
-    def test_PolicyGetDigest(self):
+    def test_policy_get_digest(self):
 
         sym = TPMT_SYM_DEF(
             algorithm=TPM2_ALG.XOR,
@@ -2784,7 +2784,7 @@ class TestEsys(TSS2_EsapiTest):
                 primary2, primary1, duplicate, keyName, symSeed, sesion3=object()
             )
 
-    def test_Import(self):
+    def test_import(self):
 
         sym = TPMT_SYM_DEF(
             algorithm=TPM2_ALG.XOR,
@@ -2901,7 +2901,7 @@ class TestEsys(TSS2_EsapiTest):
                 primary1, encryptionKey, pub, duplicate, symSeed, sym, session3=4.5
             )
 
-    def test_Quote(self):
+    def test_quote(self):
 
         inPublic = TPM2B_PUBLIC(
             TPMT_PUBLIC.parse(
@@ -2960,7 +2960,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.quote(parentHandle, "sha256:1,2,3,4", session3=object())
 
-    def test_GetSessionAuditDigest(self):
+    def test_get_session_audit_digest(self):
 
         inPublic = TPM2B_PUBLIC(
             TPMT_PUBLIC.parse(
@@ -3036,7 +3036,7 @@ class TestEsys(TSS2_EsapiTest):
                 signHandle, session, b"1234", session3=12.723
             )
 
-    def test_PP_Commands(self):
+    def test_pp_commands(self):
         with self.assertRaises(TSS2_Exception) as e:
             self.ectx.pp_commands(TPML_CC(), TPML_CC(), session1=ESYS_TR.PASSWORD)
         self.assertEqual(e.exception.error, TPM2_RC.PP)
@@ -3060,7 +3060,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.pp_commands(TPML_CC(), TPML_CC(), authHandle="platform")
 
-    def test_SetAlgorithmSet(self):
+    def test_set_algorithm_set(self):
         self.ectx.set_algorithm_set(0)
 
         with self.assertRaises(TypeError):
@@ -3078,7 +3078,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.set_algorithm_set(auth_handle=None)
 
-    def test_DictionaryAttackLockReset(self):
+    def test_dictionary_attack_lock_reset(self):
         self.ectx.dictionary_attack_lock_reset()
 
         with self.assertRaises(TSS2_Exception) as e:
@@ -3101,7 +3101,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.dictionary_attack_lock_reset(lock_handle=None)
 
-    def test_DictionaryAttackParameters(self):
+    def test_dictionary_attack_parameters(self):
         self.ectx.dictionary_attack_parameters(1, 2, 3)
 
         with self.assertRaises(TypeError):
@@ -3125,7 +3125,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.dictionary_attack_parameters(1, 2, 3, lock_handle=None)
 
-    def test_GetCommandAuditDigest(self):
+    def test_get_command_audit_digest(self):
 
         inPublic = TPM2B_PUBLIC(
             TPMT_PUBLIC.parse(
@@ -3193,7 +3193,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.get_command_audit_digest(signHandle, b"1234", session3=12.723)
 
-    def test_getTime(self):
+    def test_get_time(self):
 
         inPublic = TPM2B_PUBLIC.parse(
             alg="rsa2048:rsassa:null",
@@ -3244,7 +3244,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.get_time(signHandle, b"1234", session3=12.723)
 
-    def test_Commit(self):
+    def test_commit(self):
 
         p = TPM2B_PUBLIC.parse(
             "ecc:ecdaa",
@@ -3289,7 +3289,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.commit(signHandle, P1, s2, y2, session3=67.5)
 
-    def test_Sign(self):
+    def test_sign(self):
 
         sign_handle = self.ectx.create_primary(
             TPM2B_SENSITIVE_CREATE(),
@@ -3337,7 +3337,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.sign(sign_handle, digest, scheme, validation, session3=object())
 
-    def test_VerifySignature(self):
+    def test_verify_signature(self):
 
         sign_handle = self.ectx.create_primary(
             TPM2B_SENSITIVE_CREATE(),
@@ -3384,7 +3384,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.verify_signature(sign_handle, digest, signature, session3={})
 
-    def test_SetCommandCodeAuditStatus(self):
+    def test_set_command_code_audit_status(self):
 
         self.ectx.set_command_code_audit_status(TPM2_ALG.SHA256, TPML_CC(), TPML_CC())
 
@@ -3429,7 +3429,7 @@ class TestEsys(TSS2_EsapiTest):
                 TPM2_ALG.SHA256, TPML_CC(), TPML_CC(), session3=[]
             )
 
-    def test_PCR_Extend(self):
+    def test_pcr_extend(self):
 
         digests = TPML_DIGEST_VALUES(
             [
@@ -3445,7 +3445,7 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.pcr_extend(ESYS_TR.PCR16, digests)
 
-    def test_PCR_Event(self):
+    def test_pcr_event(self):
 
         digests = self.ectx.pcr_event(ESYS_TR.PCR0, b"01234567890123456789")
         self.assertEqual(type(digests), TPML_DIGEST_VALUES)
@@ -3474,7 +3474,7 @@ class TestEsys(TSS2_EsapiTest):
                 ESYS_TR.PCR0, b"01234567890123456789", session3=TPML_ALG()
             )
 
-    def test_PCR_Allocate(self):
+    def test_pcr_allocate(self):
 
         pcrsels = TPML_PCR_SELECTION.parse("sha1:3+sha256:all")
 
@@ -3502,7 +3502,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.pcr_allocate(pcrsels, session3=object())
 
-    def test_PCR_SetAuthPolicy(self):
+    def test_pcr_set_auth_policy(self):
 
         policy = b"0123456789ABCDEF0123456789ABCDEF"
         self.ectx.pcr_set_auth_policy(policy, TPM2_ALG.SHA256, ESYS_TR.PCR20)
@@ -3547,7 +3547,7 @@ class TestEsys(TSS2_EsapiTest):
                 policy, TPM2_ALG.SHA256, ESYS_TR.PCR20, session3=object()
             )
 
-    def test_PCR_SetAuthValue(self):
+    def test_pcr_set_auth_value(self):
 
         self.ectx.pcr_set_auth_value(ESYS_TR.PCR20, b"password")
         self.ectx.set_auth(ESYS_TR.PCR20, b"password")
@@ -3573,7 +3573,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.pcr_set_auth_value(ESYS_TR.PCR20, b"password", session3=43.2)
 
-    def test_PCR_Reset(self):
+    def test_pcr_reset(self):
 
         self.ectx.pcr_reset(ESYS_TR.PCR16)
 
@@ -3592,7 +3592,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.pcr_reset(ESYS_TR.PCR20, session3=45.6)
 
-    def test_PolicySigned(self):
+    def test_policy_signed(self):
 
         handle = self.ectx.create_primary(
             TPM2B_SENSITIVE_CREATE(),
@@ -3832,7 +3832,7 @@ class TestEsys(TSS2_EsapiTest):
 
         self.assertEqual(tcti, self.ectx.tcti)
 
-    def test_PolicySecret(self):
+    def test_policy_secret(self):
 
         sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL)
 
@@ -3892,7 +3892,7 @@ class TestEsys(TSS2_EsapiTest):
                 ESYS_TR.OWNER, session, nonce, b"", b"", expiration, session3=56.7
             )
 
-    def test_PolicyTicket(self):
+    def test_policy_ticket(self):
         handle = self.ectx.create_primary(
             TPM2B_SENSITIVE_CREATE(),
             TPM2B_PUBLIC.parse(
@@ -3992,7 +3992,7 @@ class TestEsys(TSS2_EsapiTest):
                 session, timeout, b"", b"", name, policy_ticket, session3=object()
             )
 
-    def test_PolicyOR(self):
+    def test_policy_or(self):
 
         sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL)
 
@@ -4035,7 +4035,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.policy_or(session, TPML_DIGEST(), session3=object())
 
-    def test_PolicyPCR(self):
+    def test_policy_pcr(self):
 
         sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL)
 
@@ -4078,7 +4078,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.policy_pcr(session, TPM2B_DIGEST(), "sha256:1", session3=object)
 
-    def test_PolicyLocality(self):
+    def test_policy_locality(self):
 
         sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL)
 
@@ -4114,7 +4114,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.policy_locality(session, TPMA_LOCALITY.ONE, session3=object())
 
-    def test_PolicyNV(self):
+    def test_policy_nv(self):
 
         sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL)
 
@@ -4198,7 +4198,7 @@ class TestEsys(TSS2_EsapiTest):
                 session3=object(),
             )
 
-    def test_PolicyCounterTimer(self):
+    def test_policy_counter_timer(self):
 
         sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL)
 
@@ -4246,7 +4246,7 @@ class TestEsys(TSS2_EsapiTest):
                 session, b"12345678", TPM2_EO.EQ, session3=45.6
             )
 
-    def test_PolicyPhysicalPresence(self):
+    def test_policy_physical_presence(self):
 
         sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL)
 
@@ -4273,7 +4273,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.policy_physical_presence(session, session3=42.2)
 
-    def test_PolicyCPHash(self):
+    def test_policy_cp_hash(self):
 
         sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL)
 
@@ -4312,7 +4312,7 @@ class TestEsys(TSS2_EsapiTest):
                 session, b"01234567890ABCDEF012345689ABCDEF", session3=45.6
             )
 
-    def test_PolicyNameHash(self):
+    def test_policy_name_hash(self):
 
         sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL)
 
@@ -4354,7 +4354,7 @@ class TestEsys(TSS2_EsapiTest):
                 session, b"01234567890ABCDEF012345689ABCDEF", session3=45.6
             )
 
-    def test_PolicyDuplicationSelect(self):
+    def test_policy_duplication_select(self):
 
         sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL)
 
@@ -4435,7 +4435,7 @@ class TestEsys(TSS2_EsapiTest):
                 session3=object(),
             )
 
-    def test_PolicyAuthorize(self):
+    def test_policy_authorize(self):
 
         handle = self.ectx.create_primary(
             TPM2B_SENSITIVE_CREATE(),
@@ -4530,7 +4530,7 @@ class TestEsys(TSS2_EsapiTest):
                 session3=object(),
             )
 
-    def test_PolicyPassword(self):
+    def test_policy_password(self):
 
         sym = TPMT_SYM_DEF(TPM2_ALG.NULL)
 
@@ -4557,7 +4557,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.policy_password(session, session3="baz")
 
-    def test_PolicyNVWritten(self):
+    def test_policy_nv_written(self):
 
         sym = TPMT_SYM_DEF(TPM2_ALG.NULL)
 
@@ -4589,7 +4589,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.policy_nv_written(session, session3="baz")
 
-    def test_PolicyTemplate(self):
+    def test_policy_template(self):
 
         sym = TPMT_SYM_DEF(TPM2_ALG.NULL)
 
@@ -4628,7 +4628,7 @@ class TestEsys(TSS2_EsapiTest):
                 session, b"0123456789ABCDEF01234567890ABCDE", session3=45.6
             )
 
-    def test_PolicyAuthorizeNV(self):
+    def test_policy_authorize_nv(self):
 
         nv_public = TPM2B_NV_PUBLIC(
             nvPublic=TPMS_NV_PUBLIC(
