@@ -252,8 +252,8 @@ class ESAPI:
                 session_handle,
             )
         )
-        session_handle_object = session_handle[0]
-        return session_handle_object
+
+        return session_handle[0]
 
     def trsess_set_attributes(
         self, session: ESYS_TR, attributes: int, mask: int = 0xFF
@@ -388,8 +388,8 @@ class ESAPI:
                 object_handle,
             )
         )
-        object_handle_object = object_handle[0]
-        return ESYS_TR(object_handle_object)
+
+        return ESYS_TR(object_handle[0])
 
     def load_external(
         self,
@@ -426,8 +426,8 @@ class ESAPI:
                 object_handle,
             )
         )
-        object_handle_object = object_handle[0]
-        return ESYS_TR(object_handle_object)
+
+        return ESYS_TR(object_handle[0])
 
     def read_public(
         self,
@@ -638,9 +638,9 @@ class ESAPI:
                 out_public,
             )
         )
-        object_handle_object = object_handle[0]
+
         return (
-            ESYS_TR(object_handle_object),
+            ESYS_TR(object_handle[0]),
             TPM2B_PRIVATE(get_dptr(out_private, lib.Esys_Free)),
             TPM2B_PUBLIC(get_dptr(out_public, lib.Esys_Free)),
         )
@@ -1243,8 +1243,8 @@ class ESAPI:
                 sequence_handle,
             )
         )
-        sequence_handle_object = sequence_handle[0]
-        return ESYS_TR(sequence_handle_object)
+
+        return ESYS_TR(sequence_handle[0])
 
     def hash_sequence_start(
         self,
@@ -1278,8 +1278,8 @@ class ESAPI:
                 sequence_handle,
             )
         )
-        sequence_handle_object = sequence_handle[0]
-        return ESYS_TR(sequence_handle_object)
+
+        return ESYS_TR(sequence_handle[0])
 
     def sequence_update(
         self,
@@ -3113,8 +3113,8 @@ class ESAPI:
         context_cdata = _get_cdata(context, TPMS_CONTEXT, "context")
         loaded_handle = ffi.new("ESYS_TR *")
         _chkrc(lib.Esys_ContextLoad(self._ctx, context_cdata, loaded_handle))
-        loaded_handle_object = loaded_handle[0]
-        return ESYS_TR(loaded_handle_object)
+
+        return ESYS_TR(loaded_handle[0])
 
     def flush_context(self, flush_handle: ESYS_TR) -> None:
         _check_handle_type(flush_handle, "flush_handle")
@@ -3151,8 +3151,8 @@ class ESAPI:
                 new_object_handle,
             )
         )
-        new_object_handle_object = new_object_handle[0]
-        return ESYS_TR(new_object_handle_object)
+
+        return ESYS_TR(new_object_handle[0])
 
     def read_clock(
         self,
@@ -3302,8 +3302,8 @@ class ESAPI:
                 nv_handle,
             )
         )
-        nv_handle_object = nv_handle[0]
-        return ESYS_TR(nv_handle_object)
+
+        return ESYS_TR(nv_handle[0])
 
     def nv_undefine_space(
         self,
