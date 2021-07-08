@@ -76,7 +76,7 @@ class ESAPI:
         lib.Esys_Finalize(self._ctx_pp)
         self._ctx = ffi.NULL
 
-    def GetTcti(self) -> TCTI:
+    def get_tcti(self) -> TCTI:
         if hasattr(self._tcti, "_tcti_context"):
             return self._tcti
         tctx = ffi.new("TSS2_TCTI_CONTEXT **")
@@ -85,7 +85,7 @@ class ESAPI:
 
     @property
     def tcti(self) -> TCTI:
-        return self.GetTcti()
+        return self.get_tcti()
 
     def tr_from_tpmpublic(
         self,
