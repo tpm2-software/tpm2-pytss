@@ -90,7 +90,7 @@ class TestFapi:
     def sign_key(self):
         profile_name = self.fapi.config.profile_name
         key_path = f"/{profile_name}/HS/SRK/key_{random_uid()}"
-        self.fapi.create_key(path=key_path, type="sign, exportable")
+        self.fapi.create_key(path=key_path, type_="sign, exportable")
         yield key_path
         self.fapi.delete(path=key_path)
 
@@ -98,7 +98,7 @@ class TestFapi:
     def decrypt_key(self):
         profile_name = self.fapi.config.profile_name
         key_path = f"/{profile_name}/HS/SRK/key_{random_uid()}"
-        self.fapi.create_key(path=key_path, type="decrypt, restricted, noda")
+        self.fapi.create_key(path=key_path, type_="decrypt, restricted, noda")
         yield key_path
         self.fapi.delete(path=key_path)
 
@@ -129,21 +129,21 @@ class TestFapi:
     @pytest.fixture
     def nv_increment(self):
         nv_path = f"/nv/Owner/nv_{random_uid()}"
-        self.fapi.create_nv(path=nv_path, size=10, type="counter")
+        self.fapi.create_nv(path=nv_path, size=10, type_="counter")
         yield nv_path
         self.fapi.delete(path=nv_path)
 
     @pytest.fixture
     def nv_pcr(self):
         nv_path = f"/nv/Owner/nv_{random_uid()}"
-        self.fapi.create_nv(path=nv_path, size=32, type="pcr")
+        self.fapi.create_nv(path=nv_path, size=32, type_="pcr")
         yield nv_path
         self.fapi.delete(path=nv_path)
 
     @pytest.fixture
     def nv_bitfield(self):
         nv_path = f"/nv/Owner/nv_{random_uid()}"
-        self.fapi.create_nv(path=nv_path, size=32, type="bitfield")
+        self.fapi.create_nv(path=nv_path, size=32, type_="bitfield")
         yield nv_path
         self.fapi.delete(path=nv_path)
 
@@ -629,7 +629,7 @@ class TestFapi:
         self.fapi.import_object(path=policy_path, import_data=policy_auth_nv)
         profile_name = self.fapi.config.profile_name
         key_path = f"/{profile_name}/HS/SRK/key_{random_uid()}"
-        self.fapi.create_key(path=key_path, type="sign", policy_path=policy_path)
+        self.fapi.create_key(path=key_path, type_="sign", policy_path=policy_path)
 
         # use key for signing: success
         self.fapi.sign(path=key_path, digest=b"\x11" * 32)
@@ -678,7 +678,7 @@ class TestFapi:
         profile_name = self.fapi.config.profile_name
         key_path = f"/{profile_name}/HS/SRK/key_{random_uid()}"
         self.fapi.create_key(
-            path=key_path, type="sign", policy_path=policy_authorize_path
+            path=key_path, type_="sign", policy_path=policy_authorize_path
         )
 
         # try to use key without satisfying policy Authorize: fail
@@ -728,7 +728,7 @@ class TestFapi:
         # create key which can only be used if policy Signed is satisfied
         profile_name = self.fapi.config.profile_name
         key_path = f"/{profile_name}/HS/SRK/key_{random_uid()}"
-        self.fapi.create_key(path=key_path, type="sign", policy_path=policy_path)
+        self.fapi.create_key(path=key_path, type_="sign", policy_path=policy_path)
 
         # try to use key without satisfying policy Signed: fail
         with pytest.raises(TSS2_Exception):
@@ -889,7 +889,7 @@ class TestFapi:
         # create key which can only be used if policy Action is satisfied
         profile_name = self.fapi.config.profile_name
         key_path = f"/{profile_name}/HS/SRK/key_{random_uid()}"
-        self.fapi.create_key(path=key_path, type="sign", policy_path=policy_path)
+        self.fapi.create_key(path=key_path, type_="sign", policy_path=policy_path)
 
         # try to use key without satisfying policy Action: fail
         with pytest.raises(TSS2_Exception):

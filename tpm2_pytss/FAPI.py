@@ -273,7 +273,7 @@ class FAPI:
     def create_key(
         self,
         path: Union[bytes, str],
-        type: Optional[Union[bytes, str]] = None,  # TODO enum
+        type_: Optional[Union[bytes, str]] = None,  # TODO enum
         policy_path: Optional[Union[bytes, str]] = None,
         auth_value: Optional[Union[bytes, str]] = None,
         exists_ok: bool = False,
@@ -282,7 +282,7 @@ class FAPI:
 
         Args:
             path (bytes or str): Path to the new key object, e.g. `/HS/SRK/new_signing_key`.
-            type (bytes or str, optional): Comma separated list. Possible values: system, sign, decrypt, restricted, exportable, noda, 0x81000000. Defaults to None.
+            type_ (bytes or str, optional): Comma separated list. Possible values: system, sign, decrypt, restricted, exportable, noda, 0x81000000. Defaults to None.
             auth_value (bytes or str, optional): Password to key. Defaults to None.
             exists_ok (bool, optional): Do not throw a TSS2_Exception if an object with the given path already exists. Defaults to False.
 
@@ -293,10 +293,10 @@ class FAPI:
             bool: True if the key was created. False otherwise.
         """
         path = to_bytes_or_null(path)
-        type = to_bytes_or_null(type)
+        type_ = to_bytes_or_null(type_)
         policy_path = to_bytes_or_null(policy_path)
         auth_value = to_bytes_or_null(auth_value)
-        ret = lib.Fapi_CreateKey(self._ctx, path, type, policy_path, auth_value)
+        ret = lib.Fapi_CreateKey(self._ctx, path, type_, policy_path, auth_value)
         _chkrc(
             ret, acceptable=lib.TSS2_FAPI_RC_PATH_ALREADY_EXISTS if exists_ok else None
         )
@@ -419,7 +419,7 @@ class FAPI:
         self,
         path: Union[bytes, str],
         data: Optional[Union[bytes, str]] = None,
-        type: Optional[Union[bytes, str]] = None,
+        type_: Optional[Union[bytes, str]] = None,
         policy_path: Optional[Union[bytes, str]] = None,
         auth_value: Optional[Union[bytes, str]] = None,
         exists_ok: bool = False,
@@ -429,7 +429,7 @@ class FAPI:
         Args:
             path (bytes or str): The path of the new sealed object.
             data (bytes or str, optional): Data to be sealed (often a digest). If None, random data will be generated. Defaults to None.
-            type (bytes or str, optional): Comma separated list. Possible values: system, sign, decrypt, restricted, exportable, noda, 0x81000000. Defaults to None.
+            type_ (bytes or str, optional): Comma separated list. Possible values: system, sign, decrypt, restricted, exportable, noda, 0x81000000. Defaults to None.
             policy_path (bytes or str, optional): The path to the policy which will be associated with the sealed object. Defaults to None.
             auth_value (bytes or str, optional): Password to protect the new sealed object. Defaults to None.
             exists_ok (bool, optional): Do not throw a TSS2_Exception if an object with the given path already exists. Defaults to False.
@@ -447,11 +447,11 @@ class FAPI:
         else:
             data_len = len(data)
         data = to_bytes_or_null(data)
-        type = to_bytes_or_null(type)
+        type_ = to_bytes_or_null(type_)
         policy_path = to_bytes_or_null(policy_path)
         auth_value = to_bytes_or_null(auth_value)
         ret = lib.Fapi_CreateSeal(
-            self._ctx, path, type, data_len, policy_path, auth_value, data
+            self._ctx, path, type_, data_len, policy_path, auth_value, data
         )
         _chkrc(
             ret, acceptable=lib.TSS2_FAPI_RC_PATH_ALREADY_EXISTS if exists_ok else None
@@ -769,12 +769,12 @@ class FAPI:
             Tuple[bytes, Any]: A tuple of the binary blob and its type (:const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_CONTEXTLOAD` or :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_DESERIALIZE)`
         """
         path = to_bytes_or_null(path)
-        type = ffi.new("uint8_t *")
+        type_ = ffi.new("uint8_t *")
         data = ffi.new("uint8_t **")
         length = ffi.new("size_t *")
-        ret = lib.Fapi_GetEsysBlob(self._ctx, path, type, data, length)
+        ret = lib.Fapi_GetEsysBlob(self._ctx, path, type_, data, length)
         _chkrc(ret)
-        return bytes(ffi.unpack(get_dptr(data, lib.Fapi_Free), length[0])), type[0]
+        return bytes(ffi.unpack(get_dptr(data, lib.Fapi_Free), length[0])), type_[0]
 
     def export_policy(self, path: Union[bytes, str]) -> str:
         """Export a policy from the key store as a JSON-encoded string.
@@ -976,7 +976,7 @@ class FAPI:
         self,
         path: Union[bytes, str],
         size: int,
-        type: Optional[Union[bytes, str]] = None,
+        type_: Optional[Union[bytes, str]] = None,
         policy_path: Optional[Union[bytes, str]] = None,
         auth_value: Optional[Union[bytes, str]] = None,
     ) -> None:
@@ -985,7 +985,7 @@ class FAPI:
         Args:
             path (bytes or str): Path to the NV storage area.
             size (int): Size of the storage area in bytes.
-            type (bytes or str, optional): Type of the storage area. A combination of `bitfield`, `counter`, `pcr`, `system`, `noda`. Defaults to None.
+            type_ (bytes or str, optional): Type of the storage area. A combination of `bitfield`, `counter`, `pcr`, `system`, `noda`. Defaults to None.
             policy_path (bytes or str, optional): The path to the policy which will be associated with the storage area. Defaults to None.
             auth_value (bytes or str, optional): Password to protect the new storage area. Defaults to None.
 
@@ -993,10 +993,10 @@ class FAPI:
             TSS2_Exception: If Fapi returned an error code.
         """
         path = to_bytes_or_null(path)
-        type = to_bytes_or_null(type)
+        type_ = to_bytes_or_null(type_)
         policy_path = to_bytes_or_null(policy_path)
         auth_value = to_bytes_or_null(auth_value)
-        ret = lib.Fapi_CreateNv(self._ctx, path, type, size, policy_path, auth_value)
+        ret = lib.Fapi_CreateNv(self._ctx, path, type_, size, policy_path, auth_value)
         _chkrc(ret)
 
     def nv_read(self, path: Union[bytes, str]) -> Tuple[bytes, str]:
