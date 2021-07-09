@@ -2,6 +2,7 @@
 """
 SPDX-License-Identifier: BSD-2
 """
+import unittest
 from base64 import b64decode
 
 from tpm2_pytss import crypto, types
@@ -553,3 +554,7 @@ class CryptoTest(TSS2_EsapiTest):
         with self.assertRaises(ValueError) as e:
             pub.toPEM()
         self.assertEqual(str(e.exception), "unsupported curve: 0")
+
+
+if __name__ == "__main__":
+    unittest.main()

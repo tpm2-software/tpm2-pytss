@@ -2,6 +2,8 @@
 """
 SPDX-License-Identifier: BSD-3
 """
+import unittest
+
 from tpm2_pytss.tsskey import TSSPrivKey, parent_ecc_template, parent_rsa_template
 from tpm2_pytss.types import *
 
@@ -63,3 +65,7 @@ class TSSKeyTest(TSS2_EsapiTest):
         key = TSSPrivKey.create_ecc(self.ectx, parent=0x81000081)
         key.load(self.ectx)
         self.assertEqual(key.parent, 0x81000081)
+
+
+if __name__ == "__main__":
+    unittest.main()

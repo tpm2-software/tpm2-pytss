@@ -6,6 +6,7 @@ import binascii
 import json
 import random
 import string
+import unittest
 
 import pkgconfig
 import pytest
@@ -919,3 +920,7 @@ class TestFapi:
 
         # use key for signing: success
         self.fapi.sign(path=key_path, digest=b"\x11" * 32)
+
+
+if __name__ == "__main__":
+    unittest.main()

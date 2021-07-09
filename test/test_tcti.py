@@ -2,6 +2,7 @@
 """
 SPDX-License-Identifier: BSD-2
 """
+import unittest
 
 from tpm2_pytss import TctiLdr
 from tpm2_pytss._libtpm2_pytss import ffi, lib
@@ -77,3 +78,7 @@ class TestTCTI(TSS2_EsapiTest):
 
         with self.assertRaises(TypeError):
             TctiLdr(name=1234, conf=None)
+
+
+if __name__ == "__main__":
+    unittest.main()

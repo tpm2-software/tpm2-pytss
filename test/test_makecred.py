@@ -2,6 +2,8 @@
 """
 SPDX-License-Identifier: BSD-2
 """
+import unittest
+
 from tpm2_pytss.makecred import (
     TPM2_ALG,
     TPM2B_PUBLIC,
@@ -174,3 +176,7 @@ class MakeCredTest(TSS2_EsapiTest):
             outsymseed,
             TPMT_SYM_DEF_OBJECT(algorithm=TPM2_ALG.NULL),
         )
+
+
+if __name__ == "__main__":
+    unittest.main()
