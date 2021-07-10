@@ -9,7 +9,7 @@ from asn1crypto.core import ObjectIdentifier, Sequence, Boolean, OctetString, In
 from asn1crypto import pem
 
 
-parent_rsa_template = TPMT_PUBLIC(
+_parent_rsa_template = TPMT_PUBLIC(
     type=TPM2_ALG.RSA,
     nameAlg=TPM2_ALG.SHA256,
     objectAttributes=TPMA_OBJECT.USERWITHAUTH
@@ -34,7 +34,7 @@ parent_rsa_template = TPMT_PUBLIC(
     ),
 )
 
-parent_ecc_template = TPMT_PUBLIC(
+_parent_ecc_template = TPMT_PUBLIC(
     type=TPM2_ALG.ECC,
     nameAlg=TPM2_ALG.SHA256,
     objectAttributes=TPMA_OBJECT.USERWITHAUTH
@@ -59,7 +59,7 @@ parent_ecc_template = TPMT_PUBLIC(
     ),
 )
 
-rsa_template = TPMT_PUBLIC(
+_rsa_template = TPMT_PUBLIC(
     type=TPM2_ALG.RSA,
     nameAlg=TPM2_ALG.SHA256,
     objectAttributes=TPMA_OBJECT.USERWITHAUTH
@@ -78,7 +78,7 @@ rsa_template = TPMT_PUBLIC(
     ),
 )
 
-ecc_template = TPMT_PUBLIC(
+_ecc_template = TPMT_PUBLIC(
     type=TPM2_ALG.ECC,
     nameAlg=TPM2_ALG.SHA256,
     objectAttributes=TPMA_OBJECT.USERWITHAUTH
@@ -97,10 +97,10 @@ ecc_template = TPMT_PUBLIC(
     ),
 )
 
-loadablekey_oid = ObjectIdentifier("2.23.133.10.1.3")
+_loadablekey_oid = ObjectIdentifier("2.23.133.10.1.3")
 
-# BooleanOne is used to encode True in the same way as tpm2-tss-engine
-class BooleanOne(Boolean):
+# _BooleanOne is used to encode True in the same way as tpm2-tss-engine
+class _BooleanOne(Boolean):
     def set(self, value):
         self._native = bool(value)
         self.contents = b"\x00" if not value else b"\x01"
@@ -113,16 +113,16 @@ class TSSPrivKey(object):
     class _tssprivkey_der(Sequence):
         _fields = [
             ("type", ObjectIdentifier),
-            ("emptyAuth", BooleanOne, {"explicit": 0, "optional": True}),
+            ("empty_auth", _BooleanOne, {"explicit": 0, "optional": True}),
             ("parent", Integer),
             ("public", OctetString),
             ("private", OctetString),
         ]
 
-    def __init__(self, private, public, emptyAuth=True, parent=lib.TPM2_RH_OWNER):
+    def __init__(self, private, public, empty_auth=True, parent=lib.TPM2_RH_OWNER):
         self._private = private
         self._public = public
-        self._emptyAuth = bool(emptyAuth)
+        self._empty_auth = bool(empty_auth)
         self._parent = parent
 
     @property
@@ -134,17 +134,17 @@ class TSSPrivKey(object):
         return self._public
 
     @property
-    def emptyAuth(self):
-        return self._emptyAuth
+    def empty_auth(self):
+        return self._empty_auth
 
     @property
     def parent(self):
         return self._parent
 
-    def toDER(self):
+    def to_der(self):
         seq = self._tssprivkey_der()
-        seq["type"] = loadablekey_oid.native
-        seq["emptyAuth"] = self.emptyAuth
+        seq["type"] = _loadablekey_oid.native
+        seq["empty_auth"] = self.empty_auth
         seq["parent"] = self.parent
         pub = self.public.marshal()
         seq["public"] = pub
@@ -152,8 +152,8 @@ class TSSPrivKey(object):
         seq["private"] = priv
         return seq.dump()
 
-    def toPEM(self):
-        der = self.toDER()
+    def to_pem(self):
+        der = self.to_der()
         return pem.armor("TSS2 PRIVATE KEY", der)
 
     @staticmethod
@@ -166,9 +166,9 @@ class TSSPrivKey(object):
             for i in range(0, algs.count):
                 al.append(algs.algProperties[i].alg)
         if TPM2_ALG.ECC in al:
-            return parent_ecc_template
+            return _parent_ecc_template
         elif TPM2_ALG.RSA in al:
-            return parent_rsa_template
+            return _parent_rsa_template
         return None
 
     @staticmethod
@@ -191,10 +191,10 @@ class TSSPrivKey(object):
         return phandle
 
     def load(self, ectx, password=None):
-        if not password and not self.emptyAuth:
+        if not password and not self.empty_auth:
             raise RuntimeError("no password specified but it is required")
-        elif password and self.emptyAuth:
-            warnings.warn("password specified but emptyAuth is true")
+        elif password and self.empty_auth:
+            warnings.warn("password specified but empty_euth is true")
         phandle = self._getparent(ectx, self.public.publicArea.type, self.parent)
         handle = ectx.load(phandle, self.private, self.public)
         ectx.set_auth(handle, password)
@@ -221,7 +221,7 @@ class TSSPrivKey(object):
     def create_rsa(
         cls, ectx, keyBits=2048, exponent=0, parent=lib.TPM2_RH_OWNER, password=None
     ):
-        template = rsa_template
+        template = _rsa_template
         template.parameters.rsaDetail.keyBits = keyBits
         template.parameters.rsaDetail.exponent = exponent
         return cls.create(ectx, template, parent, password)
@@ -230,24 +230,24 @@ class TSSPrivKey(object):
     def create_ecc(
         cls, ectx, curveID=TPM2_ECC.NIST_P256, parent=lib.TPM2_RH_OWNER, password=None
     ):
-        template = ecc_template
+        template = _ecc_template
         template.parameters.eccDetail.curveID = curveID
         return cls.create(ectx, template, parent, password)
 
     @classmethod
-    def fromDER(cls, data):
+    def from_der(cls, data):
         seq = cls._tssprivkey_der.load(data)
-        if seq["type"].native != loadablekey_oid.native:
+        if seq["type"].native != _loadablekey_oid.native:
             raise TypeError("unsupported key type")
-        emptyAuth = seq["emptyAuth"].native
+        empty_auth = seq["empty_auth"].native
         parent = seq["parent"].native
         public, _ = TPM2B_PUBLIC.unmarshal(bytes(seq["public"]))
         private, _ = TPM2B_PRIVATE.unmarshal(bytes(seq["private"]))
-        return cls(private, public, emptyAuth, parent)
+        return cls(private, public, empty_auth, parent)
 
     @classmethod
-    def fromPEM(cls, data):
+    def from_pem(cls, data):
         pem_type, _, der = pem.unarmor(data)
         if pem_type != "TSS2 PRIVATE KEY":
             raise TypeError("unsupported PEM type")
-        return cls.fromDER(der)
+        return cls.from_der(der)
