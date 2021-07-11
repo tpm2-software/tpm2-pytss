@@ -110,6 +110,12 @@ class _BooleanOne(Boolean):
 
 
 class TSSPrivKey(object):
+    """TSSPrivKey is class to create/load keys for/from tpm2-tss-engine / tpm2-openssl.
+
+    Note:
+        Most users should use create_rsa/create_ecc together with to_pem and from_pem together with load.
+    """
+
     class _tssprivkey_der(Sequence):
         _fields = [
             ("type", ObjectIdentifier),
@@ -120,6 +126,14 @@ class TSSPrivKey(object):
         ]
 
     def __init__(self, private, public, empty_auth=True, parent=lib.TPM2_RH_OWNER):
+        """Initialize TSSPrivKey using raw values.
+
+        Args:
+            private (TPM2B_PRIVATE): The private part of the TPM key.
+            public (TPM2B_PUBLIC): The public part of the TPM key.
+            empty_auth (bool): Defines if the authorization is a empty password, default is True.
+            parent (int): The parent of the key, either a persistant key handle or TPM2_RH_OWNER, default is TPM2_RH_OWNER.
+        """
         self._private = private
         self._public = public
         self._empty_auth = bool(empty_auth)
@@ -127,21 +141,30 @@ class TSSPrivKey(object):
 
     @property
     def private(self):
+        """TPM2B_PRIVATE: The private part of the TPM key."""
         return self._private
 
     @property
     def public(self):
+        """TPM2B_PUBLIC: The public part of the TPM key."""
         return self._public
 
     @property
     def empty_auth(self):
+        """bool: Defines if the authorization is a empty password."""
         return self._empty_auth
 
     @property
     def parent(self):
+        """int: Handle of the parent key."""
         return self._parent
 
     def to_der(self):
+        """Encode the TSSPrivKey as DER encoded ASN.1.
+
+        Returns:
+            Returns the DER encoding as bytes.
+        """
         seq = self._tssprivkey_der()
         seq["type"] = _loadablekey_oid.native
         seq["empty_auth"] = self.empty_auth
@@ -153,6 +176,11 @@ class TSSPrivKey(object):
         return seq.dump()
 
     def to_pem(self):
+        """Encode the TSSPrivKey as PEM encoded ASN.1.
+
+        Returns:
+            Returns the PEM encoding as bytes.
+        """
         der = self.to_der()
         return pem.armor("TSS2 PRIVATE KEY", der)
 
@@ -191,6 +219,15 @@ class TSSPrivKey(object):
         return phandle
 
     def load(self, ectx, password=None):
+        """Load the TSSPrivKey.
+
+        Args:
+            ectx (ESAPI): The ESAPI instance to use for loading the key.
+            password (bytes): The password of the TPM key, default is None.
+
+        Returns:
+            An ESYS_TR handle.
+        """
         if not password and not self.empty_auth:
             raise RuntimeError("no password specified but it is required")
         elif password and self.empty_auth:
@@ -202,6 +239,20 @@ class TSSPrivKey(object):
 
     @classmethod
     def create(cls, ectx, template, parent=lib.TPM2_RH_OWNER, password=None):
+        """Create a TssPrivKey using a template.
+
+        Note:
+            Most users should use the create_rsa or create_ecc methods.
+
+        Args:
+            ectx (ESAPI): The ESAPI instance to use for creating the key.
+            template (TPM2B_PUBLIC): The key template.
+            parent (int): The parent of the key, default is TPM2_RH_OWNER.
+            password (bytes): The password to set for the key, default is None.
+
+        Returns:
+            Returns a TSSPrivKey instance with the created key.
+        """
         insens = TPM2B_SENSITIVE_CREATE()
         emptyauth = True
         if password:
@@ -221,6 +272,18 @@ class TSSPrivKey(object):
     def create_rsa(
         cls, ectx, keyBits=2048, exponent=0, parent=lib.TPM2_RH_OWNER, password=None
     ):
+        """Create a RSA TssPrivKey using a standard RSA key template.
+
+        Args:
+            ectx (ESAPI): The ESAPI instance to use for creating the key.
+            keyBits (int): Size of the RSA key, default is 2048.
+            exponent (int): The exponent to use for the RSA key, default is 0 (TPM default).
+            parent (int): The parent of the key, default is TPM2_RH_OWNER.
+            password (bytes): The password to set for the key, default is None.
+
+        Returns:
+            Returns a TSSPrivKey instance with the created RSA key.
+        """
         template = _rsa_template
         template.parameters.rsaDetail.keyBits = keyBits
         template.parameters.rsaDetail.exponent = exponent
@@ -230,12 +293,31 @@ class TSSPrivKey(object):
     def create_ecc(
         cls, ectx, curveID=TPM2_ECC.NIST_P256, parent=lib.TPM2_RH_OWNER, password=None
     ):
+        """Create an ECC TssPrivKey using a standard ECC key template.
+
+        Args:
+            ectx (ESAPI): The ESAPI instance to use for creating the key.
+            curveID (int): The ECC curve to be used, default is TPM2_ECC.NIST_P256.
+            parent (int): The parent of the key, default is TPM2_RH_OWNER.
+            password (bytes): The password to set for the key, default is None.
+
+        Returns:
+            Returns a TSSPrivKey instance with the created ECC key.
+        """
         template = _ecc_template
         template.parameters.eccDetail.curveID = curveID
         return cls.create(ectx, template, parent, password)
 
     @classmethod
     def from_der(cls, data):
+        """Load a TSSPrivKey from DER ASN.1.
+
+        Args:
+            data (bytes): The DER encoded ASN.1.
+
+        Returns:
+            Returns a TSSPrivKey instance.
+        """
         seq = cls._tssprivkey_der.load(data)
         if seq["type"].native != _loadablekey_oid.native:
             raise TypeError("unsupported key type")
@@ -247,6 +329,14 @@ class TSSPrivKey(object):
 
     @classmethod
     def from_pem(cls, data):
+        """Load a TSSPrivKey from PEM ASN.1.
+
+        Args:
+            data (bytes): The PEM encoded ASN.1.
+
+        Returns:
+            Returns a TSSPrivKey instance.
+        """
         pem_type, _, der = pem.unarmor(data)
         if pem_type != "TSS2 PRIVATE KEY":
             raise TypeError("unsupported PEM type")
