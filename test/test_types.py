@@ -7,6 +7,7 @@ import itertools
 import unittest
 
 from tpm2_pytss import *
+from base64 import b64decode
 
 
 class TypesTest(unittest.TestCase):
@@ -1312,6 +1313,40 @@ class TypesTest(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             TPMA_LOCALITY.create_extended(255 - 32 + 1)
+
+    def test_TPMS_CONTEXT_from_tools(self):
+        test_ctx = b"""utzA3gAAAAFAAAABgAAAAAAAAAAAAAOkAvIAAAAAAqIAIFNJEhgwU8zxMhuTBhSqPktXguCbMgUg
+        mACnGHIlDr0mAn7QtSMsTy1hAOqPvR8LRxcCphVs1owzQuHIe1Ez4kwA5xSl2zU+xFMhuD9coN4Z
+        LiRxwuxCDuQ41rqJHRpRbJKn0zj3uw/rpdkGzSKP70VlZxtTnH1TKnpA65Dhxmzt9+AqCC8oAbeT
+        8ceZy9FelFZJjKQ8ik8zavDLxhy5etD4Y9IwetM6rAt6tlUqzNeR2OhJMpn3uFt4eO+qLxCifIHR
+        hgpD0+ulWoCXfYA2CJIPnnHGzxx96soUyXwng7rb4fgfWaan6SXfxd/MAcRQNAR7nVsG2wTyZH3F
+        cVOqXaQhdZOBXsbsoZfPu3Vne3GGc9kA6V2RuhwvTVHYj3R5eCS+9eOknsr8dHWez8Txzwk1l5lx
+        xLt2AmDO7M8IyHGcI68ven5/SoXEX3nwz8mlYHLhdPnuq11GO0Ak3cARCvfvKrZIPUF+Bhkk9HHg
+        725rbsSvWWi/Od+zWWqMKMX9um+PmT+xrA65+xBH0pYhv8UhYUqzEQc7eUylxXXQuQzGHTjL3XdL
+        Rl9zo+WBjuBzF44E6j8c8ghdlUqCWICF/gfD8Nnfx2JT+rRcs1sz4+T3s8725ghYWmJhb+Oy+KDB
+        PZQvl9F8XUpEZ3b+xJ0qBHhdhutFvqAFq2dTZLLy+sfOj61PPgz8hmCZcuc+i3OnA+73E7GXqucU
+        YzRgJaptxRrMbujvIKlK/BI0OK4mGA505hLb+EjWkZ7eTkEmEyviVL5ZxeqPk3+hMArjuEy25HCN
+        N7Js0AVEQzgXAQm5jdxkcNcwTR0Z46sDdntMkxslR//+0iep9EvcXLgZ/hyTkTjQkB7zKQjh3NBO
+        r+ShbNtNnOUGnAYOhak3DMmOKdpBgAAAgAAA/wAWAAR53X6WF4cq4euj360A2EG67P+iZgAAAAEA
+        JgAlAAQAAwByAAAABgCAABAAFIrV77jm23RSbSe0b3NqvEBvuN35"""
+
+        ctxbytes = b64decode(test_ctx)
+        ctx = TPMS_CONTEXT.from_tools(ctxbytes)
+
+        self.assertEqual(ctx.hierarchy, lib.TPM2_RH_OWNER)
+        self.assertEqual(ctx.savedHandle, 0x80000000)
+        self.assertEqual(ctx.sequence, 932)
+        self.assertEqual(ctx.contextBlob, ctxbytes[26:])
+
+        badmagic = bytearray(ctxbytes)
+        badmagic[0] = 1
+        with self.assertRaises(ValueError):
+            ctx = TPMS_CONTEXT.from_tools(badmagic)
+
+        badversion = bytearray(ctxbytes)
+        badversion[5] = 0xFF
+        with self.assertRaises(ValueError):
+            ctx = TPMS_CONTEXT.from_tools(badversion)
 
 
 if __name__ == "__main__":
