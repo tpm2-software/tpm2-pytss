@@ -1013,6 +1013,11 @@ class TPM_OBJECT(object):
             setattr(self, key, value)
 
     def marshal(self):
+        """Marshal instance into bytes.
+
+        Returns:
+            Returns the marshaled type as bytes.
+        """
         mfunc = getattr(lib, f"Tss2_MU_{self.__class__.__name__}_Marshal", None)
         if mfunc is None:
             raise RuntimeError(
@@ -1029,6 +1034,14 @@ class TPM_OBJECT(object):
 
     @classmethod
     def unmarshal(cls, buf):
+        """Unmarshal bytes into type instance.
+
+        Args:
+            buf (bytes): The bytes to be unmarshaled.
+
+        Returns:
+            Returns an instance of the current type and the number of bytes consumed.
+        """
         umfunc = getattr(lib, f"Tss2_MU_{cls.__name__}_Unmarshal", None)
         if umfunc is None:
             raise RuntimeError(f"No unmarshal function found for {cls.__name__}")
@@ -1657,6 +1670,20 @@ class TPMT_PUBLIC(TPM_OBJECT):
         symmetric=None,
         scheme=None,
     ):
+        """Decode the public part from standard key encodings.
+
+        Currently supports PEM, DER and SSH encoded public keys.
+
+        Args:
+            data (bytes): The encoded public key.
+            nameAlg (int): The name algorithm for the public area, default is TPM2_ALG.SHA256.
+            objectAttributes (int): The object attributes for the public area, default is (TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH).
+            symmetric (TPMT_SYM_DEF_OBJECT, optional): The symmetric definition to use for the public area, default is None.
+            scheme (TPMT_ASYM_SCHEME, optional): The signing/key exchange shceme to use for the public area, default is None.
+
+        Returns:
+            Returns a TPMT_PUBLIC instance.
+        """
         p = cls()
         public_from_encoding(data, p)
         p.nameAlg = nameAlg
@@ -1674,9 +1701,22 @@ class TPMT_PUBLIC(TPM_OBJECT):
         return p
 
     def to_pem(self, encoding="pem"):
+        """Encode the public key in standard format.
+
+        Args:
+            encoding (str, optional): The encoding format, one of "pem", "der" or "ssh".
+
+        Returns:
+            Returns the encoded key as bytes.
+        """
         return public_to_pem(self, encoding)
 
     def get_name(self):
+        """Get the TPM name of the public area.
+
+        Returns:
+            Returns TPM2B_NAME.
+        """
         name = getname(self)
         return TPM2B_NAME(name)
 
@@ -1743,6 +1783,11 @@ class TPM2B_NAME(TPM2B_SIMPLE_OBJECT):
 
 class TPM2B_NV_PUBLIC(TPM_OBJECT):
     def get_name(self):
+        """Get the TPM name of the NV public area.
+
+        Returns:
+            Returns TPM2B_NAME.
+        """
         return self.nvPublic.get_name()
 
 
@@ -1770,14 +1815,41 @@ class TPM2B_PUBLIC(TPM_OBJECT):
         symmetric=None,
         scheme=None,
     ):
+        """Decode the public part from standard key encodings.
+
+        Currently supports PEM, DER and SSH encoded public keys.
+
+        Args:
+            data (bytes): The encoded public key.
+            nameAlg (int): The name algorithm for the public area, default is TPM2_ALG.SHA256.
+            objectAttributes (int): The object attributes for the public area, default is (TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH).
+            symmetric (TPMT_SYM_DEF_OBJECT, optional): The symmetric definition to use for the public area, default is None.
+            scheme (TPMT_ASYM_SCHEME, optional): The signing/key exchange shceme to use for the public area, default is None.
+
+        Returns:
+            Returns a TPM2B_PUBLIC instance.
+        """
         pa = TPMT_PUBLIC.from_pem(data, nameAlg, objectAttributes, symmetric, scheme)
         p = cls(publicArea=pa)
         return p
 
     def to_pem(self, encoding="pem"):
+        """Encode the public key in standard format.
+
+        Args:
+            encoding (str, optional): The encoding format, one of "pem", "der" or "ssh".
+
+        Returns:
+            Returns the encoded key as bytes.
+        """
         return self.publicArea.to_pem(encoding)
 
     def get_name(self):
+        """Get the TPM name of the public area.
+
+        Returns:
+            Returns TPM2B_NAME.
+        """
         return self.publicArea.get_name()
 
     @classmethod
@@ -1798,6 +1870,16 @@ class TPM2B_PUBLIC_KEY_RSA(TPM2B_SIMPLE_OBJECT):
 class TPM2B_SENSITIVE(TPM_OBJECT):
     @classmethod
     def from_pem(cls, data):
+        """Decode the private part from standard key encodings.
+
+        Currently supports PEM, DER and SSH encoded private keys.
+
+        Args:
+            data (bytes): The encoded key as bytes.
+
+        Returns:
+            Returns an instance of TPM2B_SENSITIVE.
+        """
         p = TPMT_SENSITIVE.from_pem(data)
         return cls(sensitiveArea=p)
 
@@ -2036,6 +2118,11 @@ class TPMS_NV_PIN_COUNTER_PARAMETERS(TPM_OBJECT):
 
 class TPMS_NV_PUBLIC(TPM_OBJECT):
     def get_name(self):
+        """Get the TPM name of the NV public area.
+
+        Returns:
+            Returns TPM2B_NAME.
+        """
         name = getname(self)
         return TPM2B_NAME(name)
 
@@ -2210,6 +2297,16 @@ class TPMU_PUBLIC_ID(TPM_OBJECT):
 class TPMT_SENSITIVE(TPM_OBJECT):
     @classmethod
     def from_pem(cls, data):
+        """Decode the private part from standard key encodings.
+
+        Currently supports PEM, DER and SSH encoded private keys.
+
+        Args:
+            data (bytes): The encoded key as bytes.
+
+        Returns:
+            Returns an instance of TPMT_SENSITIVE.
+        """
         p = cls()
         private_from_encoding(data, p)
         return p
