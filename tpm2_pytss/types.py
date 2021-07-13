@@ -1967,7 +1967,31 @@ class TPMS_COMMAND_AUDIT_INFO(TPM_OBJECT):
 
 
 class TPMS_CONTEXT(TPM_OBJECT):
-    pass
+    @classmethod
+    def from_tools(cls, data):
+        """Unmarshal tpm2-tools context.
+
+        Note:
+            Currently only support key object contexts from tpm2-tools.
+
+        Args:
+            data (bytes): The bytes from a tpm2-tools context file.
+
+        Returns:
+            Returns a TPMS_CONTEXT instance.
+        """
+        magic = int.from_bytes(data[0:4], byteorder="big")
+        if magic != 0xBADCC0DE:
+            raise ValueError(f"bad magic, expected 0xBADCC0DE, got 0x{magic:X}")
+        version = int.from_bytes(data[4:8], byteorder="big")
+        if version != 1:
+            raise ValueError(f"bad version, expected 1, got {version}")
+        ctx = cls()
+        ctx.hierarchy = int.from_bytes(data[8:12], byteorder="big")
+        ctx.savedHandle = int.from_bytes(data[12:16], byteorder="big")
+        ctx.sequence = int.from_bytes(data[16:24], byteorder="big")
+        ctx.contextBlob, _ = TPM2B_CONTEXT_DATA.unmarshal(data[24:])
+        return ctx
 
 
 class TPMS_CONTEXT_DATA(TPM_OBJECT):
