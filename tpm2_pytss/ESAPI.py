@@ -58,7 +58,52 @@ def _check_handle_type(handle, varname, expected=None):
 
 
 class ESAPI:
+    """ Initialize an ESAPI object for further use.
+
+    Initialize an ESAPI object that holds all the state and metadata information
+    during an interaction with the TPM.
+    If tcti is None (the default), load a TCTI in this order:
+
+        - Library libtss2-tcti-default.so (link to the preferred TCTI)
+
+        - Library libtss2-tcti-tabrmd.so (tabrmd)
+
+        - Device /dev/tpmrm0 (kernel resident resource manager)
+
+        - Device /dev/tpm0 (hardware TPM)
+
+        - TCP socket localhost:2321 (TPM simulator)
+
+    Args:
+        tcti (TCTI): The TCTI context used to connect to the TPM (may be None). Default None.
+
+    Returns:
+        An instance of the ESAPI class.
+
+    Raises:
+        TypeError: If the TCTI is an invalid type.
+        TSS2_Exception: Any of the various TSS2_RC's the lower layers can return.
+
+    This class implements the TCG defined Enhanced System API in Python see Notes below.
+
+    Note that since this implementation is a binding, the underlying tss2-esys version will matter as far
+    as the users mileage.
+
+    Note that since the TCG has no specification on the ESAPI Python interface, liberties were taken to make
+    use of features in Python not found in C. While the API is very similar to the C API, its not an exact
+    match and, hopefully, will be simpler to use.
+
+    The specification for the C library can be found at:
+      - https://trustedcomputinggroup.org/resource/tcg-tss-2-0-enhanced-system-api-esapi-specification/
+
+    C Function: Esys_Initialize
+    """
+
     def __init__(self, tcti: TCTI = None):
+
+        if not isinstance(tcti, (TCTI, None)):
+            raise TypeError(f"Expected tcti to be type TCTI or None, got {type(tcti)}")
+
         self._tcti = tcti
         tctx = ffi.NULL if tcti is None else tcti._tcti_context
 
@@ -72,11 +117,37 @@ class ESAPI:
     def __exit__(self, _type, value, traceback) -> None:
         self.close()
 
+    #
+    # Close is used over tying this to the memory life cycle as __del__ means the GC has control
+    # over when the underlying TCTI is free'd. Which could cause blocking from other ESAPI contexts
+    # to the TPM.
+    #
     def close(self) -> None:
+        """Finalize an ESAPI Instance
+
+        After interactions with the TPM the context holding the metadata needs to be
+        freed. Since additional internal memory allocations may have happened during
+        use of the context, it needs to be finalized correctly.
+
+        C Function: Esys_Finalize
+        """
+
         lib.Esys_Finalize(self._ctx_pp)
         self._ctx = ffi.NULL
 
     def get_tcti(self) -> TCTI:
+        """Return the used TCTI context.
+
+        If a tcti context was passed into Esys_Initialize then this tcti context is
+        return. If NULL was passed in, then NULL will be returned.
+        This function is useful before Esys_Finalize to retrieve the tcti context and
+        perform a clean Tss2_Tcti_Finalize.
+
+        Returns:
+            A TCTI or None if None was passed to the ESAPI constructor.
+
+        C Function: Esys_GetTcti
+        """
         if hasattr(self._tcti, "_tcti_context"):
             return self._tcti
         tctx = ffi.new("TSS2_TCTI_CONTEXT **")
@@ -85,6 +156,8 @@ class ESAPI:
 
     @property
     def tcti(self) -> TCTI:
+        """Same as get_tcti()"""
+
         return self.get_tcti()
 
     def tr_from_tpmpublic(
@@ -94,7 +167,36 @@ class ESAPI:
         session2: ESYS_TR = ESYS_TR.NONE,
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> ESYS_TR:
+        """Creation of an ESYS_TR object from TPM metadata.
 
+        This function can be used to create ESYS_TR object for Tpm Resources that are
+        not created or loaded (e.g. using ESys_CreatePrimary or ESys_Load) but
+        pre-exist inside the TPM. Examples are NV-Indices or persistent object.
+
+        Since man in the middle attacks should be prevented as much as possible it is
+        recommended to pass a session.
+
+        Note: For PCRs and hierarchies, please use the global ESYS_TR identifiers.
+
+        Note: If a session is provided the TPM is queried for the metadata twice.
+        First without a session to retrieve some metadata then with the session where
+        this metadata is used in the session HMAC calculation and thereby verified.
+
+        Args:
+            handle (TPM2_HANDLE): The handle of the TPM object to represent as ESYS_TR.
+            session1 (ESYS_TR): A session for securing the TPM command (optional).
+            session2 (ESYS_TR): A session for securing the TPM command (optional).
+            session3 (ESYS_TR): A session for securing the TPM command (optional).
+
+        Returns:
+            A tuple of (TPM2B_ID_OBJECT, TPM2B_ENCRYPTED_SECRET)
+
+        Raises:
+            TypeError: If a type is not expected.
+            TSS2_Exception: Any of the various TSS2_RC's the lower layers can return.
+
+        C Function: Esys_TR_FromTPMPublic
+        """
         _check_handle_type(handle, "handle")
 
         _check_handle_type(session1, "session1")
@@ -109,13 +211,35 @@ class ESAPI:
         )
         return ESYS_TR(obj[0])
 
-    def set_auth(self, esys_tr: ESYS_TR, auth: Union[TPM2B_AUTH, bytes, str, None]):
+    def set_auth(
+        self, esys_handle: ESYS_TR, auth_value: Union[TPM2B_AUTH, bytes, str, None]
+    ):
+        """Set the authorization value of an ESYS_TR.
 
-        if auth is None:
-            auth = TPM2B_AUTH()
+        Authorization values are associated with ESYS_TR Tpm Resource object. They
+        are then picked up whenever an authorization is needed.
 
-        auth_cdata = _get_cdata(auth, TPM2B_AUTH, "auth")
-        _chkrc(lib.Esys_TR_SetAuth(self._ctx, esys_tr, auth_cdata))
+        Note: The authorization value is not stored in the metadata during
+        tr_serialize. Therefore set_auth needs to be called again after
+        every tr_deserialize.
+
+        Args:
+            esys_handle(ESYS_TR): The ESYS_TR for which to set the auth_value value.
+            auth_value(TPM2B_AUTH, bytes, str, None): The auth_value value to set for the ESYS_TR or None to zero.
+            Defaults to None.
+
+        Raises:
+            TypeError: If a parameter is not of an expected type.
+            TSS2_Exception: Any of the various TSS2_RC's the lower layers can return.
+        """
+
+        _check_handle_type(esys_handle, "esys_handle")
+
+        if auth_value is None:
+            auth_value = TPM2B_AUTH()
+
+        auth_cdata = _get_cdata(auth_value, TPM2B_AUTH, "auth_value")
+        _chkrc(lib.Esys_TR_SetAuth(self._ctx, esys_handle, auth_cdata))
 
     def tr_get_name(self, handle: ESYS_TR) -> TPM2B_NAME:
 
