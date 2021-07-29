@@ -1774,18 +1774,16 @@ class TestEsys(TSS2_EsapiTest):
 
     def test_clock_set(self):
         newtime = 0xFA1AFE1
-        self.ectx.clock_set(ESYS_TR.OWNER, newtime, session1=ESYS_TR.PASSWORD)
+        self.ectx.clock_set(newtime)
         ntime = self.ectx.read_clock()
         self.assertGreaterEqual(ntime.clockInfo.clock, newtime)
 
         with self.assertRaises(TSS2_Exception) as e:
-            self.ectx.clock_set(ESYS_TR.OWNER, 0, session1=ESYS_TR.PASSWORD)
+            self.ectx.clock_set(0)
         self.assertEqual(e.exception.error, TPM2_RC.VALUE)
 
     def test_clock_rate_adjust(self):
-        self.ectx.clock_rate_adjust(
-            ESYS_TR.OWNER, TPM2_CLOCK.COARSE_SLOWER, session1=ESYS_TR.PASSWORD
-        )
+        self.ectx.clock_rate_adjust(TPM2_CLOCK.COARSE_SLOWER)
 
     def test_nv_undefine_space_special(self):
         # pre-generated TPM2_PolicyCommandCode(TPM2_CC_NV_UndefineSpaceSpecial)
@@ -1818,9 +1816,7 @@ class TestEsys(TSS2_EsapiTest):
 
         self.ectx.policy_command_code(session, TPM2_CC.NV_UndefineSpaceSpecial)
 
-        self.ectx.nv_undefine_space_special(
-            nvhandle, session1=session, session2=ESYS_TR.PASSWORD
-        )
+        self.ectx.nv_undefine_space_special(nvhandle, session1=session)
 
     def test_nv_read_public(self):
         nvpub = TPM2B_NV_PUBLIC(
@@ -2397,11 +2393,7 @@ class TestEsys(TSS2_EsapiTest):
 
         with self.assertRaises(TSS2_Exception) as e:
             self.ectx.field_upgrade_start(
-                ESYS_TR.PLATFORM,
-                keyhandle,
-                b"",
-                TPMT_SIGNATURE(sigAlg=TPM2_ALG.NULL),
-                session1=ESYS_TR.PASSWORD,
+                keyhandle, b"", TPMT_SIGNATURE(sigAlg=TPM2_ALG.NULL),
             )
         self.assertEqual(e.exception.error, TPM2_RC.COMMAND_CODE)
 
@@ -3081,10 +3073,8 @@ class TestEsys(TSS2_EsapiTest):
     def test_dictionary_attack_lock_reset(self):
         self.ectx.dictionary_attack_lock_reset()
 
-        with self.assertRaises(TSS2_Exception) as e:
+        with self.assertRaises(ValueError):
             self.ectx.dictionary_attack_lock_reset(lock_handle=ESYS_TR.RH_OWNER)
-        self.assertEqual(e.exception.error, 132)
-        self.assertEqual(e.exception.handle, 1)
 
         with self.assertRaises(TypeError):
             self.ectx.dictionary_attack_lock_reset([1, 2, 3])
