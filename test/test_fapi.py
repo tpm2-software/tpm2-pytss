@@ -6,14 +6,13 @@ import binascii
 import random
 import string
 
-import pkgconfig
-
 import pytest
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.backends import default_backend
 
 from tpm2_pytss import *
+from tpm2_pytss.utils import is_bug_fixed
 
 from .TSS2_BaseTest import TpmSimulator, TSS2_BaseTest
 
@@ -315,7 +314,7 @@ class TestFapi:
     # TODO test encrypt with RSA profile. Needs to be provisioned separately.
 
     @pytest.mark.skipif(
-        pkgconfig.installed("tss2-fapi", "<=3.1.0"), reason="tpm2-tss bug, see #2028"
+        not is_bug_fixed(fixed_in="3.2"), reason="tpm2-tss bug, see #2028"
     )
     def test_import_key_double_ok(self, cryptography_key):
         key, key_public_pem = cryptography_key
@@ -329,7 +328,7 @@ class TestFapi:
         assert imported is False
 
     @pytest.mark.skipif(
-        pkgconfig.installed("tss2-fapi", "<=3.1.0"), reason="tpm2-tss bug, see #2028"
+        not is_bug_fixed(fixed_in="3.2"), reason="tpm2-tss bug, see #2028"
     )
     def test_import_key_double_fail(self, cryptography_key):
         key, key_public_pem = cryptography_key
@@ -341,7 +340,7 @@ class TestFapi:
             self.fapi.import_object(path=key_path, import_data=key_public_pem)
 
     @pytest.mark.skipif(
-        pkgconfig.installed("tss2-fapi", "<=3.1.0"), reason="tpm2-tss bug, see #2028"
+        not is_bug_fixed(fixed_in="3.2"), reason="tpm2-tss bug, see #2028"
     )
     def test_import_policy_double_ok(self):
         policy = """
@@ -360,7 +359,7 @@ class TestFapi:
         assert imported is False
 
     @pytest.mark.skipif(
-        pkgconfig.installed("tss2-fapi", "<=3.1.0"), reason="tpm2-tss bug, see #2028"
+        not is_bug_fixed(fixed_in="3.2"), reason="tpm2-tss bug, see #2028"
     )
     def test_import_policy_double_fail(self):
         policy = """
@@ -593,7 +592,8 @@ class TestFapi:
         self.fapi.sign(key_path, b"\x22" * 32)
 
     @pytest.mark.skipif(
-        pkgconfig.installed("tss2-fapi", "<=3.1.0"), reason="tpm2-tss bug, see #2084"
+        not is_bug_fixed(fixed_in="3.2", backports=["2.4.7", "3.0.5", "3.1.1"]),
+        reason="tpm2-tss bug, see #2084",
     )
     def test_write_authorize_nv(self, esys):
         # write CommandCode policy for sign key into nv index
@@ -639,7 +639,8 @@ class TestFapi:
             self.fapi.quote(path=key_path, pcrs=[7, 9])
 
     @pytest.mark.skipif(
-        pkgconfig.installed("tss2-fapi", "<=3.1.0"), reason="tpm2-tss bug, see #2084"
+        not is_bug_fixed(fixed_in="3.2", backports=["2.4.7", "3.0.5", "3.1.1"]),
+        reason="tpm2-tss bug, see #2084",
     )
     def test_authorize_policy(self, sign_key):
         # create policy Authorize, which is satisfied via a signature by sign_key
@@ -703,7 +704,7 @@ class TestFapi:
             self.fapi.quote(path=key_path, pcrs=[7, 9])
 
     @pytest.mark.skipif(
-        pkgconfig.installed("tss2-fapi", "<=3.1.0"), reason="tpm2-tss bug, see #2080"
+        not is_bug_fixed(fixed_in="3.2"), reason="tpm2-tss bug, see #2080"
     )
     def test_policy_signed(self, cryptography_key):
         # create external signing key used by the signing authority external to the TPM
@@ -868,7 +869,8 @@ class TestFapi:
         self.fapi.delete(path=nv_path)
 
     @pytest.mark.skipif(
-        pkgconfig.installed("tss2-fapi", "<=3.1.0"), reason="tpm2-tss bug, see #2089"
+        not is_bug_fixed(fixed_in="3.2", backports=["2.4.7", "3.0.5", "3.1.1"]),
+        reason="tpm2-tss bug, see #2089",
     )
     def test_policy_action(self):
         # create policy Action, which is satisfied via the callback

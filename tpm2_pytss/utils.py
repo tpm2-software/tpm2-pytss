@@ -1,11 +1,16 @@
 """
 SPDX-License-Identifier: BSD-2
 """
-
+import logging
 import sys
+from typing import List
+
+import pkgconfig
 
 from ._libtpm2_pytss import ffi, lib
 from .TSS2_Exception import TSS2_Exception
+
+logger = logging.getLogger(__name__)
 
 # Peek into the loaded modules, if mock is loaded, set __MOCK__ to True, else False
 __MOCK__ = "unittest.mock" in sys.modules
@@ -178,3 +183,43 @@ def check_friendly_int(friendly, varname, clazz):
         raise ValueError(
             f"expected {varname} value of {friendly} in class {str(clazz)}, however it's not found."
         )
+
+
+def is_bug_fixed(
+    fixed_in=None, backports: List[str] = None, lib: str = "tss2-fapi"
+) -> bool:
+    """Use pkg-config to determine if a bug was fixed in the currently installed tpm2-tss version."""
+    if fixed_in and pkgconfig.installed(lib, f">= {fixed_in}"):
+        return True
+
+    version = pkgconfig.modversion(lib)
+    version = version.split("-")[0]
+    vers_major, vers_minor, vers_patch = (int(s) for s in version.split("."))
+
+    if backports is None:
+        backports = []
+    for backport in backports:
+        backp_major, backp_minor, backp_patch = (int(s) for s in backport.split("."))
+
+        if vers_major == backp_major and vers_minor == backp_minor:
+            return vers_patch >= backp_patch
+
+    return False
+
+
+def check_bug_fixed(
+    details,
+    fixed_in=None,
+    backports: List[str] = None,
+    lib: str = "tss2-fapi",
+    error: bool = False,
+) -> None:
+    """Emit a warning or exception if there is an unfixed bug in the currently installed tpm2-tss version."""
+    if not is_bug_fixed(fixed_in=fixed_in, backports=backports, lib=lib):
+        version = pkgconfig.modversion(lib)
+        message = f"This API call {'is' if error else 'may be'} affected by a bug in {lib} version {version}: {details}\nPlease use >= {fixed_in}. Backports exist for {backports}."
+
+        if error:
+            raise RuntimeError(message)
+
+        logger.warning(message)

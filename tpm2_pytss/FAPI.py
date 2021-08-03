@@ -11,7 +11,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from ._libtpm2_pytss import ffi, lib
 from .callbacks import Callback, CallbackType, get_callback, unlock_callback
 from .fapi_info import FapiInfo
-from .utils import _chkrc, to_bytes_or_null, get_dptr
+from .utils import _chkrc, check_bug_fixed, get_dptr, to_bytes_or_null
 from .TCTI import TCTI
 
 logger = logging.getLogger(__name__)
@@ -496,6 +496,10 @@ class FAPI:
         Returns:
             bool: True if the object was imported. False otherwise.
         """
+        check_bug_fixed(
+            fixed_in="3.2",
+            details="FAPI Import will overwrite existing objects with same path silently. See https://github.com/tpm2-software/tpm2-tss/issues/2028",
+        )
         path = to_bytes_or_null(path)
         import_data = to_bytes_or_null(import_data)
         ret = lib.Fapi_Import(self._ctx, path, import_data)
@@ -682,6 +686,12 @@ class FAPI:
         Returns:
             bytes: The platform certificates
         """
+        check_bug_fixed(
+            fixed_in="3.2",
+            backports=["2.4.7", "3.0.5", "3.1.1"],
+            details="FAPI Get Platform Certificate might lead wrong sequence errors. See https://github.com/tpm2-software/tpm2-tss/issues/2091",
+        )
+
         # TODO split certificates into list
         # TODO why bytes? is this DER?
         certificate = ffi.new("uint8_t **")
@@ -895,6 +905,11 @@ class FAPI:
         Returns:
             Tuple[str, bytes, str, str]: info, signature, pcr_log, certificate
         """
+        check_bug_fixed(
+            fixed_in="3.2",
+            backports=["2.4.7", "3.0.5", "3.1.1"],
+            details="Multiple calls of FAPI Quote might lead to TPM out of memory errors. See https://github.com/tpm2-software/tpm2-tss/issues/2084",
+        )
 
         path = to_bytes_or_null(path)
         quote_type = to_bytes_or_null(quote_type)
@@ -1262,6 +1277,11 @@ class FAPI:
         Raises:
             TSS2_Exception: If Fapi returned an error code.
         """
+        check_bug_fixed(
+            fixed_in="3.2",
+            details="FAPI PolicySigned default nameAlg might be SHA1 unexpectedly. See https://github.com/tpm2-software/tpm2-tss/issues/2080. Fixed in https://github.com/tpm2-software/tpm2-tss/commit/b843960b6e601a786b469832392dc0a12e13cf34",
+        )
+
         if callback is None and user_data is not None:
             raise RuntimeError("If callback is None, user_data must be None, too.")
 
@@ -1334,6 +1354,12 @@ class FAPI:
         """
         if callback is None and user_data is not None:
             raise ValueError("If callback is None, user_data must be None, too.")
+
+        check_bug_fixed(
+            fixed_in="3.2",
+            backports=["2.4.7", "3.0.5", "3.1.1"],
+            details="FAPI Policy Action might lead to crashes. See https://github.com/tpm2-software/tpm2-tss/issues/2089",
+        )
 
         if user_data is None:
             user_data_len = 0
