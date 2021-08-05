@@ -43,20 +43,6 @@ $ black .
 $ python -m pytest -n $(nproc) --cov=tpm2_pytss -v
 ```
 
-## Docker
-
-```console
-$ rm -rf build
-$ git clean -Xf || true
-$ docker build -t tpm2software/tpm2-tss-python -f .ci/Dockerfile.tpm2-tss-python .
-$ docker run --rm \
-  -u $(id -u):$(id -g) \
-  -v "${PWD}:/workspace/tpm2-pytss" \
-  --env-file .ci/docker.env \
-  tpm2software/tpm2-tss-python \
-  /bin/bash -c '/workspace/tpm2-pytss/.ci/docker.run'
-```
-
 ## Environment Variables
 
 - NONE

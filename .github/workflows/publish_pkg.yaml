@@ -13,10 +13,12 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Install Dependencies
+      env:
+        TPM2_TSS_VERSION: 3.0.3
       run: |
         python3 -m pip install --user --upgrade pip
         python3 -m pip install --user --upgrade twine
-        docker build -t tpm2software/tpm2-tss-python -f .ci/Dockerfile.tpm2-tss-python .
+        ./.ci/install-deps.sh
 
     - name: Test
       env:
