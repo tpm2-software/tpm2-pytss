@@ -249,7 +249,6 @@ class TestEsys(TSS2_EsapiTest):
         hmac_session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.HMAC,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -268,47 +267,47 @@ class TestEsys(TSS2_EsapiTest):
         # test some bad params
         with self.assertRaises(TypeError):
             self.ectx.start_auth_session(
-                object, ESYS_TR.NONE, None, TPM2_SE.HMAC, sym, TPM2_ALG.SHA256
+                object, ESYS_TR.NONE, TPM2_SE.HMAC, sym, TPM2_ALG.SHA256
             )
 
         with self.assertRaises(TypeError):
             self.ectx.start_auth_session(
-                ESYS_TR.NONE, object(), None, TPM2_SE.HMAC, sym, TPM2_ALG.SHA256
+                ESYS_TR.NONE, object(), TPM2_SE.HMAC, sym, TPM2_ALG.SHA256
+            )
+
+        with self.assertRaises(ValueError):
+            self.ectx.start_auth_session(
+                ESYS_TR.NONE, ESYS_TR.NONE, 8745635, sym, TPM2_ALG.SHA256
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.start_auth_session(
+                ESYS_TR.NONE, ESYS_TR.NONE, object(), sym, TPM2_ALG.SHA256
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.start_auth_session(
+                ESYS_TR.NONE, ESYS_TR.NONE, TPM2_SE.HMAC, 42, TPM2_ALG.SHA256
+            )
+
+        with self.assertRaises(ValueError):
+            self.ectx.start_auth_session(
+                ESYS_TR.NONE, ESYS_TR.NONE, TPM2_SE.HMAC, sym, 8395847
+            )
+
+        with self.assertRaises(TypeError):
+            self.ectx.start_auth_session(
+                ESYS_TR.NONE, ESYS_TR.NONE, TPM2_SE.HMAC, sym, TPM2B_SYM_KEY()
             )
 
         with self.assertRaises(TypeError):
             self.ectx.start_auth_session(
                 ESYS_TR.NONE,
                 ESYS_TR.NONE,
-                TPM2B_PUBLIC(),
                 TPM2_SE.HMAC,
                 sym,
                 TPM2_ALG.SHA256,
-            )
-
-        with self.assertRaises(ValueError):
-            self.ectx.start_auth_session(
-                ESYS_TR.NONE, ESYS_TR.NONE, None, 8745635, sym, TPM2_ALG.SHA256
-            )
-
-        with self.assertRaises(TypeError):
-            self.ectx.start_auth_session(
-                ESYS_TR.NONE, ESYS_TR.NONE, None, object(), sym, TPM2_ALG.SHA256
-            )
-
-        with self.assertRaises(TypeError):
-            self.ectx.start_auth_session(
-                ESYS_TR.NONE, ESYS_TR.NONE, None, TPM2_SE.HMAC, 42, TPM2_ALG.SHA256
-            )
-
-        with self.assertRaises(ValueError):
-            self.ectx.start_auth_session(
-                ESYS_TR.NONE, ESYS_TR.NONE, None, TPM2_SE.HMAC, sym, 8395847
-            )
-
-        with self.assertRaises(TypeError):
-            self.ectx.start_auth_session(
-                ESYS_TR.NONE, ESYS_TR.NONE, None, TPM2_SE.HMAC, sym, TPM2B_SYM_KEY()
+                TPM2B_PUBLIC(),
             )
 
     def test_start_auth_session_enckey(self):
@@ -326,7 +325,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=handle,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.POLICY,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -356,7 +354,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=handle,
             bind=handle,
-            nonce_caller=None,
             session_type=TPM2_SE.POLICY,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -386,7 +383,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=handle,
             bind=handle,
-            nonce_caller=None,
             session_type=TPM2_SE.POLICY,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -424,10 +420,10 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=handle,
             bind=handle,
-            nonce_caller=TPM2B_NONCE(b"thisisthirtytwocharslastichecked"),
             session_type=TPM2_SE.POLICY,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
+            nonce_caller=TPM2B_NONCE(b"thisisthirtytwocharslastichecked"),
         )
 
         self.ectx.trsess_set_attributes(
@@ -449,10 +445,10 @@ class TestEsys(TSS2_EsapiTest):
             self.ectx.start_auth_session(
                 tpm_key=ESYS_TR.NONE,
                 bind=ESYS_TR.NONE,
-                nonce_caller=object(),
                 session_type=TPM2_SE.HMAC,
                 symmetric=sym,
                 auth_hash=TPM2_ALG.SHA256,
+                nonce_caller=object(),
             )
 
     def test_create(self):
@@ -1808,7 +1804,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             ESYS_TR.NONE,
             ESYS_TR.NONE,
-            None,
             TPM2_SE.POLICY,
             TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL),
             TPM2_ALG.SHA256,
@@ -2090,7 +2085,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             ESYS_TR.NONE,
             ESYS_TR.NONE,
-            None,
             TPM2_SE.POLICY,
             TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL),
             TPM2_ALG.SHA256,
@@ -2443,7 +2437,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.TRIAL,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -2474,7 +2467,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.TRIAL,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -2522,7 +2514,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.POLICY,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -2601,7 +2592,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.TRIAL,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -2623,7 +2613,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.TRIAL,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -2651,7 +2640,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.TRIAL,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -2673,7 +2661,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.TRIAL,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -2721,7 +2708,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.POLICY,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -2787,7 +2773,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.TRIAL,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -2835,7 +2820,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.POLICY,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -2974,7 +2958,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.HMAC,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -3140,7 +3123,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.HMAC,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -3601,7 +3583,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.POLICY,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -3829,7 +3810,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.TRIAL,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -3900,7 +3880,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.POLICY,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -3934,7 +3913,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.POLICY,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -3989,7 +3967,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.TRIAL,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -4032,7 +4009,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.TRIAL,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -4075,7 +4051,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.TRIAL,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -4111,7 +4086,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.TRIAL,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -4195,7 +4169,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.TRIAL,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -4243,7 +4216,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.TRIAL,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -4270,7 +4242,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.TRIAL,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -4309,7 +4280,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.TRIAL,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -4351,7 +4321,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.TRIAL,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -4444,7 +4413,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.TRIAL,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -4527,7 +4495,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.TRIAL,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -4554,7 +4521,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.TRIAL,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -4586,7 +4552,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.TRIAL,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,
@@ -4637,7 +4602,6 @@ class TestEsys(TSS2_EsapiTest):
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
             bind=ESYS_TR.NONE,
-            nonce_caller=None,
             session_type=TPM2_SE.TRIAL,
             symmetric=sym,
             auth_hash=TPM2_ALG.SHA256,

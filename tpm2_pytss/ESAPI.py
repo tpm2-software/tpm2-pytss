@@ -462,10 +462,10 @@ class ESAPI:
         self,
         tpm_key: ESYS_TR,
         bind: ESYS_TR,
-        nonce_caller: Union[TPM2B_NONCE, bytes, str, None],
         session_type: TPM2_SE,
         symmetric: TPMT_SYM_DEF,
         auth_hash: TPM2_ALG,
+        nonce_caller: Union[TPM2B_NONCE, bytes, str, None] = None,
         session1: ESYS_TR = ESYS_TR.NONE,
         session2: ESYS_TR = ESYS_TR.NONE,
         session3: ESYS_TR = ESYS_TR.NONE,
@@ -479,11 +479,11 @@ class ESAPI:
         Args:
             tpm_key (ESYS_TR): Handle of a loaded decrypt key used to encrypt salt.
             bind (ESYS_TR): Entity providing the authValue.
-            nonce_caller (Union[TPM2B_NONCE, bytes, str, None]): Initial nonceCaller, sets nonceTPM size for the
-                session. Can be None to have ESAPI generate it for the caller.
             session_type (TPM2_SE): Indicates the type of the session; simple HMAC or policy (including a trial policy).
             symmetric (TPMT_SYM_DEF): The algorithm and key size for parameter encryption.
             auth_hash (TPM2_ALG): Hash algorithm to use for the session.
+            nonce_caller (Union[TPM2B_NONCE, bytes, str, None]): Initial nonceCaller, sets nonceTPM size for the
+                session. Can be None to have ESAPI generate it for the caller. Defaults to None.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
