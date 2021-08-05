@@ -37,18 +37,13 @@ function run_publish_pkg() {
 
 function run_test() {
 
-  ci_env=""
-  if [ "$ENABLE_COVERAGE" == "true" ]; then
-    ci_env=$(bash <(curl -s https://codecov.io/env))
-  fi
+  python3 setup.py sdist && python3 setup.py bdist
 
-  docker run --rm \
-    -u $(id -u):$(id -g) \
-    -v "${PWD}:/workspace/tpm2-pytss" \
-    --env-file .ci/docker.env \
-    $ci_env \
-    tpm2software/tpm2-tss-python \
-    /bin/bash -c '/workspace/tpm2-pytss/.ci/docker.run'
+  python3 -m pytest -n $(nproc) --cov=tpm2_pytss -v
+
+  if [ -n "${ENABLE_COVERAGE}" ]; then
+    python3 -m codecov
+  fi
 }
 
 function run_whitespace() {
@@ -70,24 +65,12 @@ function run_style() {
   "${PYTHON}" -m black --diff --check "${SRC_ROOT}"
 }
 
-function run_build_docs() {
-
-  docker run --rm \
-    -u $(id -u):$(id -g) \
-    -v "${PWD}:/workspace/tpm2-pytss" \
-    --env-file .ci/docker.env \
-    tpm2software/tpm2-tss-python \
-    /bin/bash -c 'virtualenv .venv && . .venv/bin/activate && . .ci/docker-prelude.sh && python3 -m pip install -e .[dev] && ./scripts/docs.sh '
-}
-
 if [ "x${TEST}" != "x" ]; then
   run_test
 elif [ "x${WHITESPACE}" != "x" ]; then
   run_whitespace
 elif [ "x${STYLE}" != "x" ]; then
   run_style
-elif [ "x${DOCS}" != "x" ]; then
-  run_build_docs
 elif [ "x${PUBLISH_PKG}" != "x" ]; then
   run_publish_pkg
 fi
