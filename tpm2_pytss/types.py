@@ -946,10 +946,7 @@ class TPM_OBJECT(object):
             cname = fields[k]
             if cname.kind != "primitive" and cname.kind != "array":
                 clsname = fixup_classname(cname)
-                try:
-                    clazz = globals()[clsname]
-                except Exception as e:
-                    raise e
+                clazz = globals()[clsname]
                 # If subclass object is a TPM2B SIMPLE object, and we have a raw str, or bytes, convert
                 if issubclass(clazz, TPM2B_SIMPLE_OBJECT) and isinstance(
                     v, (str, bytes)
