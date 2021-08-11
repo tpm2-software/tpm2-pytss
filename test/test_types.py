@@ -142,6 +142,14 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(x.pcrSelect[2], 0)
         self.assertEqual(x.pcrSelect[3], 0)
 
+        with self.assertRaises(RuntimeError) as e:
+            TPMS_PCR_SELECTION(halg=TPM2_ALG.SHA256)
+        self.assertEqual(str(e.exception), "halg and pcrs MUST be specified")
+
+        with self.assertRaises(RuntimeError) as e:
+            TPMS_PCR_SELECTION(pcrs=(1, 2, 3))
+        self.assertEqual(str(e.exception), "halg and pcrs MUST be specified")
+
     def test_TPMS_PCR_SELECTION_parse(self):
 
         x = TPMS_PCR_SELECTION.parse("sha512:1, 7, 8, 12, 18, 24")
