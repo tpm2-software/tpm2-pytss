@@ -1,0 +1,66 @@
+name: Python packaging
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - name: Install python build tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install -U build
+          pip install -U twine
+      - name: Install pkg-config dependency
+        run: sudo apt-get install pkg-config
+      - name: Install tpm2-tss depdendency
+        uses: actions/checkout@v2
+        with:
+          repository: tpm2-software/tpm2-tss
+          ref: master
+      - name: Install build requirements for tpm2-tss
+        run: |
+          sudo apt -y update
+          sudo apt -y install \
+          autoconf-archive \
+          libcmocka0 \
+          libcmocka-dev \
+          procps \
+          iproute2 \
+          build-essential \
+          git \
+          pkg-config \
+          gcc \
+          libtool \
+          automake \
+          libssl-dev \
+          uthash-dev \
+          autoconf \
+          doxygen \
+          libjson-c-dev \
+          libini-config-dev \
+          libcurl4-openssl-dev
+      - name: Build tpm2-tss depdencency
+        run: |
+          ./bootstrap
+          ./configure
+          make -j4
+          sudo make install
+      - name: Get tpm2-pytss package
+        uses: actions/checkout@v2
+      - name: Build tpm2-pytss package
+        # Github Actions doesn't need
+        # PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
+        run: python -m build
+      - name: Publish to TestPyPi
+        env:
+          PUBLISH_PKG: 1
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.TESTPYPI_TOKEN }}
+        # Don't upload the .whl files, not manylinux compatible
+        run: python3 -m twine upload --repository testpypi dist/*.tar.gz
+
