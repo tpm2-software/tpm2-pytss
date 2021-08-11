@@ -1168,6 +1168,10 @@ class TypesTest(unittest.TestCase):
             TPM2B_DIGEST(size=12)
         self.assertEqual(str(e.exception), "size is read only")
 
+        # This checks that TPM2B_SIMPLE_OBJECTs __setattr__ calls TPM_OBJECTs __setattr__
+        dig.nosuchfield = b"1234"
+        self.assertEqual(dig.nosuchfield, b"1234")
+
     def test_TPMS_ECC_POINT(self):
 
         x = b"12345678"
