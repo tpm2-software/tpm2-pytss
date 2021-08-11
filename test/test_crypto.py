@@ -159,6 +159,36 @@ wF24s98qYmAu3ENjz6XPl/xv
 -----END PUBLIC KEY-----
 """
 
+dsa_private_key = b"""
+-----BEGIN DSA PRIVATE KEY-----
+MIIBuwIBAAKBgQDWcNPSloGagE3WyinH+/vhAT0rxwyoaI7EmQguggD8z/Dq477C
+F1kIWNS53jyM3e6K7iIDGqrg/StsHjM1bvp0kzAJuZqOrAmP8tqns1CbAVn9WMIc
+aHw/fVvpZ4XbZ1TmvZNXtNwYil77Q1GDtw9zdqRWeyjbY10dsHjByxXUeQIVAKcD
+S5p35NOrm1XX3B0ySCLVPsajAoGASLqlBGsJ4ANh5X/rxdMHMAVrDzH/XprpvqLC
+qVNOrBQvoE977aNQWuZ8J+1hjGhV7BDjLoULRg6J+rH3c6YcY27ALmB1uMalrjU1
+1c4XOxFQ28eFqBpVyXj1HON3Wv4IJoBxLp5+R5HfAX+N9+b6KS2ltwyozK4aBzGN
+kgWTlfcCgYEAoSeNK9IG0FRNxBJAOK3wMSQlDCqUB3ZdMYw9h8AUM19E1VWHbs6v
+64UzSjiUBmpttqPCQVmgJKRRrPbikVHOzMC8asEH0uIjxyxicfkhpOoSinD/9/0A
+fhqkWGROM1oBkrLWlD2DNwVglcwsZlRacrXg5ubEQ18+gn3+xvLrQ0ACFEXN6I9P
+0SKQIMmGu3B02XkbI5dH
+-----END DSA PRIVATE KEY-----
+"""
+
+dsa_public_key = b"""
+-----BEGIN PUBLIC KEY-----
+MIIBtzCCASsGByqGSM44BAEwggEeAoGBANZw09KWgZqATdbKKcf7++EBPSvHDKho
+jsSZCC6CAPzP8OrjvsIXWQhY1LnePIzd7oruIgMaquD9K2weMzVu+nSTMAm5mo6s
+CY/y2qezUJsBWf1YwhxofD99W+lnhdtnVOa9k1e03BiKXvtDUYO3D3N2pFZ7KNtj
+XR2weMHLFdR5AhUApwNLmnfk06ubVdfcHTJIItU+xqMCgYBIuqUEawngA2Hlf+vF
+0wcwBWsPMf9emum+osKpU06sFC+gT3vto1Ba5nwn7WGMaFXsEOMuhQtGDon6sfdz
+phxjbsAuYHW4xqWuNTXVzhc7EVDbx4WoGlXJePUc43da/ggmgHEunn5Hkd8Bf433
+5vopLaW3DKjMrhoHMY2SBZOV9wOBhQACgYEAoSeNK9IG0FRNxBJAOK3wMSQlDCqU
+B3ZdMYw9h8AUM19E1VWHbs6v64UzSjiUBmpttqPCQVmgJKRRrPbikVHOzMC8asEH
+0uIjxyxicfkhpOoSinD/9/0AfhqkWGROM1oBkrLWlD2DNwVglcwsZlRacrXg5ubE
+Q18+gn3+xvLrQ0A=
+-----END PUBLIC KEY-----
+"""
+
 
 class CryptoTest(TSS2_EsapiTest):
     def test_public_from_pem_rsa(self):
@@ -547,3 +577,16 @@ class CryptoTest(TSS2_EsapiTest):
         with self.assertRaises(ValueError) as e:
             pub.to_pem()
         self.assertEqual(str(e.exception), "unsupported curve: 0")
+
+    def test_unsupported_key(self):
+        sl = dsa_private_key.strip().splitlines()
+        b64 = b"".join(sl[1:-1])
+        der = b64decode(b64)
+
+        with self.assertRaises(RuntimeError) as e:
+            priv = TPMT_SENSITIVE.from_pem(der)
+        self.assertEqual(str(e.exception), "unsupported key type: _DSAPrivateKey")
+
+        with self.assertRaises(RuntimeError) as e:
+            pub = TPMT_PUBLIC.from_pem(dsa_public_key)
+        self.assertEqual(str(e.exception), "unsupported key type: _DSAPublicKey")
