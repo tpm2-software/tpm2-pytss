@@ -600,3 +600,13 @@ class CryptoTest(TSS2_EsapiTest):
         self.assertEqual(pub.parameters.asymDetail.symmetric.algorithm, TPM2_ALG.AES)
         self.assertEqual(pub.parameters.asymDetail.symmetric.keyBits.aes, 128)
         self.assertEqual(pub.parameters.asymDetail.symmetric.mode.aes, TPM2_ALG.CFB)
+
+    def test_from_pem_with_scheme(self):
+        scheme = TPMT_ASYM_SCHEME(scheme=TPM2_ALG.ECDSA)
+        scheme.details.ecdsa.hashAlg = TPM2_ALG.SHA256
+        pub = TPMT_PUBLIC.from_pem(ecc_public_key, scheme=scheme)
+
+        self.assertEqual(pub.parameters.asymDetail.scheme.scheme, TPM2_ALG.ECDSA)
+        self.assertEqual(
+            pub.parameters.asymDetail.scheme.details.ecdsa.hashAlg, TPM2_ALG.SHA256
+        )
