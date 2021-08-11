@@ -47,15 +47,6 @@ def to_bytes_or_null(value, allow_null=True, encoding=None):
 #### Utilities ####
 
 
-def TPM2B_unpack(x, n="buffer"):
-    d = x.__getattribute__(n)
-    b = ffi.unpack(d, x.size)
-    if isinstance(b, list):
-        b = bytes(b)
-
-    return b
-
-
 def CLASS_INT_ATTRS_from_string(cls, str_value, fixup_map=None):
     """
     Given a class, lookup int attributes by name and return that attribute value.
