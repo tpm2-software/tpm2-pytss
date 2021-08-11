@@ -533,6 +533,10 @@ class CryptoTest(TSS2_EsapiTest):
         pub = TPMT_PUBLIC.from_pem(rsa_three_exponent)
         self.assertEqual(pub.parameters.rsaDetail.exponent, 3)
 
+        key = crypto.public_to_key(pub)
+        nums = key.public_numbers()
+        self.assertEqual(nums.e, 3)
+
     def test_ecc_bad_curves(self):
         with self.assertRaises(ValueError) as e:
             pub = TPMT_PUBLIC.from_pem(ecc_bad_curve)
