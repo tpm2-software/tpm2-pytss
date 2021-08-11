@@ -590,3 +590,13 @@ class CryptoTest(TSS2_EsapiTest):
         with self.assertRaises(RuntimeError) as e:
             pub = TPMT_PUBLIC.from_pem(dsa_public_key)
         self.assertEqual(str(e.exception), "unsupported key type: _DSAPublicKey")
+
+    def test_from_pem_with_symmetric(self):
+        sym = TPMT_SYM_DEF_OBJECT(algorithm=TPM2_ALG.AES)
+        sym.keyBits.aes = 128
+        sym.mode.aes = TPM2_ALG.CFB
+        pub = TPMT_PUBLIC.from_pem(ecc_public_key, symmetric=sym)
+
+        self.assertEqual(pub.parameters.asymDetail.symmetric.algorithm, TPM2_ALG.AES)
+        self.assertEqual(pub.parameters.asymDetail.symmetric.keyBits.aes, 128)
+        self.assertEqual(pub.parameters.asymDetail.symmetric.mode.aes, TPM2_ALG.CFB)
