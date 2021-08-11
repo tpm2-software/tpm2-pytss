@@ -1108,6 +1108,12 @@ class TypesTest(unittest.TestCase):
                 self.assertEqual(selection.hash, TPM2_ALG.SHA512)
                 self.assertEqual(selection.pcrSelect[0], 128)
 
+    def test_TPML_PCR_SELECTION_bad_selections(self):
+        toomany = "+".join([f"{x}" for x in range(0, 17)])
+        with self.assertRaises(RuntimeError) as e:
+            TPML_PCR_SELECTION.parse(toomany)
+        self.assertEqual(str(e.exception), "PCR Selection list greater than 16, got 17")
+
     def test_TPM2B_AUTH_empty(self):
         x = TPM2B_AUTH()
         self.assertEqual(x.size, 0)
