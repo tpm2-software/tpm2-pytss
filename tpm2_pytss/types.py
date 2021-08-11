@@ -1680,7 +1680,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
             nameAlg (int): The name algorithm for the public area, default is TPM2_ALG.SHA256.
             objectAttributes (int): The object attributes for the public area, default is (TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH).
             symmetric (TPMT_SYM_DEF_OBJECT, optional): The symmetric definition to use for the public area, default is None.
-            scheme (TPMT_ASYM_SCHEME, optional): The signing/key exchange shceme to use for the public area, default is None.
+            scheme (TPMT_ASYM_SCHEME, optional): The signing/key exchange scheme to use for the public area, default is None.
 
         Returns:
             Returns a TPMT_PUBLIC instance.
@@ -1696,7 +1696,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
         if scheme is None:
             p.parameters.asymDetail.scheme.scheme = TPM2_ALG.NULL
         else:
-            p.parameters.asymDetail.scheme.scheme = scheme
+            p.parameters.asymDetail.scheme = scheme
         if p.type == TPM2_ALG.ECC:
             p.parameters.eccDetail.kdf.scheme = TPM2_ALG.NULL
         return p
