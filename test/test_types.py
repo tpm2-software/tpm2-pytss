@@ -1164,6 +1164,10 @@ class TypesTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             dig.name[0] = b"\x00"
 
+        with self.assertRaises(AttributeError) as e:
+            TPM2B_DIGEST(size=12)
+        self.assertEqual(str(e.exception), "size is read only")
+
     def test_TPMS_ECC_POINT(self):
 
         x = b"12345678"
