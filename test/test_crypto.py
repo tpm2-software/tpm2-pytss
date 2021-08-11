@@ -610,3 +610,37 @@ class CryptoTest(TSS2_EsapiTest):
         self.assertEqual(
             pub.parameters.asymDetail.scheme.details.ecdsa.hashAlg, TPM2_ALG.SHA256
         )
+
+    def test_public_from_private(self):
+        pub = TPMT_PUBLIC.from_pem(rsa_private_key)
+        self.assertEqual(pub.type, types.TPM2_ALG.RSA)
+        self.assertEqual(pub.parameters.rsaDetail.keyBits, 2048)
+        self.assertEqual(pub.parameters.rsaDetail.exponent, 0)
+        self.assertEqual(pub.unique.rsa, rsa_public_key_bytes)
+
+        pub = TPMT_PUBLIC.from_pem(ecc_private_key)
+        self.assertEqual(pub.type, types.TPM2_ALG.ECC)
+        self.assertEqual(pub.parameters.eccDetail.curveID, types.TPM2_ECC.NIST_P256)
+        self.assertEqual(pub.unique.ecc.x, ecc_public_key_bytes[0:32])
+        self.assertEqual(pub.unique.ecc.y, ecc_public_key_bytes[32:64])
+
+    def test_public_from_private_der(self):
+        sl = rsa_private_key.strip().splitlines()
+        b64 = b"".join(sl[1:-1])
+        rsader = b64decode(b64)
+
+        pub = TPMT_PUBLIC.from_pem(rsader)
+        self.assertEqual(pub.type, types.TPM2_ALG.RSA)
+        self.assertEqual(pub.parameters.rsaDetail.keyBits, 2048)
+        self.assertEqual(pub.parameters.rsaDetail.exponent, 0)
+        self.assertEqual(pub.unique.rsa, rsa_public_key_bytes)
+
+        sl = ecc_private_key.strip().splitlines()
+        b64 = b"".join(sl[1:-1])
+        eccder = b64decode(b64)
+
+        pub = TPMT_PUBLIC.from_pem(eccder)
+        self.assertEqual(pub.type, types.TPM2_ALG.ECC)
+        self.assertEqual(pub.parameters.eccDetail.curveID, types.TPM2_ECC.NIST_P256)
+        self.assertEqual(pub.unique.ecc.x, ecc_public_key_bytes[0:32])
+        self.assertEqual(pub.unique.ecc.y, ecc_public_key_bytes[32:64])

@@ -88,6 +88,11 @@ def key_from_encoding(data):
         key = cert.public_key()
     elif sdata.startswith(b"-----BEGIN PUBLIC KEY-----"):
         key = load_pem_public_key(data, backend=default_backend())
+    elif sdata.startswith(b"-----BEGIN RSA PRIVATE KEY-----") or sdata.startswith(
+        b"-----BEGIN EC PRIVATE KEY-----"
+    ):
+        pkey = load_pem_private_key(data, password=None, backend=default_backend())
+        key = pkey.public_key()
     elif sdata.startswith(b"ssh-") or sdata.startswith(b"ecdsa-sha2-"):
         key = load_ssh_public_key(data, backend=default_backend())
     else:
@@ -99,6 +104,11 @@ def key_from_encoding(data):
             pass
         try:
             key = load_der_public_key(data, backend=default_backend())
+        except ValueError:
+            pass
+        try:
+            pkey = load_der_private_key(data, password=None, backend=default_backend())
+            key = pkey.public_key()
         except ValueError:
             pass
 
