@@ -2169,12 +2169,7 @@ class TPMS_PCR_SELECTION(TPM_OBJECT):
         try:
             halg = int(hunks[0], 0)
         except ValueError:
-            try:
-                halg = TPM2_ALG.parse(hunks[0])
-            except KeyError:
-                raise RuntimeError(
-                    f"Expected int or algorithm friendly name, got {hunks[0]}"
-                )
+            halg = TPM2_ALG.parse(hunks[0])
 
         if hunks[1] != "all":
             try:
