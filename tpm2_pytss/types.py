@@ -1976,7 +1976,7 @@ class TPML_PCR_SELECTION(TPML_OBJECT):
         count = len(selectors)
         if count > lib.TPM2_NUM_PCR_BANKS:
             raise RuntimeError(
-                f"PCR Selection list greater than f{lib.TPM2_NUM_PCR_BANKS}, "
+                f"PCR Selection list greater than {lib.TPM2_NUM_PCR_BANKS}, "
                 f"got {len(selectors)}"
             )
 
