@@ -1472,6 +1472,9 @@ class TPMT_PUBLIC(TPM_OBJECT):
         elif scheme.startswith("rsapss"):
             templ.parameters.asymDetail.scheme.scheme = TPM2_ALG.RSAPSS
             halg = scheme[len("rsapss") + 1 :]
+        elif scheme.startswith("oaep"):
+            templ.parameters.asymDetail.scheme.scheme = TPM2_ALG.OAEP
+            halg = scheme[len("oaep") + 1 :]
         else:
             templ.parameters.asymDetail.scheme.scheme = TPM2_ALG.NULL
             raise RuntimeError(
@@ -1494,10 +1497,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
             scheme = "null"
 
         halg = ""
-        if scheme.startswith("oaep"):
-            templ.parameters.asymDetail.scheme.scheme = TPM2_ALG.OAEP
-            halg = scheme[len("oaep") + 1 :]
-        elif scheme.startswith("ecdsa"):
+        if scheme.startswith("ecdsa"):
             templ.parameters.asymDetail.scheme.scheme = TPM2_ALG.ECDSA
             halg = scheme[len("ecdsa") + 1 :]
         elif scheme.startswith("ecdh"):

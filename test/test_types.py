@@ -1016,6 +1016,19 @@ class TypesTest(unittest.TestCase):
             templ.parameters.eccDetail.symmetric.mode.camellia, TPM2_ALG.CFB
         )
 
+    def test_TPMT_PUBLIC_parse_rsa_oaep(self):
+        templ = TPMT_PUBLIC.parse(
+            "rsa2048:oaep-sha512",
+            nameAlg=TPM2_ALG.SHA256,
+            objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS
+            ^ TPMA_OBJECT.SIGN_ENCRYPT,
+        )
+        self.assertEqual(templ.parameters.asymDetail.scheme.scheme, TPM2_ALG.OAEP)
+        self.assertEqual(
+            templ.parameters.asymDetail.scheme.details.oaep.hashAlg, TPM2_ALG.SHA512
+        )
+        self.assertEqual(templ.nameAlg, TPM2_ALG.SHA256)
+
     def test_TPML_ALG_parse_none(self):
         a = TPML_ALG.parse(None)
         self.assertEqual(len(a), 0)
