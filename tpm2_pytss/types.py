@@ -1670,6 +1670,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
         ),
         symmetric=None,
         scheme=None,
+        password=None,
     ):
         """Decode the public part from standard key encodings.
 
@@ -1681,12 +1682,13 @@ class TPMT_PUBLIC(TPM_OBJECT):
             objectAttributes (int): The object attributes for the public area, default is (TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH).
             symmetric (TPMT_SYM_DEF_OBJECT, optional): The symmetric definition to use for the public area, default is None.
             scheme (TPMT_ASYM_SCHEME, optional): The signing/key exchange scheme to use for the public area, default is None.
+            password (bytes, optional): The password used to decrypt the key, default is None.
 
         Returns:
             Returns a TPMT_PUBLIC instance.
         """
         p = cls()
-        public_from_encoding(data, p)
+        public_from_encoding(data, p, password=password)
         p.nameAlg = nameAlg
         p.objectAttributes = objectAttributes
         if symmetric is None:
@@ -1815,6 +1817,7 @@ class TPM2B_PUBLIC(TPM_OBJECT):
         ),
         symmetric=None,
         scheme=None,
+        password=None,
     ):
         """Decode the public part from standard key encodings.
 
@@ -1826,11 +1829,14 @@ class TPM2B_PUBLIC(TPM_OBJECT):
             objectAttributes (int): The object attributes for the public area, default is (TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH).
             symmetric (TPMT_SYM_DEF_OBJECT, optional): The symmetric definition to use for the public area, default is None.
             scheme (TPMT_ASYM_SCHEME, optional): The signing/key exchange shceme to use for the public area, default is None.
+            password (bytes, optional): The password used to decrypt the key, default is None.
 
         Returns:
             Returns a TPM2B_PUBLIC instance.
         """
-        pa = TPMT_PUBLIC.from_pem(data, nameAlg, objectAttributes, symmetric, scheme)
+        pa = TPMT_PUBLIC.from_pem(
+            data, nameAlg, objectAttributes, symmetric, scheme, password
+        )
         p = cls(publicArea=pa)
         return p
 
@@ -1870,18 +1876,19 @@ class TPM2B_PUBLIC_KEY_RSA(TPM2B_SIMPLE_OBJECT):
 
 class TPM2B_SENSITIVE(TPM_OBJECT):
     @classmethod
-    def from_pem(cls, data):
+    def from_pem(cls, data, password=None):
         """Decode the private part from standard key encodings.
 
         Currently supports PEM, DER and SSH encoded private keys.
 
         Args:
             data (bytes): The encoded key as bytes.
+            password (bytes, optional): The password used to decrypt the key, default is None.
 
         Returns:
             Returns an instance of TPM2B_SENSITIVE.
         """
-        p = TPMT_SENSITIVE.from_pem(data)
+        p = TPMT_SENSITIVE.from_pem(data, password)
         return cls(sensitiveArea=p)
 
 
@@ -2292,19 +2299,20 @@ class TPMU_PUBLIC_ID(TPM_OBJECT):
 
 class TPMT_SENSITIVE(TPM_OBJECT):
     @classmethod
-    def from_pem(cls, data):
+    def from_pem(cls, data, password=None):
         """Decode the private part from standard key encodings.
 
         Currently supports PEM, DER and SSH encoded private keys.
 
         Args:
             data (bytes): The encoded key as bytes.
+            password (bytes, optional): The password used to decrypt the key, default is None.
 
         Returns:
             Returns an instance of TPMT_SENSITIVE.
         """
         p = cls()
-        private_from_encoding(data, p)
+        private_from_encoding(data, p, password)
         return p
 
 

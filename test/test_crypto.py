@@ -189,6 +189,17 @@ Q18+gn3+xvLrQ0A=
 -----END PUBLIC KEY-----
 """
 
+ecc_encrypted_key = b"""
+-----BEGIN EC PRIVATE KEY-----
+Proc-Type: 4,ENCRYPTED
+DEK-Info: AES-256-CBC,3E4AA4A32C548CBB67F0D619538BE10B
+
+kjWZRRxDAcydDyuX3p3ZIaPqa2QtI7hA0neoLbSrbdJ0mNjN63epDJYAvQpIxYv9
+QuvaxyX7VW4guemvj/ZvHu3HuKr0TlvBqVtsGqIJbi3eCFvmll//qo1AG0mDAopL
+I8/rxsxXVofKhAfCeJ4gP6LOlr6uLQKdf0wYxzcYEZI=
+-----END EC PRIVATE KEY-----
+"""
+
 
 class CryptoTest(TSS2_EsapiTest):
     def test_public_from_pem_rsa(self):
@@ -644,3 +655,13 @@ class CryptoTest(TSS2_EsapiTest):
         self.assertEqual(pub.parameters.eccDetail.curveID, types.TPM2_ECC.NIST_P256)
         self.assertEqual(pub.unique.ecc.x, ecc_public_key_bytes[0:32])
         self.assertEqual(pub.unique.ecc.y, ecc_public_key_bytes[32:64])
+
+    def test_encrypted_key(self):
+        pub = TPMT_PUBLIC.from_pem(ecc_encrypted_key, password=b"mysecret")
+        self.assertEqual(pub.type, TPM2_ALG.ECC)
+
+        priv = TPMT_SENSITIVE.from_pem(ecc_encrypted_key, password=b"mysecret")
+        self.assertEqual(priv.sensitiveType, TPM2_ALG.ECC)
+
+        with self.assertRaises(ValueError):
+            TPMT_PUBLIC.from_pem(ecc_encrypted_key, password=b"passpass")
