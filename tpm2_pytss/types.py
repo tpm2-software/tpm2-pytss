@@ -1596,7 +1596,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
             detail = detail[3:]
         else:
             raise RuntimeError(
-                f'Expected symetric detail to be null or start with one of aes, camellia, got: "{detail}"'
+                f'Expected symmetric detail to be null or start with one of aes, camellia, got: "{detail}"'
             )
 
         bits, mode = TPMT_PUBLIC._handle_sym_common(detail)
