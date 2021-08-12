@@ -80,7 +80,7 @@ def _int_to_buffer(i, b):
     b.buffer = i.to_bytes(length=s, byteorder="big")
 
 
-def key_from_encoding(data):
+def key_from_encoding(data, password=None):
     sdata = data.strip()
     key = None
     if sdata.startswith(b"-----BEGIN CERTIFICATE-----"):
@@ -91,7 +91,7 @@ def key_from_encoding(data):
     elif sdata.startswith(b"-----BEGIN RSA PRIVATE KEY-----") or sdata.startswith(
         b"-----BEGIN EC PRIVATE KEY-----"
     ):
-        pkey = load_pem_private_key(data, password=None, backend=default_backend())
+        pkey = load_pem_private_key(data, password=password, backend=default_backend())
         key = pkey.public_key()
     elif sdata.startswith(b"ssh-") or sdata.startswith(b"ecdsa-sha2-"):
         key = load_ssh_public_key(data, backend=default_backend())
@@ -107,7 +107,9 @@ def key_from_encoding(data):
         except ValueError:
             pass
         try:
-            pkey = load_der_private_key(data, password=None, backend=default_backend())
+            pkey = load_der_private_key(
+                data, password=password, backend=default_backend()
+            )
             key = pkey.public_key()
         except ValueError:
             pass
@@ -117,8 +119,8 @@ def key_from_encoding(data):
     return key
 
 
-def public_from_encoding(data, obj):
-    key = key_from_encoding(data)
+def public_from_encoding(data, obj, password=None):
+    key = key_from_encoding(data, password)
     nums = key.public_numbers()
     if isinstance(key, rsa.RSAPublicKey):
         obj.type = lib.TPM2_ALG_RSA
@@ -140,18 +142,20 @@ def public_from_encoding(data, obj):
         raise RuntimeError(f"unsupported key type: {key.__class__.__name__}")
 
 
-def private_key_from_encoding(data):
+def private_key_from_encoding(data, password=None):
     sdata = data.strip()
     key = None
     if sdata.startswith(b"-----BEGIN RSA PRIVATE KEY-----") or sdata.startswith(
         b"-----BEGIN EC PRIVATE KEY-----"
     ):
-        key = load_pem_private_key(sdata, password=None, backend=default_backend())
+        key = load_pem_private_key(sdata, password=password, backend=default_backend())
     elif sdata.startswith(b"-----BEGIN OPENSSH PRIVATE KEY-----"):
-        key = load_ssh_private_key(sdata, password=None, backend=default_backend())
+        key = load_ssh_private_key(sdata, password=password, backend=default_backend())
     else:
         try:
-            key = load_der_private_key(data, password=None, backend=default_backend())
+            key = load_der_private_key(
+                data, password=password, backend=default_backend()
+            )
         except ValueError:
             pass
 
@@ -160,8 +164,8 @@ def private_key_from_encoding(data):
     return key
 
 
-def private_from_encoding(data, obj):
-    key = private_key_from_encoding(data)
+def private_from_encoding(data, obj, password=None):
+    key = private_key_from_encoding(data, password)
     nums = key.private_numbers()
     if isinstance(key, rsa.RSAPrivateKey):
         obj.sensitiveType = lib.TPM2_ALG_RSA
