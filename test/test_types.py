@@ -594,6 +594,11 @@ class TypesTest(unittest.TestCase):
         db = d.buffer
         self.assertEqual(db, b"test1")
 
+    def test_unsupported_unmarshal(self):
+        with self.assertRaises(RuntimeError) as e:
+            TPM_OBJECT.unmarshal(b"")
+        self.assertEqual(str(e.exception), "No unmarshal function found for TPM_OBJECT")
+
     def test_TPMT_PUBLIC_empty(self):
 
         templ = TPMT_PUBLIC.parse()
