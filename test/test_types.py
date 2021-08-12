@@ -1037,6 +1037,13 @@ class TypesTest(unittest.TestCase):
         )
         self.assertEqual(templ.parameters.asymDetail.scheme.scheme, TPM2_ALG.RSAES)
 
+    def test_TPMT_PUBLIC_parse_camellia(self):
+        templ = TPMT_PUBLIC.parse("camellia256cfb")
+        self.assertEqual(templ.type, TPM2_ALG.SYMCIPHER)
+        self.assertEqual(templ.parameters.symDetail.sym.algorithm, TPM2_ALG.CAMELLIA)
+        self.assertEqual(templ.parameters.symDetail.sym.keyBits.sym, 256)
+        self.assertEqual(templ.parameters.symDetail.sym.mode.sym, TPM2_ALG.CFB)
+
     def test_TPML_ALG_parse_none(self):
         a = TPML_ALG.parse(None)
         self.assertEqual(len(a), 0)

@@ -1635,7 +1635,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
         if len(prefix) == 1:
             prefix = prefix[0]
             keep_processing = getattr(TPMT_PUBLIC, f"_handle_{prefix}")(
-                objstr[3:], templ
+                objstr[len(prefix) :], templ
             )
         else:
             raise RuntimeError(
