@@ -307,6 +307,11 @@ class TypesTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             TPM2_ALG.parse("foo")
 
+    def test_TPM_FRIENDLY_INT_bad_to_string(self):
+        with self.assertRaises(ValueError) as e:
+            TPM2_ALG.to_string(TPM2_ALG.LAST + 1)
+        self.assertEqual(str(e.exception), "Could not match 69 to class TPM2_ALG")
+
     def test_ESYS_TR(self):
         self.assertEqual(ESYS_TR.parse("PCR0"), ESYS_TR.PCR0)
         self.assertEqual(ESYS_TR.parse("NONE"), ESYS_TR.NONE)
