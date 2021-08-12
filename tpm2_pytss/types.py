@@ -1460,7 +1460,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
 
         halg = ""
         # rsaes must match exactly takes no other params
-        if scheme == "rsaaes":
+        if scheme == "rsaes":
             templ.parameters.asymDetail.scheme.scheme = TPM2_ALG.RSAES
             TPMT_PUBLIC._error_on_conflicting_sign_attrs(templ)
             return

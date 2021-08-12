@@ -1029,6 +1029,14 @@ class TypesTest(unittest.TestCase):
         )
         self.assertEqual(templ.nameAlg, TPM2_ALG.SHA256)
 
+    def test_TPMT_PUBLIC_parse_rsa_rsaes(self):
+        templ = TPMT_PUBLIC.parse(
+            "rsa2048:rsaes",
+            objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS
+            ^ TPMA_OBJECT.SIGN_ENCRYPT,
+        )
+        self.assertEqual(templ.parameters.asymDetail.scheme.scheme, TPM2_ALG.RSAES)
+
     def test_TPML_ALG_parse_none(self):
         a = TPML_ALG.parse(None)
         self.assertEqual(len(a), 0)
