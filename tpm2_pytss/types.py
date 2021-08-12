@@ -1592,8 +1592,8 @@ class TPMT_PUBLIC(TPM_OBJECT):
             templ.parameters.symDetail.sym.algorithm = TPM2_ALG.AES
             detail = detail[3:]
         elif detail.startswith("camellia"):
-            templ.parameters.symDetail.sym.algorithm = TPM2_ALG.AES
-            detail = detail[3:]
+            templ.parameters.symDetail.sym.algorithm = TPM2_ALG.CAMELLIA
+            detail = detail[8:]
         else:
             raise RuntimeError(
                 f'Expected symmetric detail to be null or start with one of aes, camellia, got: "{detail}"'

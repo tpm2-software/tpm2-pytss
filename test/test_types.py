@@ -1006,6 +1006,16 @@ class TypesTest(unittest.TestCase):
 
         self.assertEqual(templ.parameters.asymDetail.symmetric.algorithm, TPM2_ALG.NULL)
 
+    def test_TPMT_PUBLIC_parse_ecc_camellia(self):
+        templ = TPMT_PUBLIC.parse(alg="ecc:camellia128cfb")
+        self.assertEqual(
+            templ.parameters.eccDetail.symmetric.algorithm, TPM2_ALG.CAMELLIA
+        )
+        self.assertEqual(templ.parameters.eccDetail.symmetric.keyBits.camellia, 128)
+        self.assertEqual(
+            templ.parameters.eccDetail.symmetric.mode.camellia, TPM2_ALG.CFB
+        )
+
     def test_TPML_ALG_parse_none(self):
         a = TPML_ALG.parse(None)
         self.assertEqual(len(a), 0)
