@@ -726,6 +726,49 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(templ.parameters.rsaDetail.symmetric.mode.sym, TPM2_ALG.CFB)
         self.assertEqual(templ.parameters.rsaDetail.symmetric.algorithm, TPM2_ALG.AES)
 
+    def test_TPMT_PUBLIC_parse_bad_params(self):
+        with self.assertRaises(RuntimeError) as e:
+            TPMT_PUBLIC.parse(alg="rsa512")
+        self.assertEqual(
+            str(e.exception),
+            "Expected keybits for RSA to be one of ['1024', '2048', '3072', '4096'], got:\"512\"",
+        )
+
+        with self.assertRaises(RuntimeError) as e:
+            TPMT_PUBLIC.parse(alg="rsa2048:aes512")
+        self.assertEqual(
+            str(e.exception),
+            "Expected bits to be one of ['128', '192', '256'], got: \"512\"",
+        )
+
+        with self.assertRaises(RuntimeError) as e:
+            TPMT_PUBLIC.parse(alg="rsa2048:aes256yyy")
+        self.assertEqual(
+            str(e.exception),
+            "Expected mode to be one of ['cfb', 'cbc', 'ofb', 'ctr', 'ecb'], got: \"yyy\"",
+        )
+
+        with self.assertRaises(RuntimeError) as e:
+            TPMT_PUBLIC.parse("unsupported")
+        self.assertEqual(
+            str(e.exception),
+            "Expected object prefix to be one of ('rsa', 'ecc', 'aes', 'camellia', 'xor', 'hmac', 'keyedhash'), got: \"unsupported\"",
+        )
+
+        with self.assertRaises(RuntimeError) as e:
+            TPMT_PUBLIC.parse("rsa2048:hmac")
+        self.assertEqual(
+            str(e.exception),
+            'Expected symmetric detail to be null or start with one of aes, camellia, got: "hmac"',
+        )
+
+        with self.assertRaises(RuntimeError) as e:
+            TPMT_PUBLIC.parse("hmac:aes128")
+        self.assertEqual(
+            str(e.exception),
+            'Keyedhash objects cannot have asym detail, got: "aes128"',
+        )
+
     def test_TPMT_PUBLIC_parse_ecc_ecdaa4_sha256(self):
 
         # scheme is set, so we need to be smarter about the attributes we use
