@@ -2,14 +2,11 @@
 """
 SPDX-License-Identifier: BSD-3
 """
-import binascii
-import itertools
-import unittest
-
 from tpm2_pytss import *
 from tpm2_pytss.tsskey import TSSPrivKey, _parent_rsa_template, _parent_ecc_template
 from .TSS2_BaseTest import TSS2_EsapiTest
-
+from asn1crypto.core import ObjectIdentifier
+from asn1crypto import pem
 
 rsa_pem = b"""-----BEGIN TSS2 PRIVATE KEY-----
 MIIB8gYGZ4EFCgEDoAMBAQECBEAAAAEEggEYARYAAQALAAYEcgAAABAAEAgAAAEA
@@ -44,6 +41,22 @@ class TSSKeyTest(TSS2_EsapiTest):
         key = TSSPrivKey.create_ecc(self.ectx)
         key.load(self.ectx)
 
+    def test_create_load_ecc_password(self):
+        key = TSSPrivKey.create_ecc(self.ectx, password=b"1234")
+        key.load(self.ectx, password=b"1234")
+
+    def test_create_password_load_no_password(self):
+        key = TSSPrivKey.create_ecc(self.ectx, password=b"1234")
+        with self.assertRaises(RuntimeError) as e:
+            key.load(self.ectx)
+        self.assertEqual(str(e.exception), "no password specified but it is required")
+
+    def test_create_no_password_load_password(self):
+        key = TSSPrivKey.create_ecc(self.ectx)
+        with self.assertWarns(UserWarning) as w:
+            key.load(self.ectx, password=b"1234")
+        self.assertEqual(str(w.warning), "password specified but empty_auth is true")
+
     def test_persistent_parent_rsa(self):
         insens = TPM2B_SENSITIVE_CREATE()
         inpublic = TPM2B_PUBLIC(publicArea=_parent_rsa_template)
@@ -67,3 +80,42 @@ class TSSKeyTest(TSS2_EsapiTest):
         key = TSSPrivKey.create_ecc(self.ectx, parent=0x81000081)
         key.load(self.ectx)
         self.assertEqual(key.parent, 0x81000081)
+
+    def test_bad_pem_type(self):
+        bad_pem = rsa_pem.replace(b"TSS2", b"BORK")
+        with self.assertRaises(TypeError) as e:
+            TSSPrivKey.from_pem(bad_pem)
+        self.assertEqual(str(e.exception), "unsupported PEM type")
+
+    def test_bad_oid(self):
+        _, _, der = pem.unarmor(rsa_pem)
+        dc = TSSPrivKey._tssprivkey_der.load(der)
+        dc["type"] = ObjectIdentifier("1.2.3.4")
+        badder = dc.dump()
+
+        with self.assertRaises(TypeError) as e:
+            TSSPrivKey.from_der(badder)
+        self.assertEqual(str(e.exception), "unsupported key type")
+
+    def test_no_ecc(self):
+        cap_data = TPMS_CAPABILITY_DATA()
+        cap_data.data.algorithms[0] = TPMS_ALG_PROPERTY(alg=TPM2_ALG.RSA)
+
+        def mock_getcap(*args, **kwargs):
+            return (False, cap_data)
+
+        self.ectx.get_capability = mock_getcap
+
+        TSSPrivKey.create_ecc(self.ectx)
+
+    def test_no_ecc_no_rsa(self):
+        cap_data = TPMS_CAPABILITY_DATA()
+
+        def mock_getcap(*args, **kwargs):
+            return (False, cap_data)
+
+        self.ectx.get_capability = mock_getcap
+
+        with self.assertRaises(RuntimeError) as e:
+            TSSPrivKey.create_ecc(self.ectx)
+        self.assertEqual(str(e.exception), "Unable to find supported parent key type")

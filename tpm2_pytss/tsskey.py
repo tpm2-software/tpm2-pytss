@@ -206,7 +206,7 @@ class TSSPrivKey(object):
         else:
             return ectx.tr_from_tpmpublic(parent)
         if template is None:
-            raise RuntimeError("Unable to find supported parent key typ")
+            raise RuntimeError("Unable to find supported parent key type")
         inpub = TPM2B_PUBLIC(publicArea=template)
         phandle, _, _, _, _ = ectx.create_primary(
             primary_handle=ESYS_TR.RH_OWNER,
@@ -231,7 +231,7 @@ class TSSPrivKey(object):
         if not password and not self.empty_auth:
             raise RuntimeError("no password specified but it is required")
         elif password and self.empty_auth:
-            warnings.warn("password specified but empty_euth is true")
+            warnings.warn("password specified but empty_auth is true")
         phandle = self._getparent(ectx, self.public.publicArea.type, self.parent)
         handle = ectx.load(phandle, self.private, self.public)
         ectx.set_auth(handle, password)
