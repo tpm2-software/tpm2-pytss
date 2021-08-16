@@ -14,6 +14,8 @@ from tpm2_pytss.utils import (
     mock_bail,
 )
 from tpm2_pytss.crypto import (
+    calculate_sym_unique,
+    get_digest_size,
     public_from_encoding,
     private_from_encoding,
     public_to_pem,
@@ -21,6 +23,7 @@ from tpm2_pytss.crypto import (
 )
 
 import binascii
+import secrets
 
 
 class ParserAttributeError(Exception):
@@ -1891,6 +1894,36 @@ class TPM2B_SENSITIVE(TPM_OBJECT):
         p = TPMT_SENSITIVE.from_pem(data, password)
         return cls(sensitiveArea=p)
 
+    @classmethod
+    def keyedhash_from_secret(
+        cls,
+        secret,
+        nameAlg=TPM2_ALG.SHA256,
+        objectAttributes=(
+            TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH
+        ),
+        scheme=None,
+        seed=None,
+    ):
+        """Generate the private and public part for a keyed hash object from a secret.
+
+        Args:
+            secret (bytes): The HMAC key / data to be sealed.
+            nameAlg (int): The name algorithm for the public part, default is TPM2_ALG.SHA256.
+            objectAttributes (int): The object attributes for the public area, default is (TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH).
+            scheme (TPMT_KEYEDHASH_SCHEME, optional): The signing/key exchange scheme to use for the public area, default is None.
+            seed (bytes, optional): The obfuscate value, default is a randomized value.
+
+        Returns:
+            A tuple of of TPM2B_SENSITIVE and TPM2B_PUBLIC
+        """
+        sa, pa = TPMT_SENSITIVE.keyedhash_from_secret(
+            secret, nameAlg, objectAttributes, scheme, seed
+        )
+        priv = TPM2B_SENSITIVE(sensitiveArea=sa)
+        pub = TPM2B_PUBLIC(publicArea=pa)
+        return (priv, pub)
+
 
 class TPM2B_SENSITIVE_CREATE(TPM_OBJECT):
     pass
@@ -2314,6 +2347,49 @@ class TPMT_SENSITIVE(TPM_OBJECT):
         p = cls()
         private_from_encoding(data, p, password)
         return p
+
+    @classmethod
+    def keyedhash_from_secret(
+        cls,
+        secret,
+        nameAlg=TPM2_ALG.SHA256,
+        objectAttributes=(
+            TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH
+        ),
+        scheme=None,
+        seed=None,
+    ):
+        """Generate the private and public part for a keyed hash object from a secret.
+
+        Args:
+            secret (bytes): The HMAC key / data to be sealed.
+            nameAlg (int): The name algorithm for the public part, default is TPM2_ALG.SHA256.
+            objectAttributes (int): The object attributes for the public area, default is (TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH).
+            scheme (TPMT_KEYEDHASH_SCHEME, optional): The signing/key exchange scheme to use for the public area, default is None.
+            seed (bytes, optional): The obfuscate value, default is a randomized value.
+
+        Returns:
+            A tuple of of TPMT_SENSITIVE and TPMT_PUBLIC
+        """
+        pub = TPMT_PUBLIC(
+            type=TPM2_ALG.KEYEDHASH, nameAlg=nameAlg, objectAttributes=objectAttributes
+        )
+        if scheme is None:
+            pub.parameters.keyedHashDetail.scheme.scheme = TPM2_ALG.NULL
+        else:
+            pub.parameters.keyedHashDetail.scheme = scheme
+        digsize = get_digest_size(nameAlg)
+        if seed and len(seed) != digsize:
+            raise ValueError(
+                f"invalid seed size, expected {digsize} but got {len(seed)}"
+            )
+        elif not seed:
+            seed = secrets.token_bytes(digsize)
+        pub.unique.keyedHash = calculate_sym_unique(nameAlg, secret, seed)
+        priv = cls(sensitiveType=TPM2_ALG.KEYEDHASH)
+        priv.sensitive.bits = secret
+        priv.seedValue = seed
+        return (priv, pub)
 
 
 class TPMU_SENSITIVE_COMPOSITE(TPM_OBJECT):

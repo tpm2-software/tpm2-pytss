@@ -273,3 +273,21 @@ def symdef_to_crypt(symdef):
         raise ValueError(f"unsupported symmetric mode {symdef.mode.sym}")
     bits = symdef.keyBits.sym
     return (alg, mode, bits)
+
+
+def calculate_sym_unique(nameAlg, secret, seed):
+    dt = _get_digest(nameAlg)
+    if dt is None:
+        raise ValueError(f"unsupported digest algorithm: {nameAlg}")
+    d = hashes.Hash(dt(), backend=default_backend())
+    d.update(seed)
+    d.update(secret)
+    return d.finalize()
+
+
+def get_digest_size(alg):
+    dt = _get_digest(alg)
+    if dt is None:
+        raise ValueError(f"unsupported digest algorithm: {alg}")
+
+    return dt.digest_size
