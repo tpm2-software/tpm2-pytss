@@ -665,3 +665,45 @@ class CryptoTest(TSS2_EsapiTest):
 
         with self.assertRaises(ValueError):
             TPMT_PUBLIC.from_pem(ecc_encrypted_key, password=b"passpass")
+
+    def test_keyedhash_from_secret(self):
+        secret = b"secret key"
+        scheme = TPMT_KEYEDHASH_SCHEME(scheme=TPM2_ALG.HMAC)
+        scheme.details.hmac.hashAlg = TPM2_ALG.SHA256
+        (sens, pub) = TPM2B_SENSITIVE.keyedhash_from_secret(secret, scheme=scheme)
+
+        self.assertEqual(pub.publicArea.type, TPM2_ALG.KEYEDHASH)
+        self.assertEqual(pub.publicArea.nameAlg, TPM2_ALG.SHA256)
+        self.assertEqual(
+            pub.publicArea.parameters.keyedHashDetail.scheme.scheme, TPM2_ALG.HMAC
+        )
+        self.assertEqual(
+            pub.publicArea.parameters.keyedHashDetail.scheme.details.hmac.hashAlg,
+            TPM2_ALG.SHA256,
+        )
+        self.assertEqual(sens.sensitiveArea.sensitiveType, TPM2_ALG.KEYEDHASH)
+        self.assertEqual(sens.sensitiveArea.sensitive.bits, secret)
+
+    def test_keyedhash_from_secret_unseal(self):
+        secret = b"sealed secret"
+        seed = b"\xF1" * 32
+        (sens, pub) = TPM2B_SENSITIVE.keyedhash_from_secret(
+            secret, objectAttributes=TPMA_OBJECT.USERWITHAUTH, seed=seed
+        )
+
+        handle = self.ectx.load_external(sens, pub, types.ESYS_TR.RH_NULL)
+        sealdata = self.ectx.unseal(handle)
+
+        self.assertEqual(sens.sensitiveArea.seedValue, seed)
+        self.assertEqual(sealdata, secret)
+
+    def test_keyedhash_from_secret_bad(self):
+        secret = b"1234"
+
+        with self.assertRaises(ValueError) as e:
+            TPMT_SENSITIVE.keyedhash_from_secret(secret, nameAlg=TPM2_ALG.NULL)
+        self.assertEqual(str(e.exception), "unsupported digest algorithm: 16")
+
+        with self.assertRaises(ValueError) as e:
+            TPMT_SENSITIVE.keyedhash_from_secret(secret, seed=b"bad seed")
+        self.assertEqual(str(e.exception), "invalid seed size, expected 32 but got 8")
