@@ -22,6 +22,7 @@ from cryptography.hazmat.primitives.kdf.concatkdf import ConcatKDFHash
 from cryptography.hazmat.primitives.ciphers.algorithms import AES
 from cryptography.hazmat.primitives.ciphers import modes
 from cryptography.hazmat.backends import default_backend
+from cryptography.exceptions import UnsupportedAlgorithm
 
 _curvetable = (
     (lib.TPM2_ECC_NIST_P192, ec.SECP192R1),
@@ -81,42 +82,47 @@ def _int_to_buffer(i, b):
 
 
 def key_from_encoding(data, password=None):
-    sdata = data.strip()
-    key = None
-    if sdata.startswith(b"-----BEGIN CERTIFICATE-----"):
+    try:
         cert = load_pem_x509_certificate(data, backend=default_backend())
         key = cert.public_key()
-    elif sdata.startswith(b"-----BEGIN PUBLIC KEY-----"):
+        return key
+    except ValueError:
+        pass
+    try:
         key = load_pem_public_key(data, backend=default_backend())
-    elif sdata.startswith(b"-----BEGIN RSA PRIVATE KEY-----") or sdata.startswith(
-        b"-----BEGIN EC PRIVATE KEY-----"
-    ):
+        return key
+    except ValueError:
+        pass
+    try:
         pkey = load_pem_private_key(data, password=password, backend=default_backend())
         key = pkey.public_key()
-    elif sdata.startswith(b"ssh-") or sdata.startswith(b"ecdsa-sha2-"):
+        return key
+    except ValueError:
+        pass
+    try:
         key = load_ssh_public_key(data, backend=default_backend())
-    else:
-        try:
-            cert = load_der_x509_certificate(data, backend=default_backend())
-            key = cert.public_key()
-            return key
-        except ValueError:
-            pass
-        try:
-            key = load_der_public_key(data, backend=default_backend())
-        except ValueError:
-            pass
-        try:
-            pkey = load_der_private_key(
-                data, password=password, backend=default_backend()
-            )
-            key = pkey.public_key()
-        except ValueError:
-            pass
+        return key
+    except (ValueError, UnsupportedAlgorithm):
+        pass
+    try:
+        cert = load_der_x509_certificate(data, backend=default_backend())
+        key = cert.public_key()
+        return key
+    except ValueError:
+        pass
+    try:
+        key = load_der_public_key(data, backend=default_backend())
+        return key
+    except ValueError:
+        pass
+    try:
+        pkey = load_der_private_key(data, password=password, backend=default_backend())
+        key = pkey.public_key()
+        return key
+    except ValueError:
+        pass
 
-    if key is None:
-        raise ValueError("Unsupported key format")
-    return key
+    raise ValueError("Unsupported key format")
 
 
 def public_from_encoding(data, obj, password=None):
@@ -143,25 +149,23 @@ def public_from_encoding(data, obj, password=None):
 
 
 def private_key_from_encoding(data, password=None):
-    sdata = data.strip()
-    key = None
-    if sdata.startswith(b"-----BEGIN RSA PRIVATE KEY-----") or sdata.startswith(
-        b"-----BEGIN EC PRIVATE KEY-----"
-    ):
-        key = load_pem_private_key(sdata, password=password, backend=default_backend())
-    elif sdata.startswith(b"-----BEGIN OPENSSH PRIVATE KEY-----"):
-        key = load_ssh_private_key(sdata, password=password, backend=default_backend())
-    else:
-        try:
-            key = load_der_private_key(
-                data, password=password, backend=default_backend()
-            )
-        except ValueError:
-            pass
+    try:
+        key = load_pem_private_key(data, password=password, backend=default_backend())
+        return key
+    except ValueError:
+        pass
+    try:
+        key = load_ssh_private_key(data, password=password, backend=default_backend())
+        return key
+    except ValueError:
+        pass
+    try:
+        key = load_der_private_key(data, password=password, backend=default_backend())
+        return key
+    except ValueError:
+        pass
 
-    if key is None:
-        raise ValueError("Unsupported key format")
-    return key
+    raise ValueError("Unsupported key format")
 
 
 def private_from_encoding(data, obj, password=None):
