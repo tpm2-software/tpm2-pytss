@@ -1924,6 +1924,39 @@ class TPM2B_SENSITIVE(TPM_OBJECT):
         pub = TPM2B_PUBLIC(publicArea=pa)
         return (priv, pub)
 
+    @classmethod
+    def symcipher_from_secret(
+        cls,
+        secret,
+        algorithm=TPM2_ALG.AES,
+        mode=TPM2_ALG.CFB,
+        nameAlg=TPM2_ALG.SHA256,
+        objectAttributes=(
+            TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH
+        ),
+        seed=None,
+    ):
+        """
+        Generate the private and public part for a symcipher object from a secret.
+
+        Args:
+            secret (bytes): the symmetric key.
+            algorithm (int): The symmetric cipher algorithm to use, default is TPM2_ALG.AES.
+            mode (int): The symmetric mode to use, default is TPM2_ALG.CFB.
+            nameAlg (int): The name algorithm for the public part, default is TPM2_ALG.SHA256.
+            objectAttributes (int): The object attributes for the public area, default is (TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH).
+            seed (bytes, optional): The obfuscate value, default is a randomized value.
+
+        Returns:
+            A tuple of TPM2B_SENSITIVE and TPM2B_PUBLIC
+        """
+        sa, pa = TPMT_SENSITIVE.symcipher_from_secret(
+            secret, algorithm, mode, nameAlg, objectAttributes, seed
+        )
+        priv = TPM2B_SENSITIVE(sensitiveArea=sa)
+        pub = TPM2B_PUBLIC(publicArea=pa)
+        return (priv, pub)
+
 
 class TPM2B_SENSITIVE_CREATE(TPM_OBJECT):
     pass
@@ -2387,6 +2420,58 @@ class TPMT_SENSITIVE(TPM_OBJECT):
             seed = secrets.token_bytes(digsize)
         pub.unique.keyedHash = calculate_sym_unique(nameAlg, secret, seed)
         priv = cls(sensitiveType=TPM2_ALG.KEYEDHASH)
+        priv.sensitive.bits = secret
+        priv.seedValue = seed
+        return (priv, pub)
+
+    @classmethod
+    def symcipher_from_secret(
+        cls,
+        secret,
+        algorithm=TPM2_ALG.AES,
+        mode=TPM2_ALG.CFB,
+        nameAlg=TPM2_ALG.SHA256,
+        objectAttributes=(
+            TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH
+        ),
+        seed=None,
+    ):
+        """
+        Generate the private and public part for a symcipher object from a secret.
+
+        Args:
+            secret (bytes): the symmetric key.
+            algorithm (int): The symmetric cipher algorithm to use, default is TPM2_ALG.AES.
+            mode (int): The symmetric mode to use, default is TPM2_ALG.CFB.
+            nameAlg (int): The name algorithm for the public part, default is TPM2_ALG.SHA256.
+            objectAttributes (int): The object attributes for the public area, default is (TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH).
+            seed (bytes, optional): The obfuscate value, default is a randomized value.
+
+        Returns:
+            A tuple of TPMT_SENSITIVE and TPMT_PUBLIC
+        """
+        nbits = len(secret) * 8
+        if algorithm == TPM2_ALG.SM4 and nbits != 128:
+            raise ValueError(f"invalid key size, expected 128, got {nbits}")
+        elif nbits not in (128, 192, 256):
+            raise ValueError(
+                f"invalid key size, expected 128, 192 or 256 bits, got {nbits}"
+            )
+        pub = TPMT_PUBLIC(
+            type=TPM2_ALG.SYMCIPHER, nameAlg=nameAlg, objectAttributes=objectAttributes
+        )
+        pub.parameters.symDetail.sym.keyBits.sym = nbits
+        pub.parameters.symDetail.sym.algorithm = algorithm
+        pub.parameters.symDetail.sym.mode.sym = mode
+        digsize = get_digest_size(nameAlg)
+        if seed and len(seed) != digsize:
+            raise ValueError(
+                f"invalid seed size, expected {digsize} but got {len(seed)}"
+            )
+        elif not seed:
+            seed = secrets.token_bytes(digsize)
+        pub.unique.sym = calculate_sym_unique(nameAlg, secret, seed)
+        priv = cls(sensitiveType=TPM2_ALG.SYMCIPHER)
         priv.sensitive.bits = secret
         priv.seedValue = seed
         return (priv, pub)

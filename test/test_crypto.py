@@ -707,3 +707,35 @@ class CryptoTest(TSS2_EsapiTest):
         with self.assertRaises(ValueError) as e:
             TPMT_SENSITIVE.keyedhash_from_secret(secret, seed=b"bad seed")
         self.assertEqual(str(e.exception), "invalid seed size, expected 32 but got 8")
+
+    def test_symcipher_from_secret(self):
+        secret = b"\xF1" * 32
+
+        sens, pub = TPM2B_SENSITIVE.symcipher_from_secret(secret)
+
+        self.assertEqual(sens.sensitiveArea.sensitiveType, TPM2_ALG.SYMCIPHER)
+        self.assertEqual(sens.sensitiveArea.sensitive.bits, secret)
+
+        self.assertEqual(pub.publicArea.type, TPM2_ALG.SYMCIPHER)
+        self.assertEqual(pub.publicArea.parameters.symDetail.sym.keyBits.sym, 256)
+        self.assertEqual(
+            pub.publicArea.parameters.symDetail.sym.algorithm, TPM2_ALG.AES
+        )
+        self.assertEqual(pub.publicArea.parameters.symDetail.sym.mode.sym, TPM2_ALG.CFB)
+
+        self.ectx.load_external(sens, pub, ESYS_TR.RH_NULL)
+
+    def test_symcipher_from_secret_bad(self):
+        with self.assertRaises(ValueError) as e:
+            TPMT_SENSITIVE.symcipher_from_secret(b"\xFF" * 17)
+        self.assertEqual(
+            str(e.exception), "invalid key size, expected 128, 192 or 256 bits, got 136"
+        )
+
+        with self.assertRaises(ValueError) as e:
+            TPMT_SENSITIVE.symcipher_from_secret(b"\xFF" * 32, algorithm=TPM2_ALG.SM4)
+        self.assertEqual(str(e.exception), "invalid key size, expected 128, got 256")
+
+        with self.assertRaises(ValueError) as e:
+            TPMT_SENSITIVE.symcipher_from_secret(b"\xFF" * 32, seed=b"1234")
+        self.assertEqual(str(e.exception), "invalid seed size, expected 32 but got 4")
