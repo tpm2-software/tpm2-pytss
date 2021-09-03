@@ -397,6 +397,30 @@ class Common:
         with pytest.raises(TSS2_Exception):
             self.fapi.create_seal(path=seal_path, data=seal_data)
 
+    def test_create_seal_random(self):
+        profile_name = self.fapi.config.profile_name
+        seal_path = f"/{profile_name}/HS/SRK/seal_{random_uid()}"
+        seal_len = 12
+        created = self.fapi.create_seal(path=seal_path, size=seal_len)
+        assert created is True
+        assert seal_path in self.fapi.list()
+
+        unseal_data = self.fapi.unseal(path=seal_path)
+        assert type(unseal_data) is bytes
+        assert len(unseal_data) == seal_len
+
+    def test_create_seal_both_data_and_size_fail(self):
+        profile_name = self.fapi.config.profile_name
+        seal_path = f"/{profile_name}/HS/SRK/seal_{random_uid()}"
+        with pytest.raises(ValueError):
+            self.fapi.create_seal(path=seal_path, data="Hello World", size=11)
+
+    def test_create_seal_neither_data_nor_size_fail(self):
+        profile_name = self.fapi.config.profile_name
+        seal_path = f"/{profile_name}/HS/SRK/seal_{random_uid()}"
+        with pytest.raises(ValueError):
+            self.fapi.create_seal(path=seal_path)
+
     def test_unseal(self, seal):
         seal_path, seal_data = seal
         unseal_data = self.fapi.unseal(path=seal_path)

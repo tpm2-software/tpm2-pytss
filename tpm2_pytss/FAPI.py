@@ -421,6 +421,7 @@ class FAPI:
         type_: Optional[Union[bytes, str]] = None,
         policy_path: Optional[Union[bytes, str]] = None,
         auth_value: Optional[Union[bytes, str]] = None,
+        size: Optional[int] = None,
         exists_ok: bool = False,
     ) -> bool:
         """Create a Fapi sealed (= encrypted) object, that is data sealed a Fapi parent key. Oftentimes, the data is a digest.
@@ -431,6 +432,7 @@ class FAPI:
             type_ (bytes or str, optional): Comma separated list. Possible values: system, sign, decrypt, restricted, exportable, noda, 0x81000000. Defaults to None.
             policy_path (bytes or str, optional): The path to the policy which will be associated with the sealed object. Defaults to None.
             auth_value (bytes or str, optional): Password to protect the new sealed object. Defaults to None.
+            size (int, optional): If data is None, random bytes of length size are generated. Parameters data and size cannot be given at the same time. Defaults to None.
             exists_ok (bool, optional): Do not throw a TSS2_Exception if an object with the given path already exists. Defaults to False.
 
         Raises:
@@ -440,9 +442,12 @@ class FAPI:
             bool: True if the sealed object was created. False otherwise.
         """
         path = to_bytes_or_null(path)
+        if data is not None and size is not None:
+            raise ValueError("Parameters data and size cannot be given at same time.")
+        if data is None and size is None:
+            raise ValueError("Either parameter data or parameter size must be given.")
         if data is None:
-            # TODO if data is none, user should be able to give a size (of the random data)
-            data_len = 0
+            data_len = size
         else:
             data_len = len(data)
         data = to_bytes_or_null(data)
