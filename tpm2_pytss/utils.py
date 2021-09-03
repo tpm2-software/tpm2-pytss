@@ -17,11 +17,13 @@ __MOCK__ = "unittest.mock" in sys.modules
 
 
 def _chkrc(rc, acceptable=None):
-    if rc == lib.TPM2_RC_SUCCESS:
-        return
-    if acceptable is not None and (rc == acceptable or rc in acceptable):
-        return
-    raise TSS2_Exception(rc)
+    if acceptable is None:
+        acceptable = []
+    elif isinstance(acceptable, int):
+        acceptable = [acceptable]
+    acceptable += [lib.TPM2_RC_SUCCESS]
+    if rc not in acceptable:
+        raise TSS2_Exception(rc)
 
 
 def to_bytes_or_null(value, allow_null=True, encoding=None):
