@@ -2498,7 +2498,11 @@ class TPMT_TK_HASHCHECK(TPM_OBJECT):
 
 
 class TPMT_HA(TPM_OBJECT):
-    pass
+    def __bytes__(self):
+        if self.hashAlg == TPM2_ALG.NULL:
+            return b""
+        ds = get_digest_size(self.hashAlg)
+        return bytes(self.digest.sha512[0:ds])
 
 
 class TPMU_HA(TPM_OBJECT):
@@ -2506,6 +2510,10 @@ class TPMU_HA(TPM_OBJECT):
 
 
 class TPMT_SIG_SCHEME(TPM_OBJECT):
+    pass
+
+
+class TPMU_SIGNATURE(TPM_OBJECT):
     pass
 
 
