@@ -105,8 +105,7 @@ class FapiConfig(contextlib.ExitStack):
     def __exit__(self, exc_type, exc_val, exc_tb):
         super().__exit__(exc_type, exc_val, exc_tb)
 
-        if self.config_env_backup is not None:
-            os.environ[FAPI_CONFIG_ENV] = self.config_env_backup
+        del os.environ[FAPI_CONFIG_ENV]
 
         if self.config_tmp_path is not None:
             os.unlink(self.config_tmp_path)
