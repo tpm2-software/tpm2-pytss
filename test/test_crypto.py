@@ -9,6 +9,7 @@ import unittest
 from tpm2_pytss import *
 from .TSS2_BaseTest import TSS2_EsapiTest
 from base64 import b64decode
+from hashlib import sha256, sha384
 
 rsa_private_key = b"""
 -----BEGIN RSA PRIVATE KEY-----
@@ -739,3 +740,153 @@ class CryptoTest(TSS2_EsapiTest):
         with self.assertRaises(ValueError) as e:
             TPMT_SENSITIVE.symcipher_from_secret(b"\xFF" * 32, seed=b"1234")
         self.assertEqual(str(e.exception), "invalid seed size, expected 32 but got 4")
+
+    def test_verify_signature_hmac(self):
+        secret = b"secret key"
+        scheme = TPMT_KEYEDHASH_SCHEME(scheme=TPM2_ALG.HMAC)
+        scheme.details.hmac.hashAlg = TPM2_ALG.SHA256
+        (sens, pub) = TPM2B_SENSITIVE.keyedhash_from_secret(
+            secret,
+            scheme=scheme,
+            objectAttributes=(TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH),
+        )
+
+        handle = self.ectx.load_external(sens, pub, types.ESYS_TR.RH_NULL)
+
+        msg = b"sign me please"
+        h = sha256(msg)
+        sigdig = h.digest()
+        sig = self.ectx.sign(
+            handle,
+            sigdig,
+            TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL),
+            TPMT_TK_HASHCHECK(tag=TPM2_ST.HASHCHECK, hierarchy=TPM2_RH.NULL),
+        )
+        crypto.verify_signature(sig, secret, msg)
+
+    def test_verify_signature_ecc(self):
+        template = TPM2B_PUBLIC.parse(
+            "ecc:ecdsa_sha256",
+            objectAttributes=(
+                TPMA_OBJECT.USERWITHAUTH
+                | TPMA_OBJECT.SIGN_ENCRYPT
+                | TPMA_OBJECT.SENSITIVEDATAORIGIN
+            ),
+        )
+        handle, public, _, _, _ = self.ectx.create_primary(
+            TPM2B_SENSITIVE_CREATE(), template
+        )
+
+        msg = b"sign me please"
+        h = sha256(msg)
+        sigdig = h.digest()
+        sig = self.ectx.sign(
+            handle,
+            sigdig,
+            TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL),
+            TPMT_TK_HASHCHECK(tag=TPM2_ST.HASHCHECK, hierarchy=TPM2_RH.NULL),
+        )
+
+        crypto.verify_signature(sig, public, msg)
+
+    def test_verify_singature_rsapss(self):
+        template = TPM2B_PUBLIC.parse(
+            "rsa2048:rsapss-sha384:null",
+            objectAttributes=(
+                TPMA_OBJECT.USERWITHAUTH
+                | TPMA_OBJECT.SIGN_ENCRYPT
+                | TPMA_OBJECT.SENSITIVEDATAORIGIN
+            ),
+        )
+        handle, public, _, _, _ = self.ectx.create_primary(
+            TPM2B_SENSITIVE_CREATE(), template
+        )
+
+        msg = b"sign me please"
+        h = sha384(msg)
+        sigdig = h.digest()
+        sig = self.ectx.sign(
+            handle,
+            sigdig,
+            TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL),
+            TPMT_TK_HASHCHECK(tag=TPM2_ST.HASHCHECK, hierarchy=TPM2_RH.NULL),
+        )
+
+        crypto.verify_signature(sig, public, msg)
+
+    def test_verify_singature_rsassa(self):
+        template = TPM2B_PUBLIC.parse(
+            "rsa2048:rsassa-sha256:null",
+            objectAttributes=(
+                TPMA_OBJECT.USERWITHAUTH
+                | TPMA_OBJECT.SIGN_ENCRYPT
+                | TPMA_OBJECT.SENSITIVEDATAORIGIN
+            ),
+        )
+        handle, public, _, _, _ = self.ectx.create_primary(
+            TPM2B_SENSITIVE_CREATE(), template
+        )
+
+        msg = b"sign me please"
+        h = sha256(msg)
+        sigdig = h.digest()
+        sig = self.ectx.sign(
+            handle,
+            sigdig,
+            TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL),
+            TPMT_TK_HASHCHECK(tag=TPM2_ST.HASHCHECK, hierarchy=TPM2_RH.NULL),
+        )
+
+        crypto.verify_signature(sig, public, msg)
+
+    def test_verify_signature_bad(self):
+        badalg = TPMT_SIGNATURE(sigAlg=TPM2_ALG.NULL)
+        with self.assertRaises(ValueError) as e:
+            crypto.verify_signature(badalg, b"", b"")
+        self.assertEqual(str(e.exception), "unsupported signature algorithm: 16")
+
+        hsig = TPMT_SIGNATURE(sigAlg=TPM2_ALG.HMAC)
+        with self.assertRaises(ValueError) as e:
+            crypto.verify_signature(hsig, str("not bytes"), b"1234")
+        self.assertEqual(
+            str(e.exception), "bad key type for 5, expected bytes, got str"
+        )
+
+        hsig.signature.hmac.hashAlg = TPM2_ALG.NULL
+        with self.assertRaises(ValueError) as e:
+            crypto.verify_signature(hsig, b"key", b"1234")
+        self.assertEqual(str(e.exception), "unsupported digest algorithm: 16")
+
+        badecc = TPMT_SIGNATURE(sigAlg=TPM2_ALG.ECDSA)
+        with self.assertRaises(ValueError) as e:
+            crypto.verify_signature(badecc, str("bad"), b"1234")
+        self.assertEqual(
+            str(e.exception), "bad key type for 24, expected ECC public key, got str"
+        )
+
+        ecckey = TPM2B_PUBLIC.from_pem(ecc_public_key)
+        badecc.signature.ecdsa.hash = TPM2_ALG.NULL
+        with self.assertRaises(ValueError) as e:
+            crypto.verify_signature(badecc, ecckey, b"1234")
+        self.assertEqual(str(e.exception), "unsupported digest algorithm: 16")
+
+        badrsa = TPMT_SIGNATURE(sigAlg=TPM2_ALG.RSAPSS)
+        with self.assertRaises(ValueError) as e:
+            crypto.verify_signature(badrsa, str("bad"), b"1234")
+        self.assertEqual(
+            str(e.exception), "bad key type for 22, expected RSA public key, got str"
+        )
+
+        badrsa.signature.rsapss.hash = TPM2_ALG.NULL
+        rsakey = TPM2B_PUBLIC.from_pem(rsa_public_key)
+        with self.assertRaises(ValueError) as e:
+            crypto.verify_signature(badrsa, rsakey, b"1234")
+        self.assertEqual(str(e.exception), "unsupported digest algorithm: 16")
+
+        badrsa.signature.rsapss.hash = TPM2_ALG.SHA256
+        with self.assertRaises(crypto.InvalidSignature):
+            crypto.verify_signature(badrsa, rsakey, b"1234")
+
+        badrsa.sigAlg = TPM2_ALG.RSASSA
+        with self.assertRaises(crypto.InvalidSignature):
+            crypto.verify_signature(badrsa, rsakey, b"1234")

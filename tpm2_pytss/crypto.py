@@ -4,8 +4,9 @@ SPDX-License-Identifier: BSD-2
 
 from math import ceil
 from ._libtpm2_pytss import lib
-from cryptography.hazmat.primitives.asymmetric import rsa, ec
-from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import rsa, ec, padding
+from cryptography.hazmat.primitives.asymmetric.utils import encode_dss_signature
+from cryptography.hazmat.primitives import hashes, hmac
 from cryptography.hazmat.primitives.serialization import (
     load_pem_private_key,
     load_der_private_key,
@@ -22,7 +23,7 @@ from cryptography.hazmat.primitives.kdf.concatkdf import ConcatKDFHash
 from cryptography.hazmat.primitives.ciphers.algorithms import AES
 from cryptography.hazmat.primitives.ciphers import modes
 from cryptography.hazmat.backends import default_backend
-from cryptography.exceptions import UnsupportedAlgorithm
+from cryptography.exceptions import UnsupportedAlgorithm, InvalidSignature
 
 _curvetable = (
     (lib.TPM2_ECC_NIST_P192, ec.SECP192R1),
@@ -295,3 +296,83 @@ def get_digest_size(alg):
         raise ValueError(f"unsupported digest algorithm: {alg}")
 
     return dt.digest_size
+
+
+def verify_signature_rsa(signature, key, data):
+    dt = _get_digest(signature.signature.any.hashAlg)
+    if dt is None:
+        raise ValueError(
+            f"unsupported digest algorithm: {signature.signature.rsapss.hash}"
+        )
+    mpad = None
+    if signature.sigAlg == lib.TPM2_ALG_RSASSA:
+        pad = padding.PKCS1v15()
+    elif signature.sigAlg == lib.TPM2_ALG_RSAPSS:
+        pad = padding.PSS(mgf=padding.MGF1(dt()), salt_length=dt.digest_size)
+        mpad = padding.PSS(mgf=padding.MGF1(dt()), salt_length=padding.PSS.MAX_LENGTH)
+    else:
+        raise ValueError(f"unsupported RSA signature algorihtm: {signature.sigAlg}")
+
+    sig = bytes(signature.signature.rsapss.sig)
+    try:
+        key.verify(sig, data, pad, dt())
+    except InvalidSignature:
+        if mpad:
+            key.verify(sig, data, mpad, dt())
+        else:
+            raise
+
+
+def verify_signature_ecc(signature, key, data):
+    dt = _get_digest(signature.signature.any.hashAlg)
+    if dt is None:
+        raise ValueError(
+            f"unsupported digest algorithm: {signature.signature.ecdsa.hash}"
+        )
+    r = int.from_bytes(signature.signature.ecdsa.signatureR, byteorder="big")
+    s = int.from_bytes(signature.signature.ecdsa.signatureS, byteorder="big")
+    sig = encode_dss_signature(r, s)
+    key.verify(sig, data, ec.ECDSA(dt()))
+
+
+def verify_signature_hmac(signature, key, data):
+    dt = _get_digest(signature.signature.hmac.hashAlg)
+    if dt is None:
+        raise ValueError(
+            f"unsupported digest algorithm: {signature.signature.hmac.hashAlg}"
+        )
+    sh = hashes.Hash(dt(), backend=default_backend())
+    sh.update(data)
+    hdata = sh.finalize()
+    sig = bytes(signature.signature.hmac)
+    h = hmac.HMAC(key, dt(), backend=default_backend())
+    h.update(hdata)
+    h.verify(sig)
+
+
+def verify_signature(signature, key, data):
+    if hasattr(key, "publicArea"):
+        key = key.publicArea
+    kt = getattr(key, "type", None)
+    if kt in (lib.TPM2_ALG_RSA, lib.TPM2_ALG_ECC):
+        key = public_to_key(key)
+    if signature.sigAlg in (lib.TPM2_ALG_RSASSA, lib.TPM2_ALG_RSAPSS):
+        if not isinstance(key, rsa.RSAPublicKey):
+            raise ValueError(
+                f"bad key type for {signature.sigAlg}, expected RSA public key, got {key.__class__.__name__}"
+            )
+        verify_signature_rsa(signature, key, data)
+    elif signature.sigAlg == lib.TPM2_ALG_ECDSA:
+        if not isinstance(key, ec.EllipticCurvePublicKey):
+            raise ValueError(
+                f"bad key type for {signature.sigAlg}, expected ECC public key, got {key.__class__.__name__}"
+            )
+        verify_signature_ecc(signature, key, data)
+    elif signature.sigAlg == lib.TPM2_ALG_HMAC:
+        if not isinstance(key, bytes):
+            raise ValueError(
+                f"bad key type for {signature.sigAlg}, expected bytes, got {key.__class__.__name__}"
+            )
+        verify_signature_hmac(signature, key, data)
+    else:
+        raise ValueError(f"unsupported signature algorithm: {signature.sigAlg}")
