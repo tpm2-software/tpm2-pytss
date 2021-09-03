@@ -8,8 +8,9 @@ import string
 
 import pytest
 from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.asymmetric import ec, padding
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric.padding import PSS
 
 from tpm2_pytss import *
 from tpm2_pytss.utils import is_bug_fixed
@@ -25,19 +26,42 @@ def simulator():
     tpm.close()
 
 
-@pytest.fixture(scope="module")
-def fapi_config(simulator):
+@pytest.fixture(scope="class")
+def fapi_config_ecc(simulator):
     with FapiConfig(
-        temp_dirs=True, tcti=simulator.tcti_name_conf, ek_cert_less="yes"
+        temp_dirs=True,
+        tcti=simulator.tcti_name_conf,
+        ek_cert_less="yes",
+        profile_name="P_ECCP256SHA256",
     ) as fapi_config:
         yield fapi_config
 
 
-@pytest.fixture(scope="module")
-def fapi(fapi_config):
+@pytest.fixture(scope="class")
+def fapi_config_rsa(simulator):
+    with FapiConfig(
+        temp_dirs=True,
+        tcti=simulator.tcti_name_conf,
+        ek_cert_less="yes",
+        profile_name="P_RSA2048SHA256",
+    ) as fapi_config:
+        yield fapi_config
+
+
+@pytest.fixture(scope="class")
+def fapi_ecc(fapi_config_ecc):
     with FAPI() as fapi:
-        fapi.provision()
+        fapi.provision(is_provisioned_ok=False)
         yield fapi
+        fapi.delete("/")
+
+
+@pytest.fixture(scope="class")
+def fapi_rsa(fapi_config_rsa):
+    with FAPI() as fapi:
+        fapi.provision(is_provisioned_ok=False)
+        yield fapi
+        fapi.delete("/")
 
 
 def random_uid() -> str:
@@ -57,16 +81,20 @@ def sha256(data: bytes) -> bytes:
 
 
 @pytest.fixture(scope="class")
-def init_fapi(request, fapi):
-    request.cls.fapi = fapi
-    request.cls.fapi.provision()
+def init_fapi_ecc(request, fapi_ecc):
+    request.cls.fapi = fapi_ecc
     request.cls.profile_name = request.cls.fapi.config.profile_name
     yield request.cls.fapi
 
 
-# @pytest.mark.forked
-@pytest.mark.usefixtures("init_fapi")
-class TestFapi:
+@pytest.fixture(scope="class")
+def init_fapi_rsa(request, fapi_rsa):
+    request.cls.fapi = fapi_rsa
+    request.cls.profile_name = request.cls.fapi.config.profile_name
+    yield request.cls.fapi
+
+
+class Common:
     @pytest.fixture
     def esys(self):
         with ESAPI(tcti=self.fapi.tcti) as esys:
@@ -97,7 +125,7 @@ class TestFapi:
     def decrypt_key(self):
         profile_name = self.fapi.config.profile_name
         key_path = f"/{profile_name}/HS/SRK/key_{random_uid()}"
-        self.fapi.create_key(path=key_path, type_="decrypt, restricted, noda")
+        self.fapi.create_key(path=key_path, type_="decrypt")
         yield key_path
         self.fapi.delete(path=key_path)
 
@@ -153,8 +181,6 @@ class TestFapi:
     def test_provision_fail(self):
         with pytest.raises(TSS2_Exception):
             self.fapi.provision(is_provisioned_ok=False)
-
-    # TODO provision second (RSA) profile
 
     def test_get_random(self):
         random_bytes = self.fapi.get_random(42)
@@ -228,37 +254,6 @@ class TestFapi:
         with pytest.raises(TSS2_Exception):
             self.fapi.create_key(path=key_path)
 
-    def test_get_tpm_blobs(self, sign_key):
-        tpm_2b_public, tpm_2b_private, policy = self.fapi.get_tpm_blobs(path=sign_key)
-        assert tpm_2b_public.size == 0x56
-        assert tpm_2b_public.publicArea.type == lib.TPM2_ALG_ECC
-        assert tpm_2b_public.publicArea.nameAlg == lib.TPM2_ALG_SHA256
-        assert (
-            tpm_2b_public.publicArea.objectAttributes
-            == lib.TPMA_OBJECT_SIGN_ENCRYPT
-            | lib.TPMA_OBJECT_USERWITHAUTH
-            | lib.TPMA_OBJECT_SENSITIVEDATAORIGIN
-        )
-        assert tpm_2b_public.publicArea.authPolicy.size == 0
-        assert (
-            tpm_2b_public.publicArea.parameters.eccDetail.symmetric.algorithm
-            == lib.TPM2_ALG_NULL
-        )
-        assert (
-            tpm_2b_public.publicArea.parameters.eccDetail.scheme.scheme
-            == lib.TPM2_ALG_NULL
-        )
-        assert (
-            tpm_2b_public.publicArea.parameters.eccDetail.curveID
-            == lib.TPM2_ECC_NIST_P256
-        )
-        assert (
-            tpm_2b_public.publicArea.parameters.eccDetail.kdf.scheme
-            == lib.TPM2_ALG_NULL
-        )
-        assert tpm_2b_private.size == 0x7E
-        assert policy == ""
-
     def test_get_esys_blob_contextload(self, esys, sign_key):
         blob_data, blob_type = self.fapi.get_esys_blob(path=sign_key)
         assert blob_type == lib.FAPI_ESYSBLOB_CONTEXTLOAD
@@ -271,29 +266,6 @@ class TestFapi:
         assert blob_type == lib.FAPI_ESYSBLOB_DESERIALIZE
         esys_handle = esys.load_blob(blob_data, blob_type)
         esys.nv_read_public(esys_handle)
-
-    def test_sign(self, sign_key):
-        # create signature
-        message = b"Hello World"
-        digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
-        digest.update(message)
-        digest = digest.finalize()
-
-        signature, key_public_pem, cert_pem = self.fapi.sign(
-            path=sign_key, digest=digest
-        )
-        assert type(signature) == bytes
-        assert type(key_public_pem) == bytes
-        assert type(cert_pem) == bytes
-
-        # verify via fapi
-        self.fapi.verify_signature(sign_key, digest, signature)
-
-        # verify via openssl
-        public_key = serialization.load_pem_public_key(
-            key_public_pem, backend=default_backend()
-        )
-        public_key.verify(signature, message, ec.ECDSA(hashes.SHA256()))
 
     def test_verify(self, ext_key):
         # create signature externally
@@ -498,7 +470,7 @@ class TestFapi:
 
     def test_get_empty_platform_certificates_ok(self):
         certificates = self.fapi.get_platform_certificates(no_cert_ok=True)
-        assert certificates is b""
+        assert certificates == b""
 
     def test_get_empty_platform_certificates_fail(self):
         with pytest.raises(TSS2_Exception):
@@ -530,11 +502,21 @@ class TestFapi:
         assert log == ""
 
     def test_nv_increment(self, nv_increment):
+        # TODO initial increment should not be necessary, check in with upstream
         self.fapi.nv_increment(nv_increment)
 
-        returned_data, log = self.fapi.nv_read(nv_increment)
-        assert returned_data == b"\x00\x00\x00\x00\x00\x00\x00\x01"
+        data_before, log = self.fapi.nv_read(nv_increment)
+        assert len(data_before) == 8
         assert log == ""
+
+        self.fapi.nv_increment(nv_increment)
+
+        data_after, log = self.fapi.nv_read(nv_increment)
+        assert len(data_after) == 8
+        assert log == ""
+        assert int.from_bytes(data_before, byteorder="big") + 1 == int.from_bytes(
+            data_after, byteorder="big"
+        )
 
     def test_nv_pcr(self, nv_pcr):
         value_old = b"\x00" * 32
@@ -548,8 +530,6 @@ class TestFapi:
         assert '"test":"myfile"' in returned_log
 
     def test_nv_set_bits(self, nv_bitfield):
-        value_old = b"\x00" * 32
-
         bitfield = 0x0000DECAFBAD0000
         self.fapi.nv_set_bits(nv_bitfield, bitfield)
 
@@ -763,7 +743,7 @@ class TestFapi:
     def test_policy_branched(self):
         pcr_index = 15
         pcr_data = b"ABCDEF"
-        pcr_digest = b"\x00" * 32
+        pcr_digest, _ = self.fapi.pcr_read(index=pcr_index)
         pcr_digest = sha256(pcr_digest + sha256(pcr_data))
 
         # create policy Signed, which is satisfied via a signature by sign_key
@@ -809,7 +789,6 @@ class TestFapi:
           ]
         }}
         """
-        print(policy)
 
         policy_path = f"/policy/policy_{random_uid()}"
         self.fapi.import_object(path=policy_path, import_data=policy)
@@ -918,3 +897,124 @@ class TestFapi:
 
         # use key for signing: success
         self.fapi.sign(path=key_path, digest=b"\x11" * 32)
+
+
+@pytest.mark.usefixtures("init_fapi_ecc")
+class TestFapiECC(Common):
+    def test_sign(self, sign_key):
+        # create signature
+        message = b"Hello World"
+        digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
+        digest.update(message)
+        digest = digest.finalize()
+
+        signature, key_public_pem, cert_pem = self.fapi.sign(
+            path=sign_key, digest=digest
+        )
+        assert type(signature) == bytes
+        assert type(key_public_pem) == bytes
+        assert type(cert_pem) == bytes
+
+        # verify via fapi
+        self.fapi.verify_signature(sign_key, digest, signature)
+
+        # verify via openssl
+        public_key = serialization.load_pem_public_key(
+            key_public_pem, backend=default_backend()
+        )
+        public_key.verify(signature, message, ec.ECDSA(hashes.SHA256()))
+
+    def test_get_tpm_blobs(self, sign_key):
+        tpm_2b_public, tpm_2b_private, policy = self.fapi.get_tpm_blobs(path=sign_key)
+        assert tpm_2b_public.size == 0x56
+        assert tpm_2b_public.publicArea.type == lib.TPM2_ALG_ECC
+        assert tpm_2b_public.publicArea.nameAlg == lib.TPM2_ALG_SHA256
+        assert (
+            tpm_2b_public.publicArea.objectAttributes
+            == lib.TPMA_OBJECT_SIGN_ENCRYPT
+            | lib.TPMA_OBJECT_USERWITHAUTH
+            | lib.TPMA_OBJECT_SENSITIVEDATAORIGIN
+        )
+        assert tpm_2b_public.publicArea.authPolicy.size == 0
+        assert (
+            tpm_2b_public.publicArea.parameters.eccDetail.symmetric.algorithm
+            == lib.TPM2_ALG_NULL
+        )
+        assert (
+            tpm_2b_public.publicArea.parameters.eccDetail.scheme.scheme
+            == lib.TPM2_ALG_NULL
+        )
+        assert (
+            tpm_2b_public.publicArea.parameters.eccDetail.curveID
+            == lib.TPM2_ECC_NIST_P256
+        )
+        assert (
+            tpm_2b_public.publicArea.parameters.eccDetail.kdf.scheme
+            == lib.TPM2_ALG_NULL
+        )
+        assert tpm_2b_private.size == 0x7E
+        assert policy == ""
+
+
+@pytest.mark.usefixtures("init_fapi_rsa")
+class TestFapiRSA(Common):
+    def test_sign(self, sign_key):
+        # create signature
+        message = b"Hello World"
+        digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
+        digest.update(message)
+        digest = digest.finalize()
+
+        signature, key_public_pem, cert_pem = self.fapi.sign(
+            path=sign_key, digest=digest
+        )
+        assert type(signature) == bytes
+        assert type(key_public_pem) == bytes
+        assert type(cert_pem) == bytes
+
+        # verify via fapi
+        self.fapi.verify_signature(sign_key, digest, signature)
+
+        # verify via openssl
+        public_key = serialization.load_pem_public_key(
+            key_public_pem, backend=default_backend()
+        )
+        public_key.verify(
+            signature,
+            message,
+            PSS(mgf=padding.MGF1(hashes.SHA256()), salt_length=32),
+            hashes.SHA256(),
+        )
+
+    def test_get_tpm_blobs(self, sign_key):
+        tpm_2b_public, tpm_2b_private, policy = self.fapi.get_tpm_blobs(path=sign_key)
+        assert tpm_2b_public.size == 0x116
+        assert tpm_2b_public.publicArea.type == lib.TPM2_ALG_RSA
+        assert tpm_2b_public.publicArea.nameAlg == lib.TPM2_ALG_SHA256
+        assert (
+            tpm_2b_public.publicArea.objectAttributes
+            == lib.TPMA_OBJECT_SIGN_ENCRYPT
+            | lib.TPMA_OBJECT_USERWITHAUTH
+            | lib.TPMA_OBJECT_SENSITIVEDATAORIGIN
+        )
+        assert tpm_2b_public.publicArea.authPolicy.size == 0
+        assert (
+            tpm_2b_public.publicArea.parameters.rsaDetail.symmetric.algorithm
+            == lib.TPM2_ALG_NULL
+        )
+        assert (
+            tpm_2b_public.publicArea.parameters.rsaDetail.scheme.scheme
+            == lib.TPM2_ALG_NULL
+        )
+        assert tpm_2b_public.publicArea.parameters.rsaDetail.keyBits == 2048
+        assert tpm_2b_public.publicArea.parameters.rsaDetail.exponent == 0
+        assert tpm_2b_private.size == 0xDE
+        assert policy == ""
+
+    def test_encrypt_decrypt(self, decrypt_key):
+        plaintext = b"Hello World!"
+        ciphertext = self.fapi.encrypt(decrypt_key, plaintext)
+        assert isinstance(ciphertext, bytes)
+
+        decrypted = self.fapi.decrypt(decrypt_key, ciphertext)
+        assert decrypted == plaintext
