@@ -101,7 +101,7 @@ class ESAPI:
 
     def __init__(self, tcti: TCTI = None):
 
-        if not isinstance(tcti, (TCTI, None)):
+        if not isinstance(tcti, (TCTI, type(None))):
             raise TypeError(f"Expected tcti to be type TCTI or None, got {type(tcti)}")
 
         self._tcti = tcti
