@@ -1035,6 +1035,10 @@ class TestFapiRSA(Common):
         assert tpm_2b_private.size == 0xDE
         assert policy == ""
 
+    @pytest.mark.skipif(
+        not is_bug_fixed(fixed_in="3.2", backports=["2.4.7", "3.0.5", "3.1.1"]),
+        reason="tpm2-tss bug, see #2092",
+    )
     def test_encrypt_decrypt(self, decrypt_key):
         plaintext = b"Hello World!"
         ciphertext = self.fapi.encrypt(decrypt_key, plaintext)
