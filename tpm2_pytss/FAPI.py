@@ -380,6 +380,11 @@ class FAPI:
         Returns:
             bytes: The ciphertext.
         """
+        check_bug_fixed(
+            fixed_in="3.2",
+            backports=["2.4.7", "3.0.5", "3.1.1"],
+            details="Faulty free of FAPI Encrypt might lead to Segmentation Fault. See https://github.com/tpm2-software/tpm2-tss/issues/2092",
+        )
         path = to_bytes_or_null(path)
         plaintext = to_bytes_or_null(plaintext)
         ciphertext = ffi.new("uint8_t **")
