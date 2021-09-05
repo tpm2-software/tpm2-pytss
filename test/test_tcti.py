@@ -70,7 +70,7 @@ class TestTCTI(TSS2_EsapiTest):
         self.assertIsInstance(self.tcti.conf, str)
 
         with self.assertRaises(TypeError):
-            TctiLdr(name=None, conf=1234)
+            TCTILdr(name=None, conf=1234)
 
         with self.assertRaises(TypeError):
-            TctiLdr(name=1234, conf=None)
+            TCTILdr(name=1234, conf=None)

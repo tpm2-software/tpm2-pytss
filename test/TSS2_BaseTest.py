@@ -87,7 +87,7 @@ class SwtpmSimulator(BaseTpmSimulator):
         if self._port is None:
             return None
 
-        return TctiLdr("swtpm", f"port={self._port}")
+        return TCTILdr("swtpm", f"port={self._port}")
 
 
 class IBMSimulator(BaseTpmSimulator):
@@ -128,7 +128,7 @@ class IBMSimulator(BaseTpmSimulator):
         if self._port is None:
             return None
 
-        return TctiLdr("mssim", f"port={self._port}")
+        return TCTILdr("mssim", f"port={self._port}")
 
 
 class TpmSimulator(object):
