@@ -7,7 +7,7 @@ from .TCTI import TCTI
 from .utils import _chkrc
 
 
-class TctiLdr(TCTI):
+class TCTILdr(TCTI):
     def __init__(self, name=None, conf=None):
 
         self._ctx_pp = ffi.new("TSS2_TCTI_CONTEXT **")

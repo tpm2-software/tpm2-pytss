@@ -1,4 +1,4 @@
-Fapi
+FAPI
 ====
 
 .. autoclass:: tpm2_pytss.FAPI

@@ -28,7 +28,7 @@ def simulator():
 
 @pytest.fixture(scope="class")
 def fapi_config_ecc(simulator):
-    with FapiConfig(
+    with FAPIConfig(
         temp_dirs=True,
         tcti=simulator.tcti_name_conf,
         ek_cert_less="yes",
@@ -39,7 +39,7 @@ def fapi_config_ecc(simulator):
 
 @pytest.fixture(scope="class")
 def fapi_config_rsa(simulator):
-    with FapiConfig(
+    with FAPIConfig(
         temp_dirs=True,
         tcti=simulator.tcti_name_conf,
         ek_cert_less="yes",

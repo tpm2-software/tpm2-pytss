@@ -25,7 +25,7 @@ FAPI_CONFIG_PATHS = [
 ]
 
 
-class FapiConfig(contextlib.ExitStack):
+class FAPIConfig(contextlib.ExitStack):
     """Context to create a temporary Fapi environment."""
 
     def __init__(self, config: Optional[dict] = None, temp_dirs: bool = True, **kwargs):
@@ -95,7 +95,7 @@ class FapiConfig(contextlib.ExitStack):
         fapi_conf_file.write(json.dumps(self.config))
         fapi_conf_file.close
         logger.debug(
-            f"Creating FapiConfig: {self.config_tmp_path}:\n{json.dumps(self.config, indent=4)}"
+            f"Creating FAPIConfig: {self.config_tmp_path}:\n{json.dumps(self.config, indent=4)}"
         )
 
         # Set fapi config env variable
