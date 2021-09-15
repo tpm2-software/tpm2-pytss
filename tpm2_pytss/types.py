@@ -20,6 +20,7 @@ from tpm2_pytss.crypto import (
     private_from_encoding,
     public_to_pem,
     getname,
+    verify_signature,
 )
 
 import binascii
@@ -2518,7 +2519,18 @@ class TPMU_SIGNATURE(TPM_OBJECT):
 
 
 class TPMT_SIGNATURE(TPM_OBJECT):
-    pass
+    def verify_signature(self, key, data):
+        """
+        Verify a TPM generated signature against a key.
+
+        Args:
+            key (TPMT_PUBLIC, TPM2B_PUBLIC or bytes): The key to verify against, bytes for HMAC, the public part for asymmetric key.
+            data (bytes): The signed data to verify.
+
+        Raises:
+            InvalidSignature: when the signature doesn't match the data.
+        """
+        verify_signature(self, key, data)
 
 
 class TPMU_SIG_SCHEME(TPM_OBJECT):
