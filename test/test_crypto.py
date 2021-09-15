@@ -837,7 +837,7 @@ class CryptoTest(TSS2_EsapiTest):
             TPMT_TK_HASHCHECK(tag=TPM2_ST.HASHCHECK, hierarchy=TPM2_RH.NULL),
         )
 
-        crypto.verify_signature(sig, public, msg)
+        sig.verify_signature(public, msg)
 
     def test_verify_signature_bad(self):
         badalg = TPMT_SIGNATURE(sigAlg=TPM2_ALG.NULL)
