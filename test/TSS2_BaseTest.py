@@ -3,13 +3,9 @@ SPDX-License-Identifier: BSD-2
 """
 
 from distutils import spawn
-import logging
-import os
 import random
 import subprocess
-import tempfile
 import unittest
-import sys
 from time import sleep
 from ctypes import cdll
 
