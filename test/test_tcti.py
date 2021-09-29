@@ -74,3 +74,7 @@ class TestTCTI(TSS2_EsapiTest):
 
         with self.assertRaises(TypeError):
             TCTILdr(name=1234, conf=None)
+
+
+if __name__ == "__main__":
+    unittest.main()
