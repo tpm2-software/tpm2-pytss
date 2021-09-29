@@ -10,15 +10,23 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives.asymmetric.ec import (
     ECDH,
     generate_private_key,
+    EllipticCurvePublicKey,
 )
+from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 from cryptography.hazmat.primitives.hmac import HMAC
 from cryptography.hazmat.primitives.ciphers import modes, Cipher
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.ciphers.algorithms import AES
+from cryptography.hazmat.primitives.hashes import HashAlgorithm
+from typing import Optional, Tuple, Type
+
 import secrets
 
 
-def generate_rsa_seed(key, hashAlg, label):
+def generate_rsa_seed(
+    key: RSAPublicKey, hashAlg: int, label: bytes
+) -> Tuple[bytes, bytes]:
     halg = _get_digest(hashAlg)
     if halg is None:
         raise ValueError(f"unsupported digest algorithm {hashAlg}")
@@ -29,7 +37,9 @@ def generate_rsa_seed(key, hashAlg, label):
     return (seed, enc_seed)
 
 
-def generate_ecc_seed(key, hashAlg, label):
+def generate_ecc_seed(
+    key: EllipticCurvePublicKey, hashAlg: int, label: bytes
+) -> Tuple[bytes, bytes]:
     halg = _get_digest(hashAlg)
     if halg is None:
         raise ValueError(f"unsupported digest algorithm {hashAlg}")
@@ -49,7 +59,7 @@ def generate_ecc_seed(key, hashAlg, label):
     return (seed, secret)
 
 
-def generate_seed(public, label):
+def generate_seed(public: TPMT_PUBLIC, label: bytes) -> Tuple[bytes, bytes]:
     key = public_to_key(public)
     if public.type == TPM2_ALG.RSA:
         return generate_rsa_seed(key, public.nameAlg, label)
@@ -59,14 +69,14 @@ def generate_seed(public, label):
         raise ValueError(f"unsupported seed algorithm {public.type}")
 
 
-def hmac(halg, hmackey, enc_cred, name):
+def hmac(halg: HashAlgorithm, hmackey: bytes, enc_cred: bytes, name: bytes) -> bytes:
     h = HMAC(hmackey, halg(), backend=default_backend())
     h.update(enc_cred)
     h.update(name)
     return h.finalize()
 
 
-def encrypt(cipher, key, data):
+def encrypt(cipher: Type[AES], key: bytes, data: bytes) -> bytes:
     iv = len(key) * b"\x00"
     ci = cipher(key)
     ciph = Cipher(ci, modes.CFB(iv), backend=default_backend())
@@ -75,7 +85,9 @@ def encrypt(cipher, key, data):
     return encdata
 
 
-def make_credential(public, credential, name):
+def make_credential(
+    public: TPM2B_PUBLIC, credential: bytes, name: TPM2B_NAME
+) -> Tuple[TPM2B_ID_OBJECT, TPM2B_ENCRYPTED_SECRET]:
     """Encrypts credential for use with activate_credential
 
     Args:
@@ -112,7 +124,13 @@ def make_credential(public, credential, name):
     return (credblob, secret)
 
 
-def wrap(newparent, public, sensitive, symkey=None, symdef=None):
+def wrap(
+    newparent: TPMT_PUBLIC,
+    public: TPM2B_PUBLIC,
+    sensitive: TPM2B_SENSITIVE,
+    symkey: Optional[bytes] = None,
+    symdef: Optional[TPMT_SYM_DEF_OBJECT] = None,
+) -> Tuple[TPM2B_DATA, TPM2B_PRIVATE, TPM2B_ENCRYPTED_SECRET]:
     """Wraps key under a TPM key hierarchy
 
     Args:
