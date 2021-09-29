@@ -38,3 +38,7 @@ class ExceptionTest(unittest.TestCase):
         self.assertEqual(exc.handle, 0)
         self.assertEqual(exc.parameter, 0)
         self.assertEqual(exc.session, 1)
+
+
+if __name__ == "__main__":
+    unittest.main()
