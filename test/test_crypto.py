@@ -890,3 +890,7 @@ class CryptoTest(TSS2_EsapiTest):
         badrsa.sigAlg = TPM2_ALG.RSASSA
         with self.assertRaises(crypto.InvalidSignature):
             crypto.verify_signature(badrsa, rsakey, b"1234")
+
+
+if __name__ == "__main__":
+    unittest.main()
