@@ -2,7 +2,6 @@
 """
 SPDX-License-Identifier: BSD-2
 """
-import binascii
 import random
 import string
 import sys
