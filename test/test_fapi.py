@@ -5,6 +5,7 @@ SPDX-License-Identifier: BSD-2
 import binascii
 import random
 import string
+import sys
 
 import pytest
 from cryptography.hazmat.primitives import hashes, serialization
@@ -1046,3 +1047,7 @@ class TestFapiRSA(Common):
 
         decrypted = self.fapi.decrypt(decrypt_key, ciphertext)
         assert decrypted == plaintext
+
+
+if __name__ == "__main__":
+    sys.exit(pytest.main(sys.argv))
