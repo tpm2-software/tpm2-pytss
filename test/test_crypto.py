@@ -2,8 +2,6 @@
 """
 SPDX-License-Identifier: BSD-2
 """
-import binascii
-import itertools
 import unittest
 
 from tpm2_pytss import *
