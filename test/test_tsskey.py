@@ -8,6 +8,8 @@ from .TSS2_BaseTest import TSS2_EsapiTest
 from asn1crypto.core import ObjectIdentifier
 from asn1crypto import pem
 
+import unittest
+
 rsa_pem = b"""-----BEGIN TSS2 PRIVATE KEY-----
 MIIB8gYGZ4EFCgEDoAMBAQECBEAAAAEEggEYARYAAQALAAYEcgAAABAAEAgAAAEA
 AQEAzF/VFhLaIJ9Y3up8slssYhV1Fhh7KwYBCR1dqLeI9QkDF6M05b/Uc589yMsn
@@ -119,3 +121,7 @@ class TSSKeyTest(TSS2_EsapiTest):
         with self.assertRaises(RuntimeError) as e:
             TSSPrivKey.create_ecc(self.ectx)
         self.assertEqual(str(e.exception), "Unable to find supported parent key type")
+
+
+if __name__ == "__main__":
+    unittest.main()
