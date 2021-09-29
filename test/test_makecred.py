@@ -170,3 +170,7 @@ class MakeCredTest(TSS2_EsapiTest):
             outsymseed,
             TPMT_SYM_DEF_OBJECT(algorithm=TPM2_ALG.NULL),
         )
+
+
+if __name__ == "__main__":
+    unittest.main()
