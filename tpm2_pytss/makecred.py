@@ -112,18 +112,26 @@ def make_credential(public, credential, name):
     return (credblob, secret)
 
 
-def wrap(newparent, public, sensitive, symkey, symdef):
+def wrap(newparent, public, sensitive, symkey=None, symdef=None):
     """Wraps key under a TPM key hierarchy
 
     Args:
         newparent (TPMT_PUBLIC): The public area of the parent
         public (TPM2B_PUBLIC): The public area of the key
         sensitive (TPM2B_SENSITIVE): The sensitive area of the key
-        symkey (bytes or None): Symmetric key for inner encryption
-        symdef (TPMT_SYMDEF_OBJECT): Symmetric algorithm to be used for inner encryption
+        symkey (bytes or None): Symmetric key for inner encryption. Defaults to None. When None
+        and symdef is defined a key will be generated based on the key size for symdef.
+        symdef (TPMT_SYMDEF_OBJECT): Symmetric algorithm to be used for inner encryption. This should
+        be set to aes128CFB since that is what the TPM supports:
+        TPMT_SYM_DEF(
+          algorithm=TPM2_ALG.AES,
+          keyBits=TPMU_SYM_KEY_BITS(sym=128),
+          mode=TPMU_SYM_MODE(sym=TPM2_ALG.CFB),
+        )
 
     Returns:
-        A tuple of (TPM2B_DATA, TPM2B_PRIVATE, TPM2B_ENCRYPTED_SECRET)
+        A tuple of (TPM2B_DATA, TPM2B_PRIVATE, TPM2B_ENCRYPTED_SECRET) which is the encryption key, the
+        the wrapped duplicate and the encrypted seed.
 
     Raises:
         ValueError: If the public key type or symmetric algorithm are not supported
