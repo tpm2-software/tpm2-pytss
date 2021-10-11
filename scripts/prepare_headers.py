@@ -3,11 +3,20 @@
 SPDX-License-Identifier: BSD-2
 """
 
+import importlib.util
 import os
+import pkgconfig
 import pathlib
 import re
 import sys
 import textwrap
+
+# import tpm2_pytss.constants
+constants_spec = importlib.util.spec_from_file_location(
+    "tpm2_pytss.constants", "tpm2_pytss/constants.py"
+)
+constants = importlib.util.module_from_spec(constants_spec)
+constants_spec.loader.exec_module(constants)
 
 
 def remove_common_guards(s):
@@ -111,6 +120,39 @@ def prepare_fapi(dirpath):
 
     s = remove_poll_stuff(s, "FAPI_POLL_HANDLE")
 
+    s += "".join(
+        f"""
+    extern "Python" TSS2_RC {constants.CALLBACK_BASE_NAME[constants.CallbackType.FAPI_AUTH]}{i}(
+        char     const *objectPath,
+        char     const *description,
+        char    const **auth,
+        void           *userData);
+    extern "Python" TSS2_RC {constants.CALLBACK_BASE_NAME[constants.CallbackType.FAPI_BRANCH]}{i}(
+        char     const *objectPath,
+        char     const *description,
+        char    const **branchNames,
+        size_t          numBranches,
+        size_t         *selectedBranch,
+        void           *userData);
+    extern "Python" TSS2_RC {constants.CALLBACK_BASE_NAME[constants.CallbackType.FAPI_SIGN]}{i}(
+        char     const *objectPath,
+        char     const *description,
+        char     const *publicKey,
+        char     const *publicKeyHint,
+        uint32_t        hashAlg,
+        uint8_t  const *dataToSign,
+        size_t          dataToSignSize,
+        uint8_t const **signature,
+        size_t         *signatureSize,
+        void           *userData);
+    extern "Python" TSS2_RC {constants.CALLBACK_BASE_NAME[constants.CallbackType.FAPI_POLICYACTION]}{i}(
+        char     const *objectPath,
+        char     const *action,
+        void           *userData);
+     """
+        for i in range(0, constants.CALLBACK_COUNT)
+    )
+
     return remove_common_guards(s)
 
 
@@ -152,7 +194,7 @@ def prepare_mu(dirpath):
     return s
 
 
-def prepare(indir, outfile):
+def prepare(indir, outfile, build_fapi=True):
     indir = os.path.join(indir, "tss2")
 
     common = prepare_common(indir)
@@ -167,7 +209,8 @@ def prepare(indir, outfile):
 
     esapi = prepare_esapi(indir)
 
-    fapi = prepare_fapi(indir)
+    if build_fapi:
+        fapi = prepare_fapi(indir)
 
     rcdecode = prepare_rcdecode(indir)
 
@@ -192,7 +235,8 @@ def prepare(indir, outfile):
         f.write(tcti_ldr)
         f.write(sapi)
         f.write(esapi)
-        f.write(fapi)
+        if build_fapi:
+            f.write(fapi)
         f.write(rcdecode)
         f.write(mu)
 
@@ -201,4 +245,7 @@ if __name__ == "__main__":
     if len(sys.argv) != 3:
         print("Usage: {0} <tss2-header-dir> <output-file>".format(sys.argv[0]))
         exit(1)
-    prepare(sys.argv[1], sys.argv[2])
+
+    build_fapi = pkgconfig.installed("tss2-fapi", ">=3.0.0")
+
+    prepare(sys.argv[1], sys.argv[2], build_fapi=build_fapi)
