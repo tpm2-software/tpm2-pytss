@@ -1,5 +1,9 @@
 from .ESAPI import ESAPI
-from .FAPI import *
+
+try:
+    from .FAPI import *
+except NotImplementedError:
+    pass
 from .TCTILdr import *
 from .TCTI import TCTI
 from .types import *
