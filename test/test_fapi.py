@@ -12,7 +12,11 @@ from cryptography.hazmat.primitives.asymmetric import ec, padding
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric.padding import PSS
 
-from tpm2_pytss import *
+try:
+    from tpm2_pytss import *
+except NotImplementedError:
+    pytest.skip("Skipping FAPI tests as FAPI not detected", allow_module_level=True)
+
 from tpm2_pytss.utils import is_bug_fixed
 
 from .TSS2_BaseTest import TpmSimulator, TSS2_BaseTest
