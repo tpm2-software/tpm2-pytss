@@ -14,6 +14,21 @@ TPM2 TSS Python bindings for Enhanced System API (ESYS).
 Documentation for the latest release is hosted at
 https://tpm2-pytss.readthedocs.io/en/latest/index.html
 
+## Releases
+
+Currently no production stable releases are available, however branch master is progressing into a stable point and the version 1.0.0 will
+come off of that branch. Until then, consider all pypi.org packages and releases below 1.0.0 unstable, deprecated and likely broken. The master
+branch will be a stable development branch, use with caution.
+
+## Installing
+
+To install the master branch:
+```bash
+python3 -m pip install git+https://github.com/tpm2-software/tpm2-pytss.git
+```
+
+This is known to work with version 2.4.0 of tpm2-tss, testing is underway with more recent versions.
+
 ## Contributing
 
 See [HACKING](HACKING.md)
@@ -29,8 +44,3 @@ See [HACKING](HACKING.md)
 ## License
 
 tpm2-pytss is distributed under the [BSD 2 Clause License](LICENSE).
-
-## TODOs
-
-- Document need for ctypes for certain values, [example](https://github.com/tpm2-software/tpm2-pytss/blob/d84ab944c2795a27a076caf759ecfb31ab667446/tests/test_esys_auto_session_flags.py#L112-L133)
-- `ESYS_TR_PTR` should be `SessionContext` (Maybe?)
