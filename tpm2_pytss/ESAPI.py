@@ -1,6 +1,7 @@
 """
 SPDX-License-Identifier: BSD-2
 """
+import pkgconfig
 
 from .types import *
 
@@ -9,6 +10,10 @@ from .TCTI import TCTI
 from .TCTILdr import TCTILdr
 
 from typing import Union, Tuple, List
+
+# Work around this FAPI dependency if FAPI is not present with the constant value
+_fapi_installed_ = pkgconfig.installed("tss2-fapi", ">=3.0.0")
+_DEFAULT_LOAD_BLOB_SELECTOR = lib.FAPI_ESYSBLOB_CONTEXTLOAD if _fapi_installed_ else 1
 
 
 def _get_cdata(value, expected, varname, allow_none=False, *args, **kwargs):
@@ -847,6 +852,8 @@ class ESAPI:
         )
 
         in_public_cdata = _get_cdata(in_public, TPM2B_PUBLIC, "in_public")
+
+        hierarchy = ESAPI._fixup_hierarchy(hierarchy)
 
         object_handle = ffi.new("ESYS_TR *")
         _chkrc(
@@ -2049,6 +2056,9 @@ class ESAPI:
 
         check_friendly_int(hash_alg, "hash_alg", TPM2_ALG)
 
+        check_friendly_int(hierarchy, "hierarchy", ESYS_TR)
+        hierarchy = ESAPI._fixup_hierarchy(hierarchy)
+
         data_cdata = _get_cdata(data, TPM2B_MAX_BUFFER, "data")
 
         out_hash = ffi.new("TPM2B_DIGEST **")
@@ -2431,6 +2441,7 @@ class ESAPI:
         _check_handle_type(session3, "session3")
 
         check_friendly_int(hierarchy, "hierarchy", ESYS_TR)
+        hierarchy = ESAPI._fixup_hierarchy(hierarchy)
 
         buffer_cdata = _get_cdata(buffer, TPM2B_MAX_BUFFER, "buffer", allow_none=True)
 
@@ -4915,11 +4926,13 @@ class ESAPI:
             "auth_handle",
             expected=(ESYS_TR.RH_ENDORSEMENT, ESYS_TR.RH_OWNER, ESYS_TR.RH_PLATFORM),
         )
+
         _check_handle_type(
             enable,
             "enable",
             expected=(ESYS_TR.RH_ENDORSEMENT, ESYS_TR.RH_OWNER, ESYS_TR.RH_PLATFORM),
         )
+        enable = ESAPI._fixup_hierarchy(enable)
 
         if not isinstance(state, bool):
             raise TypeError(f"Expected state to be a bool, got {type(state)}")
@@ -6723,7 +6736,7 @@ class ESAPI:
         return TPM2B_DATA(get_dptr(output_data, lib.Esys_Free))
 
     def load_blob(
-        self, data: bytes, type_: int = lib.FAPI_ESYSBLOB_CONTEXTLOAD
+        self, data: bytes, type_: int = _DEFAULT_LOAD_BLOB_SELECTOR
     ) -> ESYS_TR:
         """load binary ESAPI object as binary blob. Supported are the types :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_CONTEXTLOAD` and :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_DESERIALIZE`.
 
@@ -6812,3 +6825,38 @@ class ESAPI:
         _chkrc(lib.Esys_TR_Deserialize(self._ctx, buffer, len(buffer), esys_handle))
 
         return ESYS_TR(esys_handle[0])
+
+    @staticmethod
+    def _fixup_hierarchy(hierarchy: ESYS_TR) -> Union[TPM2_RH, ESYS_TR]:
+        """Fixup ESYS_TR values to TPM2_RH constants to work around tpm2-tss API change in 3.0.0.
+
+        In versions tpm2-tss version before 3.0.0 the TPM2_RH constants were used Esys_LoadExternal,
+        however the spec and API idioms dictate that an ESYS_TR should be used, and thus that change
+        was made. To keep the API constant always expect ESYS_TR's in the Python code and fix them
+        up under the hood for old ESAPI versions.
+
+        Args:
+            hierarchy (ESYS_TR): The ESYS_TR object to map tp TPM2_RH constant.
+
+        Returns:
+          The TPM2_RH.
+
+        Raises:
+            - ValueError: If a parameter is the incorrect value.
+        """
+
+        if pkgconfig.installed("tss2-esys", "<3.0.0"):
+            fixup_map = {
+                ESYS_TR.NULL: TPM2_RH.NULL,
+                ESYS_TR.OWNER: TPM2_RH.OWNER,
+                ESYS_TR.PLATFORM: TPM2_RH.PLATFORM,
+                ESYS_TR.ENDORSEMENT: TPM2_RH.ENDORSEMENT,
+            }
+            if hierarchy not in fixup_map:
+                raise RunTimeError(
+                    "Expected hierarchy to be one of ESYS_TR.NULL, ESYS_TR.PLATFORM, ESYS_TR.OWNER, ESYS_TR.ENDORSMENT"
+                )
+
+            hierarchy = fixup_map[hierarchy]
+
+        return hierarchy
