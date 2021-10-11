@@ -7,15 +7,17 @@ import string
 import sys
 
 import pytest
+
+pytestmark = pytest.mark.skipif(
+    "tpm2_pytss.FAPI" not in sys.modules, reason="FAPI Not Detected"
+)
+
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec, padding
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives.asymmetric.padding import PSS
 
-try:
-    from tpm2_pytss import *
-except NotImplementedError:
-    pytest.skip("Skipping FAPI tests as FAPI not detected", allow_module_level=True)
+from tpm2_pytss import *
 
 from tpm2_pytss.utils import is_bug_fixed
 
