@@ -1,6 +1,11 @@
 """
 SPDX-License-Identifier: BSD-2
 """
+import pkgconfig
+
+if not pkgconfig.installed("tss2-fapi", ">=3.0.0"):
+    raise NotImplementedError("FAPI Not installed or version is not 3.0.0")
+
 import contextlib
 import json
 import logging
