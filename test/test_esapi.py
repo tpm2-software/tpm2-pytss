@@ -123,6 +123,10 @@ class TestEsys(TSS2_EsapiTest):
                 inSensitive, "ecc256", session3=object()
             )
 
+    def test_create_primary_none(self):
+        handle, _, _, _, _ = self.ectx.create_primary(None)
+        self.assertNotEqual(handle, 0)
+
     def test_pcr_read(self):
 
         pcrsels = TPML_PCR_SELECTION.parse("sha1:3+sha256:all")
@@ -522,6 +526,13 @@ class TestEsys(TSS2_EsapiTest):
                 parentHandle, childInSensitive, childInPublic, outsideInfo, object
             )
 
+    def test_create_none(self):
+
+        parentHandle = self.ectx.create_primary(None)[0]
+        priv, pub = self.ectx.create(parentHandle, None)[0:2]
+        self.assertEqual(type(pub), TPM2B_PUBLIC)
+        self.assertEqual(type(priv), TPM2B_PRIVATE)
+
     def test_load(self):
 
         inSensitive = TPM2B_SENSITIVE_CREATE(
@@ -895,6 +906,13 @@ class TestEsys(TSS2_EsapiTest):
 
         with self.assertRaises(TypeError):
             self.ectx.create_loaded(parentHandle, childInSensitive, session3=object())
+
+    def test_createloaded_none(self):
+
+        parentHandle = self.ectx.create_primary(None)[0]
+
+        childHandle = self.ectx.create_loaded(parentHandle, None)[0]
+        self.assertNotEqual(childHandle, 0)
 
     def test_rsa_enc_dec(self):
 
