@@ -635,7 +635,7 @@ class ESAPI:
     def create(
         self,
         parent_handle: ESYS_TR,
-        in_sensitive: TPM2B_SENSITIVE_CREATE,
+        in_sensitive: Union[TPM2B_SENSITIVE_CREATE, type(None)],
         in_public: Union[TPM2B_PUBLIC, str] = "rsa2048",
         outside_info: Union[TPM2B_DATA, bytes, str] = TPM2B_DATA(),
         creation_pcr: Union[TPML_PCR_SELECTION, str] = TPML_PCR_SELECTION(),
@@ -653,7 +653,7 @@ class ESAPI:
 
         Args:
             parent_handle (ESYS_TR): Handle of parent for new object.
-            in_sensitive (TPM2B_SENSITIVE_CREATE): The sensitive data.
+            in_sensitive (TPM2B_SENSITIVE_CREATE): The sensitive data, can be None for an empty TPM2B_SENSITIVE_CREATE.
             in_public (Union[TPM2B_PUBLIC, str]): The public template. Defaults to an rsa2048 template.
             outside_info (Union[TPM2B_DATA, bytes, str]):Data that will be included in the creation data for
                 this object to provide permanent, verifiable linkage between
@@ -682,6 +682,9 @@ class ESAPI:
         _check_handle_type(session3, "session3")
 
         in_public_cdata = _get_cdata(in_public, TPM2B_PUBLIC, "in_public")
+
+        if in_sensitive is None:
+            in_sensitive = TPM2B_SENSITIVE_CREATE()
         in_sensitive_cdata = _get_cdata(
             in_sensitive, TPM2B_SENSITIVE_CREATE, "in_sensitive"
         )
@@ -1150,7 +1153,7 @@ class ESAPI:
     def create_loaded(
         self,
         parent_handle: ESYS_TR,
-        in_sensitive: TPM2B_SENSITIVE_CREATE,
+        in_sensitive: Union[TPM2B_SENSITIVE_CREATE, type(None)],
         in_public: Union[TPM2B_PUBLIC, str] = "rsa2048",
         session1: ESYS_TR = ESYS_TR.PASSWORD,
         session2: ESYS_TR = ESYS_TR.NONE,
@@ -1167,7 +1170,7 @@ class ESAPI:
               storage key, TPM2_RH_ENDORSEMENT, TPM2_RH_OWNER, TPM2_RH_PLATFORM+{PP},
               or TPM2_RH_NULL.
             in_sensitive(TPM2B_SENSITIVE_CREATE): The sensitive data, see TPM 2.0 Part 1 Sensitive
-                Values.
+                Values. Accepts None for an empty TPM2B_SENSITIVE_CREATE.
             in_public(Union[TPM2B_PUBLIC, str]): The public template (optional). Defaults to an rsa2048 key.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.PASSWORD.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -1195,6 +1198,8 @@ class ESAPI:
         if isinstance(in_public, str):
             in_public = TPM2B_TEMPLATE(TPMT_PUBLIC.parse(in_public).marshal())
 
+        if in_sensitive is None:
+            in_sensitive = TPM2B_SENSITIVE_CREATE()
         in_sensitive_cdata = _get_cdata(
             in_sensitive, TPM2B_SENSITIVE_CREATE, "in_sensitive"
         )
@@ -4759,7 +4764,7 @@ class ESAPI:
 
     def create_primary(
         self,
-        in_sensitive: TPM2B_SENSITIVE_CREATE,
+        in_sensitive: Union[TPM2B_SENSITIVE_CREATE, type(None)],
         in_public: Union[TPM2B_PUBLIC, str] = "rsa2048",
         primary_handle: ESYS_TR = ESYS_TR.OWNER,
         outside_info: Union[TPM2B_DATA, bytes, str] = TPM2B_DATA(),
@@ -4775,7 +4780,8 @@ class ESAPI:
         available
 
         Args:
-            in_sensitive (TPM2B_SENSITIVE_CREATE): The sensitive data, see TPM 2.0 Part 1 Sensitive Values.
+            in_sensitive (TPM2B_SENSITIVE_CREATE): The sensitive data, see TPM 2.0 Part 1 Sensitive Values. Accepts
+            None for an empty TPM2B_SENSITIVE_CREATE.
             in_public (Union[TPM2B_PUBLIC, str]): The public template. Defaults to "rsa2048".
             primary_handle (ESYS_TR): ESYS_TR.ENDORSEMENT, ESYS_TR.OWNER, ESYS_TR.PLATFORM or ESYS_TR.NULL.
                 Defaults to ESYS_TR.OWNER.
@@ -4813,6 +4819,9 @@ class ESAPI:
             "in_public",
             objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS,
         )
+
+        if in_sensitive is None:
+            in_sensitive = TPM2B_SENSITIVE_CREATE()
         in_sensitive_cdata = _get_cdata(
             in_sensitive, TPM2B_SENSITIVE_CREATE, "in_sensitive"
         )
