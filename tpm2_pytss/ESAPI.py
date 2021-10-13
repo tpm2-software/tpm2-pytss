@@ -110,12 +110,15 @@ class ESAPI:
                 f"Expected tcti to be type TCTI, str or None, got {type(tcti)}"
             )
 
+        self._passed_tcti = self._did_load_tcti = False
+
         # support tpm2-tools style tcti strings
         if isinstance(tcti, str):
             self._did_load_tcti = True
+            self._passed_tcti = True
             tcti = TCTILdr.parse(tcti)
-        else:
-            self._did_load_tcti = False
+        elif isinstance(tcti, TCTI):
+            self._passed_tcti = True
 
         self._tcti = tcti
         tctx = ffi.NULL if tcti is None else tcti._tcti_context
@@ -154,8 +157,8 @@ class ESAPI:
     def get_tcti(self) -> TCTI:
         """Return the used TCTI context.
 
-        If a tcti context was passed into Esys_Initialize then this tcti context is
-        return. If NULL was passed in, then NULL will be returned.
+        If a TCTI was passed into Esys_Initialize then this tcti context is
+        return. If None was passed in, then None will be returned.
         This function is useful before Esys_Finalize to retrieve the tcti context and
         perform a clean Tss2_Tcti_Finalize.
 
@@ -164,11 +167,7 @@ class ESAPI:
 
         C Function: Esys_GetTcti
         """
-        if hasattr(self._tcti, "_tcti_context"):
-            return self._tcti
-        tctx = ffi.new("TSS2_TCTI_CONTEXT **")
-        _chkrc(lib.Esys_GetTcti(self._ctx, tctx))
-        return TCTI(tctx[0])
+        return self._tcti if self._passed_tcti else None
 
     @property
     def tcti(self) -> TCTI:
