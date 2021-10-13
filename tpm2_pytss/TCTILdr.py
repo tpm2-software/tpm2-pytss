@@ -62,3 +62,10 @@ class TCTILdr(TCTI):
     @property
     def conf(self):
         return self._conf
+
+    @property
+    def name_conf(self):
+        return f"{self.name}:{self.conf}" if self.conf else self.name
+
+    def __str__(self):
+        return self.name_conf
