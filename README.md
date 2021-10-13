@@ -7,9 +7,11 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/python/black)
 [![PyPI version](https://img.shields.io/pypi/v/tpm2-pytss.svg)](https://pypi.org/project/tpm2-pytss)
 
-TPM2 TSS Python bindings for Enhanced System API (ESYS), Feature API (FAPI), Marshaling (MU), TCTI Loader (TCTILdr) and RC Decoding (rcdecode) libraries. I also contains
-utility methods for wrapping keys to TPM 2.0 data structures for importation into the TPM, TPM-less makecredential command and name calculations, TSS2 PEM Key format support,
-importing Keys from PEM, DER and SSH formats, conversion from tpm2-tools based command line strings and loading tpm2-tools context files.
+TPM2 TSS Python bindings for Enhanced System API (ESYS), Feature API (FAPI), Marshaling (MU), TCTI
+Loader (TCTILdr) and RC Decoding (rcdecode) libraries. It also contains utility methods for wrapping
+keys to TPM 2.0 data structures for importation into the TPM, TPM-less makecredential command and
+name calculations, TSS2 PEM Key format support, importing Keys from PEM, DER and SSH formats,
+conversion from tpm2-tools based command line strings and loading tpm2-tools context files.
 
 ## Documentation
 
