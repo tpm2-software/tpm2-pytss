@@ -3177,7 +3177,7 @@ class ESAPI:
 
         Args:
             key_handle (ESYS_TR):
-            digest (Union[TPM2B_DIGEST, bytes, int]): Digest to be signed.
+            digest (Union[TPM2B_DIGEST, bytes, str]): Digest to be signed.
             in_scheme (TPMT_SIG_SCHEME): TPM2_Signing scheme to use if the scheme for keyHandle is TPM2_ALG_NULL.
             validation (TPMT_TK_HASHCHECK): Proof that digest was created by the TPM.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.PASSWORD.
