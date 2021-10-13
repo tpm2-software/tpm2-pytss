@@ -44,6 +44,17 @@ class TCTILdr(TCTI):
         lib.Tss2_TctiLdr_Finalize(self._ctx_pp)
         self._ctx = ffi.NULL
 
+    @classmethod
+    def parse(cls, tcti_name_conf: str):
+
+        chunks = tcti_name_conf.split(":", 1)
+        if len(chunks) > 2:
+            raise RuntimeError(f"Expected only 1 : in TCTI str, got {len(chunks)}")
+        name = chunks[0]
+        conf = chunks[1] if len(chunks) == 2 else None
+
+        return cls(name, conf)
+
     @property
     def name(self):
         return self._name

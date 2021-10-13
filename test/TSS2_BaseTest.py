@@ -173,13 +173,14 @@ class TSS2_EsapiTest(TSS2_BaseTest):
     def setUp(self):
         super().setUp()
         try:
-            self.tcti = self.tpm.get_tcti()
-            with ESAPI(self.tcti) as ectx:
+            # use str initializer here to test string inputs to ESAPI constructor
+            with ESAPI(self.tpm.tcti_name_conf) as ectx:
                 ectx.startup(TPM2_SU.CLEAR)
 
         except Exception as e:
             self.tpm.close()
             raise e
+        self.tcti = self.tpm.get_tcti()
         self.ectx = ESAPI(self.tcti)
 
     def tearDown(self):

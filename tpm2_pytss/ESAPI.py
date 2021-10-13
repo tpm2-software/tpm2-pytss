@@ -6,6 +6,7 @@ from .types import *
 
 from .utils import _chkrc, get_dptr, check_friendly_int
 from .TCTI import TCTI
+from .TCTILdr import TCTILdr
 
 from typing import Union, Tuple, List
 
@@ -75,7 +76,9 @@ class ESAPI:
         - TCP socket localhost:2321 (TPM simulator)
 
     Args:
-        tcti (TCTI): The TCTI context used to connect to the TPM (may be None). Default None.
+        tcti Union[TCTI, str]: The TCTI context used to connect to the TPM (may be None). This
+        is established using TCTILdr or a tpm2-tools style --tcti string in the format of
+        <tcti-name>:<tcti-conf> where :<tcti-conf> is optional. Defaults to None.
 
     Returns:
         An instance of the ESAPI class.
@@ -83,6 +86,7 @@ class ESAPI:
     Raises:
         TypeError: If the TCTI is an invalid type.
         TSS2_Exception: Any of the various TSS2_RC's the lower layers can return.
+        RuntimeError: If a TCTI config string is not in name:conf or name format.
 
     This class implements the TCG defined Enhanced System API in Python see Notes below.
 
@@ -99,10 +103,19 @@ class ESAPI:
     C Function: Esys_Initialize
     """
 
-    def __init__(self, tcti: TCTI = None):
+    def __init__(self, tcti: Union[TCTI, str] = None):
 
-        if not isinstance(tcti, (TCTI, type(None))):
-            raise TypeError(f"Expected tcti to be type TCTI or None, got {type(tcti)}")
+        if not isinstance(tcti, (TCTI, type(None), str)):
+            raise TypeError(
+                f"Expected tcti to be type TCTI, str or None, got {type(tcti)}"
+            )
+
+        # support tpm2-tools style tcti strings
+        if isinstance(tcti, str):
+            self._did_load_tcti = True
+            tcti = TCTILdr.parse(tcti)
+        else:
+            self._did_load_tcti = False
 
         self._tcti = tcti
         tctx = ffi.NULL if tcti is None else tcti._tcti_context
@@ -134,6 +147,9 @@ class ESAPI:
 
         lib.Esys_Finalize(self._ctx_pp)
         self._ctx = ffi.NULL
+        if self._did_load_tcti:
+            self._tcti.close()
+        self._tcti = None
 
     def get_tcti(self) -> TCTI:
         """Return the used TCTI context.
