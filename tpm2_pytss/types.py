@@ -1017,6 +1017,9 @@ class TPM_OBJECT(object):
             # recurse so we can get handling of setattr with Python wrapped data
             setattr(self, key, value)
 
+    def __dir__(self):
+        return object.__dir__(self) + dir(self._cdata)
+
     def marshal(self):
         """Marshal instance into bytes.
 
