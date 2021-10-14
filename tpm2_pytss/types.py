@@ -72,6 +72,12 @@ class TPM_FRIENDLY_INT(int):
 
         return f"{cls.__name__}.{m}"
 
+    def __str__(self):
+        for k, v in vars(self.__class__).items():
+            if int(self) == v:
+                return k.lower()
+        return str(int(self))
+
 
 class TPM_FRIENDLY_INTLIST(TPM_FRIENDLY_INT):
     @classmethod
@@ -99,6 +105,24 @@ class TPM_FRIENDLY_INTLIST(TPM_FRIENDLY_INT):
                     )
 
         return super().parse(intvalue)
+
+    def __str__(self):
+        cv = int(self)
+        ints = list()
+        for k, v in vars(self.__class__).items():
+            if k.startswith("_") or k.startswith("DEFAULT"):
+                continue
+            for fk, fv in self._FIXUP_MAP.items():
+                if k == fv:
+                    k = fk
+                    break
+            if not v & self:
+                continue
+            ints.append(k.lower())
+            cv = cv ^ v
+        if cv:
+            raise ValueError(f"unnmatched values left: 0x{cv:x}")
+        return "|".join(ints)
 
 
 class ESYS_TR(TPM_FRIENDLY_INT):
