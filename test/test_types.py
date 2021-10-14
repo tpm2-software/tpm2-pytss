@@ -1460,6 +1460,29 @@ class TypesTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             ctx = TPMS_CONTEXT.from_tools(badversion)
 
+    def test_TPM_FRIENDLY_INT_str(self):
+        alg = TPM2_ALG(TPM2_ALG.ECC)
+        self.assertEqual(str(alg), "ecc")
+
+        badalg = TPM2_ALG(TPM2_ALG.LAST + 1)
+        self.assertEqual(str(badalg), str(TPM2_ALG.LAST + 1))
+
+    def test_TPM_FRIENDLY_INTLIST_str(self):
+        attrs = TPMA_OBJECT(
+            TPMA_OBJECT.DECRYPT | TPMA_OBJECT.NODA | TPMA_OBJECT.SIGN_ENCRYPT
+        )
+        self.assertEqual(str(attrs), "noda|decrypt|sign")
+
+        badattrs = TPMA_OBJECT(
+            TPMA_OBJECT.DECRYPT
+            | TPMA_OBJECT.NODA
+            | TPMA_OBJECT.SIGN_ENCRYPT
+            | 0x00090000
+        )
+        with self.assertRaises(ValueError) as e:
+            str(badattrs)
+        self.assertEqual(str(e.exception), "unnmatched values left: 0x80000")
+
 
 if __name__ == "__main__":
     unittest.main()
