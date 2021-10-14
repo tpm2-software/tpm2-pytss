@@ -1962,6 +1962,10 @@ class TPMU_ASYM_SCHEME(TPM_OBJECT):
     pass
 
 
+class TPMU_KDF_SCHEME(TPM_OBJECT):
+    pass
+
+
 class TPMT_KDF_SCHEME(TPM_OBJECT):
     pass
 
