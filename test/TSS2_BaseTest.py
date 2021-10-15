@@ -40,6 +40,8 @@ class BaseTpmSimulator(object):
     def close(self):
         self.tpm.terminate()
 
+    def __str__(self):
+        return self.exe
 
 class SwtpmSimulator(BaseTpmSimulator):
     exe = "swtpm"
