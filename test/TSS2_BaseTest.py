@@ -7,6 +7,7 @@ import logging
 import os
 import random
 import subprocess
+import sys
 import tempfile
 import unittest
 from time import sleep
@@ -42,6 +43,7 @@ class BaseTpmSimulator(object):
 
     def __str__(self):
         return self.exe
+
 
 class SwtpmSimulator(BaseTpmSimulator):
     exe = "swtpm"
@@ -145,10 +147,15 @@ class TpmSimulator(object):
         for sim in TpmSimulator.SIMULATORS:
             exe = spawn.find_executable(sim.exe)
             if not exe:
+                print(f'Could not find executable: "{sim.exe}"', file=sys.stderr)
                 continue
             try:
                 cdll.LoadLibrary(sim.libname)
-            except OSError:
+            except OSError as e:
+                print(
+                    f'Could not load libraries: "{sim.exe}", error: {e}',
+                    file=sys.stderr,
+                )
                 continue
 
             return sim()
