@@ -218,3 +218,8 @@ class TSS2_Exception(RuntimeError):
     def error(self):
         """int: The error with handle, parameter and session stripped."""
         return self._error
+
+    @property
+    def fmt1(self):
+        """bool: True if the error is related to a handle, parameter or session """
+        return bool(self._rc & lib.TPM2_RC_FMT1)
