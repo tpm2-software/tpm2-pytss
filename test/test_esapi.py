@@ -2375,12 +2375,26 @@ class TestEsys(TSS2_EsapiTest):
             )
 
     def test_vendor_tcg_test(self):
-        with self.assertRaises(TSS2_Exception):
+
+        # Maybe some TPMs support the CC some don't
+        capdata = self.ectx.get_capability(
+            TPM2_CAP.COMMANDS, TPM2_CC.FIRST, TPM2_MAX.CAP_CC
+        )[1]
+
+        # TPM Supports it
+        if TPM2_CC.Vendor_TCG_Test in capdata.data.command:
             self.ectx.vendor_tcg_test(b"random data")
 
-        in_cdata = TPM2B_DATA(b"other bytes")._cdata
-        with self.assertRaises(TSS2_Exception):
+            in_cdata = TPM2B_DATA(b"other bytes")._cdata
             self.ectx.vendor_tcg_test(in_cdata)
+        # TPM Does not Support it
+        else:
+            with self.assertRaises(TSS2_Exception):
+                self.ectx.vendor_tcg_test(b"random data")
+
+            in_cdata = TPM2B_DATA(b"other bytes")._cdata
+            with self.assertRaises(TSS2_Exception):
+                self.ectx.vendor_tcg_test(in_cdata)
 
         with self.assertRaises(TypeError):
             self.ectx.vendor_tcg_test(None)
