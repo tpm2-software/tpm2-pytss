@@ -39,6 +39,14 @@ class ExceptionTest(unittest.TestCase):
         self.assertEqual(exc.parameter, 0)
         self.assertEqual(exc.session, 1)
 
+    def test_fmt1(self):
+        rc = TPM2_RC.EXPIRED + TPM2_RC.S + TPM2_RC.RC1
+        exc = TSS2_Exception(rc)
+        self.assertEqual(exc.fmt1, True)
+
+        exc = TSS2_Exception(TPM2_RC.SESSION_HANDLES)
+        self.assertEqual(exc.fmt1, False)
+
 
 if __name__ == "__main__":
     unittest.main()
