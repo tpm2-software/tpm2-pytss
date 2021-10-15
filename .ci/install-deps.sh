@@ -42,32 +42,6 @@ sudo apt-get install -y \
     socat \
     libseccomp-dev \
     libjson-glib-dev
-#
-# Get a simulator
-#
-
-# libtpms
-if ! pkg-config libtpms; then 
-  git -C /tmp clone --depth=1 https://github.com/stefanberger/libtpms.git
-  pushd /tmp/libtpms
-  ./autogen.sh --prefix=/usr --with-openssl --with-tpm2
-  make -j$(nproc)
-  sudo make install
-  popd
-  rm -fr /tmp/libtpms
-  sudo ldconfig
-fi
-
-# swtpm
-if ! command -v swtpm; then
-  git -C /tmp clone --depth=1 https://github.com/stefanberger/swtpm.git
-  pushd /tmp/swtpm
-  ./autogen.sh --prefix=/usr
-  make -j$(nproc)
-  sudo make install
-  popd
-  rm -fr /tmp/swtpm
-fi
 
 #
 # Install tpm2-tss
@@ -86,6 +60,46 @@ if ! pkg-config tss2-sys; then
   sudo make install
   sudo ldconfig
   popd
+fi
+
+#
+# Get a simulator
+#
+
+# Does our tcti suport the TCTI for swtpm, if so get the swtpm simulator
+if pkg-config --exists tss2-tcti-swtpm; then
+
+  # libtpms
+  if ! pkg-config libtpms; then
+    git -C /tmp clone --depth=1 https://github.com/stefanberger/libtpms.git
+    pushd /tmp/libtpms
+    ./autogen.sh --prefix=/usr --with-openssl --with-tpm2
+    make -j$(nproc)
+    sudo make install
+    popd
+    rm -fr /tmp/libtpms
+    sudo ldconfig
+  fi
+
+  # swtpm
+  if ! command -v swtpm; then
+    git -C /tmp clone --depth=1 https://github.com/stefanberger/swtpm.git
+    pushd /tmp/swtpm
+    ./autogen.sh --prefix=/usr
+    make -j$(nproc)
+    sudo make install
+    popd
+    rm -fr /tmp/swtpm
+  fi
+# Get IBM Simulator (supported for a longer time)
+else
+  # pull from fork that has fixes for RC handling not yet in mainline.
+  git -C /tmp clone --depth=1 https://github.com/williamcroberts/ibmswtpm2.git -b fix-rc-exits
+  pushd /tmp/ibmswtpm2/src
+  make -j$(nproc)
+  sudo cp tpm_server /usr/local/bin
+  popd
+  rm -fr /tmp/ibmswtpm2
 fi
 
 #
