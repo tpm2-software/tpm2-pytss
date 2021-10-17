@@ -44,10 +44,8 @@ def _get_cdata(value, expected, varname, allow_none=False, *args, **kwargs):
 
 
 def _check_handle_type(handle, varname, expected=None):
-    if not isinstance(handle, (ESYS_TR, type(ESYS_TR.NONE))):
-        raise TypeError(
-            f"expected {varname} to be type int aka ESYS_TR, got {type(handle)}"
-        )
+    if not isinstance(handle, ESYS_TR):
+        raise TypeError(f"expected {varname} to be type ESYS_TR, got {type(handle)}")
 
     if expected is not None and handle not in expected:
         if len(expected) > 1:
@@ -212,7 +210,6 @@ class ESAPI:
 
         C Function: Esys_TR_FromTPMPublic
         """
-        _check_handle_type(handle, "handle")
 
         _check_handle_type(session1, "session1")
         _check_handle_type(session2, "session2")
@@ -547,7 +544,7 @@ class ESAPI:
             )
         )
 
-        return session_handle[0]
+        return ESYS_TR(session_handle[0])
 
     def trsess_set_attributes(
         self, session: ESYS_TR, attributes: int, mask: int = 0xFF
@@ -5695,7 +5692,6 @@ class ESAPI:
 
         _check_handle_type(auth, "auth", expected=(ESYS_TR.OWNER, ESYS_TR.PLATFORM))
         _check_handle_type(object_handle, "object_handle")
-        _check_handle_type(persistent_handle, "persistent_handle")
 
         _check_handle_type(session1, "session1")
         _check_handle_type(session2, "session2")

@@ -1483,6 +1483,9 @@ class TypesTest(unittest.TestCase):
             str(badattrs)
         self.assertEqual(str(e.exception), "unnmatched values left: 0x80000")
 
+    def test_TPM_FRIENDLY_INT_type(self):
+        self.assertIsInstance(TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS, TPMA_OBJECT)
+
 
 if __name__ == "__main__":
     unittest.main()
