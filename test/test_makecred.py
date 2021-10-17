@@ -81,7 +81,9 @@ class MakeCredTest(TSS2_EsapiTest):
         public.publicArea.type = TPM2_ALG.NULL
         with self.assertRaises(ValueError) as e:
             generate_seed(public.publicArea, b"test")
-        self.assertEqual(str(e.exception), f"unsupported key type: {TPM2_ALG.NULL}")
+        self.assertEqual(
+            str(e.exception), f"unsupported key type: {int(TPM2_ALG.NULL)}"
+        )
 
     def test_generate_seed_ecc(self):
         insens = TPM2B_SENSITIVE_CREATE()

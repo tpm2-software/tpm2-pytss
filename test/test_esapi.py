@@ -4660,7 +4660,7 @@ class TestEsys(TSS2_EsapiTest):
             self.ectx.tr_serialize("bad")
 
         with self.assertRaises(TSS2_Exception):
-            self.ectx.tr_serialize(123456)
+            self.ectx.tr_serialize(ESYS_TR(123456))
 
         with self.assertRaises(TypeError):
             self.ectx.tr_deserialize(42)

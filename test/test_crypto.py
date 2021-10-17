@@ -326,7 +326,9 @@ class CryptoTest(TSS2_EsapiTest):
 
         with self.assertRaises(ValueError) as e:
             pem = crypto.public_to_pem(pub.publicArea)
-        self.assertEqual(str(e.exception), f"unsupported key type: {TPM2_ALG.NULL}")
+        self.assertEqual(
+            str(e.exception), f"unsupported key type: {int(TPM2_ALG.NULL)}"
+        )
 
     def test_topem_rsa(self):
         pub = types.TPM2B_PUBLIC.from_pem(rsa_public_key)
@@ -701,7 +703,9 @@ class CryptoTest(TSS2_EsapiTest):
 
         with self.assertRaises(ValueError) as e:
             TPMT_SENSITIVE.keyedhash_from_secret(secret, nameAlg=TPM2_ALG.NULL)
-        self.assertEqual(str(e.exception), "unsupported digest algorithm: 16")
+        self.assertEqual(
+            str(e.exception), f"unsupported digest algorithm: {TPM2_ALG.NULL}"
+        )
 
         with self.assertRaises(ValueError) as e:
             TPMT_SENSITIVE.keyedhash_from_secret(secret, seed=b"bad seed")
