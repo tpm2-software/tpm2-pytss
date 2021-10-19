@@ -94,6 +94,14 @@ def prepare_tcti(dirpath):
     s = re.sub(r"#define TSS2_TCTI_.*\n.*", "", s, flags=re.MULTILINE)
     s = re.sub(r"^\s*#define Tss2_Tcti_(?:.*\\\r?\n)*.*$", "", s, flags=re.MULTILINE)
 
+    s += """
+    struct pollfd {
+        int   fd;         /* file descriptor */
+        short events;     /* requested events */
+        short revents;    /* returned events */
+    };
+    """
+
     return remove_common_guards(s)
 
 

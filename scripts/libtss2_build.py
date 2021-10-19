@@ -72,6 +72,7 @@ ffibuilder.cdef(open("libesys.h").read())
 source = """
     /* the C header of the library */
     #include <tss2/tss2_esys.h>
+    #include <tss2/tss2_tcti.h>
     #include <tss2/tss2_tctildr.h>
     #include <tss2/tss2_rc.h>
     #include <tss2/tss2_mu.h>
