@@ -6,9 +6,11 @@ from distutils import spawn
 import logging
 import os
 import random
+import socket
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 from time import sleep
 from ctypes import cdll
@@ -21,6 +23,11 @@ class BaseTpmSimulator(object):
     def __init__(self):
         self.tpm = None
 
+    @staticmethod
+    def ready(port):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            return s.connect_ex(("localhost", port)) == 0
+
     def start(self):
         logger = logging.getLogger("DEBUG")
         logger.debug('Setting up simulator: "{}"'.format(self.tpm))
@@ -32,6 +39,10 @@ class BaseTpmSimulator(object):
 
             tpm = self._start(port=random_port)
             if tpm:
+                # Wait to ensure that the simulator is ready for clients.
+                time.sleep(1)
+                if not self.ready(random_port):
+                    continue
                 self.tpm = tpm
                 break
 
