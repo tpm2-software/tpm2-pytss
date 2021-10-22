@@ -91,6 +91,9 @@ fi
 #
 # Install Python Development Dependencies
 #
+
+# work around as suggested in https://github.com/actions/setup-python/issues/260
+python -m pip install --ignore-installed pip==21.2.4 --disable-pip-version-check --no-warn-script-location
 python3 -m pip install --user -e .[dev]
 
 exit 0
