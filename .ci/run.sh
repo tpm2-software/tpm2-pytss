@@ -44,6 +44,15 @@ function run_test() {
   if [ -n "${ENABLE_COVERAGE}" ]; then
     python3 -m codecov
   fi
+
+  # verify that package is sane on a user install that is not editable
+  git clean -fdx
+  python3 -m pip install --user .
+  # can't be in a directory that has the package as a folder, Python tries to use that
+  # over whats installed.
+  pushd /tmp
+  python3 -c 'import tpm2_pytss'
+  popd
 }
 
 function run_whitespace() {
