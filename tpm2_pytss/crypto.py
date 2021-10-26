@@ -4,9 +4,11 @@ SPDX-License-Identifier: BSD-2
 
 from math import ceil
 from ._libtpm2_pytss import lib
+from .constants import TPM2_ALG
 from cryptography.hazmat.primitives.asymmetric import rsa, ec, padding
 from cryptography.hazmat.primitives.asymmetric.utils import encode_dss_signature
-from cryptography.hazmat.primitives import hashes, hmac
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.hmac import HMAC
 from cryptography.hazmat.primitives.serialization import (
     load_pem_private_key,
     load_der_private_key,
@@ -21,9 +23,11 @@ from cryptography.x509 import load_pem_x509_certificate, load_der_x509_certifica
 from cryptography.hazmat.primitives.kdf.kbkdf import CounterLocation, KBKDFHMAC, Mode
 from cryptography.hazmat.primitives.kdf.concatkdf import ConcatKDFHash
 from cryptography.hazmat.primitives.ciphers.algorithms import AES
-from cryptography.hazmat.primitives.ciphers import modes
+from cryptography.hazmat.primitives.ciphers import modes, Cipher
 from cryptography.hazmat.backends import default_backend
 from cryptography.exceptions import UnsupportedAlgorithm, InvalidSignature
+from typing import Tuple, Type
+import secrets
 
 _curvetable = (
     (lib.TPM2_ECC_NIST_P192, ec.SECP192R1),
@@ -345,7 +349,7 @@ def verify_signature_hmac(signature, key, data):
     sh.update(data)
     hdata = sh.finalize()
     sig = bytes(signature.signature.hmac)
-    h = hmac.HMAC(key, dt(), backend=default_backend())
+    h = HMAC(key, dt(), backend=default_backend())
     h.update(hdata)
     h.verify(sig)
 
@@ -376,3 +380,69 @@ def verify_signature(signature, key, data):
         verify_signature_hmac(signature, key, data)
     else:
         raise ValueError(f"unsupported signature algorithm: {signature.sigAlg}")
+
+
+def generate_rsa_seed(
+    key: rsa.RSAPublicKey, hashAlg: int, label: bytes
+) -> Tuple[bytes, bytes]:
+    halg = _get_digest(hashAlg)
+    if halg is None:
+        raise ValueError(f"unsupported digest algorithm {hashAlg}")
+    seed = secrets.token_bytes(halg.digest_size)
+    mgf = padding.MGF1(halg())
+    padd = padding.OAEP(mgf, halg(), label)
+    enc_seed = key.encrypt(seed, padd)
+    return (seed, enc_seed)
+
+
+def generate_ecc_seed(
+    key: ec.EllipticCurvePublicKey, hashAlg: int, label: bytes
+) -> Tuple[bytes, bytes]:
+    halg = _get_digest(hashAlg)
+    if halg is None:
+        raise ValueError(f"unsupported digest algorithm {hashAlg}")
+    ekey = ec.generate_private_key(key.curve, default_backend())
+    epubnum = ekey.public_key().public_numbers()
+    plength = int(key.curve.key_size / 8)  # FIXME ceiling here
+    exbytes = epubnum.x.to_bytes(plength, "big")
+    eybytes = epubnum.y.to_bytes(plength, "big")
+    # workaround marshal of TPMS_ECC_POINT
+    secret = (
+        len(exbytes).to_bytes(length=2, byteorder="big")
+        + exbytes
+        + len(eybytes).to_bytes(length=2, byteorder="big")
+        + eybytes
+    )
+    shared_key = ekey.exchange(ec.ECDH(), key)
+    pubnum = key.public_numbers()
+    xbytes = pubnum.x.to_bytes(plength, "big")
+    seed = kdfe(hashAlg, shared_key, label, exbytes, xbytes, halg.digest_size * 8)
+    return (seed, secret)
+
+
+def generate_seed(public: "types.TPMT_PUBLIC", label: bytes) -> Tuple[bytes, bytes]:
+    key = public_to_key(public)
+    if public.type == TPM2_ALG.RSA:
+        return generate_rsa_seed(key, public.nameAlg, label)
+    elif public.type == TPM2_ALG.ECC:
+        return generate_ecc_seed(key, public.nameAlg, label)
+    else:
+        raise ValueError(f"unsupported seed algorithm {public.type}")
+
+
+def hmac(
+    halg: hashes.HashAlgorithm, hmackey: bytes, enc_cred: bytes, name: bytes
+) -> bytes:
+    h = HMAC(hmackey, halg(), backend=default_backend())
+    h.update(enc_cred)
+    h.update(name)
+    return h.finalize()
+
+
+def encrypt(cipher: Type[AES], key: bytes, data: bytes) -> bytes:
+    iv = len(key) * b"\x00"
+    ci = cipher(key)
+    ciph = Cipher(ci, modes.CFB(iv), backend=default_backend())
+    encr = ciph.encryptor()
+    encdata = encr.update(data) + encr.finalize()
+    return encdata
