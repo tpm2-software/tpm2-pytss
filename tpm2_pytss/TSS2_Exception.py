@@ -9,7 +9,7 @@ class TSS2_Exception(RuntimeError):
     def __init__(self, rc: Union["TSS2_RC", "TPM2_RC", int]):
         if isinstance(rc, int):
             # defer this to avoid circular dep.
-            from .types import TSS2_RC
+            from .constants import TSS2_RC
 
             rc = TSS2_RC(rc)
         errmsg = ffi.string(lib.Tss2_RC_Decode(rc)).decode()

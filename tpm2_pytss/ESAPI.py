@@ -4,7 +4,7 @@ SPDX-License-Identifier: BSD-2
 import pkgconfig
 
 from .types import *
-
+from .constants import *
 from .utils import _chkrc, get_dptr, check_friendly_int
 from .TCTI import TCTI
 from .TCTILdr import TCTILdr
