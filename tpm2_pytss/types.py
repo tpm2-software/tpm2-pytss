@@ -207,6 +207,16 @@ class ESYS_TR(TPM_FRIENDLY_INT):
 
         return ectx.tr_deserialize(buffer)
 
+    def get_name(self, ectx: "ESAPI") -> "TPM2B_NAME":
+        """Same as see tpm2_pytss.ESAPI.tr_get_name
+        Args:
+            ectx(ESAPI): The esapi context to retrieve the object name from.
+
+        Returns:
+            A TPM2B_NAME object.
+        """
+        return ectx.tr_get_name(self)
+
 
 @TPM_FRIENDLY_INT.fix_const_type
 class TPM2_RH(TPM_FRIENDLY_INT):
