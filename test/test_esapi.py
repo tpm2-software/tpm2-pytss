@@ -4660,7 +4660,7 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.policy_authorize_nv(nv_index, session, session3=45.6)
 
-    def test_serialize_deserialize(self):
+    def test_esys_tr_functions(self):
 
         handle = self.ectx.create_primary(TPM2B_SENSITIVE_CREATE())[0]
 
@@ -4677,6 +4677,9 @@ class TestEsys(TSS2_EsapiTest):
         name2 = handle2.get_name(self.ectx)
         name3 = handle3.get_name(self.ectx)
         self.assertEqual(name2, name3)
+
+        self.ectx.tr_close(handle2)
+        handle3.close(self.ectx)
 
         with self.assertRaises(TypeError):
             self.ectx.tr_serialize("bad")
