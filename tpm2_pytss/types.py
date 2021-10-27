@@ -217,6 +217,13 @@ class ESYS_TR(TPM_FRIENDLY_INT):
         """
         return ectx.tr_get_name(self)
 
+    def close(self, ectx: "ESAPI"):
+        """Same as see tpm2_pytss.ESAPI.tr_close
+        Args:
+            ectx(ESAPI): The esapi context to close the ESYS_TR on.
+        """
+        return ectx.tr_close(self)
+
 
 @TPM_FRIENDLY_INT.fix_const_type
 class TPM2_RH(TPM_FRIENDLY_INT):

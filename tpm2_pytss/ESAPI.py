@@ -228,6 +228,26 @@ class ESAPI:
         )
         return ESYS_TR(obj[0])
 
+    def tr_close(self, esys_handle: ESYS_TR):
+        """ Close an ESYS_TR without removing it from the TPM.
+
+        This function deletes an ESYS_TR object from an ESYS_CONTEXT without deleting
+        it from the TPM. This is useful for NV-Indices or persistent keys, after
+        ESAPI.tr_serialize has been called. Transient objects should be deleted using
+        ESAPI.flush_context.
+
+        Args:
+            object(ESYS_TR): The ESYS_TR metadata object to be deleted from ESAPI.
+
+        Raises:
+            TSS2_Exception: Any of the various TSS2_RC's the lower layers can return.
+        """
+
+        _check_handle_type(esys_handle, "esys_handle")
+        esys_tr_ptr = ffi.new("ESYS_TR *")
+        esys_tr_ptr[0] = esys_handle
+        _chkrc(lib.Esys_TR_Close(self._ctx, esys_tr_ptr))
+
     def set_auth(
         self, esys_handle: ESYS_TR, auth_value: Union[TPM2B_AUTH, bytes, str, None]
     ):
