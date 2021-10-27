@@ -1,6 +1,6 @@
 import unittest
 
-from tpm2_pytss import TSS2_Exception, TPM2_RC
+from tpm2_pytss import TSS2_Exception, TPM2_RC, TSS2_RC
 
 
 class ExceptionTest(unittest.TestCase):
@@ -46,6 +46,18 @@ class ExceptionTest(unittest.TestCase):
 
         exc = TSS2_Exception(TPM2_RC.SESSION_HANDLES)
         self.assertEqual(exc.fmt1, False)
+
+    def test_input_types(self):
+        self.assertEqual(
+            str(TSS2_Exception(TPM2_RC.NV_LOCKED)), "tpm:error(2.0): NV access locked"
+        )
+        self.assertEqual(
+            str(TSS2_Exception(TSS2_RC.ESYS_RC_BAD_VALUE)),
+            "esapi:A parameter has a bad value",
+        )
+        self.assertEqual(
+            str(TSS2_Exception(0x7000B)), "esapi:A parameter has a bad value"
+        )
 
 
 if __name__ == "__main__":

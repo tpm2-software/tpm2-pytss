@@ -1486,6 +1486,14 @@ class TypesTest(unittest.TestCase):
     def test_TPM_FRIENDLY_INT_type(self):
         self.assertIsInstance(TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS, TPMA_OBJECT)
 
+    def test_TPM2_RC_decode(self):
+        self.assertEqual(TPM2_RC.NV_LOCKED.decode(), "tpm:error(2.0): NV access locked")
+
+    def test_TSS2_RC_decode(self):
+        self.assertEqual(
+            TSS2_RC.ESYS_RC_BAD_VALUE.decode(), "esapi:A parameter has a bad value"
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
