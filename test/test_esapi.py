@@ -1705,7 +1705,7 @@ class TestEsys(TSS2_EsapiTest):
         self.ectx.flush_context(handle)
         with self.assertRaises(TSS2_Exception) as e:
             self.ectx.tr_get_name(handle)
-        self.assertEqual(e.exception.error, TSS2_Exception.ESYS_RC_BAD_TR)
+        self.assertEqual(e.exception.error, TSS2_RC.ESYS_RC_BAD_TR)
 
     def test_evict_control(self):
         inPublic = TPM2B_PUBLIC(
