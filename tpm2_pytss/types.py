@@ -184,6 +184,29 @@ class ESYS_TR(TPM_FRIENDLY_INT):
     RH_PLATFORM = lib.ESYS_TR_RH_PLATFORM
     RH_PLATFORM_NV = lib.ESYS_TR_RH_PLATFORM_NV
 
+    def serialize(self, ectx: "ESAPI") -> bytes:
+        """Same as see tpm2_pytss.ESAPI.tr_serialize
+        Args:
+            ectx(ESAPI): The esapi context the ESYS_TR was created
+            from.
+
+        Returns:
+            A byte array of the serialized ESYS_TR.
+        """
+        return ectx.tr_serialize(self)
+
+    @staticmethod
+    def deserialize(ectx: "ESAPI", buffer: bytes) -> "ESYS_TR":
+        """Same as see tpm2_pytss.ESAPI.tr_derialize
+        Args:
+            ectx(ESAPI): The esapi context to load the ESYS_TR on.
+
+        Returns:
+            An ESYS_TR representing the TPM object.
+        """
+
+        return ectx.tr_deserialize(buffer)
+
 
 @TPM_FRIENDLY_INT.fix_const_type
 class TPM2_RH(TPM_FRIENDLY_INT):

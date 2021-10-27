@@ -4666,9 +4666,13 @@ class TestEsys(TSS2_EsapiTest):
 
         buffer = self.ectx.tr_serialize(handle)
         self.assertEqual(type(buffer), bytes)
+        self.assertEqual(handle.serialize(self.ectx), buffer)
 
         handle2 = self.ectx.tr_deserialize(buffer)
         self.assertEqual(type(handle2), ESYS_TR)
+
+        handle3 = ESYS_TR.deserialize(self.ectx, buffer)
+        self.assertEqual(type(handle3), ESYS_TR)
 
         with self.assertRaises(TypeError):
             self.ectx.tr_serialize("bad")
