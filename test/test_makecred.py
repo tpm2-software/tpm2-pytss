@@ -5,8 +5,8 @@ SPDX-License-Identifier: BSD-2
 import unittest
 
 from tpm2_pytss import *
-from tpm2_pytss.makecred import *
 from tpm2_pytss.internal.crypto import _generate_seed
+from tpm2_pytss.utils import *
 from .TSS2_BaseTest import TSS2_EsapiTest
 
 
