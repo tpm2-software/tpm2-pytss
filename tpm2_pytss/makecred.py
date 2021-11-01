@@ -1,10 +1,10 @@
-from .crypto import (
-    kdfa,
+from .internal.crypto import (
+    _kdfa,
     _get_digest,
-    symdef_to_crypt,
-    generate_seed,
-    encrypt,
-    hmac,
+    _symdef_to_crypt,
+    _generate_seed,
+    _encrypt,
+    _hmac,
 )
 from .types import *
 from cryptography.hazmat.primitives import hashes
@@ -36,16 +36,18 @@ def make_credential(
         credential = TPM2B_DIGEST(buffer=credential)
     if isinstance(name, TPM2B_SIMPLE_OBJECT):
         name = bytes(name)
-    seed, enc_seed = generate_seed(public, b"IDENTITY\x00")
+    seed, enc_seed = _generate_seed(public, b"IDENTITY\x00")
 
-    (cipher, symmode, symbits) = symdef_to_crypt(public.parameters.asymDetail.symmetric)
-    symkey = kdfa(public.nameAlg, seed, b"STORAGE", name, b"", symbits)
+    (cipher, symmode, symbits) = _symdef_to_crypt(
+        public.parameters.asymDetail.symmetric
+    )
+    symkey = _kdfa(public.nameAlg, seed, b"STORAGE", name, b"", symbits)
 
-    enc_cred = encrypt(cipher, symkey, credential.marshal())
+    enc_cred = _encrypt(cipher, symkey, credential.marshal())
 
     halg = _get_digest(public.nameAlg)
-    hmackey = kdfa(public.nameAlg, seed, b"INTEGRITY", b"", b"", halg.digest_size * 8)
-    outerhmac = hmac(halg, hmackey, enc_cred, name)
+    hmackey = _kdfa(public.nameAlg, seed, b"INTEGRITY", b"", b"", halg.digest_size * 8)
+    outerhmac = _hmac(halg, hmackey, enc_cred, name)
     hmacdata = TPM2B_DIGEST(buffer=outerhmac).marshal()
 
     credblob = TPM2B_ID_OBJECT(credential=hmacdata + enc_cred)
@@ -88,7 +90,7 @@ def wrap(
     sensb = sensitive.marshal()
     name = bytes(public.get_name())
     if symdef and symdef.algorithm != TPM2_ALG.NULL:
-        cipher, mode, bits = symdef_to_crypt(symdef)
+        cipher, mode, bits = _symdef_to_crypt(symdef)
         if not symkey:
             klen = int(bits / 8)
             symkey = secrets.token_bytes(klen)
@@ -97,21 +99,21 @@ def wrap(
         h.update(sensb)
         h.update(name)
         innerint = TPM2B_DIGEST(buffer=h.finalize()).marshal()
-        encsens = encrypt(cipher, symkey, innerint + sensb)
+        encsens = _encrypt(cipher, symkey, innerint + sensb)
         enckeyout.buffer = symkey
     else:
         encsens = sensb
 
-    seed, outsymseed.secret = generate_seed(newparent, b"DUPLICATE\x00")
-    cipher, _, bits = symdef_to_crypt(newparent.parameters.asymDetail.symmetric)
-    outerkey = kdfa(newparent.nameAlg, seed, b"STORAGE", name, b"", bits)
-    dupsens = encrypt(cipher, outerkey, encsens)
+    seed, outsymseed.secret = _generate_seed(newparent, b"DUPLICATE\x00")
+    cipher, _, bits = _symdef_to_crypt(newparent.parameters.asymDetail.symmetric)
+    outerkey = _kdfa(newparent.nameAlg, seed, b"STORAGE", name, b"", bits)
+    dupsens = _encrypt(cipher, outerkey, encsens)
 
     halg = _get_digest(newparent.nameAlg)
-    hmackey = kdfa(
+    hmackey = _kdfa(
         newparent.nameAlg, seed, b"INTEGRITY", b"", b"", halg.digest_size * 8
     )
-    outerhmac = hmac(halg, hmackey, dupsens, name)
+    outerhmac = _hmac(halg, hmackey, dupsens, name)
     hmacdata = TPM2B_DIGEST(buffer=outerhmac).marshal()
 
     duplicate = TPM2B_PRIVATE(buffer=hmacdata + dupsens)

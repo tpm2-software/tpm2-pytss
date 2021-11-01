@@ -6,6 +6,7 @@ import unittest
 
 from tpm2_pytss import *
 from tpm2_pytss.makecred import *
+from tpm2_pytss.internal.crypto import _generate_seed
 from .TSS2_BaseTest import TSS2_EsapiTest
 
 
@@ -69,18 +70,18 @@ class MakeCredTest(TSS2_EsapiTest):
     def test_generate_seed_rsa(self):
         insens = TPM2B_SENSITIVE_CREATE()
         _, public, _, _, _ = self.ectx.create_primary(insens)
-        seed, enc_seed = generate_seed(public.publicArea, b"test")
+        seed, enc_seed = _generate_seed(public.publicArea, b"test")
 
         public.publicArea.nameAlg = TPM2_ALG.LAST + 1
         with self.assertRaises(ValueError) as e:
-            generate_seed(public.publicArea, b"test")
+            _generate_seed(public.publicArea, b"test")
         self.assertEqual(
             str(e.exception), f"unsupported digest algorithm {TPM2_ALG.LAST + 1}"
         )
 
         public.publicArea.type = TPM2_ALG.NULL
         with self.assertRaises(ValueError) as e:
-            generate_seed(public.publicArea, b"test")
+            _generate_seed(public.publicArea, b"test")
         self.assertEqual(
             str(e.exception), f"unsupported key type: {int(TPM2_ALG.NULL)}"
         )
@@ -88,11 +89,11 @@ class MakeCredTest(TSS2_EsapiTest):
     def test_generate_seed_ecc(self):
         insens = TPM2B_SENSITIVE_CREATE()
         _, public, _, _, _ = self.ectx.create_primary(insens, "ecc")
-        seed, enc_seed = generate_seed(public.publicArea, b"test")
+        seed, enc_seed = _generate_seed(public.publicArea, b"test")
 
         public.publicArea.nameAlg = TPM2_ALG.LAST + 1
         with self.assertRaises(ValueError) as e:
-            generate_seed(public.publicArea, b"test")
+            _generate_seed(public.publicArea, b"test")
         self.assertEqual(
             str(e.exception), f"unsupported digest algorithm {TPM2_ALG.LAST + 1}"
         )

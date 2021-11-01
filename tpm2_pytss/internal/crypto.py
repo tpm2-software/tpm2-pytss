@@ -3,8 +3,8 @@ SPDX-License-Identifier: BSD-2
 """
 
 from math import ceil
-from ._libtpm2_pytss import lib
-from .constants import TPM2_ALG
+from .._libtpm2_pytss import lib
+from ..constants import TPM2_ALG
 from cryptography.hazmat.primitives.asymmetric import rsa, ec, padding
 from cryptography.hazmat.primitives.asymmetric.utils import encode_dss_signature
 from cryptography.hazmat.primitives import hashes
@@ -130,7 +130,7 @@ def key_from_encoding(data, password=None):
     raise ValueError("Unsupported key format")
 
 
-def public_from_encoding(data, obj, password=None):
+def _public_from_encoding(data, obj, password=None):
     key = key_from_encoding(data, password)
     nums = key.public_numbers()
     if isinstance(key, rsa.RSAPublicKey):
@@ -173,7 +173,7 @@ def private_key_from_encoding(data, password=None):
     raise ValueError("Unsupported key format")
 
 
-def private_from_encoding(data, obj, password=None):
+def _private_from_encoding(data, obj, password=None):
     key = private_key_from_encoding(data, password)
     nums = key.private_numbers()
     if isinstance(key, rsa.RSAPrivateKey):
@@ -210,7 +210,7 @@ def public_to_key(obj):
     return key
 
 
-def public_to_pem(obj, encoding="pem"):
+def _public_to_pem(obj, encoding="pem"):
     encoding = encoding.lower()
     key = public_to_key(obj)
     if encoding == "pem":
@@ -223,7 +223,7 @@ def public_to_pem(obj, encoding="pem"):
         raise ValueError(f"unsupported encoding: {encoding}")
 
 
-def getname(obj):
+def _getname(obj):
     dt = _get_digest(obj.nameAlg)
     if dt is None:
         raise ValueError(f"unsupported digest algorithm: {obj.nameAlg}")
@@ -236,7 +236,7 @@ def getname(obj):
     return name
 
 
-def kdfa(hashAlg, key, label, contextU, contextV, bits):
+def _kdfa(hashAlg, key, label, contextU, contextV, bits):
     halg = _get_digest(hashAlg)
     if halg is None:
         raise ValueError(f"unsupported digest algorithm: {hashAlg}")
@@ -273,7 +273,7 @@ def kdfe(hashAlg, z, use, partyuinfo, partyvinfo, bits):
     return kdf.derive(z)
 
 
-def symdef_to_crypt(symdef):
+def _symdef_to_crypt(symdef):
     alg = _get_alg(symdef.algorithm)
     if alg is None:
         raise ValueError(f"unsupported symmetric algorithm {symdef.algorithm}")
@@ -284,7 +284,7 @@ def symdef_to_crypt(symdef):
     return (alg, mode, bits)
 
 
-def calculate_sym_unique(nameAlg, secret, seed):
+def _calculate_sym_unique(nameAlg, secret, seed):
     dt = _get_digest(nameAlg)
     if dt is None:
         raise ValueError(f"unsupported digest algorithm: {nameAlg}")
@@ -294,7 +294,7 @@ def calculate_sym_unique(nameAlg, secret, seed):
     return d.finalize()
 
 
-def get_digest_size(alg):
+def _get_digest_size(alg):
     dt = _get_digest(alg)
     if dt is None:
         raise ValueError(f"unsupported digest algorithm: {alg}")
@@ -354,7 +354,7 @@ def verify_signature_hmac(signature, key, data):
     h.verify(sig)
 
 
-def verify_signature(signature, key, data):
+def _verify_signature(signature, key, data):
     if hasattr(key, "publicArea"):
         key = key.publicArea
     kt = getattr(key, "type", None)
@@ -382,7 +382,7 @@ def verify_signature(signature, key, data):
         raise ValueError(f"unsupported signature algorithm: {signature.sigAlg}")
 
 
-def generate_rsa_seed(
+def _generate_rsa_seed(
     key: rsa.RSAPublicKey, hashAlg: int, label: bytes
 ) -> Tuple[bytes, bytes]:
     halg = _get_digest(hashAlg)
@@ -395,7 +395,7 @@ def generate_rsa_seed(
     return (seed, enc_seed)
 
 
-def generate_ecc_seed(
+def _generate_ecc_seed(
     key: ec.EllipticCurvePublicKey, hashAlg: int, label: bytes
 ) -> Tuple[bytes, bytes]:
     halg = _get_digest(hashAlg)
@@ -420,17 +420,17 @@ def generate_ecc_seed(
     return (seed, secret)
 
 
-def generate_seed(public: "types.TPMT_PUBLIC", label: bytes) -> Tuple[bytes, bytes]:
+def _generate_seed(public: "types.TPMT_PUBLIC", label: bytes) -> Tuple[bytes, bytes]:
     key = public_to_key(public)
     if public.type == TPM2_ALG.RSA:
-        return generate_rsa_seed(key, public.nameAlg, label)
+        return _generate_rsa_seed(key, public.nameAlg, label)
     elif public.type == TPM2_ALG.ECC:
-        return generate_ecc_seed(key, public.nameAlg, label)
+        return _generate_ecc_seed(key, public.nameAlg, label)
     else:
         raise ValueError(f"unsupported seed algorithm {public.type}")
 
 
-def hmac(
+def _hmac(
     halg: hashes.HashAlgorithm, hmackey: bytes, enc_cred: bytes, name: bytes
 ) -> bytes:
     h = HMAC(hmackey, halg(), backend=default_backend())
@@ -439,7 +439,7 @@ def hmac(
     return h.finalize()
 
 
-def encrypt(cipher: Type[AES], key: bytes, data: bytes) -> bytes:
+def _encrypt(cipher: Type[AES], key: bytes, data: bytes) -> bytes:
     iv = len(key) * b"\x00"
     ci = cipher(key)
     ciph = Cipher(ci, modes.CFB(iv), backend=default_backend())

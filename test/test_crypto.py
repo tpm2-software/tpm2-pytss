@@ -5,6 +5,7 @@ SPDX-License-Identifier: BSD-2
 import unittest
 
 from tpm2_pytss import *
+from tpm2_pytss.internal import *
 from .TSS2_BaseTest import TSS2_EsapiTest
 from base64 import b64decode
 from hashlib import sha256, sha384
@@ -203,7 +204,7 @@ I8/rxsxXVofKhAfCeJ4gP6LOlr6uLQKdf0wYxzcYEZI=
 class CryptoTest(TSS2_EsapiTest):
     def test_public_from_pem_rsa(self):
         pub = TPM2B_PUBLIC()
-        crypto.public_from_encoding(rsa_public_key, pub.publicArea)
+        crypto._public_from_encoding(rsa_public_key, pub.publicArea)
 
         self.assertEqual(pub.publicArea.type, TPM2_ALG.RSA)
         self.assertEqual(pub.publicArea.parameters.rsaDetail.keyBits, 2048)
@@ -212,7 +213,7 @@ class CryptoTest(TSS2_EsapiTest):
 
     def test_private_from_pem_rsa(self):
         priv = TPM2B_SENSITIVE()
-        crypto.private_from_encoding(rsa_private_key, priv.sensitiveArea)
+        crypto._private_from_encoding(rsa_private_key, priv.sensitiveArea)
 
         self.assertEqual(priv.sensitiveArea.sensitiveType, TPM2_ALG.RSA)
         self.assertEqual(
@@ -263,7 +264,7 @@ class CryptoTest(TSS2_EsapiTest):
 
     def test_public_from_pem_ecc(self):
         pub = TPM2B_PUBLIC()
-        crypto.public_from_encoding(ecc_public_key, pub.publicArea)
+        crypto._public_from_encoding(ecc_public_key, pub.publicArea)
 
         self.assertEqual(pub.publicArea.type, TPM2_ALG.ECC)
         self.assertEqual(
@@ -278,7 +279,7 @@ class CryptoTest(TSS2_EsapiTest):
 
     def test_private_from_pem_ecc(self):
         priv = types.TPM2B_SENSITIVE()
-        crypto.private_from_encoding(ecc_private_key, priv.sensitiveArea)
+        crypto._private_from_encoding(ecc_private_key, priv.sensitiveArea)
 
         self.assertEqual(priv.sensitiveArea.sensitiveType, TPM2_ALG.ECC)
         self.assertEqual(
@@ -310,13 +311,13 @@ class CryptoTest(TSS2_EsapiTest):
 
     def test_public_to_pem_rsa(self):
         pub = TPM2B_PUBLIC.from_pem(rsa_public_key)
-        pem = crypto.public_to_pem(pub.publicArea)
+        pem = crypto._public_to_pem(pub.publicArea)
 
         self.assertEqual(pem, rsa_public_key)
 
     def test_public_to_pem_ecc(self):
         pub = TPM2B_PUBLIC.from_pem(ecc_public_key)
-        pem = crypto.public_to_pem(pub.publicArea)
+        pem = crypto._public_to_pem(pub.publicArea)
 
         self.assertEqual(pem, ecc_public_key)
 
@@ -325,7 +326,7 @@ class CryptoTest(TSS2_EsapiTest):
         pub.publicArea.type = TPM2_ALG.NULL
 
         with self.assertRaises(ValueError) as e:
-            pem = crypto.public_to_pem(pub.publicArea)
+            pem = crypto._public_to_pem(pub.publicArea)
         self.assertEqual(
             str(e.exception), f"unsupported key type: {int(TPM2_ALG.NULL)}"
         )
@@ -374,7 +375,7 @@ class CryptoTest(TSS2_EsapiTest):
 
     def test_public_from_pem_rsa_pem_cert(self):
         pub = TPMT_PUBLIC()
-        crypto.public_from_encoding(rsa_cert, pub)
+        crypto._public_from_encoding(rsa_cert, pub)
 
     def test_public_from_pem_rsa_der_cert(self):
         sl = rsa_cert.strip().splitlines()
@@ -382,11 +383,11 @@ class CryptoTest(TSS2_EsapiTest):
         der = b64decode(b64)
 
         pub = TPMT_PUBLIC()
-        crypto.public_from_encoding(der, pub)
+        crypto._public_from_encoding(der, pub)
 
     def test_public_from_pem_ecc_pem_cert(self):
         pub = TPMT_PUBLIC()
-        crypto.public_from_encoding(ecc_cert, pub)
+        crypto._public_from_encoding(ecc_cert, pub)
 
     def test_public_from_pem_ecc_der_cert(self):
         sl = ecc_cert.strip().splitlines()
@@ -394,7 +395,7 @@ class CryptoTest(TSS2_EsapiTest):
         der = b64decode(b64)
 
         pub = TPMT_PUBLIC()
-        crypto.public_from_encoding(der, pub)
+        crypto._public_from_encoding(der, pub)
 
     def test_public_from_pem_rsa_der(self):
         sl = rsa_public_key.strip().splitlines()
@@ -402,7 +403,7 @@ class CryptoTest(TSS2_EsapiTest):
         der = b64decode(b64)
 
         pub = TPMT_PUBLIC()
-        crypto.public_from_encoding(der, pub)
+        crypto._public_from_encoding(der, pub)
 
     def test_public_from_pem_ecc_der(self):
         sl = ecc_public_key.strip().splitlines()
@@ -410,13 +411,13 @@ class CryptoTest(TSS2_EsapiTest):
         der = b64decode(b64)
 
         pub = TPMT_PUBLIC()
-        crypto.public_from_encoding(der, pub)
+        crypto._public_from_encoding(der, pub)
 
     def test_public_from_pem_bad_der(self):
         der = b"" * 1024
         pub = TPMT_PUBLIC()
         with self.assertRaises(ValueError) as e:
-            crypto.public_from_encoding(der, pub)
+            crypto._public_from_encoding(der, pub)
         self.assertEqual(str(e.exception), "Unsupported key format")
 
     def test_private_from_pem_rsa_der(self):
@@ -425,7 +426,7 @@ class CryptoTest(TSS2_EsapiTest):
         der = b64decode(b64)
 
         sens = TPM2B_SENSITIVE()
-        crypto.private_from_encoding(der, sens.sensitiveArea)
+        crypto._private_from_encoding(der, sens.sensitiveArea)
 
     def test_private_from_pem_ecc_der(self):
         sl = ecc_private_key.strip().splitlines()
@@ -433,18 +434,18 @@ class CryptoTest(TSS2_EsapiTest):
         der = b64decode(b64)
 
         sens = TPM2B_SENSITIVE()
-        crypto.private_from_encoding(der, sens.sensitiveArea)
+        crypto._private_from_encoding(der, sens.sensitiveArea)
 
     def test_private_from_pem_bad_der(self):
         der = b"" * 1024
         pub = TPM2B_PUBLIC()
         with self.assertRaises(ValueError) as e:
-            crypto.private_from_encoding(der, pub)
+            crypto._private_from_encoding(der, pub)
         self.assertEqual(str(e.exception), "Unsupported key format")
 
     def test_kdfa(self):
         ekey = b"a\xe2\xb8{@f\xc0\x94\xa3Pt\x08\xf5\xaf\x01[\xce\x85t\x843\xf8\xb3\x03%q\xe5\x84x\xdc`\x81E \xf5\xa9\xe8\x9f\xc8\xc9\x96U\xbe\x1b\x07\xd9\x8f\x97*~\xf7\x9bX\x99\xbe\x86\xe7\x10g$\x9cUQT\x97\x00\x9a\x97\xfd\xf0]\xec.\xedw\xb4\xf5\x8a/)\x18D\x13W6?`{!f\xf5\xa7\xd9>E\xf7\xd66\x11j\x8aZ\x06\xe1\nJJ\x99\xb4\x9e\x15\xea\xed\xb0\x98i\xcd\xa5cI4Pq\xae\xe8\x0c6\xbae\xb1t\xe1ku\x94\x06,\xe6'\x1b\xedn\xf2T\xf7\xbd\xb4\xfeu\x7f\xacD\x9e\xcb[rHN\xf4g1C\xb3\xd9ML\xd2:\x06\xea\xb1I\x98\xa7\xe2\xa0\x99\x8b\x82\xb9n\xad\xb6\x1cZ\xa8>!\xb9\x81\xf9\x03w\x88F\n\x19\xb1^\xd8\x801\xd6\x9dF\xf3\xc3\x05\x91\x92L\xc1\xd0\xaei;\x18n\xad=v'e\xa7\xcc6\xa7\xa2\"PB\x9f\xfb\xad\xebA\x00\x8d\xee\x99\x10\xafA\xc3\xc9\xe6\xd7\xaaIe\xdf/:\xf3C{"
-        key = crypto.kdfa(
+        key = crypto._kdfa(
             TPM2_ALG.SHA256,
             b"key data",
             b"label data",
@@ -455,7 +456,7 @@ class CryptoTest(TSS2_EsapiTest):
         self.assertEqual(key, ekey)
 
         with self.assertRaises(ValueError) as e:
-            key = crypto.kdfa(
+            key = crypto._kdfa(
                 TPM2_ALG.SHA256,
                 b"key data",
                 b"label data",
@@ -466,7 +467,7 @@ class CryptoTest(TSS2_EsapiTest):
         self.assertEqual(str(e.exception), "bad key length 123, not a multiple of 8")
 
         with self.assertRaises(ValueError) as e:
-            key = crypto.kdfa(
+            key = crypto._kdfa(
                 TPM2_ALG.LAST + 1,
                 b"key data",
                 b"label data",
@@ -526,21 +527,21 @@ class CryptoTest(TSS2_EsapiTest):
         symdef.mode.sym = TPM2_ALG.CFB
         symdef.keyBits.sym = 128
 
-        (alg, mode, bits) = crypto.symdef_to_crypt(symdef)
+        (alg, mode, bits) = crypto._symdef_to_crypt(symdef)
         self.assertEqual(alg, crypto.AES)
         self.assertEqual(mode, crypto.modes.CFB)
         self.assertEqual(bits, 128)
 
         symdef.mode.sym = TPM2_ALG.LAST + 1
         with self.assertRaises(ValueError) as e:
-            crypto.symdef_to_crypt(symdef)
+            crypto._symdef_to_crypt(symdef)
         self.assertEqual(
             str(e.exception), f"unsupported symmetric mode {TPM2_ALG.LAST + 1}"
         )
 
         symdef.algorithm = TPM2_ALG.LAST + 1
         with self.assertRaises(ValueError) as e:
-            crypto.symdef_to_crypt(symdef)
+            crypto._symdef_to_crypt(symdef)
         self.assertEqual(
             str(e.exception), f"unsupported symmetric algorithm {TPM2_ALG.LAST + 1}"
         )
@@ -764,7 +765,7 @@ class CryptoTest(TSS2_EsapiTest):
             TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL),
             TPMT_TK_HASHCHECK(tag=TPM2_ST.HASHCHECK, hierarchy=TPM2_RH.NULL),
         )
-        crypto.verify_signature(sig, secret, msg)
+        crypto._verify_signature(sig, secret, msg)
 
     def test_verify_signature_ecc(self):
         template = TPM2B_PUBLIC.parse(
@@ -789,7 +790,7 @@ class CryptoTest(TSS2_EsapiTest):
             TPMT_TK_HASHCHECK(tag=TPM2_ST.HASHCHECK, hierarchy=TPM2_RH.NULL),
         )
 
-        crypto.verify_signature(sig, public, msg)
+        crypto._verify_signature(sig, public, msg)
 
     def test_verify_singature_rsapss(self):
         template = TPM2B_PUBLIC.parse(
@@ -814,7 +815,7 @@ class CryptoTest(TSS2_EsapiTest):
             TPMT_TK_HASHCHECK(tag=TPM2_ST.HASHCHECK, hierarchy=TPM2_RH.NULL),
         )
 
-        crypto.verify_signature(sig, public, msg)
+        crypto._verify_signature(sig, public, msg)
 
     def test_verify_singature_rsassa(self):
         template = TPM2B_PUBLIC.parse(
@@ -844,24 +845,24 @@ class CryptoTest(TSS2_EsapiTest):
     def test_verify_signature_bad(self):
         badalg = TPMT_SIGNATURE(sigAlg=TPM2_ALG.NULL)
         with self.assertRaises(ValueError) as e:
-            crypto.verify_signature(badalg, b"", b"")
+            crypto._verify_signature(badalg, b"", b"")
         self.assertEqual(str(e.exception), "unsupported signature algorithm: 16")
 
         hsig = TPMT_SIGNATURE(sigAlg=TPM2_ALG.HMAC)
         with self.assertRaises(ValueError) as e:
-            crypto.verify_signature(hsig, str("not bytes"), b"1234")
+            crypto._verify_signature(hsig, str("not bytes"), b"1234")
         self.assertEqual(
             str(e.exception), "bad key type for 5, expected bytes, got str"
         )
 
         hsig.signature.hmac.hashAlg = TPM2_ALG.NULL
         with self.assertRaises(ValueError) as e:
-            crypto.verify_signature(hsig, b"key", b"1234")
+            crypto._verify_signature(hsig, b"key", b"1234")
         self.assertEqual(str(e.exception), "unsupported digest algorithm: 16")
 
         badecc = TPMT_SIGNATURE(sigAlg=TPM2_ALG.ECDSA)
         with self.assertRaises(ValueError) as e:
-            crypto.verify_signature(badecc, str("bad"), b"1234")
+            crypto._verify_signature(badecc, str("bad"), b"1234")
         self.assertEqual(
             str(e.exception), "bad key type for 24, expected ECC public key, got str"
         )
@@ -869,12 +870,12 @@ class CryptoTest(TSS2_EsapiTest):
         ecckey = TPM2B_PUBLIC.from_pem(ecc_public_key)
         badecc.signature.ecdsa.hash = TPM2_ALG.NULL
         with self.assertRaises(ValueError) as e:
-            crypto.verify_signature(badecc, ecckey, b"1234")
+            crypto._verify_signature(badecc, ecckey, b"1234")
         self.assertEqual(str(e.exception), "unsupported digest algorithm: 16")
 
         badrsa = TPMT_SIGNATURE(sigAlg=TPM2_ALG.RSAPSS)
         with self.assertRaises(ValueError) as e:
-            crypto.verify_signature(badrsa, str("bad"), b"1234")
+            crypto._verify_signature(badrsa, str("bad"), b"1234")
         self.assertEqual(
             str(e.exception), "bad key type for 22, expected RSA public key, got str"
         )
@@ -882,16 +883,16 @@ class CryptoTest(TSS2_EsapiTest):
         badrsa.signature.rsapss.hash = TPM2_ALG.NULL
         rsakey = TPM2B_PUBLIC.from_pem(rsa_public_key)
         with self.assertRaises(ValueError) as e:
-            crypto.verify_signature(badrsa, rsakey, b"1234")
+            crypto._verify_signature(badrsa, rsakey, b"1234")
         self.assertEqual(str(e.exception), "unsupported digest algorithm: 16")
 
         badrsa.signature.rsapss.hash = TPM2_ALG.SHA256
         with self.assertRaises(crypto.InvalidSignature):
-            crypto.verify_signature(badrsa, rsakey, b"1234")
+            crypto._verify_signature(badrsa, rsakey, b"1234")
 
         badrsa.sigAlg = TPM2_ALG.RSASSA
         with self.assertRaises(crypto.InvalidSignature):
-            crypto.verify_signature(badrsa, rsakey, b"1234")
+            crypto._verify_signature(badrsa, rsakey, b"1234")
 
 
 if __name__ == "__main__":
