@@ -12,14 +12,14 @@ from tpm2_pytss.utils import (
     convert_to_python_native,
     mock_bail,
 )
-from tpm2_pytss.crypto import (
-    calculate_sym_unique,
-    get_digest_size,
-    public_from_encoding,
-    private_from_encoding,
-    public_to_pem,
-    getname,
-    verify_signature,
+from tpm2_pytss.internal.crypto import (
+    _calculate_sym_unique,
+    _get_digest_size,
+    _public_from_encoding,
+    _private_from_encoding,
+    _public_to_pem,
+    _getname,
+    _verify_signature,
 )
 from tpm2_pytss.constants import (
     TPMA_OBJECT,
@@ -817,7 +817,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
             Returns a TPMT_PUBLIC instance.
         """
         p = cls()
-        public_from_encoding(data, p, password=password)
+        _public_from_encoding(data, p, password=password)
         p.nameAlg = nameAlg
         p.objectAttributes = objectAttributes
         if symmetric is None:
@@ -841,7 +841,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
         Returns:
             Returns the encoded key as bytes.
         """
-        return public_to_pem(self, encoding)
+        return _public_to_pem(self, encoding)
 
     def get_name(self):
         """Get the TPM name of the public area.
@@ -849,7 +849,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
         Returns:
             Returns TPM2B_NAME.
         """
-        name = getname(self)
+        name = _getname(self)
         return TPM2B_NAME(name)
 
 
@@ -1323,7 +1323,7 @@ class TPMS_NV_PUBLIC(TPM_OBJECT):
         Returns:
             Returns TPM2B_NAME.
         """
-        name = getname(self)
+        name = _getname(self)
         return TPM2B_NAME(name)
 
 
@@ -1504,7 +1504,7 @@ class TPMT_SENSITIVE(TPM_OBJECT):
             Returns an instance of TPMT_SENSITIVE.
         """
         p = cls()
-        private_from_encoding(data, p, password)
+        _private_from_encoding(data, p, password)
         return p
 
     @classmethod
@@ -1537,14 +1537,14 @@ class TPMT_SENSITIVE(TPM_OBJECT):
             pub.parameters.keyedHashDetail.scheme.scheme = TPM2_ALG.NULL
         else:
             pub.parameters.keyedHashDetail.scheme = scheme
-        digsize = get_digest_size(nameAlg)
+        digsize = _get_digest_size(nameAlg)
         if seed and len(seed) != digsize:
             raise ValueError(
                 f"invalid seed size, expected {digsize} but got {len(seed)}"
             )
         elif not seed:
             seed = secrets.token_bytes(digsize)
-        pub.unique.keyedHash = calculate_sym_unique(nameAlg, secret, seed)
+        pub.unique.keyedHash = _calculate_sym_unique(nameAlg, secret, seed)
         priv = cls(sensitiveType=TPM2_ALG.KEYEDHASH)
         priv.sensitive.bits = secret
         priv.seedValue = seed
@@ -1589,14 +1589,14 @@ class TPMT_SENSITIVE(TPM_OBJECT):
         pub.parameters.symDetail.sym.keyBits.sym = nbits
         pub.parameters.symDetail.sym.algorithm = algorithm
         pub.parameters.symDetail.sym.mode.sym = mode
-        digsize = get_digest_size(nameAlg)
+        digsize = _get_digest_size(nameAlg)
         if seed and len(seed) != digsize:
             raise ValueError(
                 f"invalid seed size, expected {digsize} but got {len(seed)}"
             )
         elif not seed:
             seed = secrets.token_bytes(digsize)
-        pub.unique.sym = calculate_sym_unique(nameAlg, secret, seed)
+        pub.unique.sym = _calculate_sym_unique(nameAlg, secret, seed)
         priv = cls(sensitiveType=TPM2_ALG.SYMCIPHER)
         priv.sensitive.bits = secret
         priv.seedValue = seed
@@ -1627,7 +1627,7 @@ class TPMT_HA(TPM_OBJECT):
     def __bytes__(self):
         if self.hashAlg == TPM2_ALG.NULL:
             return b""
-        ds = get_digest_size(self.hashAlg)
+        ds = _get_digest_size(self.hashAlg)
         return bytes(self.digest.sha512[0:ds])
 
 
@@ -1655,7 +1655,7 @@ class TPMT_SIGNATURE(TPM_OBJECT):
         Raises:
             InvalidSignature: when the signature doesn't match the data.
         """
-        verify_signature(self, key, data)
+        _verify_signature(self, key, data)
 
 
 class TPMU_SIG_SCHEME(TPM_OBJECT):
