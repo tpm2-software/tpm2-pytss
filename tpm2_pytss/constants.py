@@ -3,7 +3,7 @@ SPDX-License-Identifier: BSD-2
 """
 
 from ._libtpm2_pytss import lib, ffi
-from tpm2_pytss.utils import CLASS_INT_ATTRS_from_string
+from tpm2_pytss.internal.utils import _CLASS_INT_ATTRS_from_string
 import pkgconfig
 
 
@@ -15,7 +15,7 @@ class TPM_FRIENDLY_INT(int):
         # If it's a string initializer value, see if it matches anything in the list
         if isinstance(value, str):
             try:
-                value = CLASS_INT_ATTRS_from_string(cls, value, cls._FIXUP_MAP)
+                value = _CLASS_INT_ATTRS_from_string(cls, value, cls._FIXUP_MAP)
             except KeyError:
                 raise RuntimeError(
                     f'Could not convert friendly name to value, got: "{value}"'
@@ -83,7 +83,7 @@ class TPM_FRIENDLY_INTLIST(TPM_FRIENDLY_INT):
             hunks = value.split("|") if "|" in value else [value]
             for k in hunks:
                 try:
-                    intvalue |= CLASS_INT_ATTRS_from_string(cls, k, cls._FIXUP_MAP)
+                    intvalue |= _CLASS_INT_ATTRS_from_string(cls, k, cls._FIXUP_MAP)
                 except KeyError:
                     raise RuntimeError(
                         f'Could not convert friendly name to value, got: "{k}"'

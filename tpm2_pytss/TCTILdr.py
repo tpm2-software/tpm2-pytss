@@ -4,7 +4,7 @@ SPDX-License-Identifier: BSD-2
 
 from ._libtpm2_pytss import lib, ffi
 from .TCTI import TCTI
-from .utils import _chkrc
+from .internal.utils import _chkrc
 
 
 class TCTILdr(TCTI):

@@ -7,8 +7,8 @@ from typing import List
 
 import pkgconfig
 
-from ._libtpm2_pytss import ffi, lib
-from .TSS2_Exception import TSS2_Exception
+from .._libtpm2_pytss import ffi, lib
+from ..TSS2_Exception import TSS2_Exception
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ def _chkrc(rc, acceptable=None):
         raise TSS2_Exception(rc)
 
 
-def to_bytes_or_null(value, allow_null=True, encoding=None):
+def _to_bytes_or_null(value, allow_null=True, encoding=None):
     """Convert to cdata input.
 
     None:  ffi.NULL (if allow_null == True)
@@ -49,7 +49,7 @@ def to_bytes_or_null(value, allow_null=True, encoding=None):
 #### Utilities ####
 
 
-def CLASS_INT_ATTRS_from_string(cls, str_value, fixup_map=None):
+def _CLASS_INT_ATTRS_from_string(cls, str_value, fixup_map=None):
     """
     Given a class, lookup int attributes by name and return that attribute value.
     :param cls: The class to search.
@@ -68,14 +68,14 @@ def CLASS_INT_ATTRS_from_string(cls, str_value, fixup_map=None):
     return friendly[str_value.upper()]
 
 
-def cpointer_to_ctype(x):
+def _cpointer_to_ctype(x):
     tipe = ffi.typeof(x)
     if tipe.kind == "pointer":
         tipe = tipe.item
     return tipe
 
 
-def fixup_cdata_kwargs(this, _cdata, kwargs):
+def _fixup_cdata_kwargs(this, _cdata, kwargs):
 
     # folks may call this routine without a keyword argument which means it may
     # end up in _cdata, so we want to try and work this out
@@ -99,7 +99,7 @@ def fixup_cdata_kwargs(this, _cdata, kwargs):
     # if it's unknown, find the field it's destined for. This is easy for TPML_
     # and TPM2B_ types because their is only one field.
     if unknown is not None:
-        tipe = cpointer_to_ctype(_cdata)
+        tipe = _cpointer_to_ctype(_cdata)
 
         # ignore the field that is size or count, and get the one for the data
         size_field_name = "size" if "TPM2B_" in tipe.cname else "count"
@@ -111,11 +111,11 @@ def fixup_cdata_kwargs(this, _cdata, kwargs):
             )
 
         if hasattr(unknown, "_cdata"):
-            a = cpointer_to_ctype(getattr(_cdata, field_name))
-            b = cpointer_to_ctype(unknown._cdata)
+            a = _cpointer_to_ctype(getattr(_cdata, field_name))
+            b = _cpointer_to_ctype(unknown._cdata)
             if a != b:
-                expected = fixup_classname(tipe)
-                got = fixup_classname(b)
+                expected = _fixup_classname(tipe)
+                got = _fixup_classname(b)
                 raise TypeError(
                     f"Expected initialization from type {expected}, got {got}"
                 )
@@ -127,7 +127,7 @@ def fixup_cdata_kwargs(this, _cdata, kwargs):
     return (_cdata, kwargs)
 
 
-def convert_to_python_native(global_map, data):
+def _convert_to_python_native(global_map, data):
 
     if not isinstance(data, ffi.CData):
         return data
@@ -144,13 +144,13 @@ def convert_to_python_native(global_map, data):
     if tipe.kind != "struct" and tipe.kind != "union":
         raise TypeError(f'Not struct or union, got: "{tipe.kind}"')
 
-    clsname = fixup_classname(tipe)
+    clsname = _fixup_classname(tipe)
     subclass = global_map[clsname]
     obj = subclass(_cdata=data)
     return obj
 
 
-def fixup_classname(tipe):
+def _fixup_classname(tipe):
     # Some versions of tpm2-tss had anonymous structs, so the kind will be struct
     # but the name will not contain it
     if tipe.cname.startswith(tipe.kind):
@@ -159,15 +159,15 @@ def fixup_classname(tipe):
     return tipe.cname
 
 
-def mock_bail():
+def _mock_bail():
     return __MOCK__
 
 
-def get_dptr(dptr, free_func):
+def _get_dptr(dptr, free_func):
     return ffi.gc(dptr[0], free_func)
 
 
-def check_friendly_int(friendly, varname, clazz):
+def _check_friendly_int(friendly, varname, clazz):
 
     if not isinstance(friendly, int):
         raise TypeError(f"expected {varname} to be type int, got {type(friendly)}")
@@ -200,7 +200,7 @@ def is_bug_fixed(
     return False
 
 
-def check_bug_fixed(
+def _check_bug_fixed(
     details,
     fixed_in=None,
     backports: List[str] = None,

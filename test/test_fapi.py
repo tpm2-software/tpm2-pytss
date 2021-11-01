@@ -19,7 +19,7 @@ from cryptography.hazmat.primitives.asymmetric.padding import PSS
 
 from tpm2_pytss import *
 
-from tpm2_pytss.utils import is_bug_fixed
+from tpm2_pytss.internal.utils import is_bug_fixed
 
 from .TSS2_BaseTest import TpmSimulator, TSS2_BaseTest
 
