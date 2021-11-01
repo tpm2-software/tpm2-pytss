@@ -4,13 +4,13 @@ SPDX-License-Identifier: BSD-2
 
 from ._libtpm2_pytss import ffi, lib
 
-from tpm2_pytss.utils import (
+from tpm2_pytss.internal.utils import (
     _chkrc,
-    fixup_cdata_kwargs,
-    cpointer_to_ctype,
-    fixup_classname,
-    convert_to_python_native,
-    mock_bail,
+    _fixup_cdata_kwargs,
+    _cpointer_to_ctype,
+    _fixup_classname,
+    _convert_to_python_native,
+    _mock_bail,
 )
 from tpm2_pytss.internal.crypto import (
     _calculate_sym_unique,
@@ -45,15 +45,15 @@ class TPM_OBJECT(object):
         # Rather than trying to mock the FFI interface, just avoid it and return
         # the base object. This is really only needed for documentation, and it
         # makes it work. Why Yes, this is a terrible hack (cough cough).
-        if mock_bail():
+        if _mock_bail():
             return
 
-        _cdata, kwargs = fixup_cdata_kwargs(self, _cdata, kwargs)
+        _cdata, kwargs = _fixup_cdata_kwargs(self, _cdata, kwargs)
         object.__setattr__(self, "_cdata", _cdata)
 
-        tipe = cpointer_to_ctype(self._cdata)
+        tipe = _cpointer_to_ctype(self._cdata)
 
-        expected_cname = fixup_classname(tipe)
+        expected_cname = _fixup_classname(tipe)
         # Because we alias TPM2B_AUTH as a TPM2B_DIGEST in the C code
         if (
             expected_cname != "TPM2B_DIGEST"
@@ -71,7 +71,7 @@ class TPM_OBJECT(object):
                 )
             cname = fields[k]
             if cname.kind != "primitive" and cname.kind != "array":
-                clsname = fixup_classname(cname)
+                clsname = _fixup_classname(cname)
                 clazz = globals()[clsname]
                 # If subclass object is a TPM2B SIMPLE object, and we have a raw str, or bytes, convert
                 if issubclass(clazz, TPM2B_SIMPLE_OBJECT) and isinstance(
@@ -96,7 +96,7 @@ class TPM_OBJECT(object):
             # Get the attribute they're looking for out of _cdata
             x = getattr(_cdata, key)
 
-            obj = convert_to_python_native(globals(), x)
+            obj = _convert_to_python_native(globals(), x)
             return obj
 
     def __setattr__(self, key, value):
@@ -116,7 +116,7 @@ class TPM_OBJECT(object):
         except TypeError as e:
             data = getattr(_cdata, key)
             tipe = ffi.typeof(data)
-            clsname = fixup_classname(tipe)
+            clsname = _fixup_classname(tipe)
             clazz = None
             try:
                 clazz = globals()[clsname]
@@ -184,7 +184,7 @@ class TPM_OBJECT(object):
 class TPM2B_SIMPLE_OBJECT(TPM_OBJECT):
     def __init__(self, _cdata=None, **kwargs):
 
-        _cdata, kwargs = fixup_cdata_kwargs(self, _cdata, kwargs)
+        _cdata, kwargs = _fixup_cdata_kwargs(self, _cdata, kwargs)
         _bytefield = type(self)._get_bytefield()
 
         for k, v in kwargs.items():
@@ -279,7 +279,7 @@ class TPML_Iterator(object):
 class TPML_OBJECT(TPM_OBJECT):
     def __init__(self, _cdata=None, **kwargs):
 
-        _cdata, kwargs = fixup_cdata_kwargs(self, _cdata, kwargs)
+        _cdata, kwargs = _fixup_cdata_kwargs(self, _cdata, kwargs)
         super().__init__(_cdata=_cdata)
 
         # Nothing todo
@@ -301,7 +301,7 @@ class TPML_OBJECT(TPM_OBJECT):
         expected_class = TPM_OBJECT
         try:
             tipe = ffi.typeof(cdata_array[0])
-            clsname = fixup_classname(tipe)
+            clsname = _fixup_classname(tipe)
             expected_class = globals()[clsname]
         except TypeError:
             pass
@@ -346,7 +346,7 @@ class TPML_OBJECT(TPM_OBJECT):
 
         # subclasses in the arrays within the CTypes are fixed, so
         # we only need to do this once
-        clsname = fixup_classname(tipe.item)
+        clsname = _fixup_classname(tipe.item)
         subclass = globals()[clsname]
 
         l = []
@@ -391,7 +391,7 @@ class TPML_OBJECT(TPM_OBJECT):
             return cdatas[0] if item_was_int else cdatas
 
         # convert it to python native
-        objects = [convert_to_python_native(globals(), x) for x in cdatas]
+        objects = [_convert_to_python_native(globals(), x) for x in cdatas]
 
         if isinstance(objects[0], TPM2B_SIMPLE_OBJECT):
             objects = [bytes(x) for x in objects]

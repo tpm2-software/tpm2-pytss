@@ -16,7 +16,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from ._libtpm2_pytss import ffi, lib
 from .callbacks import Callback, CallbackType, get_callback, unlock_callback
 from .fapi_info import FapiInfo
-from .utils import _chkrc, check_bug_fixed, get_dptr, to_bytes_or_null
+from .internal.utils import _chkrc, _check_bug_fixed, _get_dptr, _to_bytes_or_null
 from .TCTI import TCTI
 from .types import TPM2B_PUBLIC, TPM2B_PRIVATE
 
@@ -126,7 +126,7 @@ class FAPI:
         self.encoding = "utf-8"
 
         self._ctx_pp = ffi.new("FAPI_CONTEXT **")
-        uri = to_bytes_or_null(uri)
+        uri = _to_bytes_or_null(uri)
         ret = lib.Fapi_Initialize(self._ctx_pp, uri)
         _chkrc(ret)
 
@@ -204,9 +204,9 @@ class FAPI:
         Returns:
             bool: True if Fapi was provisioned, False otherwise.
         """
-        auth_value_eh = to_bytes_or_null(auth_value_eh)
-        auth_value_sh = to_bytes_or_null(auth_value_sh)
-        auth_value_lockout = to_bytes_or_null(auth_value_lockout, allow_null=False)
+        auth_value_eh = _to_bytes_or_null(auth_value_eh)
+        auth_value_sh = _to_bytes_or_null(auth_value_sh)
+        auth_value_lockout = _to_bytes_or_null(auth_value_lockout, allow_null=False)
         ret = lib.Fapi_Provision(
             self._ctx, auth_value_eh, auth_value_sh, auth_value_lockout
         )
@@ -237,7 +237,7 @@ class FAPI:
         data = ffi.new("uint8_t **")
         ret = lib.Fapi_GetRandom(self._ctx, num_bytes, data)
         _chkrc(ret)
-        return bytes(ffi.unpack(get_dptr(data, lib.Fapi_Free), num_bytes))
+        return bytes(ffi.unpack(_get_dptr(data, lib.Fapi_Free), num_bytes))
 
     def get_info(self) -> str:
         """Get Fapi information, containing library info, TPM capabilities and more.
@@ -251,7 +251,7 @@ class FAPI:
         info = ffi.new("char **")
         ret = lib.Fapi_GetInfo(self._ctx, info)
         _chkrc(ret)
-        return ffi.string(get_dptr(info, lib.Fapi_Free)).decode(self.encoding)
+        return ffi.string(_get_dptr(info, lib.Fapi_Free)).decode(self.encoding)
 
     def list(self, search_path: Optional[Union[bytes, str]] = None) -> List[str]:
         """Get a list of all Fapi current object paths.
@@ -265,12 +265,12 @@ class FAPI:
         Returns:
             List[str]: List of all current Fapi object paths.
         """
-        search_path = to_bytes_or_null(search_path, allow_null=False)
+        search_path = _to_bytes_or_null(search_path, allow_null=False)
         path_list = ffi.new("char **")
         ret = lib.Fapi_List(self._ctx, search_path, path_list)
         _chkrc(ret)
         return (
-            ffi.string(get_dptr(path_list, lib.Fapi_Free))
+            ffi.string(_get_dptr(path_list, lib.Fapi_Free))
             .decode(self.encoding)
             .split(":")
         )
@@ -297,10 +297,10 @@ class FAPI:
         Returns:
             bool: True if the key was created. False otherwise.
         """
-        path = to_bytes_or_null(path)
-        type_ = to_bytes_or_null(type_)
-        policy_path = to_bytes_or_null(policy_path)
-        auth_value = to_bytes_or_null(auth_value)
+        path = _to_bytes_or_null(path)
+        type_ = _to_bytes_or_null(type_)
+        policy_path = _to_bytes_or_null(policy_path)
+        auth_value = _to_bytes_or_null(auth_value)
         ret = lib.Fapi_CreateKey(self._ctx, path, type_, policy_path, auth_value)
         _chkrc(
             ret, acceptable=lib.TSS2_FAPI_RC_PATH_ALREADY_EXISTS if exists_ok else None
@@ -326,9 +326,9 @@ class FAPI:
         Returns:
             Tuple[bytes, str, str]: (signature (DER), public key (PEM), certificate (PEM))
         """
-        path = to_bytes_or_null(path)
-        padding = to_bytes_or_null(padding)  # enum
-        digest = to_bytes_or_null(digest)
+        path = _to_bytes_or_null(path)
+        padding = _to_bytes_or_null(padding)  # enum
+        digest = _to_bytes_or_null(digest)
         signature = ffi.new("uint8_t **")
         signature_size = ffi.new("size_t *")
         public_key = ffi.new("char **")
@@ -347,9 +347,9 @@ class FAPI:
         )
         _chkrc(ret)
         return (
-            bytes(ffi.unpack(get_dptr(signature, lib.Fapi_Free), signature_size[0])),
-            ffi.string(get_dptr(public_key, lib.Fapi_Free)),
-            ffi.string(get_dptr(certificate, lib.Fapi_Free)),
+            bytes(ffi.unpack(_get_dptr(signature, lib.Fapi_Free), signature_size[0])),
+            ffi.string(_get_dptr(public_key, lib.Fapi_Free)),
+            ffi.string(_get_dptr(certificate, lib.Fapi_Free)),
         )
 
     def verify_signature(
@@ -365,7 +365,7 @@ class FAPI:
         Raises:
             TSS2_Exception: If Fapi returned an error code, e.g. if the signature cannot be verified successfully.
         """
-        path = to_bytes_or_null(path)
+        path = _to_bytes_or_null(path)
         ret = lib.Fapi_VerifySignature(
             self._ctx, path, digest, len(digest), signature, len(signature)
         )
@@ -386,13 +386,13 @@ class FAPI:
         Returns:
             bytes: The ciphertext.
         """
-        check_bug_fixed(
+        _check_bug_fixed(
             fixed_in="3.2",
             backports=["2.4.7", "3.0.5", "3.1.1"],
             details="Faulty free of FAPI Encrypt might lead to Segmentation Fault. See https://github.com/tpm2-software/tpm2-tss/issues/2092",
         )
-        path = to_bytes_or_null(path)
-        plaintext = to_bytes_or_null(plaintext)
+        path = _to_bytes_or_null(path)
+        plaintext = _to_bytes_or_null(plaintext)
         ciphertext = ffi.new("uint8_t **")
         ciphertext_size = ffi.new("size_t *")
         ret = lib.Fapi_Encrypt(
@@ -400,7 +400,7 @@ class FAPI:
         )
         _chkrc(ret)
         return bytes(
-            ffi.unpack(get_dptr(ciphertext, lib.Fapi_Free), ciphertext_size[0])
+            ffi.unpack(_get_dptr(ciphertext, lib.Fapi_Free), ciphertext_size[0])
         )
 
     def decrypt(self, path: Union[bytes, str], ciphertext: bytes) -> bytes:
@@ -416,7 +416,7 @@ class FAPI:
         Returns:
             bytes: The plaintext.
         """
-        path = to_bytes_or_null(path)
+        path = _to_bytes_or_null(path)
         plaintext = ffi.new("uint8_t **")
         plaintext_size = ffi.new("size_t *")
         ret = lib.Fapi_Decrypt(
@@ -452,7 +452,7 @@ class FAPI:
         Returns:
             bool: True if the sealed object was created. False otherwise.
         """
-        path = to_bytes_or_null(path)
+        path = _to_bytes_or_null(path)
         if data is not None and size is not None:
             raise ValueError("Parameters data and size cannot be given at same time.")
         if data is None and size is None:
@@ -461,10 +461,10 @@ class FAPI:
             data_len = size
         else:
             data_len = len(data)
-        data = to_bytes_or_null(data)
-        type_ = to_bytes_or_null(type_)
-        policy_path = to_bytes_or_null(policy_path)
-        auth_value = to_bytes_or_null(auth_value)
+        data = _to_bytes_or_null(data)
+        type_ = _to_bytes_or_null(type_)
+        policy_path = _to_bytes_or_null(policy_path)
+        auth_value = _to_bytes_or_null(auth_value)
         ret = lib.Fapi_CreateSeal(
             self._ctx, path, type_, data_len, policy_path, auth_value, data
         )
@@ -485,12 +485,12 @@ class FAPI:
         Returns:
             bytes: The unsealed data in plaintext.
         """
-        path = to_bytes_or_null(path)
+        path = _to_bytes_or_null(path)
         data = ffi.new("uint8_t **")
         data_size = ffi.new("size_t *")
         ret = lib.Fapi_Unseal(self._ctx, path, data, data_size)
         _chkrc(ret)
-        return bytes(ffi.unpack(get_dptr(data, lib.Fapi_Free), data_size[0]))
+        return bytes(ffi.unpack(_get_dptr(data, lib.Fapi_Free), data_size[0]))
 
     def import_object(
         self,
@@ -511,12 +511,12 @@ class FAPI:
         Returns:
             bool: True if the object was imported. False otherwise.
         """
-        check_bug_fixed(
+        _check_bug_fixed(
             fixed_in="3.2",
             details="FAPI Import will overwrite existing objects with same path silently. See https://github.com/tpm2-software/tpm2-tss/issues/2028",
         )
-        path = to_bytes_or_null(path)
-        import_data = to_bytes_or_null(import_data)
+        path = _to_bytes_or_null(path)
+        import_data = _to_bytes_or_null(import_data)
         ret = lib.Fapi_Import(self._ctx, path, import_data)
         _chkrc(
             ret, acceptable=lib.TSS2_FAPI_RC_PATH_ALREADY_EXISTS if exists_ok else None
@@ -532,7 +532,7 @@ class FAPI:
         Raises:
             TSS2_Exception: If Fapi returned an error code.
         """
-        path = to_bytes_or_null(path)
+        path = _to_bytes_or_null(path)
         ret = lib.Fapi_Delete(self._ctx, path)
         _chkrc(ret)
 
@@ -548,8 +548,8 @@ class FAPI:
         Raises:
             TSS2_Exception: If Fapi returned an error code.
         """
-        path = to_bytes_or_null(path)
-        auth_value = to_bytes_or_null(auth_value)
+        path = _to_bytes_or_null(path)
+        auth_value = _to_bytes_or_null(auth_value)
         ret = lib.Fapi_ChangeAuth(self._ctx, path, auth_value)
         _chkrc(ret)
 
@@ -568,12 +568,12 @@ class FAPI:
         Returns:
             str: The exported data.
         """
-        path = to_bytes_or_null(path)
-        new_path = to_bytes_or_null(new_path)
+        path = _to_bytes_or_null(path)
+        new_path = _to_bytes_or_null(new_path)
         exported_data = ffi.new("char **")
         ret = lib.Fapi_ExportKey(self._ctx, path, new_path, exported_data)
         _chkrc(ret)
-        return ffi.string(get_dptr(exported_data, lib.Fapi_Free)).decode(self.encoding)
+        return ffi.string(_get_dptr(exported_data, lib.Fapi_Free)).decode(self.encoding)
 
     def set_description(
         self, path: Union[bytes, str], description: Optional[Union[bytes, str]] = None
@@ -587,8 +587,8 @@ class FAPI:
         Raises:
             TSS2_Exception: If Fapi returned an error code.
         """
-        path = to_bytes_or_null(path)
-        description = to_bytes_or_null(description)
+        path = _to_bytes_or_null(path)
+        description = _to_bytes_or_null(description)
         ret = lib.Fapi_SetDescription(self._ctx, path, description)
         _chkrc(ret)
 
@@ -604,12 +604,12 @@ class FAPI:
         Returns:
             str: The description of the Fapi object.
         """
-        path = to_bytes_or_null(path)
+        path = _to_bytes_or_null(path)
         description = ffi.new("char **")
         ret = lib.Fapi_GetDescription(self._ctx, path, description)
         _chkrc(ret)
         # description is guaranteed to be a null-terminated string
-        return ffi.string(get_dptr(description, lib.Fapi_Free)).decode()
+        return ffi.string(_get_dptr(description, lib.Fapi_Free)).decode()
 
     def set_app_data(
         self, path: Union[bytes, str], app_data: Optional[Union[bytes, str]] = None
@@ -623,12 +623,12 @@ class FAPI:
         Raises:
             TSS2_Exception: If Fapi returned an error code.
         """
-        path = to_bytes_or_null(path)
+        path = _to_bytes_or_null(path)
         if app_data is None:
             app_data_len = 0
         else:
             app_data_len = len(app_data)
-        app_data = to_bytes_or_null(app_data)
+        app_data = _to_bytes_or_null(app_data)
         ret = lib.Fapi_SetAppData(self._ctx, path, app_data, app_data_len)
         _chkrc(ret)
 
@@ -644,14 +644,14 @@ class FAPI:
         Returns:
             Optional[bytes]: The application data or None.
         """
-        path = to_bytes_or_null(path)
+        path = _to_bytes_or_null(path)
         app_data = ffi.new("uint8_t **")
         app_data_size = ffi.new("size_t *")
         ret = lib.Fapi_GetAppData(self._ctx, path, app_data, app_data_size)
         _chkrc(ret)
         if app_data[0] == ffi.NULL:
             return None
-        return bytes(ffi.unpack(get_dptr(app_data, lib.Fapi_Free), app_data_size[0]))
+        return bytes(ffi.unpack(_get_dptr(app_data, lib.Fapi_Free), app_data_size[0]))
 
     def set_certificate(
         self, path: Union[bytes, str], certificate: Optional[Union[bytes, str]] = None
@@ -665,8 +665,8 @@ class FAPI:
         Raises:
             TSS2_Exception: If Fapi returned an error code.
         """
-        path = to_bytes_or_null(path)
-        certificate = to_bytes_or_null(certificate)
+        path = _to_bytes_or_null(path)
+        certificate = _to_bytes_or_null(certificate)
         ret = lib.Fapi_SetCertificate(self._ctx, path, certificate)
         _chkrc(ret)
 
@@ -682,12 +682,12 @@ class FAPI:
         Returns:
             bytes: The application data.
         """
-        path = to_bytes_or_null(path)
+        path = _to_bytes_or_null(path)
         certificate = ffi.new("char **")
         ret = lib.Fapi_GetCertificate(self._ctx, path, certificate)
         _chkrc(ret)
         # certificate is guaranteed to be a null-terminated string
-        return ffi.string(get_dptr(certificate, lib.Fapi_Free)).decode()
+        return ffi.string(_get_dptr(certificate, lib.Fapi_Free)).decode()
 
     def get_platform_certificates(self, no_cert_ok: bool = False) -> bytes:
         """Get the platform certificate and the so-called delta certificates.
@@ -701,7 +701,7 @@ class FAPI:
         Returns:
             bytes: The platform certificates
         """
-        check_bug_fixed(
+        _check_bug_fixed(
             fixed_in="3.2",
             backports=["2.4.7", "3.0.5", "3.1.1"],
             details="FAPI Get Platform Certificate might lead wrong sequence errors. See https://github.com/tpm2-software/tpm2-tss/issues/2091",
@@ -718,7 +718,7 @@ class FAPI:
         if no_cert_ok and ret == lib.TSS2_FAPI_RC_NO_CERT:
             return b""
         return bytes(
-            ffi.unpack(get_dptr(certificate, lib.Fapi_Free), certificates_size)
+            ffi.unpack(_get_dptr(certificate, lib.Fapi_Free), certificates_size)
         )
 
     def get_tpm_blobs(
@@ -735,7 +735,7 @@ class FAPI:
         Returns:
             Tuple[TPM2B_PUBLIC, TPM2B_PRIVATE, str]: (tpm_2b_public, tpm_2b_private, policy)
         """
-        path = to_bytes_or_null(path)
+        path = _to_bytes_or_null(path)
         tpm_2b_public = ffi.new("uint8_t **")
         tpm_2b_public_size = ffi.new("size_t *")
         tpm_2b_private = ffi.new("uint8_t **")
@@ -784,13 +784,13 @@ class FAPI:
         Returns:
             Tuple[bytes, Any]: A tuple of the binary blob and its type (:const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_CONTEXTLOAD` or :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_DESERIALIZE)`
         """
-        path = to_bytes_or_null(path)
+        path = _to_bytes_or_null(path)
         type_ = ffi.new("uint8_t *")
         data = ffi.new("uint8_t **")
         length = ffi.new("size_t *")
         ret = lib.Fapi_GetEsysBlob(self._ctx, path, type_, data, length)
         _chkrc(ret)
-        return bytes(ffi.unpack(get_dptr(data, lib.Fapi_Free), length[0])), type_[0]
+        return bytes(ffi.unpack(_get_dptr(data, lib.Fapi_Free), length[0])), type_[0]
 
     def export_policy(self, path: Union[bytes, str]) -> str:
         """Export a policy from the key store as a JSON-encoded string.
@@ -804,11 +804,11 @@ class FAPI:
         Returns:
             str: JSON-encoded policy.
         """
-        path = to_bytes_or_null(path)
+        path = _to_bytes_or_null(path)
         policy = ffi.new("char **")
         ret = lib.Fapi_ExportPolicy(self._ctx, path, policy)
         _chkrc(ret)
-        return ffi.string(get_dptr(policy, lib.Fapi_Free)).decode()
+        return ffi.string(_get_dptr(policy, lib.Fapi_Free)).decode()
 
     def authorize_policy(
         self,
@@ -826,13 +826,13 @@ class FAPI:
         Raises:
             TSS2_Exception: If Fapi returned an error code.
         """
-        policy_path = to_bytes_or_null(policy_path)
-        key_path = to_bytes_or_null(key_path)
+        policy_path = _to_bytes_or_null(policy_path)
+        key_path = _to_bytes_or_null(key_path)
         if policy_ref is None:
             policy_ref_len = 0
         else:
             policy_ref_len = len(policy_ref)
-        policy_ref = to_bytes_or_null(policy_ref)
+        policy_ref = _to_bytes_or_null(policy_ref)
         ret = lib.Fapi_AuthorizePolicy(
             self._ctx, policy_path, key_path, policy_ref, policy_ref_len
         )
@@ -857,8 +857,8 @@ class FAPI:
         ret = lib.Fapi_PcrRead(self._ctx, index, value, value_size, log)
         _chkrc(ret)
         return (
-            bytes(ffi.unpack(get_dptr(value, lib.Fapi_Free), value_size[0])),
-            ffi.string(get_dptr(log, lib.Fapi_Free)).decode(),
+            bytes(ffi.unpack(_get_dptr(value, lib.Fapi_Free), value_size[0])),
+            ffi.string(_get_dptr(log, lib.Fapi_Free)).decode(),
         )
 
     def pcr_extend(
@@ -885,8 +885,8 @@ class FAPI:
             Tuple[bytes, str]: PCR value and its associated event log.
         """
         # TODO "extend", formula in doc
-        log = to_bytes_or_null(log)
-        data = to_bytes_or_null(data)
+        log = _to_bytes_or_null(log)
+        data = _to_bytes_or_null(data)
         ret = lib.Fapi_PcrExtend(self._ctx, index, data, len(data), log)
         _chkrc(ret)
 
@@ -911,19 +911,19 @@ class FAPI:
         Returns:
             Tuple[str, bytes, str, str]: info, signature, pcr_log, certificate
         """
-        check_bug_fixed(
+        _check_bug_fixed(
             fixed_in="3.2",
             backports=["2.4.7", "3.0.5", "3.1.1"],
             details="Multiple calls of FAPI Quote might lead to TPM out of memory errors. See https://github.com/tpm2-software/tpm2-tss/issues/2084",
         )
 
-        path = to_bytes_or_null(path)
-        quote_type = to_bytes_or_null(quote_type)
+        path = _to_bytes_or_null(path)
+        quote_type = _to_bytes_or_null(quote_type)
         if qualifying_data is None:
             qualifying_data_len = 0
         else:
             qualifying_data_len = len(qualifying_data)
-        qualifying_data = to_bytes_or_null(qualifying_data)
+        qualifying_data = _to_bytes_or_null(qualifying_data)
 
         quote_info = ffi.new("char **")
         signature = ffi.new("uint8_t **")
@@ -946,11 +946,11 @@ class FAPI:
         )
         _chkrc(ret)
         return (
-            ffi.string(get_dptr(quote_info, lib.Fapi_Free)).decode(),
-            bytes(ffi.unpack(get_dptr(signature, lib.Fapi_Free), signature_len[0])),
-            ffi.string(get_dptr(pcr_log, lib.Fapi_Free)).decode(),
+            ffi.string(_get_dptr(quote_info, lib.Fapi_Free)).decode(),
+            bytes(ffi.unpack(_get_dptr(signature, lib.Fapi_Free), signature_len[0])),
+            ffi.string(_get_dptr(pcr_log, lib.Fapi_Free)).decode(),
             ffi.string(
-                get_dptr(certificate, lib.Fapi_Free) or ffi.new("char *")
+                _get_dptr(certificate, lib.Fapi_Free) or ffi.new("char *")
             ).decode(),
         )
 
@@ -974,15 +974,15 @@ class FAPI:
         Raises:
             TSS2_Exception: If Fapi returned an error code.
         """
-        path = to_bytes_or_null(path)
-        signature = to_bytes_or_null(signature)
+        path = _to_bytes_or_null(path)
+        signature = _to_bytes_or_null(signature)
         if qualifying_data is None:
             qualifying_data_len = 0
         else:
             qualifying_data_len = len(qualifying_data)
-        qualifying_data = to_bytes_or_null(qualifying_data)
-        quote_info = to_bytes_or_null(quote_info)
-        pcr_log = to_bytes_or_null(pcr_log)
+        qualifying_data = _to_bytes_or_null(qualifying_data)
+        quote_info = _to_bytes_or_null(quote_info)
+        pcr_log = _to_bytes_or_null(pcr_log)
         ret = lib.Fapi_VerifyQuote(
             self._ctx,
             path,
@@ -1015,10 +1015,10 @@ class FAPI:
         Raises:
             TSS2_Exception: If Fapi returned an error code.
         """
-        path = to_bytes_or_null(path)
-        type_ = to_bytes_or_null(type_)
-        policy_path = to_bytes_or_null(policy_path)
-        auth_value = to_bytes_or_null(auth_value)
+        path = _to_bytes_or_null(path)
+        type_ = _to_bytes_or_null(type_)
+        policy_path = _to_bytes_or_null(policy_path)
+        auth_value = _to_bytes_or_null(auth_value)
         ret = lib.Fapi_CreateNv(self._ctx, path, type_, size, policy_path, auth_value)
         _chkrc(ret)
 
@@ -1034,15 +1034,15 @@ class FAPI:
         Returns:
             Tuple[bytes, str]: Data stored in the NV storage area and its associated event log.
         """
-        path = to_bytes_or_null(path)
+        path = _to_bytes_or_null(path)
         data = ffi.new("uint8_t **")
         data_size = ffi.new("size_t *")
         log = ffi.new("char **")
         ret = lib.Fapi_NvRead(self._ctx, path, data, data_size, log)
         _chkrc(ret)
         return (
-            bytes(ffi.unpack(get_dptr(data, lib.Fapi_Free), data_size[0])),
-            ffi.string(get_dptr(log, lib.Fapi_Free)).decode(),
+            bytes(ffi.unpack(_get_dptr(data, lib.Fapi_Free), data_size[0])),
+            ffi.string(_get_dptr(log, lib.Fapi_Free)).decode(),
         )
 
     def nv_write(self, path: Union[bytes, str], data: Union[bytes, str]) -> None:
@@ -1055,8 +1055,8 @@ class FAPI:
         Raises:
             TSS2_Exception: If Fapi returned an error code.
         """
-        path = to_bytes_or_null(path)
-        data = to_bytes_or_null(data)
+        path = _to_bytes_or_null(path)
+        data = _to_bytes_or_null(data)
         ret = lib.Fapi_NvWrite(self._ctx, path, data, len(data))
         _chkrc(ret)
 
@@ -1078,9 +1078,9 @@ class FAPI:
         Raises:
             TSS2_Exception: If Fapi returned an error code.
         """
-        path = to_bytes_or_null(path)
-        data = to_bytes_or_null(data)
-        log = to_bytes_or_null(log)
+        path = _to_bytes_or_null(path)
+        data = _to_bytes_or_null(data)
+        log = _to_bytes_or_null(log)
         ret = lib.Fapi_NvExtend(self._ctx, path, data, len(data), log)
         _chkrc(ret)
 
@@ -1093,7 +1093,7 @@ class FAPI:
         Raises:
             TSS2_Exception: If Fapi returned an error code.
         """
-        path = to_bytes_or_null(path)
+        path = _to_bytes_or_null(path)
         ret = lib.Fapi_NvIncrement(self._ctx, path)
         _chkrc(ret)
 
@@ -1107,7 +1107,7 @@ class FAPI:
         Raises:
             TSS2_Exception: If Fapi returned an error code.
         """
-        path = to_bytes_or_null(path)
+        path = _to_bytes_or_null(path)
         ret = lib.Fapi_NvSetBits(self._ctx, path, bitmap)
         _chkrc(ret)
 
@@ -1123,8 +1123,8 @@ class FAPI:
         Raises:
             TSS2_Exception: If Fapi returned an error code.
         """
-        nv_path = to_bytes_or_null(nv_path)
-        policy_path = to_bytes_or_null(policy_path)
+        nv_path = _to_bytes_or_null(nv_path)
+        policy_path = _to_bytes_or_null(policy_path)
         ret = lib.Fapi_WriteAuthorizeNv(self._ctx, nv_path, policy_path)
         _chkrc(ret)
 
@@ -1188,7 +1188,7 @@ class FAPI:
             user_data_len = 0
         else:
             user_data_len = len(user_data)
-        user_data = to_bytes_or_null(user_data)
+        user_data = _to_bytes_or_null(user_data)
 
         def callback_wrapper(path, description, auth, user_data):
             path = ffi.string(path).decode()
@@ -1239,7 +1239,7 @@ class FAPI:
             user_data_len = 0
         else:
             user_data_len = len(user_data)
-        user_data = to_bytes_or_null(user_data)
+        user_data = _to_bytes_or_null(user_data)
 
         def callback_wrapper(
             path, description, branch_names, num_branches, selected_branch, user_data
@@ -1285,7 +1285,7 @@ class FAPI:
         Raises:
             TSS2_Exception: If Fapi returned an error code.
         """
-        check_bug_fixed(
+        _check_bug_fixed(
             fixed_in="3.2",
             details="FAPI PolicySigned default nameAlg might be SHA1 unexpectedly. See https://github.com/tpm2-software/tpm2-tss/issues/2080. Fixed in https://github.com/tpm2-software/tpm2-tss/commit/b843960b6e601a786b469832392dc0a12e13cf34",
         )
@@ -1297,7 +1297,7 @@ class FAPI:
             user_data_len = 0
         else:
             user_data_len = len(user_data)
-        user_data = to_bytes_or_null(user_data)
+        user_data = _to_bytes_or_null(user_data)
 
         def callback_wrapper(
             path,
@@ -1363,7 +1363,7 @@ class FAPI:
         if callback is None and user_data is not None:
             raise ValueError("If callback is None, user_data must be None, too.")
 
-        check_bug_fixed(
+        _check_bug_fixed(
             fixed_in="3.2",
             backports=["2.4.7", "3.0.5", "3.1.1"],
             details="FAPI Policy Action might lead to crashes. See https://github.com/tpm2-software/tpm2-tss/issues/2089",
@@ -1373,7 +1373,7 @@ class FAPI:
             user_data_len = 0
         else:
             user_data_len = len(user_data)
-        user_data = to_bytes_or_null(user_data)
+        user_data = _to_bytes_or_null(user_data)
 
         def callback_wrapper(path, action, user_data):
             path = ffi.string(path).decode()
