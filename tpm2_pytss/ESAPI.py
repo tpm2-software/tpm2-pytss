@@ -4815,7 +4815,9 @@ class ESAPI:
         session1: ESYS_TR = ESYS_TR.PASSWORD,
         session2: ESYS_TR = ESYS_TR.NONE,
         session3: ESYS_TR = ESYS_TR.NONE,
-    ) -> Tuple[ESYS_TR, TPM2B_PUBLIC, TPM2B_CREATION_DATA, TPMT_TK_CREATION]:
+    ) -> Tuple[
+        ESYS_TR, TPM2B_PUBLIC, TPM2B_CREATION_DATA, TPM2B_DIGEST, TPMT_TK_CREATION
+    ]:
         """Invoke the TPM2_CreatePrimary command.
 
         This function invokes the TPM2_CreatePrimary command in a one-call
@@ -4843,7 +4845,7 @@ class ESAPI:
             TSS2_Exception: Any of the various TSS2_RC's the lower layers can return.
 
         Returns:
-            A Tuple[ESYS_TR, TPM2B_PUBLIC, TPM2B_CREATION_DATA, TPMT_TK_CREATION] which is the ESYS_TR handle of ESYS resource for TPM2_HANDLE,
+            A Tuple[ESYS_TR, TPM2B_PUBLIC, TPM2B_CREATION_DATA, TPM2B_DIGEST, TPMT_TK_CREATION] which is the ESYS_TR handle of ESYS resource for TPM2_HANDLE,
             the public portion of the created object, the creation data and digest of creation data using the nameAlg of
             of the object respectively.
 
