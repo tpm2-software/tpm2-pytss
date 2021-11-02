@@ -3,8 +3,7 @@ SPDX-License-Identifier: BSD-2
 """
 
 from math import ceil
-from .._libtpm2_pytss import lib
-from ..constants import TPM2_ALG
+from ..constants import TPM2_ALG, TPM2_ECC
 from cryptography.hazmat.primitives.asymmetric import rsa, ec, padding
 from cryptography.hazmat.primitives.asymmetric.utils import encode_dss_signature
 from cryptography.hazmat.primitives import hashes
@@ -30,26 +29,26 @@ from typing import Tuple, Type
 import secrets
 
 _curvetable = (
-    (lib.TPM2_ECC_NIST_P192, ec.SECP192R1),
-    (lib.TPM2_ECC_NIST_P224, ec.SECP224R1),
-    (lib.TPM2_ECC_NIST_P256, ec.SECP256R1),
-    (lib.TPM2_ECC_NIST_P384, ec.SECP384R1),
-    (lib.TPM2_ECC_NIST_P521, ec.SECP521R1),
+    (TPM2_ECC.NIST_P192, ec.SECP192R1),
+    (TPM2_ECC.NIST_P224, ec.SECP224R1),
+    (TPM2_ECC.NIST_P256, ec.SECP256R1),
+    (TPM2_ECC.NIST_P384, ec.SECP384R1),
+    (TPM2_ECC.NIST_P521, ec.SECP521R1),
 )
 
 _digesttable = (
-    (lib.TPM2_ALG_SHA1, hashes.SHA1),
-    (lib.TPM2_ALG_SHA256, hashes.SHA256),
-    (lib.TPM2_ALG_SHA384, hashes.SHA384),
-    (lib.TPM2_ALG_SHA512, hashes.SHA512),
-    (lib.TPM2_ALG_SHA3_256, hashes.SHA3_256),
-    (lib.TPM2_ALG_SHA3_384, hashes.SHA3_384),
-    (lib.TPM2_ALG_SHA3_512, hashes.SHA3_512),
+    (TPM2_ALG.SHA1, hashes.SHA1),
+    (TPM2_ALG.SHA256, hashes.SHA256),
+    (TPM2_ALG.SHA384, hashes.SHA384),
+    (TPM2_ALG.SHA512, hashes.SHA512),
+    (TPM2_ALG.SHA3_256, hashes.SHA3_256),
+    (TPM2_ALG.SHA3_384, hashes.SHA3_384),
+    (TPM2_ALG.SHA3_512, hashes.SHA3_512),
 )
 
 _algtable = (
-    (lib.TPM2_ALG_AES, AES),
-    (lib.TPM2_ALG_CFB, modes.CFB),
+    (TPM2_ALG.AES, AES),
+    (TPM2_ALG.CFB, modes.CFB),
 )
 
 
@@ -134,7 +133,7 @@ def _public_from_encoding(data, obj, password=None):
     key = key_from_encoding(data, password)
     nums = key.public_numbers()
     if isinstance(key, rsa.RSAPublicKey):
-        obj.type = lib.TPM2_ALG_RSA
+        obj.type = TPM2_ALG.RSA
         obj.parameters.rsaDetail.keyBits = key.key_size
         _int_to_buffer(nums.n, obj.unique.rsa)
         if nums.e != 65537:
@@ -142,7 +141,7 @@ def _public_from_encoding(data, obj, password=None):
         else:
             obj.parameters.rsaDetail.exponent = 0
     elif isinstance(key, ec.EllipticCurvePublicKey):
-        obj.type = lib.TPM2_ALG_ECC
+        obj.type = TPM2_ALG.ECC
         curveid = _get_curveid(key.curve)
         if curveid is None:
             raise ValueError(f"unsupported curve: {key.curve.name}")
@@ -177,10 +176,10 @@ def _private_from_encoding(data, obj, password=None):
     key = private_key_from_encoding(data, password)
     nums = key.private_numbers()
     if isinstance(key, rsa.RSAPrivateKey):
-        obj.sensitiveType = lib.TPM2_ALG_RSA
+        obj.sensitiveType = TPM2_ALG.RSA
         _int_to_buffer(nums.p, obj.sensitive.rsa)
     elif isinstance(key, ec.EllipticCurvePrivateKey):
-        obj.sensitiveType = lib.TPM2_ALG_ECC
+        obj.sensitiveType = TPM2_ALG.ECC
         _int_to_buffer(nums.private_value, obj.sensitive.ecc)
     else:
         raise RuntimeError(f"unsupported key type: {key.__class__.__name__}")
@@ -188,7 +187,7 @@ def _private_from_encoding(data, obj, password=None):
 
 def public_to_key(obj):
     key = None
-    if obj.type == lib.TPM2_ALG_RSA:
+    if obj.type == TPM2_ALG.RSA:
         b = obj.unique.rsa.buffer
         n = int.from_bytes(b, byteorder="big")
         e = obj.parameters.rsaDetail.exponent
@@ -196,7 +195,7 @@ def public_to_key(obj):
             e = 65537
         nums = rsa.RSAPublicNumbers(e, n)
         key = nums.public_key(backend=default_backend())
-    elif obj.type == lib.TPM2_ALG_ECC:
+    elif obj.type == TPM2_ALG.ECC:
         curve = _get_curve(obj.parameters.eccDetail.curveID)
         if curve is None:
             raise ValueError(f"unsupported curve: {obj.parameters.eccDetail.curveID}")
@@ -309,9 +308,9 @@ def verify_signature_rsa(signature, key, data):
             f"unsupported digest algorithm: {signature.signature.rsapss.hash}"
         )
     mpad = None
-    if signature.sigAlg == lib.TPM2_ALG_RSASSA:
+    if signature.sigAlg == TPM2_ALG.RSASSA:
         pad = padding.PKCS1v15()
-    elif signature.sigAlg == lib.TPM2_ALG_RSAPSS:
+    elif signature.sigAlg == TPM2_ALG.RSAPSS:
         pad = padding.PSS(mgf=padding.MGF1(dt()), salt_length=dt.digest_size)
         mpad = padding.PSS(mgf=padding.MGF1(dt()), salt_length=padding.PSS.MAX_LENGTH)
     else:
@@ -358,21 +357,21 @@ def _verify_signature(signature, key, data):
     if hasattr(key, "publicArea"):
         key = key.publicArea
     kt = getattr(key, "type", None)
-    if kt in (lib.TPM2_ALG_RSA, lib.TPM2_ALG_ECC):
+    if kt in (TPM2_ALG.RSA, TPM2_ALG.ECC):
         key = public_to_key(key)
-    if signature.sigAlg in (lib.TPM2_ALG_RSASSA, lib.TPM2_ALG_RSAPSS):
+    if signature.sigAlg in (TPM2_ALG.RSASSA, TPM2_ALG.RSAPSS):
         if not isinstance(key, rsa.RSAPublicKey):
             raise ValueError(
                 f"bad key type for {signature.sigAlg}, expected RSA public key, got {key.__class__.__name__}"
             )
         verify_signature_rsa(signature, key, data)
-    elif signature.sigAlg == lib.TPM2_ALG_ECDSA:
+    elif signature.sigAlg == TPM2_ALG.ECDSA:
         if not isinstance(key, ec.EllipticCurvePublicKey):
             raise ValueError(
                 f"bad key type for {signature.sigAlg}, expected ECC public key, got {key.__class__.__name__}"
             )
         verify_signature_ecc(signature, key, data)
-    elif signature.sigAlg == lib.TPM2_ALG_HMAC:
+    elif signature.sigAlg == TPM2_ALG.HMAC:
         if not isinstance(key, bytes):
             raise ValueError(
                 f"bad key type for {signature.sigAlg}, expected bytes, got {key.__class__.__name__}"
