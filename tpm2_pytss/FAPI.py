@@ -957,7 +957,9 @@ class FAPI:
             ffi.string(get_dptr(quote_info, lib.Fapi_Free)).decode(),
             bytes(ffi.unpack(get_dptr(signature, lib.Fapi_Free), signature_len[0])),
             ffi.string(get_dptr(pcr_log, lib.Fapi_Free)).decode(),
-            ffi.string(get_dptr(certificate, lib.Fapi_Free)).decode(),
+            ffi.string(
+                get_dptr(certificate, lib.Fapi_Free) or ffi.new("char *")
+            ).decode(),
         )
 
     def verify_quote(
