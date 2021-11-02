@@ -18,6 +18,7 @@ from .callbacks import Callback, CallbackType, get_callback, unlock_callback
 from .fapi_info import FapiInfo
 from .utils import _chkrc, check_bug_fixed, get_dptr, to_bytes_or_null
 from .TCTI import TCTI
+from .types import TPM2B_PUBLIC, TPM2B_PRIVATE
 
 logger = logging.getLogger(__name__)
 
@@ -720,7 +721,9 @@ class FAPI:
             ffi.unpack(get_dptr(certificate, lib.Fapi_Free), certificates_size)
         )
 
-    def get_tpm_blobs(self, path: Union[bytes, str]) -> Tuple[Any, Any, str]:
+    def get_tpm_blobs(
+        self, path: Union[bytes, str]
+    ) -> Tuple[TPM2B_PUBLIC, TPM2B_PRIVATE, str]:
         """Get the TPM data blobs and the policy associates with a Fapi object.
 
         Args:
@@ -730,7 +733,7 @@ class FAPI:
             TSS2_Exception: If Fapi returned an error code.
 
         Returns:
-            Tuple[Any, Any, str]: (tpm_2b_public, tpm_2b_private, policy)
+            Tuple[TPM2B_PUBLIC, TPM2B_PRIVATE, str]: (tpm_2b_public, tpm_2b_private, policy)
         """
         path = to_bytes_or_null(path)
         tpm_2b_public = ffi.new("uint8_t **")
@@ -751,26 +754,15 @@ class FAPI:
 
         policy_str = ffi.string(policy[0]).decode(self.encoding)
 
-        # unmarshal bytes to sapi data types
-        offs = ffi.new("size_t *", 0)
-        tpm_2b_public_unmarsh = ffi.new("TPM2B_PUBLIC *")
-        ret = lib.Tss2_MU_TPM2B_PUBLIC_Unmarshal(
-            get_dptr(tpm_2b_public, lib.Fapi_Free),
-            tpm_2b_public_size[0],
-            offs,
-            tpm_2b_public_unmarsh,
+        tpm_2b_public_buffer = bytes(
+            ffi.buffer(tpm_2b_public[0], tpm_2b_public_size[0])
         )
-        _chkrc(ret)
+        tpm_2b_public_unmarsh, _ = TPM2B_PUBLIC.unmarshal(tpm_2b_public_buffer)
 
-        offs[0] = 0
-        tpm_2b_private_unmarsh = ffi.new("TPM2B_PRIVATE *")
-        ret = lib.Tss2_MU_TPM2B_PRIVATE_Unmarshal(
-            get_dptr(tpm_2b_private, lib.Fapi_Free),
-            tpm_2b_private_size[0],
-            offs,
-            tpm_2b_private_unmarsh,
+        tpm_2b_private_buffer = bytes(
+            ffi.buffer(tpm_2b_private[0], tpm_2b_private_size[0])
         )
-        _chkrc(ret)
+        tpm_2b_private_unmarsh, _ = TPM2B_PRIVATE.unmarshal(tpm_2b_private_buffer)
 
         return (
             tpm_2b_public_unmarsh,
