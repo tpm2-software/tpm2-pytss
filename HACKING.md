@@ -1,6 +1,6 @@
 # Cloning
 
-You need to clone recursive so that you will get the siwg interface files as a
+You need to clone recursive so that you will get the swig interface files as a
 submodule.
 
 ```console

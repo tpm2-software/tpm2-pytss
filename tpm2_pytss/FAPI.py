@@ -816,7 +816,7 @@ class FAPI:
         key_path: Union[bytes, str],
         policy_ref: Optional[Union[bytes, str]] = None,
     ):
-        """Specifiy the underlying policy/policies for a policy Authorize.
+        """Specify the underlying policy/policies for a policy Authorize.
 
         Args:
             policy_path (bytes or str): Path to the underlying policy.

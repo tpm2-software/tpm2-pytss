@@ -133,7 +133,7 @@ class TSSPrivKey(object):
             private (TPM2B_PRIVATE): The private part of the TPM key.
             public (TPM2B_PUBLIC): The public part of the TPM key.
             empty_auth (bool): Defines if the authorization is a empty password, default is True.
-            parent (int): The parent of the key, either a persistant key handle or TPM2_RH_OWNER, default is TPM2_RH_OWNER.
+            parent (int): The parent of the key, either a persistent key handle or TPM2_RH_OWNER, default is TPM2_RH_OWNER.
         """
         self._private = private
         self._public = public

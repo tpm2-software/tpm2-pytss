@@ -314,7 +314,7 @@ def verify_signature_rsa(signature, key, data):
         pad = padding.PSS(mgf=padding.MGF1(dt()), salt_length=dt.digest_size)
         mpad = padding.PSS(mgf=padding.MGF1(dt()), salt_length=padding.PSS.MAX_LENGTH)
     else:
-        raise ValueError(f"unsupported RSA signature algorihtm: {signature.sigAlg}")
+        raise ValueError(f"unsupported RSA signature algorithm: {signature.sigAlg}")
 
     sig = bytes(signature.signature.rsapss.sig)
     try:

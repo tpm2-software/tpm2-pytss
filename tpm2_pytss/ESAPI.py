@@ -1386,7 +1386,7 @@ class ESAPI:
 
         Returns:
             A Tuple[TPM2B_PRIVATE, TPM2B_ENCRYPTED_SECRET] which is the object encrypted using
-            symmetric key derived from out_sym_seed and out_sym_seed whch is the Seed for a
+            symmetric key derived from out_sym_seed and out_sym_seed which is the Seed for a
             symmetric key protected by newParent asymmetric key respecitevely.
 
         C Function: Esys_Rewrap
