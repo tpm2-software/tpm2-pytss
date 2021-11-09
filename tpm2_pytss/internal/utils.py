@@ -107,7 +107,7 @@ def _fixup_cdata_kwargs(this, _cdata, kwargs):
 
         if len(kwargs) != 0:
             raise RuntimeError(
-                f"Ambigous call, try using key {field_name} in parameters"
+                f"Ambiguous call, try using key {field_name} in parameters"
             )
 
         if hasattr(unknown, "_cdata"):

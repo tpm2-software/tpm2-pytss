@@ -30,7 +30,7 @@ def remove_common_guards(s):
     s = re.sub("#ifdef __cplusplus\n}", "", s, flags=re.MULTILINE)
     s = re.sub("#include.*", "", s)
 
-    # Remove certain makros
+    # Remove certain macros
     s = re.sub("#define TSS2_API_VERSION.*", "", s)
     s = re.sub("#define TSS2_ABI_VERSION.*", "", s)
     s = re.sub("#define TSS2_RC_LAYER\(level\).*", "", s)

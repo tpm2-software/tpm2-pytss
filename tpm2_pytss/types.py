@@ -574,7 +574,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
             templ.objectAttributes & TPMA_OBJECT.DECRYPT
         )
 
-        # One could smarten this up to behave like tpm2-tools and trun down the attribute, but for now
+        # One could smarten this up to behave like tpm2-tools and turn down the attribute, but for now
         # error on bad attribute sets
         if is_both_set:
             raise ParserAttributeError(

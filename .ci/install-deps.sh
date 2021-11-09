@@ -66,7 +66,7 @@ fi
 # Get a simulator
 #
 
-# Does our tcti suport the TCTI for swtpm, if so get the swtpm simulator
+# Does our tcti support the TCTI for swtpm? If so get the swtpm simulator
 if pkg-config --exists tss2-tcti-swtpm; then
 
   # libtpms

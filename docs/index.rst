@@ -56,7 +56,7 @@ ldconfig
 
 When you ran ``./configure`` for tpm2-tss if you didn't supply a prefix it usually
 defaults to ``/usr/local/``. When you ran ``make install`` it then installed the
-libraries under that path. Your pacakge manager usually installs libraries to
+libraries under that path. Your package manager usually installs libraries to
 ``/usr``. If you properly configure the ``ldconfig`` tool, it'll make the libraries
 you just installed available from within ``/usr/local`` (which means they won't
 clash with things your package manager installs). If you don't configure it then
@@ -104,7 +104,7 @@ Testing
 You need to have ``tpm_server`` installed in your path to run the tests.
 
 Download the latest version from https://sourceforge.net/projects/ibmswtpm2/files/
-and put it somewher in your ``$PATH``.
+and put it somewhere in your ``$PATH``.
 
 .. code-block:: console
 
