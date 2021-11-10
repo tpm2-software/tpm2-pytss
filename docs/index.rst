@@ -3,8 +3,8 @@ tpm2-pytss Documentation
 
 This project provides access to the ``tpm2-tss`` Enhanced System API (ESAPI).
 
-Direct bindings are provided via SWIG. However, we've abstracted things a bit so
-you'll have to write less code.
+Direct bindings are provided via `CFFI <https://cffi.readthedocs.io/en/latest/>`_.
+However, we've abstracted things a bit so you'll have to write less code.
 
 To view the functions in the Enhanced System API go to
 https://trustedcomputinggroup.org/specifications-public-review/
@@ -18,12 +18,10 @@ Model`` to understand how the API works at a high level.
 Supported versions of Python are
 
 - 3.5
-
 - 3.6
-
 - 3.7
-
 - 3.8
+- 3.9
 
 Features
 --------
@@ -93,8 +91,7 @@ Or install from the Git repo
 
 .. code-block:: console
 
-    $ git clone --depth 1 --recurse-submodules -b ${TPM2_PYTSS_VERSION} \
-      https://github.com/tpm2-software/tpm2-pytss
+    $ git clone --depth 1 https://github.com/tpm2-software/tpm2-pytss
     $ cd tpm2-pytss
     $ python3 -m pip install -e .
 
