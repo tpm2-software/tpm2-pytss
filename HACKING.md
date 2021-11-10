@@ -1,8 +1,5 @@
 # Cloning
 
-You need to clone recursive so that you will get the swig interface files as a
-submodule.
-
 ```console
 $ git clone https://github.com/tpm2-software/tpm2-pytss
 ```
