@@ -22,11 +22,18 @@ from tpm2_pytss.internal.crypto import (
     _verify_signature,
     private_to_key,
 )
+import tpm2_pytss.constants as constants  # py/import-and-import-from
 from tpm2_pytss.constants import (
     TPMA_OBJECT,
     TPM2_ALG,
     TPM2_ECC_CURVE,
 )
+
+try:
+    from tpm2_pytss.internal.type_mapping import _type_map, _element_type_map
+except ImportError:
+    # this is needed so docs can be generated without building
+    pass
 
 import binascii
 import secrets
@@ -99,7 +106,14 @@ class TPM_OBJECT(object):
             # Get the attribute they're looking for out of _cdata
             x = getattr(_cdata, key)
 
-            obj = _convert_to_python_native(globals(), x)
+            tm = _type_map.get((self.__class__.__name__, key))
+            if tm is not None and hasattr(constants, tm):
+                c = getattr(constants, tm)
+                obj = c(x)
+            elif tm is not None:
+                obj = globals()[tm](x)
+            else:
+                obj = _convert_to_python_native(globals(), x)
             return obj
 
     def __setattr__(self, key, value):
@@ -389,6 +403,13 @@ class TPML_OBJECT(TPM_OBJECT):
         # get the cdata field
         cdata_list = self._cdata.__getattribute__(field_name)
         cdatas = cdata_list[item]
+
+        tm = _element_type_map.get(self.__class__.__name__)
+        if tm is not None and hasattr(constants, tm):
+            c = getattr(constants, tm)
+            cdatas = [c(x) for x in cdatas]
+        elif tm is not None:
+            cdatas = [globals()[tm](x) for x in cdatas]
 
         if len(cdatas) > 0 and not isinstance(cdatas[0], ffi.CData):
             return cdatas[0] if item_was_int else cdatas

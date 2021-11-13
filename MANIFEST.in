@@ -5,3 +5,4 @@ include tpm2_pytss/config.json
 recursive-include tpm2_pytss/swig *
 recursive-include tests *
 recursive-include examples *
+exclude tpm2_pytss/internal/type_mapping.py

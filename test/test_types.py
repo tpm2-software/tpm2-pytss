@@ -1652,6 +1652,24 @@ class TypesTest(unittest.TestCase):
             pub.publicArea.parameters.rsaDetail.symmetric.mode.aes, TPM2_ALG.ECB
         )
 
+    def test_struct_type_map(self):
+        pub = TPMT_PUBLIC(type=TPM2_ALG.RSA)
+        self.assertEqual(pub.type, TPM2_ALG.RSA)
+        self.assertIsInstance(pub.type, TPM2_ALG)
+
+        ctx = TPMS_CONTEXT(savedHandle=0x40000000)
+        self.assertEqual(ctx.savedHandle, TPM2_HANDLE(0x40000000))
+        self.assertIsInstance(ctx.savedHandle, TPM2_HANDLE)
+
+    def test_list_type_map(self):
+        algs = TPML_ALG((TPM2_ALG.SHA256,))
+        self.assertEqual(algs[0], TPM2_ALG.SHA256)
+        self.assertIsInstance(algs[0], TPM2_ALG)
+
+        hl = TPML_HANDLE((0x40000000,))
+        self.assertEqual(hl[0], TPM2_HANDLE(0x40000000))
+        self.assertIsInstance(hl[0], TPM2_HANDLE)
+
 
 if __name__ == "__main__":
     unittest.main()
