@@ -327,9 +327,7 @@ class CryptoTest(TSS2_EsapiTest):
 
         with self.assertRaises(ValueError) as e:
             pem = crypto._public_to_pem(pub.publicArea)
-        self.assertEqual(
-            str(e.exception), f"unsupported key type: {int(TPM2_ALG.NULL)}"
-        )
+        self.assertEqual(str(e.exception), f"unsupported key type: {TPM2_ALG.NULL}")
 
     def test_topem_rsa(self):
         pub = TPM2B_PUBLIC.from_pem(rsa_public_key)
@@ -355,7 +353,9 @@ class CryptoTest(TSS2_EsapiTest):
         pub.publicArea.nameAlg = TPM2_ALG.ERROR
         with self.assertRaises(ValueError) as e:
             pub.get_name()
-        self.assertEqual(str(e.exception), "unsupported digest algorithm: 0")
+        self.assertEqual(
+            str(e.exception), f"unsupported digest algorithm: {TPM2_ALG.ERROR}"
+        )
 
     def test_nv_getname(self):
         nv = TPMS_NV_PUBLIC(
@@ -589,7 +589,7 @@ class CryptoTest(TSS2_EsapiTest):
         pub.parameters.eccDetail.curveID = TPM2_ECC.NONE
         with self.assertRaises(ValueError) as e:
             pub.to_pem()
-        self.assertEqual(str(e.exception), "unsupported curve: 0")
+        self.assertEqual(str(e.exception), f"unsupported curve: {TPM2_ECC.NONE}")
 
     def test_unsupported_key(self):
         sl = dsa_private_key.strip().splitlines()
@@ -846,45 +846,56 @@ class CryptoTest(TSS2_EsapiTest):
         badalg = TPMT_SIGNATURE(sigAlg=TPM2_ALG.NULL)
         with self.assertRaises(ValueError) as e:
             crypto._verify_signature(badalg, b"", b"")
-        self.assertEqual(str(e.exception), "unsupported signature algorithm: 16")
+        self.assertEqual(
+            str(e.exception), f"unsupported signature algorithm: {TPM2_ALG.NULL}"
+        )
 
         hsig = TPMT_SIGNATURE(sigAlg=TPM2_ALG.HMAC)
         with self.assertRaises(ValueError) as e:
             crypto._verify_signature(hsig, str("not bytes"), b"1234")
         self.assertEqual(
-            str(e.exception), "bad key type for 5, expected bytes, got str"
+            str(e.exception),
+            f"bad key type for {TPM2_ALG.HMAC}, expected bytes, got str",
         )
 
         hsig.signature.hmac.hashAlg = TPM2_ALG.NULL
         with self.assertRaises(ValueError) as e:
             crypto._verify_signature(hsig, b"key", b"1234")
-        self.assertEqual(str(e.exception), "unsupported digest algorithm: 16")
+        self.assertEqual(
+            str(e.exception), f"unsupported digest algorithm: {TPM2_ALG.NULL}"
+        )
 
         badecc = TPMT_SIGNATURE(sigAlg=TPM2_ALG.ECDSA)
         with self.assertRaises(ValueError) as e:
             crypto._verify_signature(badecc, str("bad"), b"1234")
         self.assertEqual(
-            str(e.exception), "bad key type for 24, expected ECC public key, got str"
+            str(e.exception),
+            f"bad key type for {TPM2_ALG.ECDSA}, expected ECC public key, got str",
         )
 
         ecckey = TPM2B_PUBLIC.from_pem(ecc_public_key)
         badecc.signature.ecdsa.hash = TPM2_ALG.NULL
         with self.assertRaises(ValueError) as e:
             crypto._verify_signature(badecc, ecckey, b"1234")
-        self.assertEqual(str(e.exception), "unsupported digest algorithm: 16")
+        self.assertEqual(
+            str(e.exception), f"unsupported digest algorithm: {TPM2_ALG.NULL}"
+        )
 
         badrsa = TPMT_SIGNATURE(sigAlg=TPM2_ALG.RSAPSS)
         with self.assertRaises(ValueError) as e:
             crypto._verify_signature(badrsa, str("bad"), b"1234")
         self.assertEqual(
-            str(e.exception), "bad key type for 22, expected RSA public key, got str"
+            str(e.exception),
+            f"bad key type for {TPM2_ALG.RSAPSS}, expected RSA public key, got str",
         )
 
         badrsa.signature.rsapss.hash = TPM2_ALG.NULL
         rsakey = TPM2B_PUBLIC.from_pem(rsa_public_key)
         with self.assertRaises(ValueError) as e:
             crypto._verify_signature(badrsa, rsakey, b"1234")
-        self.assertEqual(str(e.exception), "unsupported digest algorithm: 16")
+        self.assertEqual(
+            str(e.exception), f"unsupported digest algorithm: {TPM2_ALG.NULL}"
+        )
 
         badrsa.signature.rsapss.hash = TPM2_ALG.SHA256
         with self.assertRaises(crypto.InvalidSignature):
