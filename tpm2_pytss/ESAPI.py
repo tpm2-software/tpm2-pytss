@@ -823,8 +823,8 @@ class ESAPI:
 
     def load_external(
         self,
+        in_sensitive: TPM2B_SENSITIVE,                
         in_public: TPM2B_PUBLIC,
-        in_sensitive: TPM2B_SENSITIVE = None,        
         hierarchy=ESYS_TR.NULL,
         session1: ESYS_TR = ESYS_TR.NONE,
         session2: ESYS_TR = ESYS_TR.NONE,
