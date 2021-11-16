@@ -823,7 +823,7 @@ class ESAPI:
 
     def load_external(
         self,
-        in_sensitive: TPM2B_SENSITIVE,                
+        in_sensitive: TPM2B_SENSITIVE,
         in_public: TPM2B_PUBLIC,
         hierarchy=ESYS_TR.NULL,
         session1: ESYS_TR = ESYS_TR.NONE,
@@ -864,7 +864,7 @@ class ESAPI:
         _check_handle_type(session3, "session3")
 
         in_private_cdata = _get_cdata(
-            in_private, TPM2B_SENSITIVE, "in_private", allow_none=True
+            in_sensitive, TPM2B_SENSITIVE, "in_sensitive", allow_none=True
         )
 
         in_public_cdata = _get_cdata(in_public, TPM2B_PUBLIC, "in_public")
