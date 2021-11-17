@@ -31,6 +31,9 @@ We support the FAPI, ESAPI, and marshalling library.
 
 - :doc:`/esys`
 - :doc:`/fapi`
+- :doc:`/utils`
+- :doc:`/tsskey`
+- :doc:`/tcti`
 
 Dependencies
 ------------
@@ -169,4 +172,7 @@ Example logs:
 
     esys
     fapi
+    utils
+    tsskey
+    tcti
     GitHub <https://github.com/tpm2-software/tpm2-pytss>
