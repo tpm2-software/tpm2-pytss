@@ -27,6 +27,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.exceptions import UnsupportedAlgorithm, InvalidSignature
 from typing import Tuple, Type
 import secrets
+import sys
 
 _curvetable = (
     (TPM2_ECC.NIST_P192, ec.SECP192R1),
@@ -205,6 +206,98 @@ def public_to_key(obj):
         key = nums.public_key(backend=default_backend())
     else:
         raise ValueError(f"unsupported key type: {obj.type}")
+
+    return key
+
+
+class _MyRSAPrivateNumbers(rsa.RSAPrivateNumbers):
+    def __init__(self, p: int, n: int, e: int, pubnums: rsa.RSAPublicNumbers):
+
+        q = n // p
+
+        d = _MyRSAPrivateNumbers._generate_d(p, q, e, n)
+
+        dmp1 = rsa.rsa_crt_dmp1(d, p)
+        dmq1 = rsa.rsa_crt_dmq1(d, q)
+        iqmp = rsa.rsa_crt_iqmp(p, q)
+
+        super().__init__(p, q, d, dmp1, dmq1, iqmp, pubnums)
+
+    @staticmethod
+    def _xgcd(a: int, b: int) -> Tuple[int, int, int]:
+        """return (g, x, y) such that a*x + b*y = g = gcd(a, b)"""
+        x0, x1, y0, y1 = 0, 1, 1, 0
+        while a != 0:
+            (q, a), b = divmod(b, a), a
+            y0, y1 = y1, y0 - q * y1
+            x0, x1 = x1, x0 - q * x1
+        return b, x0, y0
+
+    #
+    # The _modinv and _xgcd routines come from the link below. Minor modifications to add an underscore to the names as well
+    # as to check the version of Python and use pow() for modular inverse (since 3.8).
+    # were made. They are licensed under https://creativecommons.org/licenses/by-sa/3.0/
+    # - https://en.wikibooks.org/wiki/Algorithm_Implementation/Mathematics/Extended_Euclidean_algorithm#Iterative_algorithm_3
+    #
+    @staticmethod
+    def _modinv(a, m):
+
+        major = sys.version_info.major
+        minor = sys.version_info.minor
+        x = float(str(major) + "." + str(minor))
+
+        if x < 3.8:
+            g, x, y = _MyRSAPrivateNumbers._xgcd(a, m)
+            if g != 1:
+                raise Exception("modular inverse does not exist")
+            else:
+                return x % m
+        else:
+            return pow(a, -1, m)
+
+    @staticmethod
+    def _generate_d(p, q, e, n):
+
+        # P most always be larger so we don't go negative
+        if p < q:
+            p, q = q, p
+
+        phi = (p - 1) * (q - 1)
+        d = _MyRSAPrivateNumbers._modinv(e, phi)
+
+        return d
+
+
+def private_to_key(private: "types.TPMT_SENSITIVE", public: "types.TPMT_PUBLIC"):
+    key = None
+    if private.sensitiveType == TPM2_ALG.RSA:
+
+        p = int.from_bytes(bytes(private.sensitive.rsa), byteorder="big")
+        n = int.from_bytes(bytes(public.unique.rsa), byteorder="big")
+        e = (
+            public.parameters.rsaDetail.exponent
+            if public.parameters.rsaDetail.exponent != 0
+            else 65537
+        )
+
+        key = _MyRSAPrivateNumbers(p, n, e, rsa.RSAPublicNumbers(e, n)).private_key(
+            backend=default_backend()
+        )
+    elif private.sensitiveType == TPM2_ALG.ECC:
+
+        curve = _get_curve(public.parameters.eccDetail.curveID)
+        if curve is None:
+            raise ValueError(f"unsupported curve: {obj.parameters.eccDetail.curveID}")
+
+        p = int.from_bytes(bytes(private.sensitive.ecc), byteorder="big")
+        x = int.from_bytes(bytes(public.unique.ecc.x), byteorder="big")
+        y = int.from_bytes(bytes(public.unique.ecc.y), byteorder="big")
+
+        key = ec.EllipticCurvePrivateNumbers(
+            p, ec.EllipticCurvePublicNumbers(x, y, curve())
+        ).private_key(backend=default_backend())
+    else:
+        raise ValueError(f"unsupported key type: {private.sensitiveType}")
 
     return key
 
@@ -429,6 +522,63 @@ def _generate_seed(public: "types.TPMT_PUBLIC", label: bytes) -> Tuple[bytes, by
         raise ValueError(f"unsupported seed algorithm {public.type}")
 
 
+def __rsa_secret_to_seed(key, hashAlg: int, label: bytes, outsymseed: bytes):
+    halg = _get_digest(hashAlg)
+    if halg is None:
+        raise ValueError(f"unsupported digest algorithm {hashAlg}")
+    mgf = padding.MGF1(halg())
+    padd = padding.OAEP(mgf, halg(), label)
+    seed = key.decrypt(bytes(outsymseed), padd)
+    return seed
+
+
+def __ecc_secret_to_seed(
+    key: ec.EllipticCurvePrivateKey, hashAlg: int, label: bytes, outsymseed: bytes
+) -> Tuple[bytes, bytes]:
+    halg = _get_digest(hashAlg)
+    if halg is None:
+        raise ValueError(f"unsupported digest algorithm {hashAlg}")
+
+    # Get the peer public key (outsymseed)
+    # workaround unmarshal of TPMS_ECC_POINT (we cant use types here do to cyclic deps
+    xlen = int.from_bytes(outsymseed[0:2], byteorder="big")
+    ylen = int.from_bytes(outsymseed[xlen + 2 : xlen + 4], byteorder="big")
+    if xlen + ylen != len(outsymseed) - 4:
+        raise RuntimeError(
+            f"Expected TPMS_ECC_POINT to have two points of len {xlen + ylen}, got: {len(outsymseed)}"
+        )
+
+    exbytes = outsymseed[2 : 2 + xlen]
+    eybytes = outsymseed[xlen + 4 : xlen + 4 + ylen]
+
+    x = int.from_bytes(exbytes, byteorder="big")
+    y = int.from_bytes(eybytes, byteorder="big")
+    nums = ec.EllipticCurvePublicNumbers(x, y, key.curve)
+    peer_public_key = nums.public_key(backend=default_backend())
+
+    shared_key = key.exchange(ec.ECDH(), peer_public_key)
+
+    pubnum = key.public_key().public_numbers()
+    xbytes = pubnum.x.to_bytes(key.key_size // 8, "big")
+    seed = kdfe(hashAlg, shared_key, label, exbytes, xbytes, halg.digest_size * 8)
+    return seed
+
+
+def _secret_to_seed(
+    private: "types.TPMT_SENSITIVE",
+    public: "types.TPMT_PUBLIC",
+    label: bytes,
+    outsymseed: bytes,
+):
+    key = private_to_key(private, public)
+    if isinstance(key, rsa.RSAPrivateKey):
+        return __rsa_secret_to_seed(key, public.nameAlg, label, outsymseed)
+    elif isinstance(key, ec.EllipticCurvePrivateKey):
+        return __ecc_secret_to_seed(key, public.nameAlg, label, outsymseed)
+    else:
+        raise ValueError(f"unsupported seed algorithm {public.type}")
+
+
 def _hmac(
     halg: hashes.HashAlgorithm, hmackey: bytes, enc_cred: bytes, name: bytes
 ) -> bytes:
@@ -438,6 +588,19 @@ def _hmac(
     return h.finalize()
 
 
+def _check_hmac(
+    halg: hashes.HashAlgorithm,
+    hmackey: bytes,
+    enc_cred: bytes,
+    name: bytes,
+    expected: bytes,
+):
+    h = HMAC(hmackey, halg(), backend=default_backend())
+    h.update(enc_cred)
+    h.update(name)
+    h.verify(expected)
+
+
 def _encrypt(cipher: Type[AES], key: bytes, data: bytes) -> bytes:
     iv = len(key) * b"\x00"
     ci = cipher(key)
@@ -445,3 +608,12 @@ def _encrypt(cipher: Type[AES], key: bytes, data: bytes) -> bytes:
     encr = ciph.encryptor()
     encdata = encr.update(data) + encr.finalize()
     return encdata
+
+
+def _decrypt(cipher: Type[AES], key: bytes, data: bytes) -> bytes:
+    iv = len(key) * b"\x00"
+    ci = cipher(key)
+    ciph = Cipher(ci, modes.CFB(iv), backend=default_backend())
+    decr = ciph.decryptor()
+    plaintextdata = decr.update(data) + decr.finalize()
+    return plaintextdata
