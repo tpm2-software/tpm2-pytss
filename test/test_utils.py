@@ -104,7 +104,7 @@ Qa6C2sTmPHlvWopRgWslXt1JmxbBKwWf2Q==
 """
 
 
-class MakeCredTest(TSS2_EsapiTest):
+class TestUtils(TSS2_EsapiTest):
     def test_generate_seed_rsa(self):
         insens = TPM2B_SENSITIVE_CREATE()
         _, public, _, _, _ = self.ectx.create_primary(insens)
