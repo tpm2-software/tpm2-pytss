@@ -738,6 +738,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
         alg="rsa",
         objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS,
         nameAlg="sha256",
+        authPolicy=None,
     ):
 
         templ = TPMT_PUBLIC()
@@ -749,6 +750,9 @@ class TPMT_PUBLIC(TPM_OBJECT):
         if isinstance(objectAttributes, str):
             objectAttributes = TPMA_OBJECT.parse(objectAttributes)
         templ.objectAttributes = objectAttributes
+
+        if authPolicy is not None:
+            templ.authPolicy = authPolicy
 
         alg = alg.lower()
 
@@ -994,9 +998,10 @@ class TPM2B_PUBLIC(TPM_OBJECT):
         alg="rsa",
         objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS,
         nameAlg="sha256",
+        authPolicy=None,
     ):
 
-        return cls(TPMT_PUBLIC.parse(alg, objectAttributes, nameAlg))
+        return cls(TPMT_PUBLIC.parse(alg, objectAttributes, nameAlg, authPolicy))
 
 
 class TPM2B_PUBLIC_KEY_RSA(TPM2B_SIMPLE_OBJECT):
