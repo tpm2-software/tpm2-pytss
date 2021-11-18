@@ -8,6 +8,37 @@ import unittest
 from tpm2_pytss import *
 from base64 import b64decode
 
+rsa_parent_key = b"""-----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEA0FeMzAfnskx8eZYICdqURfwRhcgAWHkanaDZQXAMsKyBwkov
+yso31lhQQpjghFv1hzxy9z9yvcE+7LnFWbTnhWH2PPYyR87iM6eaW9wGdaFLMX5R
+8xbYG1ZJYsBOfiS4LauEHDYaAsYL9uv/5K0Dw2d/LSxzbv+9+EC3AomICZsf7m1B
+BVQNvtWHaPBHH+19JGtGRg8KRBWRqnrzrx6WwpGtmHVNPJwOr5hz3FtOWj99STKc
+oow5EIR44lrzg4dDcpyi4vWiustdZJm2j2iHKMfGu37r/mMDPjKNxY1YZQS5B8s5
+lgxp76UBAfTm3mttyH1K79eoplgkA+qBglVqQQIDAQABAoIBAQCsA/0t4ED+x4Pm
+Z2dPq3bMqahWCqGuap79EncOPlNb87JXFiWLi5a6lMP/mHWXEs4P0GsjlPFJlqo7
+jc5RmLmnORCzmJo/C6Nb/r/FpE55BKkuvhsvV+cp+v4wWJL2N58RphE3sbucGqR6
+RLRMvETlKyinxZGxTdothFEV+TOmqT4c3YXUyxTZj74oh+ovl22xopehxz/g9QwK
+VdZa2bs9p5gxUeYlE3BQTt/YQAXDxPp2kTnWf8CjQ+f1YOlx+1OVJVaVPk5d3/8U
+7CK5ljZoB5y11AYT11cxlqwphlF3ePJYIuTQHRldCO2Z7fv2GFJnVqKH+eu2/4AT
+94RpHpyBAoGBAO1fOV0QL7ZQk0pJlY0yETrfZRkLcUM9lFzWnF8N/zfv4CcawZpw
+PvSU5tTSnF/aYJn94KSKeZ/CiIJog4metlHNIc6qZBVTvh3lOGndib9YjLQ0j/Ru
+gYITCMmffe74+RTD4yTmbCttoay3DzIX+rK9RMEg7SDRrHxmsWRoZzKpAoGBAOCx
+HfG+FiZgJdWkelOgSBWG+9tcNmKyV+1wLR0XDx+Ung/0IWfhov4im6sPKKmKOALk
+A2cKKkcByr57Y57oBS1oT8489G8rgR4hJlBZOU40N8HRLg+9FafFH5ObS29zUeis
+AP/wq2l8DOlWUfRN1W8+YzamyOdDIGdgtGn1tFHZAoGBAKjxQS6POqYTqwEQZjRc
+Eg9It/efQTmONm3tANZWa/Mv8uViEbENeoExCSknzMwb7O0s2BnDxNSD7AyEvjnQ
+kAqgaRNiCmFzfLhiUEhouIVLTLllP5/ElsAxM+vsbAENipnQ4XV92jb+jDcVAuew
+UWmtc6XQ/XSCRrUzkcXY2LohAoGAJiNqJcJSGClxwpWsfc1S7vR+g3lfcdk7u32y
+6qEjXATp32Nc2DkgZWqSabKlAEIJx9PUEAVVr7/KHhLrkeloF5EBGsyV4NjNjcOq
+sTCz3WZXoHpVCy7ZIiT/exp872nvmUK42LiNH9aCioiwWHttovg/9uLQbxChy2pK
+tUGTXeECgYBYh3LsYNuWHpi2tW+cO3V4XP1AGBqZy3SDKD/Uk1jZPjEamkZCRDl2
+9AGIGz0H+Ovfg8vzCgYj0E9KLlE63wjSsKajC+Z17+nwzvy9cFJJtqTq/7aR0niI
+DoDguNqFEpw/cs8Eccbh0K43ubpLXc7xKoLGe5CF1sxEOZpYnPbyoA==
+-----END RSA PRIVATE KEY-----
+"""
+
+from cryptography.hazmat.primitives.serialization import load_pem_private_key
+
 
 class TypesTest(unittest.TestCase):
     def test_TPML_PCR_SELECTION_parse_2_banks_all_friendly(self):
@@ -1493,6 +1524,50 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(
             TSS2_RC.ESYS_RC_BAD_VALUE.decode(), "esapi:A parameter has a bad value"
         )
+
+    def test_TPMT_SENSITIVE_to_pem(self):
+
+        priv = TPMT_SENSITIVE.from_pem(rsa_parent_key)
+        pub = TPM2B_PUBLIC.from_pem(
+            rsa_parent_key,
+            symmetric=TPMT_SYM_DEF_OBJECT(
+                algorithm=TPM2_ALG.AES,
+                keyBits=TPMU_SYM_KEY_BITS(aes=128),
+                mode=TPMU_SYM_MODE(aes=TPM2_ALG.CFB),
+            ),
+        )
+
+        pem = priv.to_pem(pub.publicArea)
+        load_pem_private_key(pem, password=None)
+
+        # with a password
+        pem = priv.to_pem(pub.publicArea, password=b"foo")
+        with self.assertRaises(TypeError):
+            load_pem_private_key(pem, password=None)
+
+        load_pem_private_key(pem, password=b"foo")
+
+    def test_TPM2B_SENSITIVE_to_pem(self):
+
+        priv = TPM2B_SENSITIVE.from_pem(rsa_parent_key)
+        pub = TPM2B_PUBLIC.from_pem(
+            rsa_parent_key,
+            symmetric=TPMT_SYM_DEF_OBJECT(
+                algorithm=TPM2_ALG.AES,
+                keyBits=TPMU_SYM_KEY_BITS(aes=128),
+                mode=TPMU_SYM_MODE(aes=TPM2_ALG.CFB),
+            ),
+        )
+
+        pem = priv.to_pem(pub.publicArea)
+        load_pem_private_key(pem, password=None)
+
+        # with a password
+        pem = priv.to_pem(pub.publicArea, password=b"foo")
+        with self.assertRaises(TypeError):
+            load_pem_private_key(pem, password=None)
+
+        load_pem_private_key(pem, password=b"foo")
 
 
 if __name__ == "__main__":

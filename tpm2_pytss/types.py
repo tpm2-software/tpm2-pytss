@@ -20,6 +20,7 @@ from tpm2_pytss.internal.crypto import (
     _public_to_pem,
     _getname,
     _verify_signature,
+    private_to_key,
 )
 from tpm2_pytss.constants import (
     TPMA_OBJECT,
@@ -29,6 +30,8 @@ from tpm2_pytss.constants import (
 
 import binascii
 import secrets
+
+from cryptography.hazmat.primitives import serialization
 
 
 class ParserAttributeError(Exception):
@@ -1088,6 +1091,17 @@ class TPM2B_SENSITIVE(TPM_OBJECT):
         pub = TPM2B_PUBLIC(publicArea=pa)
         return (priv, pub)
 
+    def to_pem(self, public: TPMT_PUBLIC, password=None):
+        """Encode the key as PEM encoded ASN.1.
+
+        public(TPMT_PUBLIC): The corresponding public key.
+        password(bytes): An optional password for encrypting the PEM with.
+
+        Returns:
+            Returns the PEM encoding as bytes.
+        """
+        return self.sensitiveArea.to_pem(public, password)
+
 
 class TPM2B_SENSITIVE_CREATE(TPM_OBJECT):
     pass
@@ -1606,6 +1620,31 @@ class TPMT_SENSITIVE(TPM_OBJECT):
         priv.sensitive.bits = secret
         priv.seedValue = seed
         return (priv, pub)
+
+    def to_pem(self, public: TPMT_PUBLIC, password: bytes = None):
+        """Encode the key as PEM encoded ASN.1.
+
+        public(TPMT_PUBLIC): The corresponding public key.
+        password(bytes): An optional password for encrypting the PEM with.
+
+        Returns:
+            Returns the PEM encoding as bytes.
+        """
+        k = private_to_key(self, public)
+
+        enc_alg = (
+            serialization.NoEncryption()
+            if password is None
+            else serialization.BestAvailableEncryption(password)
+        )
+
+        pem = k.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=enc_alg,
+        )
+
+        return pem
 
 
 class TPMU_SENSITIVE_COMPOSITE(TPM_OBJECT):
