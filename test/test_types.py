@@ -37,7 +37,10 @@ DoDguNqFEpw/cs8Eccbh0K43ubpLXc7xKoLGe5CF1sxEOZpYnPbyoA==
 -----END RSA PRIVATE KEY-----
 """
 
-from cryptography.hazmat.primitives.serialization import load_pem_private_key
+from cryptography.hazmat.primitives.serialization import (
+    load_pem_private_key,
+    load_der_private_key,
+)
 
 
 class TypesTest(unittest.TestCase):
@@ -1568,6 +1571,36 @@ class TypesTest(unittest.TestCase):
             load_pem_private_key(pem, password=None)
 
         load_pem_private_key(pem, password=b"foo")
+
+    def test_TPMT_SENSITIVE_to_der(self):
+
+        priv = TPMT_SENSITIVE.from_pem(rsa_parent_key)
+        pub = TPM2B_PUBLIC.from_pem(
+            rsa_parent_key,
+            symmetric=TPMT_SYM_DEF_OBJECT(
+                algorithm=TPM2_ALG.AES,
+                keyBits=TPMU_SYM_KEY_BITS(aes=128),
+                mode=TPMU_SYM_MODE(aes=TPM2_ALG.CFB),
+            ),
+        )
+
+        der = priv.to_der(pub.publicArea)
+        load_der_private_key(der, password=None)
+
+    def test_TPM2B_SENSITIVE_to_der(self):
+
+        priv = TPM2B_SENSITIVE.from_pem(rsa_parent_key)
+        pub = TPM2B_PUBLIC.from_pem(
+            rsa_parent_key,
+            symmetric=TPMT_SYM_DEF_OBJECT(
+                algorithm=TPM2_ALG.AES,
+                keyBits=TPMU_SYM_KEY_BITS(aes=128),
+                mode=TPMU_SYM_MODE(aes=TPM2_ALG.CFB),
+            ),
+        )
+
+        der = priv.to_der(pub.publicArea)
+        load_der_private_key(der, password=None)
 
 
 if __name__ == "__main__":
