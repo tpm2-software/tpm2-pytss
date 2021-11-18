@@ -64,14 +64,22 @@ def wrap(
 ) -> Tuple[TPM2B_DATA, TPM2B_PRIVATE, TPM2B_ENCRYPTED_SECRET]:
     """Wraps key under a TPM key hierarchy
 
+    A key is wrapped following the Duplication protections of the TPM Architecture specification.
+    The architecture specification is found in "Part 1: Architecture" at the following link:
+      https://trustedcomputinggroup.org/resource/tpm-library-specification/
+
+    At the time of this writing, spec 1.59 was most recent and it was under section 23.3,
+    titled "Duplication".
+
     Args:
         newparent (TPMT_PUBLIC): The public area of the parent
         public (TPM2B_PUBLIC): The public area of the key
         sensitive (TPM2B_SENSITIVE): The sensitive area of the key
         symkey (bytes or None): Symmetric key for inner encryption. Defaults to None. When None
         and symdef is defined a key will be generated based on the key size for symdef.
-        symdef (TPMT_SYMDEF_OBJECT): Symmetric algorithm to be used for inner encryption. This should
-        be set to aes128CFB since that is what the TPM supports:
+        symdef (TPMT_SYMDEF_OBJECT): Symmetric algorithm to be used for inner encryption, defaults to None.
+        If None no inner wrapping is performed, else this should be set to aes128CFB since that is what
+        the TPM supports. To set to aes128cfb, do:
         TPMT_SYM_DEF(
           algorithm=TPM2_ALG.AES,
           keyBits=TPMU_SYM_KEY_BITS(sym=128),
