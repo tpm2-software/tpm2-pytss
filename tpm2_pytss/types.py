@@ -1102,6 +1102,17 @@ class TPM2B_SENSITIVE(TPM_OBJECT):
         """
         return self.sensitiveArea.to_pem(public, password)
 
+    def to_der(self, public: TPMT_PUBLIC):
+        """Encode the key as DER encoded ASN.1.
+
+        public(TPMT_PUBLIC): The corresponding public key.
+
+        Returns:
+            Returns the DER encoding as bytes.
+        """
+
+        return self.sensitiveArea.to_der(public)
+
 
 class TPM2B_SENSITIVE_CREATE(TPM_OBJECT):
     pass
@@ -1621,6 +1632,23 @@ class TPMT_SENSITIVE(TPM_OBJECT):
         priv.seedValue = seed
         return (priv, pub)
 
+    def _serialize(self, encoding: str, public: TPMT_PUBLIC, password: bytes = None):
+        k = private_to_key(self, public)
+
+        enc_alg = (
+            serialization.NoEncryption()
+            if password is None
+            else serialization.BestAvailableEncryption(password)
+        )
+
+        data = k.private_bytes(
+            encoding=encoding,
+            format=serialization.PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=enc_alg,
+        )
+
+        return data
+
     def to_pem(self, public: TPMT_PUBLIC, password: bytes = None):
         """Encode the key as PEM encoded ASN.1.
 
@@ -1630,21 +1658,19 @@ class TPMT_SENSITIVE(TPM_OBJECT):
         Returns:
             Returns the PEM encoding as bytes.
         """
-        k = private_to_key(self, public)
 
-        enc_alg = (
-            serialization.NoEncryption()
-            if password is None
-            else serialization.BestAvailableEncryption(password)
-        )
+        return self._serialize(serialization.Encoding.PEM, public, password)
 
-        pem = k.private_bytes(
-            encoding=serialization.Encoding.PEM,
-            format=serialization.PrivateFormat.TraditionalOpenSSL,
-            encryption_algorithm=enc_alg,
-        )
+    def to_der(self, public: TPMT_PUBLIC):
+        """Encode the key as DER encoded ASN.1.
 
-        return pem
+        public(TPMT_PUBLIC): The corresponding public key.
+
+        Returns:
+            Returns the DER encoding as bytes.
+        """
+
+        return self._serialize(serialization.Encoding.DER, public)
 
 
 class TPMU_SENSITIVE_COMPOSITE(TPM_OBJECT):
