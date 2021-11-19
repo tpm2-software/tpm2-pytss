@@ -1113,6 +1113,18 @@ class TPM2B_SENSITIVE(TPM_OBJECT):
 
         return self.sensitiveArea.to_der(public)
 
+    def to_ssh(self, public: TPMT_PUBLIC, password: bytes = None):
+        """Encode the key as OPENSSH PEM format.
+
+        public(TPMT_PUBLIC): The corresponding public key.
+        password(bytes): An optional password for encrypting the PEM with.
+
+        Returns:
+            Returns the PEM OPENSSH encoding as bytes.
+        """
+
+        return self.sensitiveArea.to_ssh(public, password=password)
+
 
 class TPM2B_SENSITIVE_CREATE(TPM_OBJECT):
     pass
@@ -1632,7 +1644,13 @@ class TPMT_SENSITIVE(TPM_OBJECT):
         priv.seedValue = seed
         return (priv, pub)
 
-    def _serialize(self, encoding: str, public: TPMT_PUBLIC, password: bytes = None):
+    def _serialize(
+        self,
+        encoding: str,
+        public: TPMT_PUBLIC,
+        format: str = serialization.PrivateFormat.TraditionalOpenSSL,
+        password: bytes = None,
+    ):
         k = private_to_key(self, public)
 
         enc_alg = (
@@ -1642,9 +1660,7 @@ class TPMT_SENSITIVE(TPM_OBJECT):
         )
 
         data = k.private_bytes(
-            encoding=encoding,
-            format=serialization.PrivateFormat.TraditionalOpenSSL,
-            encryption_algorithm=enc_alg,
+            encoding=encoding, format=format, encryption_algorithm=enc_alg,
         )
 
         return data
@@ -1659,7 +1675,7 @@ class TPMT_SENSITIVE(TPM_OBJECT):
             Returns the PEM encoding as bytes.
         """
 
-        return self._serialize(serialization.Encoding.PEM, public, password)
+        return self._serialize(serialization.Encoding.PEM, public, password=password)
 
     def to_der(self, public: TPMT_PUBLIC):
         """Encode the key as DER encoded ASN.1.
@@ -1671,6 +1687,23 @@ class TPMT_SENSITIVE(TPM_OBJECT):
         """
 
         return self._serialize(serialization.Encoding.DER, public)
+
+    def to_ssh(self, public: TPMT_PUBLIC, password: bytes = None):
+        """Encode the key as SSH format.
+
+        public(TPMT_PUBLIC): The corresponding public key.
+        password(bytes): An optional password for encrypting the PEM with.
+
+        Returns:
+            Returns the DER encoding as bytes.
+        """
+
+        return self._serialize(
+            serialization.Encoding.PEM,
+            public,
+            format=serialization.PrivateFormat.OpenSSH,
+            password=password,
+        )
 
 
 class TPMU_SENSITIVE_COMPOSITE(TPM_OBJECT):
