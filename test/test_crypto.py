@@ -559,17 +559,17 @@ class CryptoTest(TSS2_EsapiTest):
     def test_topem_encodings(self):
         pub = TPM2B_PUBLIC.from_pem(ecc_public_key)
 
-        pem = pub.to_pem(encoding="PEM")
+        pem = pub.to_pem()
         self.assertTrue(pem.startswith(b"-----BEGIN PUBLIC KEY-----"))
 
-        der = pub.to_pem(encoding="der")
+        der = pub.to_der()
         self.assertTrue(der.startswith(b"0Y0\x13\x06\x07"))
 
-        ssh = pub.to_pem(encoding="ssh")
+        ssh = pub.to_ssh()
         self.assertTrue(ssh.startswith(b"ecdsa-sha2-nistp256"))
 
         with self.assertRaises(ValueError) as e:
-            pub.to_pem(encoding="madeup")
+            crypto._public_to_pem(pub.publicArea, encoding="madeup")
         self.assertEqual(str(e.exception), "unsupported encoding: madeup")
 
     def test_rsa_exponent(self):

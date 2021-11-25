@@ -839,16 +839,32 @@ class TPMT_PUBLIC(TPM_OBJECT):
             p.parameters.eccDetail.kdf.scheme = TPM2_ALG.NULL
         return p
 
-    def to_pem(self, encoding="pem"):
-        """Encode the public key in standard format.
-
-        Args:
-            encoding (str, optional): The encoding format, one of "pem", "der" or "ssh".
+    def to_pem(self):
+        """Encode the public key as PEM encoded ASN.1.
 
         Returns:
-            Returns the encoded key as bytes.
+            Returns the PEM encoded key as bytes.
         """
-        return _public_to_pem(self, encoding)
+
+        return _public_to_pem(self, "pem")
+
+    def to_der(self):
+        """Encode the public key as DER encoded ASN.1.
+
+        Returns:
+            Returns the DER encoded key as bytes.
+        """
+
+        return _public_to_pem(self, "der")
+
+    def to_ssh(self):
+        """Encode the public key in OpenSSH format
+
+        Returns:
+            Returns the OpenSSH encoded key as bytes.
+        """
+
+        return _public_to_pem(self, "ssh")
 
     def get_name(self):
         """Get the TPM name of the public area.
@@ -976,16 +992,32 @@ class TPM2B_PUBLIC(TPM_OBJECT):
         p = cls(publicArea=pa)
         return p
 
-    def to_pem(self, encoding="pem"):
-        """Encode the public key in standard format.
-
-        Args:
-            encoding (str, optional): The encoding format, one of "pem", "der" or "ssh".
+    def to_pem(self):
+        """Encode the public key as PEM encoded ASN.1.
 
         Returns:
-            Returns the encoded key as bytes.
+            Returns the PEM encoded key as bytes.
         """
-        return self.publicArea.to_pem(encoding)
+
+        return self.publicArea.to_pem()
+
+    def to_der(self):
+        """Encode the public key as DER encoded ASN.1.
+
+        Returns:
+            Returns the DER encoded key as bytes.
+        """
+
+        return self.publicArea.to_der()
+
+    def to_ssh(self):
+        """Encode the public key in OpenSSH format
+
+        Returns:
+            Returns the OpenSSH encoded key as bytes.
+        """
+
+        return self.publicArea.to_ssh()
 
     def get_name(self):
         """Get the TPM name of the public area.
