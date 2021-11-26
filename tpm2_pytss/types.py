@@ -826,13 +826,19 @@ class TPMT_PUBLIC(TPM_OBJECT):
         p = cls()
         _public_from_encoding(data, p, password=password)
         p.nameAlg = nameAlg
+        if isinstance(objectAttributes, str):
+            objectAttributes = TPMA_OBJECT.parse(objectAttributes)
         p.objectAttributes = objectAttributes
         if symmetric is None:
             p.parameters.asymDetail.symmetric.algorithm = TPM2_ALG.NULL
+        elif isinstance(symmetric, str):
+            TPMT_PUBLIC._handle_asymdetail(symmetric, p)
         else:
             p.parameters.asymDetail.symmetric = symmetric
         if scheme is None:
             p.parameters.asymDetail.scheme.scheme = TPM2_ALG.NULL
+        elif isinstance(scheme, str):
+            TPMT_PUBLIC._handle_scheme(scheme, p)
         else:
             p.parameters.asymDetail.scheme = scheme
         if p.type == TPM2_ALG.ECC:
