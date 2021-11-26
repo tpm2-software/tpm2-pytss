@@ -1633,6 +1633,25 @@ class TypesTest(unittest.TestCase):
         sshpem = priv.to_ssh(pub.publicArea)
         load_ssh_private_key(sshpem, password=None)
 
+    def test_TPM2B_PUBLIC_from_pem_strings(self):
+        pub = TPM2B_PUBLIC.from_pem(
+            rsa_parent_key,
+            objectAttributes="userwithauth|sign",
+            scheme="rsapss",
+            symmetric="aes128ecb",
+        )
+        self.assertEqual(
+            pub.publicArea.objectAttributes,
+            (TPMA_OBJECT.USERWITHAUTH | TPMA_OBJECT.SIGN_ENCRYPT),
+        )
+        self.assertEqual(
+            pub.publicArea.parameters.rsaDetail.scheme.scheme, TPM2_ALG.RSAPSS
+        )
+        self.assertEqual(pub.publicArea.parameters.rsaDetail.symmetric.keyBits.aes, 128)
+        self.assertEqual(
+            pub.publicArea.parameters.rsaDetail.symmetric.mode.aes, TPM2_ALG.ECB
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
