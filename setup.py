@@ -155,7 +155,9 @@ class type_generator(build_ext):
             raise RuntimeError(
                 f"unable to find tss2_tpm2_types.h in {pk['include_dirs']}"
             )
-        pdata = preprocess_file(header_path)
+        pdata = preprocess_file(
+            header_path, cpp_args=["-D__extension__=", "-D__attribute__(x)="]
+        )
         parser = c_parser.CParser()
         ast = parser.parse(pdata, "tss2_tpm2_types.h")
         tm = self.get_types(ast)
