@@ -4131,7 +4131,7 @@ class ESAPI:
 
         TPM Command: TPM2_PolicyNV
         """
-        _check_friendly_int(auth_handle, "auth_handle", ESYS_TR)
+        _check_handle_type(auth_handle, "auth_handle")
         _check_handle_type(nv_index, "nv_index")
 
         _check_handle_type(policy_session, "policy_session")

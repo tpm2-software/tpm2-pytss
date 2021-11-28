@@ -4144,9 +4144,6 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.policy_nv(42.2, nvhandle, session, b"12345678", TPM2_EO.EQ)
 
-        with self.assertRaises(ValueError):
-            self.ectx.policy_nv(42, nvhandle, session, b"12345678", TPM2_EO.EQ)
-
         with self.assertRaises(TypeError):
             self.ectx.policy_nv(ESYS_TR.OWNER, "baz", session, b"12345678", TPM2_EO.EQ)
 
