@@ -1433,16 +1433,15 @@ class TPMS_PCR_SELECT(TPM_OBJECT):
 
 
 class TPMS_PCR_SELECTION(TPM_OBJECT):
-    def __init__(self, halg=0, pcrs=None, _cdata=None):
-        super().__init__(_cdata=_cdata)
+    def __init__(self, pcrs=None, **kwargs):
+        super().__init__(**kwargs)
 
-        if not halg and not pcrs:
+        if not pcrs:
             return
 
-        if bool(halg) != bool(pcrs):
-            raise RuntimeError("halg and pcrs MUST be specified")
+        if bool(self.hash) != bool(pcrs):
+            raise RuntimeError("hash and pcrs MUST be specified")
 
-        self._cdata.hash = halg
         self._cdata.sizeofSelect = 3
 
         if pcrs == "all" or (len(pcrs) == 1 and pcrs[0] == "all"):
@@ -1479,7 +1478,7 @@ class TPMS_PCR_SELECTION(TPM_OBJECT):
         else:
             pcrs = hunks[1]
 
-        return TPMS_PCR_SELECTION(halg=halg, pcrs=pcrs)
+        return TPMS_PCR_SELECTION(hash=halg, pcrs=pcrs)
 
 
 class TPMS_QUOTE_INFO(TPM_OBJECT):
