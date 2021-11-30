@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-SPDX-License-Identifier: BSD-2
+# SPDX-License-Identifier: BSD-2
 
 import importlib.util
 import os
