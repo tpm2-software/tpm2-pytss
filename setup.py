@@ -5,7 +5,7 @@ from setuptools import setup
 from setuptools.command.build_ext import build_ext
 from pkgconfig import pkgconfig
 from pycparser import c_parser, preprocess_file
-from pycparser.c_ast import Typedef, TypeDecl, IdentifierType, Struct, ArrayDecl
+from pycparser.c_ast import Typedef, TypeDecl, IdentifierType, Struct, ArrayDecl, Union
 from textwrap import dedent
 
 # workaround bug https://github.com/pypa/pip/issues/7953
@@ -114,11 +114,11 @@ class type_generator(build_ext):
         return fields
 
     def get_first_struct(self, v):
-        if isinstance(v, Struct):
+        if isinstance(v, (Struct, Union)):
             return v
         while hasattr(v, "type"):
             v = v.type
-            if isinstance(v, Struct):
+            if isinstance(v, (Struct, Union)):
                 return v
         return None
 
