@@ -1,6 +1,4 @@
-"""
 SPDX-License-Identifier: BSD-2
-"""
 import logging
 import sys
 from typing import List

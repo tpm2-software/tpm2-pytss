@@ -1,6 +1,4 @@
-"""
 SPDX-License-Identifier: BSD-2
-"""
 
 from math import ceil
 from ..constants import TPM2_ALG, TPM2_ECC

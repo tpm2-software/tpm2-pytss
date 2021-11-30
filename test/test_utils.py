@@ -1,7 +1,5 @@
 #!/usr/bin/python3 -u
-"""
 SPDX-License-Identifier: BSD-2
-"""
 import unittest
 
 from tpm2_pytss import *
