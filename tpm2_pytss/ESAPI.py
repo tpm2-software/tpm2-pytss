@@ -1,6 +1,4 @@
-"""
 SPDX-License-Identifier: BSD-2
-"""
 import pkgconfig
 
 from .types import *

@@ -1,7 +1,5 @@
 #!/usr/bin/python3 -u
-"""
 SPDX-License-Identifier: BSD-3
-"""
 from tpm2_pytss import *
 from tpm2_pytss.tsskey import TSSPrivKey, _parent_rsa_template, _parent_ecc_template
 from .TSS2_BaseTest import TSS2_EsapiTest
