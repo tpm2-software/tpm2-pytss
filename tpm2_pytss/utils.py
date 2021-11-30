@@ -70,7 +70,7 @@ def wrap(
 
     A key is wrapped following the Duplication protections of the TPM Architecture specification.
     The architecture specification is found in "Part 1: Architecture" at the following link:
-      https://trustedcomputinggroup.org/resource/tpm-library-specification/
+    - https://trustedcomputinggroup.org/resource/tpm-library-specification/
 
     At the time of this writing, spec 1.59 was most recent and it was under section 23.3,
     titled "Duplication".
