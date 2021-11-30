@@ -1,4 +1,4 @@
-SPDX-License-Identifier: BSD-2
+# SPDX-License-Identifier: BSD-2
 import pkgconfig
 
 if not pkgconfig.installed("tss2-fapi", ">=3.0.0"):

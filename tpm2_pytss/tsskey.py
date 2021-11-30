@@ -1,4 +1,4 @@
-SPDX-License-Identifier: BSD-2
+# SPDX-License-Identifier: BSD-2
 
 import warnings
 from ._libtpm2_pytss import lib
