@@ -22,7 +22,7 @@ from tpm2_pytss.internal.crypto import (
     _verify_signature,
     private_to_key,
 )
-import tpm2_pytss.constants as constants  # py/import-and-import-from
+import tpm2_pytss.constants as constants  # lgtm [py/import-and-import-from]
 from tpm2_pytss.constants import (
     TPMA_OBJECT,
     TPM2_ALG,
