@@ -185,7 +185,11 @@ def is_bug_fixed(
     if fixed_in and pkgconfig.installed(lib, f">= {fixed_in}"):
         return True
 
-    version = pkgconfig.modversion(lib)
+    try:
+        version = pkgconfig.modversion(lib)
+    except pkgconfig.pkgconfig.PackageNotFoundError:
+        return False
+
     version = version.split("-")[0]
     vers_major, vers_minor, vers_patch = (int(s) for s in version.split("."))
 
