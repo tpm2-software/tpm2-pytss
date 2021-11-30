@@ -1,5 +1,9 @@
 # SPDX-License-Identifier: BSD-2
+""" This module contains all the constant values from the TCG TSS specification
+- https://trustedcomputinggroup.org/resource/tss-overview-common-structures-specification
 
+Along with helpers to go from string values to constants and constant values to string values.
+"""
 from ._libtpm2_pytss import lib, ffi
 from tpm2_pytss.internal.utils import _CLASS_INT_ATTRS_from_string
 import pkgconfig
