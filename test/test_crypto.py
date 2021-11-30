@@ -237,30 +237,30 @@ class CryptoTest(TSS2_EsapiTest):
         priv = TPM2B_SENSITIVE.from_pem(rsa_private_key)
 
         # test without Hierarchy
-        handle = self.ectx.load_external(priv, pub)
+        handle = self.ectx.load_external(pub, priv)
         self.assertNotEqual(handle, 0)
 
         # negative test
         with self.assertRaises(TypeError):
-            self.ectx.load_external(TPM2B_PUBLIC(), pub)
+            self.ectx.load_external(pub, TPM2B_PUBLIC())
 
         with self.assertRaises(TypeError):
             self.ectx.load_external(priv, priv)
 
         with self.assertRaises(ValueError):
-            self.ectx.load_external(priv, pub, 7467644)
+            self.ectx.load_external(pub, priv, 7467644)
 
         with self.assertRaises(TypeError):
-            self.ectx.load_external(priv, pub, object)
+            self.ectx.load_external(pub, priv, object)
 
         with self.assertRaises(TypeError):
-            self.ectx.load_external(priv, pub, session1=76.5)
+            self.ectx.load_external(pub, priv, session1=76.5)
 
         with self.assertRaises(TypeError):
-            self.ectx.load_external(priv, pub, session2=object())
+            self.ectx.load_external(pub, priv, session2=object())
 
         with self.assertRaises(TypeError):
-            self.ectx.load_external(priv, pub, session3=TPM2B_PUBLIC())
+            self.ectx.load_external(pub, priv, session3=TPM2B_PUBLIC())
 
     def test_public_from_pem_ecc(self):
         pub = TPM2B_PUBLIC()
@@ -303,11 +303,11 @@ class CryptoTest(TSS2_EsapiTest):
 
         priv = TPM2B_SENSITIVE.from_pem(ecc_private_key)
 
-        self.ectx.load_external(priv, pub, ESYS_TR.RH_NULL)
+        self.ectx.load_external(pub, priv, ESYS_TR.RH_NULL)
 
     def test_loadexternal_public_rsa(self):
         pub = TPM2B_PUBLIC.from_pem(rsa_public_key)
-        self.ectx.load_external(None, pub, ESYS_TR.RH_NULL)
+        self.ectx.load_external(pub)
 
     def test_public_to_pem_rsa(self):
         pub = TPM2B_PUBLIC.from_pem(rsa_public_key)
@@ -344,7 +344,7 @@ class CryptoTest(TSS2_EsapiTest):
     def test_public_getname(self):
         pub = TPM2B_PUBLIC.from_pem(ecc_public_key)
         priv = TPM2B_SENSITIVE.from_pem(ecc_private_key)
-        handle = self.ectx.load_external(priv, pub, ESYS_TR.RH_NULL)
+        handle = self.ectx.load_external(pub, priv)
         ename = self.ectx.tr_get_name(handle)
         oname = pub.get_name()
 
@@ -693,7 +693,7 @@ class CryptoTest(TSS2_EsapiTest):
             secret, objectAttributes=TPMA_OBJECT.USERWITHAUTH, seed=seed
         )
 
-        handle = self.ectx.load_external(sens, pub, ESYS_TR.RH_NULL)
+        handle = self.ectx.load_external(pub, sens)
         sealdata = self.ectx.unseal(handle)
 
         self.assertEqual(sens.sensitiveArea.seedValue, seed)
@@ -727,7 +727,7 @@ class CryptoTest(TSS2_EsapiTest):
         )
         self.assertEqual(pub.publicArea.parameters.symDetail.sym.mode.sym, TPM2_ALG.CFB)
 
-        self.ectx.load_external(sens, pub, ESYS_TR.RH_NULL)
+        self.ectx.load_external(pub, sens)
 
     def test_symcipher_from_secret_bad(self):
         with self.assertRaises(ValueError) as e:
@@ -754,7 +754,7 @@ class CryptoTest(TSS2_EsapiTest):
             objectAttributes=(TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH),
         )
 
-        handle = self.ectx.load_external(sens, pub, ESYS_TR.RH_NULL)
+        handle = self.ectx.load_external(pub, sens)
 
         msg = b"sign me please"
         h = sha256(msg)
