@@ -782,7 +782,7 @@ class FAPI:
             TSS2_Exception: If Fapi returned an error code.
 
         Returns:
-            Tuple[bytes, Any]: A tuple of the binary blob and its type (:const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_CONTEXTLOAD` or :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_DESERIALIZE)`
+            Tuple[bytes, Any]: A tuple of the binary blob and its type (:const:`FAPI_ESYSBLOB.CONTEXTLOAD` or :const:`FAPI_ESYSBLOB.DESERIALIZE)`
         """
         path = _to_bytes_or_null(path)
         type_ = ffi.new("uint8_t *")

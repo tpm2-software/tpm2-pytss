@@ -262,14 +262,14 @@ class Common:
 
     def test_get_esys_blob_contextload(self, esys, sign_key):
         blob_data, blob_type = self.fapi.get_esys_blob(path=sign_key)
-        assert blob_type == lib.FAPI_ESYSBLOB_CONTEXTLOAD
+        assert blob_type == FAPI_ESYSBLOB.CONTEXTLOAD
         esys_handle = esys.load_blob(blob_data, blob_type)
         esys.read_public(esys_handle)
         esys.flush_context(esys_handle)
 
     def test_get_esys_blob_deserialize(self, esys, nv_ordinary):
         blob_data, blob_type = self.fapi.get_esys_blob(path=nv_ordinary)
-        assert blob_type == lib.FAPI_ESYSBLOB_DESERIALIZE
+        assert blob_type == FAPI_ESYSBLOB.DESERIALIZE
         esys_handle = esys.load_blob(blob_data, blob_type)
         esys.nv_read_public(esys_handle)
 

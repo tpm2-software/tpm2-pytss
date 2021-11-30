@@ -1176,3 +1176,14 @@ class TPM2_MAX(TPM_FRIENDLY_INT):
     CAP_CC = lib.TPM2_MAX_CAP_CC
     CAP_BUFFER = lib.TPM2_MAX_CAP_BUFFER
     CONTEXT_SIZE = lib.TPM2_MAX_CONTEXT_SIZE
+
+
+#
+# We specifically keep these constants around even when FAPI is missing so they may be used
+# without conditional worry and we DONT use lib prefix here because the constants are only
+# present if FAPI is installed. So just use the values directly.
+#
+@TPM_FRIENDLY_INT.fix_const_type
+class FAPI_ESYSBLOB(TPM_FRIENDLY_INT):
+    CONTEXTLOAD = 1
+    DESERIALIZE = 2

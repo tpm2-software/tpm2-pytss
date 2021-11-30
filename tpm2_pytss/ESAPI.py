@@ -13,7 +13,7 @@ from typing import List, Optional, Tuple, Union
 
 # Work around this FAPI dependency if FAPI is not present with the constant value
 _fapi_installed_ = pkgconfig.installed("tss2-fapi", ">=3.0.0")
-_DEFAULT_LOAD_BLOB_SELECTOR = lib.FAPI_ESYSBLOB_CONTEXTLOAD if _fapi_installed_ else 1
+_DEFAULT_LOAD_BLOB_SELECTOR = FAPI_ESYSBLOB.CONTEXTLOAD if _fapi_installed_ else 1
 
 
 def _get_cdata(value, expected, varname, allow_none=False, *args, **kwargs):
@@ -6750,22 +6750,23 @@ class ESAPI:
     def load_blob(
         self, data: bytes, type_: int = _DEFAULT_LOAD_BLOB_SELECTOR
     ) -> ESYS_TR:
-        """load binary ESAPI object as binary blob. Supported are the types :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_CONTEXTLOAD` and :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_DESERIALIZE`.
+        """load binary ESAPI object as binary blob. Supported are the types :const:`FAPI_ESYSBLOB.CONTEXTLOAD` and :const:`FAPI_ESYSBLOB.DESERIALIZE`.
 
         Args:
             data (bytes): Binary blob of the ESAPI object to load.
-            type_ (int, optional): :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_CONTEXTLOAD` or :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_DESERIALIZE`. Defaults to :const:`._libtpm2_pytss.lib.FAPI_ESYSBLOB_CONTEXTLOAD`.
+            type_ (int, optional): :const:`FAPI_ESYSBLOB.CONTEXTLOAD` or :const:`FAPI_ESYSBLOB.DESERIALIZE`. Defaults to :const:`FAPI_ESYSBLOB.CONTEXTLOAD`
+            if FAPI is installed else :const: `FAPI_ESYSBLOB.DESERIALIZE`.
 
         Returns:
             ESYS_TR: The ESAPI handle to the loaded object.
         """
         esys_handle = ffi.new("ESYS_TR *")
-        if type_ == lib.FAPI_ESYSBLOB_CONTEXTLOAD:
+        if type_ == FAPI_ESYSBLOB.CONTEXTLOAD:
             offs = ffi.new("size_t *", 0)
             key_ctx = ffi.new("TPMS_CONTEXT *")
             _chkrc(lib.Tss2_MU_TPMS_CONTEXT_Unmarshal(data, len(data), offs, key_ctx))
             _chkrc(lib.Esys_ContextLoad(self._ctx, key_ctx, esys_handle))
-        elif type_ == lib.FAPI_ESYSBLOB_DESERIALIZE:
+        elif type_ == FAPI_ESYSBLOB.DESERIALIZE:
             _chkrc(lib.Esys_TR_Deserialize(self._ctx, data, len(data), esys_handle))
 
         return ESYS_TR(esys_handle[0])
