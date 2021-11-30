@@ -148,6 +148,7 @@ to change.
     :maxdepth: 2
     :caption: Contents:
 
+    types
     esys
     fapi
     utils

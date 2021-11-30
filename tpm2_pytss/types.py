@@ -1,5 +1,12 @@
 # SPDX-License-Identifier: BSD-2
+"""
+The types module contains types for each of the corresponding TPM types from the TCG TSS specification
+- https://trustedcomputinggroup.org/resource/tss-overview-common-structures-specification
 
+The classes contained within can be initialized based on named argument value pairs or dictionaries
+of key-value objects where the keys are the names of the associated type.
+
+"""
 from ._libtpm2_pytss import ffi, lib
 
 from tpm2_pytss.internal.utils import (
@@ -40,14 +47,20 @@ from cryptography.hazmat.primitives import serialization
 
 
 class ParserAttributeError(Exception):
+    """ Exception ocurred when when parsing."""
+
     pass
 
 
 class TPM2_HANDLE(int):
+    """"A handle to a TPM address"""
+
     pass
 
 
 class TPM_OBJECT(object):
+    """ Abstract Base class for all TPM Objects. Not suitable for direct instantiation."""
+
     def __init__(self, _cdata=None, **kwargs):
 
         # Rather than trying to mock the FFI interface, just avoid it and return
@@ -197,6 +210,9 @@ class TPM_OBJECT(object):
 
 
 class TPM2B_SIMPLE_OBJECT(TPM_OBJECT):
+    """ Abstract Base class for all TPM2B Simple Objects. A Simple object contains only
+    a size and byte buffer fields. This is not suitable for direct instantiation."""
+
     def __init__(self, _cdata=None, **kwargs):
 
         _cdata, kwargs = _fixup_cdata_kwargs(self, _cdata, kwargs)
@@ -274,6 +290,15 @@ class TPM2B_SIMPLE_OBJECT(TPM_OBJECT):
 
 
 class TPML_Iterator(object):
+    """ Iterator class for iterating over TPML data types.
+
+    This class is used in enumerated for loops, such as:
+    .. code-block:: python
+
+    for alg in TPML_ALG:
+       do_something(alg)
+    """
+
     def __init__(self, tpml):
         self._tpml = tpml
         self._index = 0
@@ -292,6 +317,9 @@ class TPML_Iterator(object):
 
 
 class TPML_OBJECT(TPM_OBJECT):
+    """ Abstract Base class for all TPML Objects. A TPML object is an object that
+    contains a list of objects. This is not suitable for direct instantiation."""
+
     def __init__(self, _cdata=None, **kwargs):
 
         _cdata, kwargs = _fixup_cdata_kwargs(self, _cdata, kwargs)
