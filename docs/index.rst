@@ -26,8 +26,13 @@ Supported versions of Python are
 Features
 --------
 
-**In Progress**
-We support the FAPI, ESAPI, and marshalling library.
+tpm2-pytss provides bindings to the Enhanced System API (ESYS), Feature API (FAPI), Marshaling (MU), TCTI
+Loader (TCTILdr) and RC Decoding (rcdecode) libraries. It also contains utility methods for wrapping
+keys to TPM 2.0 data structures for importation into the TPM, unwrapping keys and exporting them
+from the TPM, TPM-less makecredential command and name calculations, TSS2 PEM Key format support,
+importing Keys from PEM, DER and SSH formats, conversion from tpm2-tools based command line strings
+and loading tpm2-tools context files.
+
 
 - :doc:`/esys`
 - :doc:`/fapi`
@@ -38,19 +43,38 @@ We support the FAPI, ESAPI, and marshalling library.
 Dependencies
 ------------
 
-This has been tested against TPM2 TSS 2.4.0.
+The python package will install the required python dependencies when you
+perform something like a `pip install`. However, one must satisfy the the
+dependencies on the following native libraries that comprise the tpm2-software suite:
 
-tpm2-tss
-~~~~~~~~
+Required Core Libraries provided by the tpm2-software/tpm2-tss project:
 
-You need to install tpm2-tss prior to installing this,
-`INSTALL.md
-<https://github.com/tpm2-software/tpm2-tss/blob/master/INSTALL.md>`_.
+- tss2-esys
+- tss2-fapi
+- tss2-mu
+- tss2-rcdecode
+- tss2-tctildr
+- tss2-rc
 
-pkg-config
-~~~~~~~~~~
+Optional TCTIs:
+- tss2-tcti-device
+- tss2-tcti-swtpm
+- tss2-tcti-mssim
+- tss2-tcti-libtpms
+- tss2-tcti-pcap
+- tss2-tcti-cmd
 
-You need to install pkg-config
+Optional TCTI's provided by tpm2-software/tpm2-abrmd:
+
+- tss2-tcti-abrmd
+
+These libraries are available through the package manager for most contemporary versions
+of various Linux distros. However, you can consult the various tpm2-software projects for
+help installing them from source:
+- https://github.com/tpm2-software
+
+
+Note that when you install from source, you may need to run ldconfig as illustrated below.
 
 ldconfig
 ~~~~~~~~
@@ -101,70 +125,24 @@ Or install from the Git repo
 Testing
 -------
 
-You need to have ``tpm_server`` installed in your path to run the tests.
+You need to have ``tpm_server`` or ``swtpm``  installed in your path to run the tests.
 
-Download the latest version from https://sourceforge.net/projects/ibmswtpm2/files/
-and put it somewhere in your ``$PATH``.
+Download the latest version of tpm_server from https://sourceforge.net/projects/ibmswtpm2/files/
+or swtpm from https://github.com/stefanberger/swtpm and put it somewhere in your ``$PATH``.
 
 .. code-block:: console
 
-    $ python3 setup.py test
+    $ pip install -e .[dev]
+    $ pytest -n$(nproc) -v test
 
 Logging
 -------
 
-** In Progress **
+** In Progress ** Currently all the logging infrastructure is handled by the subbordiante libraries
+and covered by tpm2-tss logging: https://github.com/tpm2-software/tpm2-tss/blob/master/doc/logging.md
 
-To get traces of all calls into the TSS, use the ``TPM2_PYTSS_LOG_LEVEL``
-environment variable.
-
-.. code-block:: console
-
-    $ export TPM2_PYTSS_LOG_LEVEL=debug
-
-Example logs:
-
-.. code-block::
-
-    test_random_length (tests.test_esys_get_random.TestGetRandom) ... DEBUG:asyncio:Using selector: EpollSelector
-    DEBUG:tpm2_pytss.util.swig:Tss2_TctiLdr_Initialize_Ex(
-        name: mssim,
-        conf: port=63684,
-        context: <Swig Object of type 'TSS2_TCTI_CONTEXT **' at 0x7f5e63d8ea50>,
-    )
-    DEBUG:tpm2_pytss.util.swig:new_ctx_ptr(
-
-    )
-    DEBUG:tpm2_pytss.util.swig:Esys_Initialize(
-        esys_context: <Swig Object of type 'ESYS_CONTEXT **' at 0x7f5e63d8e9f0>,
-        tcti: <Swig Object of type 'TSS2_TCTI_CONTEXT *' at 0x7f5e63d8e5d0>,
-        abiVersion: <tpm2_pytss.binding.TSS2_ABI_VERSION; proxy of <Swig Object of type 'TSS2_ABI_VERSION *' at 0x7f5e6337ab10> >,
-    )
-    DEBUG:tpm2_pytss.util.swig:ctx_ptr_value(
-        obj: <Swig Object of type 'ESYS_CONTEXT **' at 0x7f5e63d8e9f0>,
-    )
-    DEBUG:tpm2_pytss.util.swig:Esys_Startup(
-        esysContext: <Swig Object of type 'ESYS_CONTEXT *' at 0x7f5e63d8e7e0>,
-        startupType: 0,
-    )
-    DEBUG:tpm2_pytss.util.swig:Esys_SetTimeout(
-        esys_context: <Swig Object of type 'ESYS_CONTEXT *' at 0x7f5e63d8e7e0>,
-        timeout: -1,
-    )
-    DEBUG:tpm2_pytss.util.swig:Esys_GetRandom(
-        esysContext: <Swig Object of type 'ESYS_CONTEXT *' at 0x7f5e63d8e7e0>,
-        shandle1: 4095,
-        shandle2: 4095,
-        shandle3: 4095,
-        bytesRequested: 11,
-        randomBytes: <Swig Object of type 'TPM2B_NONCE **' at 0x7f5e63d8e8d0>,
-    )
-    DEBUG:tpm2_pytss.util.swig:Esys_Finalize(
-        context: <Swig Object of type 'ESYS_CONTEXT **' at 0x7f5e63d8e9f0>,
-    )
-    DEBUG:tpm2_pytss.util.swig:delete_ctx_ptr(
-        obj: <Swig Object of type 'ESYS_CONTEXT **' at 0x7f5e63d8e9f0>,
-    )
+This **MUST** not be considered stable API into the logging for the Python code and could be subject
+to change.
 
 .. toctree::
     :maxdepth: 2
