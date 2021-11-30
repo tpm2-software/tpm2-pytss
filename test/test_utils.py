@@ -368,7 +368,7 @@ class TestUtils(TSS2_EsapiTest):
             objectAttributes=TPMA_OBJECT.RESTRICTED | TPMA_OBJECT.DECRYPT,
             symmetric=sym,
         )
-        new_phandle = self.ectx.load_external(None, parent)
+        new_phandle = self.ectx.load_external(parent)
 
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,

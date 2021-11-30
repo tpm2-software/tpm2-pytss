@@ -823,8 +823,8 @@ class ESAPI:
 
     def load_external(
         self,
-        in_private: TPM2B_SENSITIVE,
         in_public: TPM2B_PUBLIC,
+        in_private: TPM2B_SENSITIVE = None,
         hierarchy=ESYS_TR.NULL,
         session1: ESYS_TR = ESYS_TR.NONE,
         session2: ESYS_TR = ESYS_TR.NONE,
@@ -837,8 +837,8 @@ class ESAPI:
         available
 
         Args:
-            in_private (TPM2B_PRIVATE): The private portion of the object.
             in_public (TPM2B_PUBLIC): The public portion of the object.
+            in_private (TPM2B_SENSITIVE): The sensitive portion of the object. Defaults to None.
             hierarchy (ESYS_TR): Hierarchy with which the object area is associated.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
