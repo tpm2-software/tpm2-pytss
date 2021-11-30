@@ -166,8 +166,7 @@ def unwrap(
         )
 
     Returns:
-        A tuple of (TPM2B_DATA, TPM2B_PRIVATE, TPM2B_ENCRYPTED_SECRET) which is the encryption key, the
-        the wrapped duplicate and the encrypted seed.
+        A TPM2B_SENSITIVE which contains the raw key material.
 
     Raises:
         ValueError: If the public key type or symmetric algorithm are not supported
