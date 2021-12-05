@@ -164,6 +164,7 @@ class type_generator(build_ext):
         return self.generate_mappings(ast, tm)
 
     def run(self):
+        super().run()
         type_map, element_type_map = self.get_mappings()
         mstr = ""
         for k, v in type_map.items():
@@ -173,7 +174,8 @@ class type_generator(build_ext):
         for k, v in element_type_map.items():
             estr = estr + f'    "{k}": "{v}",\n'
 
-        p = os.path.join(
+        p = os.path.join(self.build_lib, "tpm2_pytss/internal/type_mapping.py")
+        sp = os.path.join(
             os.path.dirname(__file__), "tpm2_pytss/internal/type_mapping.py"
         )
 
@@ -182,11 +184,13 @@ class type_generator(build_ext):
         stempl = dedent(self.template)
         mout = stempl.format(mstr=mstr, estr=estr)
         if not self.dry_run:
+            self.mkpath(os.path.dirname(p))
             with open(p, "wt") as tf:
                 tf.seek(0)
                 tf.truncate(0)
                 tf.write(mout)
-        super().run()
+        if self.inplace:
+            self.copy_file(p, sp)
 
 
 setup(
