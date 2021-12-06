@@ -10,10 +10,21 @@ from .internal.crypto import (
     _hmac,
 )
 from .types import *
+from .ESAPI import ESAPI
+from .constants import (
+    ESYS_TR,
+    TPM2_CAP,
+    TPM2_PT_NV,
+    TPM2_ECC,
+    TPM2_PT,
+    TPM2_RH,
+)
+from .internal.templates import _ek
+from .TSS2_Exception import TSS2_Exception
 from cryptography.hazmat.primitives import constant_time as ct
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Callable
 
 import secrets
 
@@ -226,3 +237,160 @@ def unwrap(
         )
 
     return s
+
+
+class NoSuchIndex(Exception):
+    """NV index is not defined exception
+
+    Args:
+        index (int): The NV index requested
+    """
+
+    def __init__(self, index):
+        self.index = index
+
+    def __str__(self):
+        return f"NV index 0x{index:08x} does not exist"
+
+
+class NVReadEK:
+    """NV read callback to be used with create_ek_template
+
+    Args:
+        ectx (ESAPI): The ESAPI context for reading from NV areas
+        auth_handle (ESYS_TR): Handle indicating the source of the authorization. Defaults to the index being read.
+        session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.PASSWORD.
+        session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
+        session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
+    """
+
+    def __init__(
+        self,
+        ectx: ESAPI,
+        auth_handle: ESYS_TR = None,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ):
+        self._ectx = ectx
+        self._auth_handle = auth_handle
+        self._session1 = session1
+        self._session2 = session2
+        self._session3 = session3
+        self._buffer_max = 512
+
+        more = True
+        while more:
+            more, data = self._ectx.get_capability(
+                TPM2_CAP.TPM_PROPERTIES,
+                TPM2_PT.FIXED,
+                4096,
+                session1=session2,
+                session2=session3,
+            )
+            props = data.data.tpmProperties
+            for p in props:
+                if p.property == TPM2_PT_NV.BUFFER_MAX:
+                    self._buffer_max = p.value
+                    more = False
+                    break
+
+    def __call__(self, index: Union[int, TPM2_RH]) -> bytes:
+        try:
+            nvh = self._ectx.tr_from_tpmpublic(
+                index, session1=self._session2, session2=self._session3
+            )
+        except TSS2_Exception as e:
+            if e.rc == 0x18B:
+                raise NoSuchIndex(index)
+            else:
+                raise e
+        nvpub, _ = self._ectx.nv_read_public(
+            nvh, session1=self._session2, session2=self._session3
+        )
+        nvdata = b""
+        left = nvpub.nvPublic.dataSize
+        while left > 0:
+            off = nvpub.nvPublic.dataSize - left
+            size = self._buffer_max if left > self._buffer_max else left
+            data = self._ectx.nv_read(
+                nvh,
+                size,
+                off,
+                auth_handle=self._auth_handle,
+                session1=self._session1,
+                session2=self._session2,
+                session3=self._session3,
+            )
+            nvdata = nvdata + bytes(data)
+            left = left - len(data)
+
+        return nvdata
+
+
+def create_ek_template(
+    ektype: str, nv_read_cb: Callable[[Union[int, TPM2_RH]], bytes]
+) -> Tuple[bytes, TPM2B_PUBLIC]:
+    """Creates an Endorsenment Key template which when created matches the EK certificate
+
+    The template is created according to TCG EK Credential Profile For TPM Family 2.0:
+    - https://trustedcomputinggroup.org/resource/tcg-ek-credential-profile-for-tpm-family-2-0/
+
+    Args:
+        ektype (str): The endoresment key type.
+        nv_read_cb (Callable[Union[int, TPM2_RH]]): The callback to use for reading NV areas.
+
+    None:
+        nv_read_cb MUST raise a NoSuchIndex exception if the NV index isn't defined.
+
+    Returns:
+        A tuple of the certificate (can be None) and the template as a TPM2B_PUBLIC instance
+
+    Raises:
+        ValueError: If ektype is unknown or if a high range certificate is requested but not found.
+    """
+
+    en = ektype.replace("-", "_")
+    if not hasattr(_ek, en):
+        raise ValueError(f"unknown EK type {ektype}")
+    (cert_index, template) = getattr(_ek, en)
+
+    nonce_index = None
+    if ektype in ("EK-RSA2048", "EK-ECC256"):
+        nonce_index = cert_index + 1
+        template_index = cert_index + 2
+    else:
+        template_index = cert_index + 1
+
+    cert = None
+    try:
+        cert = nv_read_cb(cert_index)
+    except NoSuchIndex:
+        if ektype not in ("EK-RSA2048", "EK-ECC256"):
+            raise ValueError(f"no certificate found for {ektype}")
+
+    try:
+        templb = nv_read_cb(template_index)
+        tt, _ = TPMT_PUBLIC.unmarshal(templb)
+        template = TPM2B_PUBLIC(publicArea=tt)
+    except NoSuchIndex:
+        pass
+
+    nonce = None
+    if nonce_index:
+        try:
+            nonce = nv_read_cb(nonce_index)
+        except NoSuchIndex:
+            pass
+
+    if nonce and template.publicArea.type == TPM2_ALG.RSA:
+        template.publicArea.unique.rsa = nonce + ((256 - len(nonce)) * b"\x00")
+    elif (
+        nonce
+        and template.publicArea.type == TPM2_ALG.ECC
+        and template.publicArea.parameters.eccDetail.curveID == TPM2_ECC.NIST_P256
+    ):
+        template.publicArea.unique.ecc.x = nonce + ((32 - len(nonce)) * b"\x00")
+        template.publicArea.unique.ecc.y = b"\x00" * 32
+
+    return cert, template
