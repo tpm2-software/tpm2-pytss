@@ -5,6 +5,7 @@ import unittest
 from tpm2_pytss import *
 from tpm2_pytss.internal.crypto import _generate_seed, private_to_key, public_to_key
 from tpm2_pytss.utils import *
+from tpm2_pytss.internal.templates import _ek
 from .TSS2_BaseTest import TSS2_EsapiTest
 
 from cryptography.hazmat.primitives import hashes
@@ -100,6 +101,27 @@ AwEHoUQDQgAEojRWBjpOkP4pH2fM5hha7iJj4A9RfDcbJrGTd181UMoYvfM+8VuY
 Qa6C2sTmPHlvWopRgWslXt1JmxbBKwWf2Q==
 -----END EC PRIVATE KEY-----
 """
+
+ek_test_template = TPMT_PUBLIC(
+    type=TPM2_ALG.KEYEDHASH,
+    nameAlg=TPM2_ALG.SHA256,
+    objectAttributes=TPMA_OBJECT.FIXEDTPM
+    | TPMA_OBJECT.FIXEDPARENT
+    | TPMA_OBJECT.SENSITIVEDATAORIGIN
+    | TPMA_OBJECT.ADMINWITHPOLICY
+    | TPMA_OBJECT.RESTRICTED
+    | TPMA_OBJECT.SIGN_ENCRYPT,
+    parameters=TPMU_PUBLIC_PARMS(
+        keyedHashDetail=TPMS_KEYEDHASH_PARMS(
+            scheme=TPMT_KEYEDHASH_SCHEME(
+                scheme=TPM2_ALG.HMAC,
+                details=TPMU_SCHEME_KEYEDHASH(
+                    hmac=TPMS_SCHEME_HASH(hashAlg=TPM2_ALG.SHA256),
+                ),
+            )
+        ),
+    ),
+)
 
 
 class TestUtils(TSS2_EsapiTest):
@@ -428,6 +450,207 @@ class TestUtils(TSS2_EsapiTest):
                 mgf=padding.MGF1(hashes.SHA256()), salt_length=padding.PSS.MAX_LENGTH
             ),
             hashes.SHA256(),
+        )
+
+    def test_create_ek_ecc(self):
+        nv_read = NVReadEK(self.ectx)
+        _, ecc_template = create_ek_template("EK-ECC256", nv_read)
+        _, ecc, _, _, _ = self.ectx.create_primary(
+            TPM2B_SENSITIVE_CREATE(), ecc_template, ESYS_TR.ENDORSEMENT
+        )
+
+        self.assertEqual(ecc.publicArea.type, TPM2_ALG.ECC)
+
+        ecc_nv_nonce = TPM2B_NV_PUBLIC(
+            nvPublic=TPMS_NV_PUBLIC(
+                nvIndex=0x1C0000B,
+                nameAlg=TPM2_ALG.SHA256,
+                attributes=TPMA_NV.AUTHWRITE | TPMA_NV.AUTHREAD,
+                dataSize=15,
+            )
+        )
+        eh = self.ectx.nv_define_space(b"", ecc_nv_nonce, ESYS_TR.OWNER)
+        self.ectx.nv_write(eh, b"\xFF" * 15)
+        nv_read = NVReadEK(self.ectx)
+        _, ecc_nonce_template = create_ek_template("EK-ECC256", nv_read)
+        _, ecc_nonce, _, _, _ = self.ectx.create_primary(
+            TPM2B_SENSITIVE_CREATE(), ecc_nonce_template, ESYS_TR.ENDORSEMENT
+        )
+        self.assertNotEqual(
+            ecc_nonce.publicArea.unique.ecc.x, ecc.publicArea.unique.ecc.x
+        )
+        self.assertNotEqual(
+            ecc_nonce.publicArea.unique.ecc.y, ecc.publicArea.unique.ecc.y
+        )
+
+    def test_create_ek_rsa(self):
+        nv_read = NVReadEK(self.ectx)
+        _, rsa_template = create_ek_template("EK-RSA2048", nv_read)
+        _, rsa, _, _, _ = self.ectx.create_primary(
+            TPM2B_SENSITIVE_CREATE(), rsa_template, ESYS_TR.ENDORSEMENT
+        )
+        self.assertEqual(rsa.publicArea.type, TPM2_ALG.RSA)
+
+        rsa_nv_nonce = TPM2B_NV_PUBLIC(
+            nvPublic=TPMS_NV_PUBLIC(
+                nvIndex=0x1C00003,
+                nameAlg=TPM2_ALG.SHA256,
+                attributes=TPMA_NV.AUTHWRITE | TPMA_NV.AUTHREAD,
+                dataSize=127,
+            )
+        )
+        rh = self.ectx.nv_define_space(b"", rsa_nv_nonce, ESYS_TR.OWNER)
+        self.ectx.nv_write(rh, b"\xFF" * 127)
+        nv_read = NVReadEK(self.ectx)
+        _, rsa_nonce_template = create_ek_template("EK-RSA2048", nv_read)
+        _, rsa_nonce, _, _, _ = self.ectx.create_primary(
+            TPM2B_SENSITIVE_CREATE(), rsa_nonce_template, ESYS_TR.ENDORSEMENT
+        )
+        self.assertNotEqual(rsa_nonce.publicArea.unique.rsa, rsa.publicArea.unique.rsa)
+
+    def test_create_ek_template(self):
+        tb = ek_test_template.marshal()
+        nv_template = TPM2B_NV_PUBLIC(
+            nvPublic=TPMS_NV_PUBLIC(
+                nvIndex=0x1C0000C,
+                nameAlg=TPM2_ALG.SHA256,
+                attributes=TPMA_NV.AUTHWRITE | TPMA_NV.AUTHREAD,
+                dataSize=len(tb),
+            )
+        )
+        tnh = self.ectx.nv_define_space(b"", nv_template, ESYS_TR.OWNER)
+        self.ectx.nv_write(tnh, tb)
+        nv_read = NVReadEK(self.ectx)
+        _, templpub = create_ek_template("EK-ECC256", nv_read)
+        _, templ, _, _, _ = self.ectx.create_primary(
+            TPM2B_SENSITIVE_CREATE(), templpub, ESYS_TR.ENDORSEMENT
+        )
+        self.assertEqual(templ.publicArea.type, TPM2_ALG.KEYEDHASH)
+
+    def test_create_ek_bad(self):
+        nv_read = NVReadEK(self.ectx)
+        with self.assertRaises(ValueError) as e:
+            create_ek_template("EK-DES", nv_read)
+        self.assertEqual(str(e.exception), "unknown EK type EK-DES")
+
+    def test_create_ek_high_rsa2048(self):
+        nv_read = NVReadEK(self.ectx)
+        with self.assertRaises(ValueError) as e:
+            create_ek_template("EK-HIGH-RSA2048", nv_read)
+        self.assertEqual(str(e.exception), "no certificate found for EK-HIGH-RSA2048")
+
+        cert_index, def_template = _ek.EK_HIGH_RSA2048
+        nv_cert = TPM2B_NV_PUBLIC(
+            nvPublic=TPMS_NV_PUBLIC(
+                nvIndex=cert_index,
+                nameAlg=TPM2_ALG.SHA256,
+                attributes=TPMA_NV.AUTHWRITE | TPMA_NV.AUTHREAD,
+                dataSize=len(b"I am a certificate"),
+            )
+        )
+        cnh = self.ectx.nv_define_space(b"", nv_cert, ESYS_TR.OWNER)
+        self.ectx.nv_write(cnh, b"I am a certificate")
+        nv_read = NVReadEK(self.ectx)
+        cert, template = create_ek_template("EK-HIGH-RSA2048", nv_read)
+        self.assertEqual(cert, b"I am a certificate")
+        self.assertEqual(template.marshal(), def_template.marshal())
+
+        tb = ek_test_template.marshal()
+        nv_template = TPM2B_NV_PUBLIC(
+            nvPublic=TPMS_NV_PUBLIC(
+                nvIndex=cert_index + 1,
+                nameAlg=TPM2_ALG.SHA256,
+                attributes=TPMA_NV.AUTHWRITE | TPMA_NV.AUTHREAD,
+                dataSize=len(tb),
+            )
+        )
+        tnh = self.ectx.nv_define_space(b"", nv_template, ESYS_TR.OWNER)
+        self.ectx.nv_write(tnh, tb)
+        nv_read = NVReadEK(self.ectx)
+        cert, template = create_ek_template("EK-HIGH-RSA2048", nv_read)
+        self.assertEqual(cert, b"I am a certificate")
+        self.assertEqual(
+            template.marshal(), TPM2B_PUBLIC(publicArea=ek_test_template).marshal()
+        )
+
+    def test_create_ek_high_ecc256(self):
+        nv_read = NVReadEK(self.ectx)
+        with self.assertRaises(ValueError) as e:
+            create_ek_template("EK-HIGH-ECC256", nv_read)
+        self.assertEqual(str(e.exception), "no certificate found for EK-HIGH-ECC256")
+
+        cert_index, def_template = _ek.EK_HIGH_ECC256
+        nv_cert = TPM2B_NV_PUBLIC(
+            nvPublic=TPMS_NV_PUBLIC(
+                nvIndex=cert_index,
+                nameAlg=TPM2_ALG.SHA256,
+                attributes=TPMA_NV.AUTHWRITE | TPMA_NV.AUTHREAD,
+                dataSize=len(b"I am a certificate"),
+            )
+        )
+        cnh = self.ectx.nv_define_space(b"", nv_cert, ESYS_TR.OWNER)
+        self.ectx.nv_write(cnh, b"I am a certificate")
+        nv_read = NVReadEK(self.ectx)
+        cert, template = create_ek_template("EK-HIGH-ECC256", nv_read)
+        self.assertEqual(cert, b"I am a certificate")
+        self.assertEqual(template.marshal(), def_template.marshal())
+
+        tb = ek_test_template.marshal()
+        nv_template = TPM2B_NV_PUBLIC(
+            nvPublic=TPMS_NV_PUBLIC(
+                nvIndex=cert_index + 1,
+                nameAlg=TPM2_ALG.SHA256,
+                attributes=TPMA_NV.AUTHWRITE | TPMA_NV.AUTHREAD,
+                dataSize=len(tb),
+            )
+        )
+        tnh = self.ectx.nv_define_space(b"", nv_template, ESYS_TR.OWNER)
+        self.ectx.nv_write(tnh, tb)
+        nv_read = nv_read_ek(self.ectx)
+        cert, template = create_ek_template("EK-HIGH-ECC256", nv_read)
+        self.assertEqual(cert, b"I am a certificate")
+        self.assertEqual(
+            template.marshal(), TPM2B_PUBLIC(publicArea=ek_test_template).marshal()
+        )
+
+    def test_create_ek_high_ecc256(self):
+        nv_read = NVReadEK(self.ectx)
+        with self.assertRaises(ValueError) as e:
+            create_ek_template("EK-HIGH-ECC384", nv_read)
+        self.assertEqual(str(e.exception), "no certificate found for EK-HIGH-ECC384")
+
+        cert_index, def_template = _ek.EK_HIGH_ECC384
+        nv_cert = TPM2B_NV_PUBLIC(
+            nvPublic=TPMS_NV_PUBLIC(
+                nvIndex=cert_index,
+                nameAlg=TPM2_ALG.SHA256,
+                attributes=TPMA_NV.AUTHWRITE | TPMA_NV.AUTHREAD,
+                dataSize=len(b"I am a certificate"),
+            )
+        )
+        cnh = self.ectx.nv_define_space(b"", nv_cert, ESYS_TR.OWNER)
+        self.ectx.nv_write(cnh, b"I am a certificate")
+        nv_read = NVReadEK(self.ectx)
+        cert, template = create_ek_template("EK-HIGH-ECC384", nv_read)
+        self.assertEqual(cert, b"I am a certificate")
+        self.assertEqual(template.marshal(), def_template.marshal())
+
+        tb = ek_test_template.marshal()
+        nv_template = TPM2B_NV_PUBLIC(
+            nvPublic=TPMS_NV_PUBLIC(
+                nvIndex=cert_index + 1,
+                nameAlg=TPM2_ALG.SHA256,
+                attributes=TPMA_NV.AUTHWRITE | TPMA_NV.AUTHREAD,
+                dataSize=len(tb),
+            )
+        )
+        tnh = self.ectx.nv_define_space(b"", nv_template, ESYS_TR.OWNER)
+        self.ectx.nv_write(tnh, tb)
+        nv_read = NVReadEK(self.ectx)
+        cert, template = create_ek_template("EK-HIGH-ECC384", nv_read)
+        self.assertEqual(cert, b"I am a certificate")
+        self.assertEqual(
+            template.marshal(), TPM2B_PUBLIC(publicArea=ek_test_template).marshal()
         )
 
 
