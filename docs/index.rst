@@ -22,26 +22,12 @@ Supported versions of Python are:
 - 3.8
 - 3.9
 
-Logging
--------
-
-** In Progress ** Currently all the logging infrastructure is handled by the subbordiante libraries
-and covered by tpm2-tss logging: https://github.com/tpm2-software/tpm2-tss/blob/master/doc/logging.md
-
-This **MUST** not be considered stable API into the logging for the Python code and could be subject
-to change.
-
 .. toctree::
+    :hidden:
     :maxdepth: 2
     :caption: Contents:
 
     install
-    constants
-    types
-    esys
-    fapi
-    utils
-    tsskey
-    tcti
+    API <api>
     testing
     GitHub <https://github.com/tpm2-software/tpm2-pytss>
