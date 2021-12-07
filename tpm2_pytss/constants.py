@@ -1,5 +1,7 @@
 # SPDX-License-Identifier: BSD-2
-""" This module contains all the constant values from the TCG TSS specification
+""" This module contains all the constant values from the following TCG specifications:
+
+- https://trustedcomputinggroup.org/resource/tpm-library-specification/. See Part 2 "Structures".
 - https://trustedcomputinggroup.org/resource/tss-overview-common-structures-specification
 
 Along with helpers to go from string values to constants and constant values to string values.
