@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: BSD-2
 """
-The types module contains types for each of the corresponding TPM types from the TCG TSS specification
+The types module contains types for each of the corresponding TPM types from the following TCG specifications:
+
+- https://trustedcomputinggroup.org/resource/tpm-library-specification/. See Part 2 "Structures".
 - https://trustedcomputinggroup.org/resource/tss-overview-common-structures-specification
 
 The classes contained within can be initialized based on named argument value pairs or dictionaries
