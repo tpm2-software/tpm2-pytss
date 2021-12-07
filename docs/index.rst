@@ -44,7 +44,7 @@ Dependencies
 ------------
 
 The python package will install the required python dependencies when you
-perform something like a `pip install`. However, one must satisfy the the
+perform something like a `pip install`. However, one must satisfy the
 dependencies on the following native libraries that comprise the tpm2-software suite:
 
 Required Core Libraries provided by the tpm2-software/tpm2-tss project:
