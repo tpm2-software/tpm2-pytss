@@ -1495,6 +1495,103 @@ class TypesTest(unittest.TestCase):
             str(badattrs)
         self.assertEqual(str(e.exception), "unnmatched values left: 0x80000")
 
+    def test_TPM_FRIENDLY_INTLIST_math(self):
+        ab = abs(TPM2_ALG.RSA)
+        self.assertIsInstance(ab, TPM2_ALG)
+        self.assertEqual(ab, TPM2_ALG.RSA)
+
+        add = TPM2_ALG.ERROR + 1
+        self.assertIsInstance(add, TPM2_ALG)
+        self.assertEqual(add, TPM2_ALG.RSA)
+
+        a = TPMA_OBJECT.RESTRICTED & 0x10000
+        self.assertIsInstance(a, TPMA_OBJECT)
+        self.assertEqual(a, TPMA_OBJECT.RESTRICTED)
+
+        ceil = TPM2_ALG.RSA.__ceil__()
+        self.assertIsInstance(ceil, TPM2_ALG)
+        self.assertEqual(ceil, TPM2_ALG.RSA)
+
+        dm = divmod(TPM2_ALG.ECC, TPM2_ALG.NULL)
+        self.assertIsInstance(dm[0], TPM2_ALG)
+        self.assertIsInstance(dm[1], TPM2_ALG)
+
+        floor = TPM2_ALG.RSA.__floor__()
+        self.assertIsInstance(floor, TPM2_ALG)
+        self.assertEqual(floor, TPM2_ALG.RSA)
+
+        floordiv = TPM2_ALG.ECC.__floordiv__(1)
+        self.assertIsInstance(floordiv, TPM2_ALG)
+
+        inv = ~TPM2_ALG.ECC
+        self.assertIsInstance(inv, TPM2_ALG)
+        self.assertEqual(inv, ~int(TPM2_ALG.ECC))
+
+        ls = TPM2_ALG.RSA << 1
+        self.assertIsInstance(ls, TPM2_ALG)
+
+        mod = TPM2_ALG.ECC % 100
+        self.assertIsInstance(mod, TPM2_ALG)
+
+        mul = TPM2_ALG.RSA * 2
+        self.assertIsInstance(mul, TPM2_ALG)
+
+        neg = -TPM2_ALG.RSA
+        self.assertIsInstance(neg, TPM2_ALG)
+
+        o = TPMA_OBJECT.RESTRICTED | TPMA_OBJECT.FIXEDTPM
+        self.assertIsInstance(o, TPMA_OBJECT)
+        self.assertEqual(o, 0x2 | 0x10000)
+
+        pos = +TPM2_ALG.RSA
+        self.assertIsInstance(pos, TPM2_ALG)
+
+        p = TPM2_ALG.RSA ** 1
+        self.assertIsInstance(p, TPM2_ALG)
+
+        radd = 1 + TPM2_ALG.NULL
+        self.assertIsInstance(radd, TPM2_ALG)
+
+        rand = 1 & TPM2_ALG.RSA
+        self.assertIsInstance(rand, TPM2_ALG)
+
+        rdv = divmod(1, TPM2_ALG.ECC)
+        self.assertIsInstance(rdv[0], TPM2_ALG)
+        self.assertIsInstance(rdv[1], TPM2_ALG)
+
+        rfloordiv = 1 // TPM2_ALG.RSA
+        self.assertIsInstance(rfloordiv, TPM2_ALG)
+
+        rmod = 3 % TPM2_ALG.RSA
+        self.assertIsInstance(rmod, TPM2_ALG)
+
+        rmul = 1 * TPM2_ALG.RSA
+        self.assertIsInstance(rmul, TPM2_ALG)
+
+        r = round(TPM2_ALG.RSA)
+        self.assertIsInstance(r, TPM2_ALG)
+
+        rp = 2 ** TPM2_ALG.RSA
+        self.assertIsInstance(rp, TPM2_ALG)
+
+        rrs = 1 >> TPM2_ALG.RSA
+        self.assertIsInstance(rrs, TPM2_ALG)
+
+        rs = TPM2_ALG.RSA >> 1
+        self.assertIsInstance(rs, TPM2_ALG)
+
+        rsub = 1 - TPM2_ALG.RSA
+        self.assertIsInstance(rsub, TPM2_ALG)
+
+        rdiv = 1 / TPM2_ALG.RSA
+        self.assertIsInstance(rdiv, TPM2_ALG)
+
+        sub = TPM2_ALG.RSA - 1
+        self.assertIsInstance(sub, TPM2_ALG)
+
+        div = TPM2_ALG.RSA / 1
+        self.assertIsInstance(div, TPM2_ALG)
+
     def test_TPM_FRIENDLY_INT_type(self):
         self.assertIsInstance(TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS, TPMA_OBJECT)
 

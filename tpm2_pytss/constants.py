@@ -99,6 +99,107 @@ class TPM_FRIENDLY_INT(int):
                 return k.lower()
         return str(int(self))
 
+    def __abs__(self):
+        return self.__class__(int(self).__abs__())
+
+    def __add__(self, value):
+        return self.__class__(int(self).__add__(value))
+
+    def __and__(self, value):
+        return self.__class__(int(self).__and__(value))
+
+    def __ceil__(self):
+        return self.__class__(int(self).__ceil__())
+
+    def __divmod__(self, value):
+        a, b = int(self).__divmod__(value)
+        return self.__class__(a), self.__class__(b)
+
+    def __floor__(self):
+        return self.__class__(int(self).__floor__())
+
+    def __floordiv__(self, value):
+        return self.__class__(int(self).__floordiv__(value))
+
+    def __invert__(self):
+        return self.__class__(int(self).__invert__())
+
+    def __lshift__(self, value):
+        return self.__class__(int(self).__lshift__(value))
+
+    def __mod__(self, value):
+        return self.__class__(int(self).__mod__(value))
+
+    def __mul__(self, value):
+        return self.__class__(int(self).__mul__(value))
+
+    def __neg__(self):
+        return self.__class__(int(self).__neg__())
+
+    def __or__(self, value):
+        return self.__class__(int(self).__or__(value))
+
+    def __pos__(self):
+        return self.__class__(int(self).__pos__())
+
+    def __pow__(self, value, mod=None):
+        return self.__class__(int(self).__pow__(value, mod))
+
+    def __radd__(self, value):
+        return self.__class__(int(self).__radd__(value))
+
+    def __rand__(self, value):
+        return self.__class__(int(self).__rand__(value))
+
+    def __rdivmod__(self, value):
+        a, b = int(self).__rdivmod__(value)
+        return self.__class__(a), self.__class__(b)
+
+    def __rfloordiv__(self, value):
+        return self.__class__(int(self).__rfloordiv__(value))
+
+    def __rlshift__(self, value):
+        return self.__class__(int(self).__rlshift__(value))
+
+    def __rmod__(self, value):
+        return self.__class__(int(self).__rmod__(value))
+
+    def __rmul__(self, value):
+        return self.__class__(int(self).__rmul__(value))
+
+    def __ror__(self, value):
+        return self.__class__(int(self).__ror__(value))
+
+    def __round__(self):
+        return self.__class__(int(self).__round__())
+
+    def __rpow__(self, value, mod=None):
+        return self.__class__(int(self).__rpow__(value, mod))
+
+    def __rrshift__(self, value):
+        return self.__class__(int(self).__rrshift__(value))
+
+    def __rshift__(self, value):
+        return self.__class__(int(self).__rshift__(value))
+
+    def __rsub__(self, value):
+        return self.__class__(int(self).__rsub__(value))
+
+    def __rtruediv__(self, value):
+        return self.__class__(int(self).__rtruediv__(value))
+
+    def __rxor__(self, value):
+        return self.__class__(int(self).__rxor__(value))
+
+    def __sub__(self, value):
+        return self.__class__(int(self).__sub__(value))
+
+    def __truediv__(self, value):
+        return self.__class__(int(self).__truediv__(value))
+
+    def __xor__(self, value):
+        return self.__class__(int(self).__xor__(value))
+
     @staticmethod
     def _fix_const_type(cls):
         for k, v in vars(cls).items():
