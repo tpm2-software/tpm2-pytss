@@ -231,7 +231,7 @@ class TypesTest(unittest.TestCase):
 
     def test_TPMS_PCR_SELECTION_parse_only_colon(self):
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPMS_PCR_SELECTION.parse(":")
 
     def test_TPMS_PCR_SELECTION_parse_only_bank_and_colon(self):
@@ -336,13 +336,13 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(TPM2_ALG.parse("ECDH"), TPM2_ALG.ECDH)
         self.assertEqual(TPM2_ALG.parse("SHA3_512"), TPM2_ALG.SHA3_512)
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPM2_ALG.parse("")
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(TypeError):
             TPM2_ALG.parse(None)
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPM2_ALG.parse("foo")
 
     def test_TPM_FRIENDLY_INT_bad_to_string(self):
@@ -359,13 +359,13 @@ class TypesTest(unittest.TestCase):
 
         self.assertEqual(ESYS_TR.to_string(ESYS_TR.OWNER), "ESYS_TR.OWNER")
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             ESYS_TR.parse("")
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(TypeError):
             ESYS_TR.parse(None)
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             ESYS_TR.parse("foo"), TPM2_ALG.SHA512
 
     def test_TPM2_ECC(self):
@@ -374,13 +374,13 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(TPM2_ECC.parse("BN_P256"), TPM2_ECC.BN_P256)
         self.assertEqual(TPM2_ECC.parse("sm2_P256"), TPM2_ECC.SM2_P256)
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPM2_ECC.parse("")
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(TypeError):
             TPM2_ECC.parse(None)
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPM2_ECC.parse("foo")
 
     def test_TPM2_CC(self):
@@ -389,13 +389,13 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(TPM2_CC.parse("Certify"), TPM2_CC.Certify)
         self.assertEqual(TPM2_CC.parse("UnSEAL"), TPM2_CC.Unseal)
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPM2_CC.parse("")
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(TypeError):
             TPM2_CC.parse(None)
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPM2_CC.parse("foo")
 
     def test_TPMA_OBJECT(self):
@@ -423,13 +423,13 @@ class TypesTest(unittest.TestCase):
             ),
         )
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPMA_OBJECT.parse("")
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(TypeError):
             TPMA_OBJECT.parse(None)
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPMA_OBJECT.parse("foo")
 
     def test_TPMA_NV(self):
@@ -446,13 +446,13 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(TPMA_NV.parse("NodA"), TPMA_NV.NO_DA)
         self.assertEqual(TPMA_NV.parse("NODA"), TPMA_NV.NO_DA)
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPMA_NV.parse("")
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(TypeError):
             TPMA_NV.parse(None)
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPMA_NV.parse("foo")
 
     def test_TPM2_SPEC(self):
@@ -460,13 +460,13 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(TPM2_SPEC.parse("Level"), TPM2_SPEC.LEVEL)
         self.assertEqual(TPM2_SPEC.parse("DAY_of_YEAR"), TPM2_SPEC.DAY_OF_YEAR)
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPM2_SPEC.parse("")
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(TypeError):
             TPM2_SPEC.parse(None)
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPM2_SPEC.parse("foo")
 
     def test_TPM2_GENERATED_VALUE(self):
@@ -474,13 +474,13 @@ class TypesTest(unittest.TestCase):
             TPM2_GENERATED_VALUE.parse("value"), TPM2_GENERATED_VALUE.VALUE
         )
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPM2_GENERATED_VALUE.parse("")
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(TypeError):
             TPM2_GENERATED_VALUE.parse(None)
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPM2_GENERATED_VALUE.parse("foo")
 
     def test_TPM2_RC(self):
@@ -488,13 +488,13 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(TPM2_RC.parse("HMAC"), TPM2_RC.HMAC)
         self.assertEqual(TPM2_RC.parse("NO_RESULT"), TPM2_RC.NO_RESULT)
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPM2_RC.parse("")
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(TypeError):
             TPM2_RC.parse(None)
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPM2_RC.parse("foo")
 
     def test_TPM2_EO(self):
@@ -502,13 +502,13 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(TPM2_EO.parse("unsigned_GT"), TPM2_EO.UNSIGNED_GT)
         self.assertEqual(TPM2_EO.parse("BITCLEAR"), TPM2_EO.BITCLEAR)
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPM2_EO.parse("")
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(TypeError):
             TPM2_EO.parse(None)
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPM2_EO.parse("foo")
 
     def test_TPM2_ST(self):
@@ -516,26 +516,26 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(TPM2_ST.parse("AUTH_SECRET"), TPM2_ST.AUTH_SECRET)
         self.assertEqual(TPM2_ST.parse("fu_manifest"), TPM2_ST.FU_MANIFEST)
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPM2_ST.parse("")
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(TypeError):
             TPM2_ST.parse(None)
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPM2_ST.parse("foo")
 
     def test_TPM2_SU(self):
         self.assertEqual(TPM2_SU.parse("clear"), TPM2_SU.CLEAR)
         self.assertEqual(TPM2_SU.parse("State"), TPM2_SU.STATE)
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPM2_SU.parse("")
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(TypeError):
             TPM2_SU.parse(None)
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPM2_SU.parse("foo")
 
     def test_TPM2_SE(self):
@@ -543,13 +543,13 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(TPM2_SE.parse("TRiaL"), TPM2_SE.TRIAL)
         self.assertEqual(TPM2_SE.parse("POLICY"), TPM2_SE.POLICY)
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPM2_SE.parse("")
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(TypeError):
             TPM2_SE.parse(None)
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPM2_SE.parse("foo")
 
     def test_TPM2_PT(self):
@@ -557,13 +557,13 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(TPM2_PT.parse("GrouP"), TPM2_PT.GROUP)
         self.assertEqual(TPM2_PT.parse("FIXED"), TPM2_PT.FIXED)
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPM2_PT.parse("")
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(TypeError):
             TPM2_PT.parse(None)
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPM2_PT.parse("foo")
 
     def test_TPM2B_PUBLIC_specified_parts(self):
@@ -775,47 +775,29 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(templ.parameters.rsaDetail.symmetric.algorithm, TPM2_ALG.AES)
 
     def test_TPMT_PUBLIC_parse_bad_params(self):
-        with self.assertRaises(RuntimeError) as e:
+        message = "Expected keybits for RSA to be one of ['1024', '2048', '3072', '4096'], got:\"512\""
+        with self.assertRaises(ValueError, msg=message) as e:
             TPMT_PUBLIC.parse(alg="rsa512")
-        self.assertEqual(
-            str(e.exception),
-            "Expected keybits for RSA to be one of ['1024', '2048', '3072', '4096'], got:\"512\"",
-        )
 
-        with self.assertRaises(RuntimeError) as e:
+        message = "Expected bits to be one of ['128', '192', '256'], got: \"512\""
+        with self.assertRaises(ValueError, msg=message) as e:
             TPMT_PUBLIC.parse(alg="rsa2048:aes512")
-        self.assertEqual(
-            str(e.exception),
-            "Expected bits to be one of ['128', '192', '256'], got: \"512\"",
-        )
 
-        with self.assertRaises(RuntimeError) as e:
+        message = "Expected mode to be one of ['cfb', 'cbc', 'ofb', 'ctr', 'ecb'], got: \"yyy\""
+        with self.assertRaises(ValueError, msg=message) as e:
             TPMT_PUBLIC.parse(alg="rsa2048:aes256yyy")
-        self.assertEqual(
-            str(e.exception),
-            "Expected mode to be one of ['cfb', 'cbc', 'ofb', 'ctr', 'ecb'], got: \"yyy\"",
-        )
 
-        with self.assertRaises(RuntimeError) as e:
+        message = "Expected object prefix to be one of ('rsa', 'ecc', 'aes', 'camellia', 'xor', 'hmac', 'keyedhash'), got: \"unsupported\""
+        with self.assertRaises(ValueError, msg=message) as e:
             TPMT_PUBLIC.parse("unsupported")
-        self.assertEqual(
-            str(e.exception),
-            "Expected object prefix to be one of ('rsa', 'ecc', 'aes', 'camellia', 'xor', 'hmac', 'keyedhash'), got: \"unsupported\"",
-        )
 
-        with self.assertRaises(RuntimeError) as e:
+        message = 'Expected symmetric detail to be null or start with one of aes, camellia, got: "hmac"'
+        with self.assertRaises(ValueError, msg=message) as e:
             TPMT_PUBLIC.parse("rsa2048:hmac")
-        self.assertEqual(
-            str(e.exception),
-            'Expected symmetric detail to be null or start with one of aes, camellia, got: "hmac"',
-        )
 
-        with self.assertRaises(RuntimeError) as e:
+        message = 'Keyedhash objects cannot have asym detail, got: "aes128"'
+        with self.assertRaises(ValueError, msg=message) as e:
             TPMT_PUBLIC.parse("hmac:aes128")
-        self.assertEqual(
-            str(e.exception),
-            'Keyedhash objects cannot have asym detail, got: "aes128"',
-        )
 
     def test_TPMT_PUBLIC_parse_ecc_ecdaa4_sha256(self):
 
@@ -1017,7 +999,7 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(templ.parameters.keyedHashDetail.scheme.scheme, TPM2_ALG.NULL)
 
         # should fail, cannot have additional specifiers
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             templ = TPMT_PUBLIC.parse(alg="keyedhash:sha512")
 
     def test_TPMT_PUBLIC_parse_hmac(self):
@@ -1135,13 +1117,13 @@ class TypesTest(unittest.TestCase):
 
     def test_TPML_ALG_parse_bad(self):
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPML_ALG.parse("not,real,alg")
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPML_ALG.parse("jfghsjhdgfdhg")
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPML_ALG.parse("aes,rsa,foo")
 
     def test_TPML_ALG_setitem_single(self):

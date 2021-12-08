@@ -513,7 +513,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
 
         expected = ["1024", "2048", "3072", "4096"]
         if objstr not in expected:
-            raise RuntimeError(
+            raise ValueError(
                 f'Expected keybits for RSA to be one of {expected}, got:"{objstr}"'
             )
 
@@ -545,7 +545,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
         bits = objstr[:3]
         expected = ["128", "192", "256"]
         if bits not in expected:
-            raise RuntimeError(f'Expected bits to be one of {expected}, got: "{bits}"')
+            raise ValueError(f'Expected bits to be one of {expected}, got: "{bits}"')
 
         bits = int(bits)
 
@@ -556,7 +556,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
         else:
             expected = ["cfb", "cbc", "ofb", "ctr", "ecb"]
             if objstr not in expected:
-                raise RuntimeError(
+                raise ValueError(
                     f'Expected mode to be one of {expected}, got: "{objstr}"'
                 )
             mode = objstr
@@ -658,7 +658,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
             halg = scheme[len("oaep") + 1 :]
         else:
             templ.parameters.asymDetail.scheme.scheme = TPM2_ALG.NULL
-            raise RuntimeError(
+            raise ValueError(
                 f'Expected RSA scheme null or rsapss or prefix of rsapss, rsassa, got "{scheme}"'
             )
 
@@ -698,7 +698,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
             templ.parameters.eccDetail.scheme.scheme = TPM2_ALG.NULL
         else:
             templ.parameters.asymDetail.scheme.scheme = TPM2_ALG.NULL
-            raise RuntimeError(
+            raise ValueError(
                 f'Expected EC scheme null or prefix of oaep, ecdsa, ecdh, scshnorr, ecdaa, got "{scheme}"'
             )
 
@@ -726,7 +726,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
                 TPM2_ALG.KDF1_SP800_108
             )
         else:
-            raise RuntimeError(
+            raise ValueError(
                 f'Expected one of HMAC or XOR, got: "{templ.parameters.keyedHashDetail.scheme.scheme}"'
             )
 
@@ -749,13 +749,13 @@ class TPMT_PUBLIC(TPM_OBJECT):
 
         if templ.type == TPM2_ALG.KEYEDHASH:
             if detail is not None:
-                raise RuntimeError(
+                raise ValueError(
                     f'Keyedhash objects cannot have asym detail, got: "{detail}"'
                 )
             return
 
         if templ.type != TPM2_ALG.RSA and templ.type != TPM2_ALG.ECC:
-            raise RuntimeError(
+            raise ValueError(
                 f'Expected only RSA and ECC objects to have asymdetail, got: "{templ.type}"'
             )
 
@@ -776,7 +776,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
             templ.parameters.symDetail.sym.algorithm = TPM2_ALG.CAMELLIA
             detail = detail[8:]
         else:
-            raise RuntimeError(
+            raise ValueError(
                 f'Expected symmetric detail to be null or start with one of aes, camellia, got: "{detail}"'
             )
 
@@ -792,7 +792,8 @@ class TPMT_PUBLIC(TPM_OBJECT):
         nameAlg="sha256",
         authPolicy=None,
     ):
-
+        """
+        """
         templ = TPMT_PUBLIC()
 
         if isinstance(nameAlg, str):
@@ -823,13 +824,13 @@ class TPMT_PUBLIC(TPM_OBJECT):
                 objstr[len(prefix) :], templ
             )
         else:
-            raise RuntimeError(
+            raise ValueError(
                 f'Expected object prefix to be one of {expected}, got: "{objstr}"'
             )
 
         if not keep_processing:
             if scheme:
-                raise RuntimeError(
+                raise ValueError(
                     f'{prefix} objects cannot have additional specifiers, got: "{scheme}"'
                 )
             return templ
@@ -837,7 +838,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
         # at this point we either have scheme as a scheme or an asym detail
         try:
             TPMT_PUBLIC._handle_scheme(scheme, templ)
-        except RuntimeError as e:
+        except ValueError as e:
             # nope try it as asymdetail
             symdetail = scheme
 

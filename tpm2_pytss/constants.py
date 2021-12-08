@@ -15,31 +15,64 @@ class TPM_FRIENDLY_INT(int):
     _FIXUP_MAP = {}
 
     @classmethod
-    def parse(cls, value):
+    def parse(cls, value: str) -> int:
         # If it's a string initializer value, see if it matches anything in the list
         if isinstance(value, str):
             try:
-                value = _CLASS_INT_ATTRS_from_string(cls, value, cls._FIXUP_MAP)
+                x = _CLASS_INT_ATTRS_from_string(cls, value, cls._FIXUP_MAP)
+                if not isinstance(x, int):
+                    raise KeyError(f'Expected int got: "{type(x)}"')
+                return x
             except KeyError:
-                raise RuntimeError(
+                raise ValueError(
                     f'Could not convert friendly name to value, got: "{value}"'
                 )
-
-        if not isinstance(value, int):
-            raise RuntimeError(f'Expected int object, got: "{type(value)}"')
-
-        return value
+        else:
+            raise TypeError(f'Expected value to be a str object, got: "{type(value)}"')
 
     @classmethod
-    def iterator(cls):
+    def iterator(cls) -> filter:
+        """ Returns the constants in the class.
+
+        Returns:
+            (int): The int values of the constants in the class.
+
+        Example:
+            list(ESYS_TR.iterator()) -> [4095, 255, 0, 1, 2, 3, ... ]
+        """
         return filter(lambda x: isinstance(x, int), vars(cls).values())
 
     @classmethod
-    def contains(cls, value):
+    def contains(cls, value: int) -> bool:
+        """ Indicates if a class contains a numeric constant.
+
+        Args:
+            value (int): The raw numerical number to test for.
+
+        Returns:
+            (bool): True if the class contains the constant, False otherwise.
+
+        Example:
+            ESYS_TR.contains(7) -> True
+        """
         return value in cls.iterator()
 
     @classmethod
-    def to_string(cls, value):
+    def to_string(cls, value: int) -> str:
+        """ Converts an integer value into it's friendly string name for that class.
+
+        Args:
+            value (int): The raw numerical number to try and convert to a name.
+
+        Returns:
+            (str): The string of the constant defining the raw numeric.
+
+        Raises:
+            ValueError: If the numeric does not match a constant.
+
+        Example:
+            ESYS_TR.to_string(5) -> 'ESYS_TR.PCR5'
+        """
         # Take the shortest match, ie OWNER over RH_OWNER.
         m = None
         items = vars(cls).items()
@@ -52,14 +85,22 @@ class TPM_FRIENDLY_INT(int):
 
         return f"{cls.__name__}.{m}"
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Returns a string value of the constant normalized to lowercase.
+
+        Returns:
+            (str): a string value of the constant normalized to lowercase.
+
+        Example:
+            str(ESYS_TR.PCR2) -> 'pcr2'
+        """
         for k, v in vars(self.__class__).items():
             if int(self) == v:
                 return k.lower()
         return str(int(self))
 
     @staticmethod
-    def fix_const_type(cls):
+    def _fix_const_type(cls):
         for k, v in vars(cls).items():
             if not isinstance(v, int) or k.startswith("_"):
                 continue
@@ -68,34 +109,60 @@ class TPM_FRIENDLY_INT(int):
         return cls
 
 
-class TPM_FRIENDLY_INTLIST(TPM_FRIENDLY_INT):
+class TPMA_FRIENDLY_INTLIST(TPM_FRIENDLY_INT):
     @classmethod
-    def parse(cls, value):
+    def parse(cls, value: str) -> int:
+        """ Converts a string of | separated constant values into it's integer value.
+
+        Given a pipe "|" separated list of string constant values that represent the
+        bitwise values returns the value itself. The value "" (empty string) returns
+        a 0.
+
+        Args:
+            value (str): The string "bitwise" expression of the object or the empty string.
+
+        Returns:
+            The integer result.
+
+        Raises:
+            TypeError: If the value is not a str.
+            ValueError: If a field portion of the str does not match a constant.
+
+        Examples:
+            TPMA_NV.parse("ppwrite|orderly|NO_DA") -> 0x6000001
+            TPMA_NV.parse("NO_DA") -> 0x2000000
+        """
 
         intvalue = 0
 
-        if value is None:
-            raise RuntimeError(f'Expected int object, got: "{type(value)}"')
+        if not isinstance(value, str):
+            raise TypeError(f'Expected value to be a str, got: "{type(value)}"')
 
-        if len(value) == 0:
-            raise RuntimeError(
-                f'Could not convert friendly name to value, got: "{value}"'
-            )
+        hunks = value.split("|") if "|" in value else [value]
+        for k in hunks:
+            try:
+                intvalue |= _CLASS_INT_ATTRS_from_string(cls, k, cls._FIXUP_MAP)
+            except KeyError:
+                raise ValueError(
+                    f'Could not convert friendly name to value, got: "{k}"'
+                )
 
-        # If it's a string initializer value, see if it matches anything in the list
-        if isinstance(value, str):
-            hunks = value.split("|") if "|" in value else [value]
-            for k in hunks:
-                try:
-                    intvalue |= _CLASS_INT_ATTRS_from_string(cls, k, cls._FIXUP_MAP)
-                except KeyError:
-                    raise RuntimeError(
-                        f'Could not convert friendly name to value, got: "{k}"'
-                    )
-
-        return super().parse(intvalue)
+        return intvalue
 
     def __str__(self):
+        """Given a constant, return the string bitwise representation.
+
+        Each constant is seperated by the "|" (pipe) character.
+
+        Returns:
+            (str): a bitwise string value of the fields for the constant normalized to lowercase.
+
+        Raises:
+            ValueError: If their are unmatched bits in the constant value.
+
+        Example:
+            str(TPMA_NV(TPMA_NV.PPWRITE|TPMA_NV.ORDERLY|TPMA_NV.NO_DA)) -> 'ppwrite|noda|orderly'
+        """
         cv = int(self)
         ints = list()
         for k, v in vars(self.__class__).items():
@@ -114,7 +181,7 @@ class TPM_FRIENDLY_INTLIST(TPM_FRIENDLY_INT):
         return "|".join(ints)
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class ESYS_TR(TPM_FRIENDLY_INT):
     NONE = lib.ESYS_TR_NONE
     PASSWORD = lib.ESYS_TR_PASSWORD
@@ -165,6 +232,7 @@ class ESYS_TR(TPM_FRIENDLY_INT):
 
     def serialize(self, ectx: "ESAPI") -> bytes:
         """Same as see tpm2_pytss.ESAPI.tr_serialize
+
         Args:
             ectx(ESAPI): The esapi context the ESYS_TR was created
             from.
@@ -177,6 +245,7 @@ class ESYS_TR(TPM_FRIENDLY_INT):
     @staticmethod
     def deserialize(ectx: "ESAPI", buffer: bytes) -> "ESYS_TR":
         """Same as see tpm2_pytss.ESAPI.tr_derialize
+
         Args:
             ectx(ESAPI): The esapi context to load the ESYS_TR on.
 
@@ -188,6 +257,7 @@ class ESYS_TR(TPM_FRIENDLY_INT):
 
     def get_name(self, ectx: "ESAPI") -> "TPM2B_NAME":
         """Same as see tpm2_pytss.ESAPI.tr_get_name
+
         Args:
             ectx(ESAPI): The esapi context to retrieve the object name from.
 
@@ -198,13 +268,14 @@ class ESYS_TR(TPM_FRIENDLY_INT):
 
     def close(self, ectx: "ESAPI"):
         """Same as see tpm2_pytss.ESAPI.tr_close
+
         Args:
             ectx(ESAPI): The esapi context to close the ESYS_TR on.
         """
         return ectx.tr_close(self)
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_RH(TPM_FRIENDLY_INT):
     SRK = lib.TPM2_RH_SRK
     OWNER = lib.TPM2_RH_OWNER
@@ -222,7 +293,7 @@ class TPM2_RH(TPM_FRIENDLY_INT):
     PLATFORM_NV = lib.TPM2_RH_PLATFORM_NV
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_ALG(TPM_FRIENDLY_INT):
     ERROR = lib.TPM2_ALG_ERROR
     RSA = lib.TPM2_ALG_RSA
@@ -270,7 +341,7 @@ class TPM2_ALG(TPM_FRIENDLY_INT):
 TPM2_ALG_ID = TPM2_ALG
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_ECC(TPM_FRIENDLY_INT):
     NONE = lib.TPM2_ECC_NONE
     NIST_P192 = lib.TPM2_ECC_NIST_P192
@@ -294,7 +365,7 @@ class TPM2_ECC(TPM_FRIENDLY_INT):
 TPM2_ECC_CURVE = TPM2_ECC
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_CC(TPM_FRIENDLY_INT):
     NV_UndefineSpaceSpecial = lib.TPM2_CC_NV_UndefineSpaceSpecial
     FIRST = lib.TPM2_CC_FIRST
@@ -416,7 +487,7 @@ class TPM2_CC(TPM_FRIENDLY_INT):
     Vendor_TCG_Test = lib.TPM2_CC_Vendor_TCG_Test
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_SPEC(TPM_FRIENDLY_INT):
     FAMILY = lib.TPM2_SPEC_FAMILY
     LEVEL = lib.TPM2_SPEC_LEVEL
@@ -425,7 +496,7 @@ class TPM2_SPEC(TPM_FRIENDLY_INT):
     DAY_OF_YEAR = lib.TPM2_SPEC_DAY_OF_YEAR
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_GENERATED_VALUE(TPM_FRIENDLY_INT):
     VALUE = lib.TPM2_GENERATED_VALUE
 
@@ -435,7 +506,7 @@ class TPM_BASE_RC(TPM_FRIENDLY_INT):
         return ffi.string(lib.Tss2_RC_Decode(self)).decode()
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_RC(TPM_BASE_RC):
     SUCCESS = lib.TPM2_RC_SUCCESS
     BAD_TAG = lib.TPM2_RC_BAD_TAG
@@ -559,7 +630,7 @@ class TPM2_RC(TPM_BASE_RC):
     N_MASK = lib.TPM2_RC_N_MASK
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TSS2_RC(TPM_BASE_RC):
     RC_LAYER_SHIFT = lib.TSS2_RC_LAYER_SHIFT
     RC_LAYER_MASK = lib.TSS2_RC_LAYER_MASK
@@ -732,7 +803,7 @@ class TSS2_RC(TPM_BASE_RC):
         FAPI_RC_ALREADY_PROVISIONED = lib.TSS2_FAPI_RC_ALREADY_PROVISIONED
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_EO(TPM_FRIENDLY_INT):
     EQ = lib.TPM2_EO_EQ
     NEQ = lib.TPM2_EO_NEQ
@@ -748,7 +819,7 @@ class TPM2_EO(TPM_FRIENDLY_INT):
     BITCLEAR = lib.TPM2_EO_BITCLEAR
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_ST(TPM_FRIENDLY_INT):
     RSP_COMMAND = lib.TPM2_ST_RSP_COMMAND
     NULL = lib.TPM2_ST_NULL
@@ -769,20 +840,20 @@ class TPM2_ST(TPM_FRIENDLY_INT):
     FU_MANIFEST = lib.TPM2_ST_FU_MANIFEST
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_SU(TPM_FRIENDLY_INT):
     CLEAR = lib.TPM2_SU_CLEAR
     STATE = lib.TPM2_SU_STATE
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_SE(TPM_FRIENDLY_INT):
     HMAC = lib.TPM2_SE_HMAC
     POLICY = lib.TPM2_SE_POLICY
     TRIAL = lib.TPM2_SE_TRIAL
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_CAP(TPM_FRIENDLY_INT):
     FIRST = lib.TPM2_CAP_FIRST
     ALGS = lib.TPM2_CAP_ALGS
@@ -798,7 +869,7 @@ class TPM2_CAP(TPM_FRIENDLY_INT):
     VENDOR_PROPERTY = lib.TPM2_CAP_VENDOR_PROPERTY
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_PT(TPM_FRIENDLY_INT):
     NONE = lib.TPM2_PT_NONE
     GROUP = lib.TPM2_PT_GROUP
@@ -836,7 +907,7 @@ class TPM2_PT(TPM_FRIENDLY_INT):
     LOCKOUT_RECOVERY = lib.TPM2_PT_LOCKOUT_RECOVERY
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_PT_VENDOR(TPM_FRIENDLY_INT):
     STRING_1 = lib.TPM2_PT_VENDOR_STRING_1
     STRING_2 = lib.TPM2_PT_VENDOR_STRING_2
@@ -845,13 +916,13 @@ class TPM2_PT_VENDOR(TPM_FRIENDLY_INT):
     TPM_TYPE = lib.TPM2_PT_VENDOR_TPM_TYPE
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_PT_FIRMWARE(TPM_FRIENDLY_INT):
     VERSION_1 = lib.TPM2_PT_FIRMWARE_VERSION_1
     VERSION_2 = lib.TPM2_PT_FIRMWARE_VERSION_2
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_PT_HR(TPM_FRIENDLY_INT):
     LOADED_MIN = lib.TPM2_PT_HR_LOADED_MIN
     LOADED = lib.TPM2_PT_HR_LOADED
@@ -864,7 +935,7 @@ class TPM2_PT_HR(TPM_FRIENDLY_INT):
     PERSISTENT_MIN = lib.TPM2_PT_HR_PERSISTENT_MIN
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_PT_NV(TPM_FRIENDLY_INT):
     COUNTERS_MAX = lib.TPM2_PT_NV_COUNTERS_MAX
     INDEX_MAX = lib.TPM2_PT_NV_INDEX_MAX
@@ -874,14 +945,14 @@ class TPM2_PT_NV(TPM_FRIENDLY_INT):
     WRITE_RECOVERY = lib.TPM2_PT_NV_WRITE_RECOVERY
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_PT_CONTEXT(TPM_FRIENDLY_INT):
     HASH = lib.TPM2_PT_CONTEXT_HASH
     SYM = lib.TPM2_PT_CONTEXT_SYM
     SYM_SIZE = lib.TPM2_PT_CONTEXT_SYM_SIZE
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_PT_PS(TPM_FRIENDLY_INT):
     FAMILY_INDICATOR = lib.TPM2_PT_PS_FAMILY_INDICATOR
     LEVEL = lib.TPM2_PT_PS_LEVEL
@@ -890,13 +961,13 @@ class TPM2_PT_PS(TPM_FRIENDLY_INT):
     YEAR = lib.TPM2_PT_PS_YEAR
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_PT_AUDIT(TPM_FRIENDLY_INT):
     COUNTER_0 = lib.TPM2_PT_AUDIT_COUNTER_0
     COUNTER_1 = lib.TPM2_PT_AUDIT_COUNTER_1
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_PT_PCR(TPM_FRIENDLY_INT):
     FIRST = lib.TPM2_PT_TPM2_PCR_FIRST
     SAVE = lib.TPM2_PT_PCR_SAVE
@@ -919,7 +990,7 @@ class TPM2_PT_PCR(TPM_FRIENDLY_INT):
     SELECT_MIN = lib.TPM2_PT_PCR_SELECT_MIN
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_PS(TPM_FRIENDLY_INT):
     MAIN = lib.TPM2_PS_MAIN
     PC = lib.TPM2_PS_PC
@@ -939,7 +1010,7 @@ class TPM2_PS(TPM_FRIENDLY_INT):
     TC = lib.TPM2_PS_TC
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_HT(TPM_FRIENDLY_INT):
     PCR = lib.TPM2_HT_PCR
     NV_INDEX = lib.TPM2_HT_NV_INDEX
@@ -952,7 +1023,7 @@ class TPM2_HT(TPM_FRIENDLY_INT):
     PERSISTENT = lib.TPM2_HT_PERSISTENT
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPMA_SESSION(TPM_FRIENDLY_INT):
     CONTINUESESSION = lib.TPMA_SESSION_CONTINUESESSION
     AUDITEXCLUSIVE = lib.TPMA_SESSION_AUDITEXCLUSIVE
@@ -962,7 +1033,7 @@ class TPMA_SESSION(TPM_FRIENDLY_INT):
     AUDIT = lib.TPMA_SESSION_AUDIT
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPMA_LOCALITY(TPM_FRIENDLY_INT):
     ZERO = lib.TPMA_LOCALITY_TPM2_LOC_ZERO
     ONE = lib.TPMA_LOCALITY_TPM2_LOC_ONE
@@ -980,7 +1051,7 @@ class TPMA_LOCALITY(TPM_FRIENDLY_INT):
         return x
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_NT(TPM_FRIENDLY_INT):
     ORDINARY = lib.TPM2_NT_ORDINARY
     COUNTER = lib.TPM2_NT_COUNTER
@@ -990,7 +1061,7 @@ class TPM2_NT(TPM_FRIENDLY_INT):
     PIN_PASS = lib.TPM2_NT_PIN_PASS
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_HR(TPM_FRIENDLY_INT):
     HANDLE_MASK = lib.TPM2_HR_HANDLE_MASK
     RANGE_MASK = lib.TPM2_HR_RANGE_MASK
@@ -1004,7 +1075,7 @@ class TPM2_HR(TPM_FRIENDLY_INT):
     PERMANENT = lib.TPM2_HR_PERMANENT
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_HC(TPM_FRIENDLY_INT):
     HR_HANDLE_MASK = lib.TPM2_HR_HANDLE_MASK
     HR_RANGE_MASK = lib.TPM2_HR_RANGE_MASK
@@ -1037,7 +1108,7 @@ class TPM2_HC(TPM_FRIENDLY_INT):
     PERMANENT_LAST = lib.TPM2_PERMANENT_LAST
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_CLOCK(TPM_FRIENDLY_INT):
     COARSE_SLOWER = lib.TPM2_CLOCK_COARSE_SLOWER
     MEDIUM_SLOWER = lib.TPM2_CLOCK_MEDIUM_SLOWER
@@ -1051,8 +1122,8 @@ class TPM2_CLOCK(TPM_FRIENDLY_INT):
 TPM2_CLOCK_ADJUST = TPM2_CLOCK
 
 
-@TPM_FRIENDLY_INT.fix_const_type
-class TPMA_NV(TPM_FRIENDLY_INTLIST):
+@TPM_FRIENDLY_INT._fix_const_type
+class TPMA_NV(TPMA_FRIENDLY_INTLIST):
 
     _FIXUP_MAP = {"NODA": "NO_DA"}
 
@@ -1081,7 +1152,7 @@ class TPMA_NV(TPM_FRIENDLY_INTLIST):
     READ_STCLEAR = lib.TPMA_NV_READ_STCLEAR
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPMA_CC(TPM_FRIENDLY_INT):
     COMMANDINDEX_MASK = lib.TPMA_CC_COMMANDINDEX_MASK
     COMMANDINDEX_SHIFT = lib.TPMA_CC_COMMANDINDEX_SHIFT
@@ -1096,8 +1167,8 @@ class TPMA_CC(TPM_FRIENDLY_INT):
     RES_SHIFT = lib.TPMA_CC_RES_SHIFT
 
 
-@TPM_FRIENDLY_INT.fix_const_type
-class TPMA_OBJECT(TPM_FRIENDLY_INTLIST):
+@TPM_FRIENDLY_INT._fix_const_type
+class TPMA_OBJECT(TPMA_FRIENDLY_INTLIST):
     FIXEDTPM = lib.TPMA_OBJECT_FIXEDTPM
     STCLEAR = lib.TPMA_OBJECT_STCLEAR
     FIXEDPARENT = lib.TPMA_OBJECT_FIXEDPARENT
@@ -1134,7 +1205,7 @@ class TPMA_OBJECT(TPM_FRIENDLY_INTLIST):
     }
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPMA_ALGORITHM(TPM_FRIENDLY_INT):
     ASYMMETRIC = lib.TPMA_ALGORITHM_ASYMMETRIC
     SYMMETRIC = lib.TPMA_ALGORITHM_SYMMETRIC
@@ -1145,7 +1216,7 @@ class TPMA_ALGORITHM(TPM_FRIENDLY_INT):
     METHOD = lib.TPMA_ALGORITHM_METHOD
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPMA_PERMANENT(TPM_FRIENDLY_INT):
     OWNERAUTHSET = lib.TPMA_PERMANENT_OWNERAUTHSET
     ENDORSEMENTAUTHSET = lib.TPMA_PERMANENT_ENDORSEMENTAUTHSET
@@ -1155,7 +1226,7 @@ class TPMA_PERMANENT(TPM_FRIENDLY_INT):
     TPMGENERATEDEPS = lib.TPMA_PERMANENT_TPMGENERATEDEPS
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPMA_STARTUP(TPM_FRIENDLY_INT):
     CLEAR_PHENABLE = lib.TPMA_STARTUP_CLEAR_PHENABLE
     CLEAR_SHENABLE = lib.TPMA_STARTUP_CLEAR_SHENABLE
@@ -1164,14 +1235,14 @@ class TPMA_STARTUP(TPM_FRIENDLY_INT):
     CLEAR_ORDERLY = lib.TPMA_STARTUP_CLEAR_ORDERLY
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPMA_MEMORY(TPM_FRIENDLY_INT):
     SHAREDRAM = lib.TPMA_MEMORY_SHAREDRAM
     SHAREDNV = lib.TPMA_MEMORY_SHAREDNV
     OBJECTCOPIEDTORAM = lib.TPMA_MEMORY_OBJECTCOPIEDTORAM
 
 
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_MAX(TPM_FRIENDLY_INT):
     DIGEST_BUFFER = lib.TPM2_MAX_DIGEST_BUFFER
     NV_BUFFER_SIZE = lib.TPM2_MAX_NV_BUFFER_SIZE
@@ -1187,7 +1258,7 @@ class TPM2_MAX(TPM_FRIENDLY_INT):
 # without conditional worry and we DONT use lib prefix here because the constants are only
 # present if FAPI is installed. So just use the values directly.
 #
-@TPM_FRIENDLY_INT.fix_const_type
+@TPM_FRIENDLY_INT._fix_const_type
 class FAPI_ESYSBLOB(TPM_FRIENDLY_INT):
     CONTEXTLOAD = 1
     DESERIALIZE = 2
