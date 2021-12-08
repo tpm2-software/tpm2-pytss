@@ -5976,7 +5976,7 @@ class ESAPI:
 
     def nv_define_space(
         self,
-        auth: ESYS_TR,
+        auth: Union[TPM2B_AUTH, bytes, str, None],
         public_info: TPM2B_NV_PUBLIC,
         auth_handle: ESYS_TR = ESYS_TR.OWNER,
         session1: ESYS_TR = ESYS_TR.PASSWORD,
@@ -5990,7 +5990,7 @@ class ESAPI:
         available
 
         Args:
-            auth (ESYS_TR): The authorization value.
+            auth (Union[TPM2B_AUTH, bytes, str, None]): The authorization value.
             public_info (TPM2B_NV_PUBLIC): The public parameters of the NV area.
             auth_handle (ESYS_TR): ESYS_TR.OWNER or ESYS_TR.PLATFORM+{PP}. Defaults to ESYS_TR.OWNER.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.PASSWORD.
