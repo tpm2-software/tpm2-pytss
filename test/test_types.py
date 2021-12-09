@@ -96,37 +96,37 @@ class TypesTest(unittest.TestCase):
 
     def test_TPML_PCR_SELECTION_parse_plus_only(self):
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPML_PCR_SELECTION.parse("+")
 
     def test_TPML_PCR_SELECTION_parse_plus_multiple(self):
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPML_PCR_SELECTION.parse("+++")
 
     def test_TPML_PCR_SELECTION_parse_plus_unbalanced(self):
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPML_PCR_SELECTION.parse("sha256:1+")
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPML_PCR_SELECTION.parse("+sha256:1")
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPML_PCR_SELECTION.parse("+sha256:1+")
 
     def test_TPML_PCR_SELECTION_parse_gibberish(self):
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPML_PCR_SELECTION.parse("gibberish value")
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPML_PCR_SELECTION.parse("foo+")
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPML_PCR_SELECTION.parse("+bar")
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPML_PCR_SELECTION.parse("sha256:1+bar")
 
     def test_TPML_PCR_SELECTION_from_TPMS_PCR_SELECTION_list(self):
@@ -174,7 +174,7 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(x.pcrSelect[2], 0)
         self.assertEqual(x.pcrSelect[3], 0)
 
-        with self.assertRaises(RuntimeError) as e:
+        with self.assertRaises(ValueError) as e:
             TPMS_PCR_SELECTION(pcrs=(1, 2, 3))
         self.assertEqual(str(e.exception), "hash and pcrs MUST be specified")
 
@@ -201,32 +201,22 @@ class TypesTest(unittest.TestCase):
 
     def test_TPMS_PCR_SELECTION_parse_None(self):
 
-        x = TPMS_PCR_SELECTION.parse(None)
-        self.assertEqual(x.hash, 0)
-        self.assertEqual(x.sizeofSelect, 0)
-        self.assertEqual(x.pcrSelect[0], 0)
-        self.assertEqual(x.pcrSelect[1], 0)
-        self.assertEqual(x.pcrSelect[2], 0)
-        self.assertEqual(x.pcrSelect[3], 0)
+        with self.assertRaises(ValueError):
+            TPMS_PCR_SELECTION.parse(None)
 
     def test_TPMS_PCR_SELECTION_parse_empty(self):
 
-        x = TPMS_PCR_SELECTION.parse("")
-        self.assertEqual(x.hash, 0)
-        self.assertEqual(x.sizeofSelect, 0)
-        self.assertEqual(x.pcrSelect[0], 0)
-        self.assertEqual(x.pcrSelect[1], 0)
-        self.assertEqual(x.pcrSelect[2], 0)
-        self.assertEqual(x.pcrSelect[3], 0)
+        with self.assertRaises(ValueError):
+            TPMS_PCR_SELECTION.parse("")
 
     def test_TPMS_PCR_SELECTION_parse_out_of_bounds_pcr(self):
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPMS_PCR_SELECTION.parse("sha256:42")
 
     def test_TPMS_PCR_SELECTION_parse_malformed(self):
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPMS_PCR_SELECTION.parse("this is gibberish")
 
     def test_TPMS_PCR_SELECTION_parse_only_colon(self):
@@ -236,17 +226,17 @@ class TypesTest(unittest.TestCase):
 
     def test_TPMS_PCR_SELECTION_parse_only_bank_and_colon(self):
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPMS_PCR_SELECTION.parse("sha256:")
 
     def test_TPMS_PCR_SELECTION_parse_bank_and_garbage(self):
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPMS_PCR_SELECTION.parse("sha256:foo")
 
     def test_TPMS_PCR_SELECTION_parse_multiple_colons(self):
 
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(ValueError):
             TPMS_PCR_SELECTION.parse(":::")
 
     def test_TPM2B_PUBLIC(self):
@@ -859,7 +849,7 @@ class TypesTest(unittest.TestCase):
 
         # scheme is set, so we need to be smarter about the attributes we use
         templ = TPMT_PUBLIC.parse(
-            f"ecc:ecdh-sha384",
+            "ecc:ecdh-sha384",
             objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS,
         )
         self.assertEqual(templ.nameAlg, TPM2_ALG.SHA256)
@@ -1075,16 +1065,16 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(templ.parameters.symDetail.sym.mode.sym, TPM2_ALG.CFB)
 
     def test_TPML_ALG_parse_none(self):
-        a = TPML_ALG.parse(None)
-        self.assertEqual(len(a), 0)
+        with self.assertRaises(ValueError):
+            TPML_ALG.parse(None)
 
     def test_TPML_ALG_parse_empty(self):
-        a = TPML_ALG.parse("")
-        self.assertEqual(len(a), 0)
+        with self.assertRaises(ValueError):
+            TPML_ALG.parse("")
 
     def test_TPML_ALG_parse_commas(self):
-        a = TPML_ALG.parse(",,,,,,")
-        self.assertEqual(len(a), 0)
+        with self.assertRaises(ValueError):
+            TPML_ALG.parse(",,,,,,")
 
     def test_TPML_ALG_parse_single(self):
         a = TPML_ALG.parse("rsa")
@@ -1221,9 +1211,10 @@ class TypesTest(unittest.TestCase):
 
     def test_TPML_PCR_SELECTION_bad_selections(self):
         toomany = "+".join([f"{x}" for x in range(0, 17)])
-        with self.assertRaises(RuntimeError) as e:
+        with self.assertRaises(
+            ValueError, msg="PCR Selection list greater than 16, got 17"
+        ):
             TPML_PCR_SELECTION.parse(toomany)
-        self.assertEqual(str(e.exception), "PCR Selection list greater than 16, got 17")
 
     def test_TPM2B_AUTH_empty(self):
         x = TPM2B_AUTH()

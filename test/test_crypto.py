@@ -594,11 +594,11 @@ class CryptoTest(TSS2_EsapiTest):
         b64 = b"".join(sl[1:-1])
         der = b64decode(b64)
 
-        with self.assertRaises(RuntimeError) as e:
+        with self.assertRaises(ValueError) as e:
             priv = TPMT_SENSITIVE.from_pem(der)
         self.assertEqual(str(e.exception), "unsupported key type: _DSAPrivateKey")
 
-        with self.assertRaises(RuntimeError) as e:
+        with self.assertRaises(ValueError) as e:
             pub = TPMT_PUBLIC.from_pem(dsa_public_key)
         self.assertEqual(str(e.exception), "unsupported key type: _DSAPublicKey")
 

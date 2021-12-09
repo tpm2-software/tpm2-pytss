@@ -35,6 +35,7 @@ from tpm2_pytss.constants import (
     TPM2_ALG,
     TPM2_ECC_CURVE,
 )
+from typing import Union, Tuple
 
 try:
     from tpm2_pytss.internal.type_mapping import _type_map, _element_type_map
@@ -282,7 +283,17 @@ class TPM2B_SIMPLE_OBJECT(TPM_OBJECT):
         buf = getattr(self, _bytefield)
         return bytes(buf)
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Returns a hex string representation of the underlying buffer.
+
+        This is the same as:
+
+        .. code-block:: python
+            bytes(tpm2b_type).hex()
+
+        Returns (str):
+            A hex encoded string of the buffer.
+        """
         b = self.__bytes__()
         return binascii.hexlify(b).decode()
 
@@ -500,6 +511,18 @@ class TPMU_PUBLIC_PARMS(TPM_OBJECT):
 
 
 class TPMT_PUBLIC_PARMS(TPM_OBJECT):
+    pass
+
+
+class TPMT_SYM_DEF_OBJECT(TPM_OBJECT):
+    pass
+
+
+class TPMT_ASYM_SCHEME(TPM_OBJECT):
+    pass
+
+
+class TPM2B_NAME(TPM2B_SIMPLE_OBJECT):
     pass
 
 
@@ -740,7 +763,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
             TPMT_PUBLIC._handle_scheme_keyedhash(scheme, templ)
         else:
             # TODO make __str__ routine for int types
-            raise RuntimeError(
+            raise ValueError(
                 f'Expected object to be of type RSA, ECC or KEYEDHASH, got "{templ.type}"'
             )
 
@@ -787,12 +810,52 @@ class TPMT_PUBLIC(TPM_OBJECT):
     @classmethod
     def parse(
         cls,
-        alg="rsa",
-        objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS,
-        nameAlg="sha256",
-        authPolicy=None,
-    ):
-        """
+        alg: str = "rsa",
+        objectAttributes: Union[
+            TPMA_OBJECT, int, str
+        ] = TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS,
+        nameAlg: Union[TPM2_ALG, int, str] = "sha256",
+        authPolicy: bytes = None,
+    ) -> "TPMT_PUBLIC":
+        """Builds a TPMT_PUBLIC from a tpm2-tools like specifier strings.
+
+        This builds the TPMT_PUBLIC structure which can be used in TPM2_Create and TPM2_CreatePrimary
+        commands that map into the tpm2-tools project as tpm2 create and createprimary commandlets. Those
+        commands take options: -G, -n, -L and -a option to specify the object to create. This method
+        converts those options, but does not create the object like tpm2-tools.
+
+        Args:
+            alg (str): The string specifier for the objects algorithm type, bitsize, symmetric cipher
+                and scheme. This is tpm2-tools option "-G" as described in:
+                https://github.com/tpm2-software/tpm2-tools/blob/master/man/common/alg.md#complex-specifiers.
+
+            objectAttiributes (TPMA_OBJECT, int, str): The objects attributes whihch can either the object attributes
+                themselves or a nice name string value. This is tpm2-tools option "-a as described in:
+                https://github.com/tpm2-software/tpm2-tools/blob/master/man/common/obj-attrs.md.
+
+            nameAlg (TPM2_ALG, int, str): The hashing algorithm for the objects name, either the TPM2_ALG constant,
+                integer value or a friendly name string. This is tpm2-tools option "-n" as described in:
+                https://github.com/tpm2-software/tpm2-tools/blob/master/man/common/alg.md#hashing-algorithms
+
+            authPolicy (bytes): The policy digest of the object. This is tpm2-tools option "-L".
+
+        Returns:
+            A populated TPMT_PUBLIC for use.
+
+        Raises:
+            ValueError: If a string value is not of an expected format.
+
+        Examples:
+            .. code-block:: python
+
+                TPMT_PUBLIC.parse(
+                    "ecc:ecdh-sha384",
+                    objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS)
+
+                TPMT_PUBLIC.parse(
+                    alg="xor:sha512",
+                    nameAlg="sha256",
+                    authPolicy=b'\xc5\x81sS\xf2\x9bc\x87r\xdf\x01\xd3\xbaowM\x96Q\xaf\x1a\xeeKEO\x82\xfeV\xf3\x13^[\x87')
         """
         templ = TPMT_PUBLIC()
 
@@ -849,29 +912,38 @@ class TPMT_PUBLIC(TPM_OBJECT):
     @classmethod
     def from_pem(
         cls,
-        data,
-        nameAlg=TPM2_ALG.SHA256,
-        objectAttributes=(
+        data: bytes,
+        nameAlg: Union[TPM2_ALG, int] = TPM2_ALG.SHA256,
+        objectAttributes: Union[TPMA_OBJECT, int] = (
             TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH
         ),
-        symmetric=None,
-        scheme=None,
-        password=None,
-    ):
+        symmetric: TPMT_SYM_DEF_OBJECT = None,
+        scheme: TPMT_ASYM_SCHEME = None,
+        password: bytes = None,
+    ) -> "TPMT_PUBLIC":
         """Decode the public part from standard key encodings.
 
         Currently supports PEM, DER and SSH encoded public keys.
 
         Args:
             data (bytes): The encoded public key.
-            nameAlg (int): The name algorithm for the public area, default is TPM2_ALG.SHA256.
-            objectAttributes (int): The object attributes for the public area, default is (TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH).
-            symmetric (TPMT_SYM_DEF_OBJECT, optional): The symmetric definition to use for the public area, default is None.
-            scheme (TPMT_ASYM_SCHEME, optional): The signing/key exchange scheme to use for the public area, default is None.
-            password (bytes, optional): The password used to decrypt the key, default is None.
+            nameAlg (TPM2_ALG, int): The name algorithm for the public area, default is TPM2_ALG.SHA256.
+            objectAttributes (TPMA_OBJECT, int): The object attributes for the public area, default is (TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH).
+            symmetric (TPMT_SYM_DEF_OBJECT) optional: The symmetric definition to use for the public area, default is None.
+            scheme (TPMT_ASYM_SCHEME) optional: The signing/key exchange scheme to use for the public area, default is None.
+            password (bytes) optional: The password used to decrypt the key, default is None.
 
         Returns:
             Returns a TPMT_PUBLIC instance.
+
+        Raises:
+            ValueError: If key parameters are not supported.
+
+        Example:
+            .. code-block:: python
+
+                ecc_key_pem = open('path/to/myecckey.pem').read().encode()
+                TPMT_PUBLIC.from_pem(ecc_key_pem)
         """
         p = cls()
         _public_from_encoding(data, p, password=password)
@@ -895,38 +967,77 @@ class TPMT_PUBLIC(TPM_OBJECT):
             p.parameters.eccDetail.kdf.scheme = TPM2_ALG.NULL
         return p
 
-    def to_pem(self):
+    def to_pem(self) -> bytes:
         """Encode the public key as PEM encoded ASN.1.
 
         Returns:
             Returns the PEM encoded key as bytes.
+
+        Raises:
+            ValueError: If key type is not supported.
+
+        Example:
+            .. code-block:: python
+
+                with ESAPI() as e:
+                    # public parameter is index 1 in the return tuple
+                    pub = e.create_primary(None)[1]
+                    pub.publicArea.to_pem()
         """
 
         return _public_to_pem(self, "pem")
 
-    def to_der(self):
+    def to_der(self) -> bytes:
         """Encode the public key as DER encoded ASN.1.
 
         Returns:
             Returns the DER encoded key as bytes.
+
+        Raises:
+            ValueError: If key type is not supported.
+
+        Example:
+            .. code-block:: python
+
+                with ESAPI() as e:
+                    # public parameter is index 1 in the return tuple
+                    pub = e.create_primary(None)[1]
+                    pub.publicArea.to_der()
         """
 
         return _public_to_pem(self, "der")
 
-    def to_ssh(self):
+    def to_ssh(self) -> bytes:
         """Encode the public key in OpenSSH format
 
         Returns:
             Returns the OpenSSH encoded key as bytes.
+
+        Raises:
+            ValueError: If key type is not supported.
+
+        Example:
+            .. code-block:: python
+
+                with ESAPI() as e:
+                    # public parameter is index 1 in the return tuple
+                    pub = e.create_primary(None)[1]
+                    pub.publicArea.to_ssh()
         """
 
         return _public_to_pem(self, "ssh")
 
-    def get_name(self):
+    def get_name(self) -> TPM2B_NAME:
         """Get the TPM name of the public area.
+
+        This function requires a populated TPMT_PUBLIC and will NOT go to the TPM
+        to retrieve the name, and instead calculates it manually.
 
         Returns:
             Returns TPM2B_NAME.
+
+        Raises:
+            ValueError: Unsupported name digest algorithm.
         """
         name = _getname(self)
         return TPM2B_NAME(name)
@@ -988,16 +1099,18 @@ class TPM2B_MAX_NV_BUFFER(TPM2B_SIMPLE_OBJECT):
     pass
 
 
-class TPM2B_NAME(TPM2B_SIMPLE_OBJECT):
-    pass
-
-
 class TPM2B_NV_PUBLIC(TPM_OBJECT):
-    def get_name(self):
+    def get_name(self) -> TPM2B_NAME:
         """Get the TPM name of the NV public area.
+
+        This function requires a populated TPM2B_NV_PUBLIC and will NOT go to the TPM
+        to retrieve the name, and instead calculates it manually.
 
         Returns:
             Returns TPM2B_NAME.
+
+        Raises:
+            ValueError: Unsupported name digest algorithm.
         """
         return self.nvPublic.get_name()
 
@@ -1018,68 +1131,117 @@ class TPM2B_PUBLIC(TPM_OBJECT):
     @classmethod
     def from_pem(
         cls,
-        data,
-        nameAlg=TPM2_ALG.SHA256,
-        objectAttributes=(
+        data: bytes,
+        nameAlg: Union[TPM2_ALG, int] = TPM2_ALG.SHA256,
+        objectAttributes: Union[TPMA_OBJECT, int] = (
             TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH
         ),
-        symmetric=None,
-        scheme=None,
-        password=None,
-    ):
+        symmetric: TPMT_SYM_DEF_OBJECT = None,
+        scheme: TPMT_ASYM_SCHEME = None,
+        password: bytes = None,
+    ) -> "TPM2B_PUBLIC":
         """Decode the public part from standard key encodings.
 
         Currently supports PEM, DER and SSH encoded public keys.
 
         Args:
             data (bytes): The encoded public key.
-            nameAlg (int): The name algorithm for the public area, default is TPM2_ALG.SHA256.
-            objectAttributes (int): The object attributes for the public area, default is (TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH).
-            symmetric (TPMT_SYM_DEF_OBJECT, optional): The symmetric definition to use for the public area, default is None.
-            scheme (TPMT_ASYM_SCHEME, optional): The signing/key exchange shceme to use for the public area, default is None.
-            password (bytes, optional): The password used to decrypt the key, default is None.
+            nameAlg (TPM2_ALG, int): The name algorithm for the public area, default is TPM2_ALG.SHA256.
+            objectAttributes (TPMA_OBJECT, int): The object attributes for the public area, default is (TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH).
+            symmetric (TPMT_SYM_DEF_OBJECT) optional: The symmetric definition to use for the public area, default is None.
+            scheme (TPMT_ASYM_SCHEME) optional: The signing/key exchange scheme to use for the public area, default is None.
+            password (bytes) optional: The password used to decrypt the key, default is None.
 
         Returns:
-            Returns a TPM2B_PUBLIC instance.
+            Returns a TPMT_PUBLIC instance.
+
+        Raises:
+            ValueError: If key parameters are not supported.
+
+        Example:
+            .. code-block:: python
+
+                ecc_key_pem = open('path/to/myecckey.pem').read().encode()
+                TP2B_PUBLIC.from_pem(ecc_key_pem)
         """
+
         pa = TPMT_PUBLIC.from_pem(
             data, nameAlg, objectAttributes, symmetric, scheme, password
         )
         p = cls(publicArea=pa)
         return p
 
-    def to_pem(self):
+    def to_pem(self) -> bytes:
         """Encode the public key as PEM encoded ASN.1.
 
         Returns:
             Returns the PEM encoded key as bytes.
+
+        Raises:
+            ValueError: If key type is not supported.
+
+        Example:
+            .. code-block:: python
+
+                with ESAPI() as e:
+                    # public parameter is index 1 in the return tuple
+                    pub = e.create_primary(None)[1]
+                    pub.to_pem()
         """
 
         return self.publicArea.to_pem()
 
-    def to_der(self):
+    def to_der(self) -> bytes:
         """Encode the public key as DER encoded ASN.1.
 
         Returns:
             Returns the DER encoded key as bytes.
+
+        Raises:
+            ValueError: If key type is not supported.
+
+        Example:
+            .. code-block:: python
+
+                with ESAPI() as e:
+                    # public parameter is index 1 in the return tuple
+                    pub = e.create_primary(None)[1]
+                    pub.to_der()
         """
 
         return self.publicArea.to_der()
 
-    def to_ssh(self):
+    def to_ssh(self) -> bytes:
         """Encode the public key in OpenSSH format
 
         Returns:
             Returns the OpenSSH encoded key as bytes.
+
+        Raises:
+            ValueError: If key type is not supported.
+
+        Example:
+            .. code-block:: python
+
+                with ESAPI() as e:
+                    # public parameter is index 1 in the return tuple
+                    pub = e.create_primary(None)[1]
+                    pub.to_ssh()
         """
 
         return self.publicArea.to_ssh()
 
-    def get_name(self):
+    def get_name(self) -> TPM2B_NAME:
         """Get the TPM name of the public area.
+
+        This function requires a populated TPM2B_PUBLIC and will NOT go to the TPM
+        to retrieve the name, and instead calculates it manually.
 
         Returns:
             Returns TPM2B_NAME.
+
+        Raises:
+            ValueError: Unsupported name digest algorithm.
         """
         return self.publicArea.get_name()
 
@@ -1090,7 +1252,47 @@ class TPM2B_PUBLIC(TPM_OBJECT):
         objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS,
         nameAlg="sha256",
         authPolicy=None,
-    ):
+    ) -> "TPM2B_PUBLIC":
+        """Builds a TPM2B_PUBLIC from a tpm2-tools like specifier strings.
+
+        This builds the TPM2B_PUBLIC structure which can be used in TPM2_Create and TPM2_CreatePrimary
+        commands that map into the tpm2-tools project as tpm2 create and createprimary commandlets. Those
+        commands take options: -G, -n, -L and -a option to specify the object to create. This method
+        converts those options, but does not create the object like tpm2-tools.
+
+        Args:
+            alg (str): The string specifier for the objects algorithm type, bitsize, symmetric cipher
+                and scheme. This is tpm2-tools option "-G" as described in:
+                https://github.com/tpm2-software/tpm2-tools/blob/master/man/common/alg.md#complex-specifiers.
+
+            objectAttiributes (TPMA_OBJECT, int, str): The objects attributes whihch can either the object attributes
+                themselves or a nice name string value. This is tpm2-tools option "-a as described in:
+                https://github.com/tpm2-software/tpm2-tools/blob/master/man/common/obj-attrs.md.
+
+            nameAlg (TPM2_ALG, int, str): The hashing algorithm for the objects name, either the TPM2_ALG constant,
+                integer value or a friendly name string. This is tpm2-tools option "-n" as described in:
+                https://github.com/tpm2-software/tpm2-tools/blob/master/man/common/alg.md#hashing-algorithms
+
+            authPolicy (bytes): The policy digest of the object. This is tpm2-tools option "-L".
+
+        Returns:
+            A populated TPMT_PUBLIC for use.
+
+        Raises:
+            ValueError: If a string value is not of an expected format.
+
+        Examples:
+            .. code-block:: python
+
+                TPM2B_PUBLIC.parse(
+                    "ecc:ecdh-sha384",
+                    objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS)
+
+                TPM2B_PUBLIC.parse(
+                    alg="xor:sha512",
+                    nameAlg="sha256",
+                    authPolicy=b'\xc5\x81sS\xf2\x9bc\x87r\xdf\x01\xd3\xbaowM\x96Q\xaf\x1a\xeeKEO\x82\xfeV\xf3\x13^[\x87')
+        """
 
         return cls(TPMT_PUBLIC.parse(alg, objectAttributes, nameAlg, authPolicy))
 
@@ -1099,9 +1301,13 @@ class TPM2B_PUBLIC_KEY_RSA(TPM2B_SIMPLE_OBJECT):
     pass
 
 
+class TPMT_KEYEDHASH_SCHEME(TPM_OBJECT):
+    pass
+
+
 class TPM2B_SENSITIVE(TPM_OBJECT):
     @classmethod
-    def from_pem(cls, data, password=None):
+    def from_pem(cls, data: bytes, password: bytes = None) -> "TPM2B_SENSITIVE":
         """Decode the private part from standard key encodings.
 
         Currently supports PEM, DER and SSH encoded private keys.
@@ -1112,6 +1318,15 @@ class TPM2B_SENSITIVE(TPM_OBJECT):
 
         Returns:
             Returns an instance of TPM2B_SENSITIVE.
+
+        Raises:
+            ValueError: If key parameters are not supported.
+
+        Example:
+            .. code-block:: python
+
+                rsa_private_key = open('path/to/my/rsaprivatekey.pem').read().encode()
+                TPM2B_SENSITIVE.from_pem(rsa_private_key)
         """
         p = TPMT_SENSITIVE.from_pem(data, password)
         return cls(sensitiveArea=p)
@@ -1119,25 +1334,36 @@ class TPM2B_SENSITIVE(TPM_OBJECT):
     @classmethod
     def keyedhash_from_secret(
         cls,
-        secret,
-        nameAlg=TPM2_ALG.SHA256,
-        objectAttributes=(
+        secret: bytes,
+        nameAlg: Union[TPM2_ALG, int] = TPM2_ALG.SHA256,
+        objectAttributes: Union[TPMA_OBJECT, int] = (
             TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH
         ),
-        scheme=None,
-        seed=None,
-    ):
+        scheme: TPMT_KEYEDHASH_SCHEME = None,
+        seed: bytes = None,
+    ) -> Tuple["TPM2B_SENSITIVE", TPM2B_PUBLIC]:
         """Generate the private and public part for a keyed hash object from a secret.
 
         Args:
             secret (bytes): The HMAC key / data to be sealed.
-            nameAlg (int): The name algorithm for the public part, default is TPM2_ALG.SHA256.
-            objectAttributes (int): The object attributes for the public area, default is (TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH).
-            scheme (TPMT_KEYEDHASH_SCHEME, optional): The signing/key exchange scheme to use for the public area, default is None.
-            seed (bytes, optional): The obfuscate value, default is a randomized value.
+            nameAlg (TPM2_ALG, int): The name algorithm for the public part, default is TPM2_ALG.SHA256.
+            objectAttributes (TPMA_OBJECT, int): The object attributes for the public area, default is (TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH).
+            scheme (TPMT_KEYEDHASH_SCHEME) optional: The signing/key exchange scheme to use for the public area, default is None.
+            seed (bytes) optional: The obfuscate value, default is a randomized value.
 
         Returns:
-            A tuple of of TPM2B_SENSITIVE and TPM2B_PUBLIC
+            A tuple of TPM2B_SENSITIVE and TPM2B_PUBLIC
+
+        Raises:
+            ValueError: If key parameters are not supported.
+
+        Example:
+            .. code-block:: python
+
+                secret = b"secret key"
+                scheme = TPMT_KEYEDHASH_SCHEME(scheme=TPM2_ALG.HMAC)
+                scheme.details.hmac.hashAlg = TPM2_ALG.SHA256
+                (sens, pub) = TPM2B_SENSITIVE.keyedhash_from_secret(secret, scheme=scheme)
         """
         sa, pa = TPMT_SENSITIVE.keyedhash_from_secret(
             secret, nameAlg, objectAttributes, scheme, seed
@@ -1149,28 +1375,33 @@ class TPM2B_SENSITIVE(TPM_OBJECT):
     @classmethod
     def symcipher_from_secret(
         cls,
-        secret,
-        algorithm=TPM2_ALG.AES,
-        mode=TPM2_ALG.CFB,
-        nameAlg=TPM2_ALG.SHA256,
-        objectAttributes=(
+        secret: bytes,
+        algorithm: Union[TPM2_ALG, int] = TPM2_ALG.AES,
+        mode: Union[TPM2_ALG, int] = TPM2_ALG.CFB,
+        nameAlg: Union[TPM2_ALG, int] = TPM2_ALG.SHA256,
+        objectAttributes: Union[TPMA_OBJECT, int] = (
             TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH
         ),
-        seed=None,
-    ):
-        """
-        Generate the private and public part for a symcipher object from a secret.
+        seed: bytes = None,
+    ) -> Tuple["TPM2B_SENSITIVE", TPM2B_PUBLIC]:
+        """Generate the private and public part for a symcipher object from a secret.
 
         Args:
             secret (bytes): the symmetric key.
-            algorithm (int): The symmetric cipher algorithm to use, default is TPM2_ALG.AES.
-            mode (int): The symmetric mode to use, default is TPM2_ALG.CFB.
-            nameAlg (int): The name algorithm for the public part, default is TPM2_ALG.SHA256.
-            objectAttributes (int): The object attributes for the public area, default is (TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH).
-            seed (bytes, optional): The obfuscate value, default is a randomized value.
+            algorithm (TPM2_ALG, int): The symmetric cipher algorithm to use, default is TPM2_ALG.AES.
+            mode (TPM2_ALG. int): The symmetric mode to use, default is TPM2_ALG.CFB.
+            nameAlg (TPM2_ALG, int): The name algorithm for the public part, default is TPM2_ALG.SHA256.
+            objectAttributes (TPMA_OBJECT, int): The object attributes for the public area, default is (TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH).
+            seed (bytes) optional: The obfuscate value, default is a randomized value.
 
         Returns:
             A tuple of TPM2B_SENSITIVE and TPM2B_PUBLIC
+
+        Example:
+            .. code-block:: python
+
+                secret = b"\xF1" * 32
+                sens, pub = TPM2B_SENSITIVE.symcipher_from_secret(secret)
         """
         sa, pa = TPMT_SENSITIVE.symcipher_from_secret(
             secret, algorithm, mode, nameAlg, objectAttributes, seed
@@ -1179,36 +1410,71 @@ class TPM2B_SENSITIVE(TPM_OBJECT):
         pub = TPM2B_PUBLIC(publicArea=pa)
         return (priv, pub)
 
-    def to_pem(self, public: TPMT_PUBLIC, password=None):
+    def to_pem(self, public: TPMT_PUBLIC, password=None) -> bytes:
         """Encode the key as PEM encoded ASN.1.
 
-        public(TPMT_PUBLIC): The corresponding public key.
-        password(bytes): An optional password for encrypting the PEM with.
+        Args:
+            public(TPMT_PUBLIC): The corresponding public key.
+            password(bytes): An optional password for encrypting the PEM with.
 
         Returns:
             Returns the PEM encoding as bytes.
+
+        Raises:
+            ValueError: Unsupported key type.
+
+        Example:
+            .. code-block:: python
+
+                rsa_private_key = open('path/to/my/rsaprivatekey.pem').read().encode()
+                priv = TPM2B_SENSITIVE.from_pem(rsa_private_key)
+                pub = TPM2B_PUBLIC.from_pem(rsa_private_key)
+                priv.to_pem(pub.publicArea)
         """
         return self.sensitiveArea.to_pem(public, password)
 
-    def to_der(self, public: TPMT_PUBLIC):
+    def to_der(self, public: TPMT_PUBLIC) -> bytes:
         """Encode the key as DER encoded ASN.1.
 
         public(TPMT_PUBLIC): The corresponding public key.
 
         Returns:
             Returns the DER encoding as bytes.
+
+        Raises:
+            ValueError: Unsupported key type.
+
+        Example:
+            .. code-block:: python
+
+                rsa_private_key = open('path/to/my/rsaprivatekey.pem').read().encode()
+                priv = TPM2B_SENSITIVE.from_pem(rsa_private_key)
+                pub = TPM2B_PUBLIC.from_pem(rsa_private_key)
+                priv.to_der(pub.publicArea)
         """
 
         return self.sensitiveArea.to_der(public)
 
-    def to_ssh(self, public: TPMT_PUBLIC, password: bytes = None):
+    def to_ssh(self, public: TPMT_PUBLIC, password: bytes = None) -> bytes:
         """Encode the key as OPENSSH PEM format.
 
-        public(TPMT_PUBLIC): The corresponding public key.
-        password(bytes): An optional password for encrypting the PEM with.
+        Args:
+            public(TPMT_PUBLIC): The corresponding public key.
+            password(bytes): An optional password for encrypting the PEM with.
 
         Returns:
             Returns the PEM OPENSSH encoding as bytes.
+
+        Raises:
+            ValueError: Unsupported key type.
+
+        Example:
+            .. code-block:: python
+
+                rsa_private_key = open('path/to/my/rsaprivatekey.pem').read().encode()
+                priv = TPM2B_SENSITIVE.from_pem(rsa_private_key)
+                pub = TPM2B_PUBLIC.from_pem(rsa_private_key)
+                priv.to_ssh(pub.publicArea)
         """
 
         return self.sensitiveArea.to_ssh(public, password=password)
@@ -1236,16 +1502,42 @@ class TPML_AC_CAPABILITIES(TPML_OBJECT):
 
 class TPML_ALG(TPML_OBJECT):
     @classmethod
-    def parse(cls, algorithms):
+    def parse(cls, algorithms: str) -> "TPML_ALG":
+        """Convert an comma separated list of algorithm friendly string names to a list of numeric constants.
+
+        Friendly algorithm names are the constants representing algorithms found in the TPM2_ALG class.
+        The string identifiers are those understood by TPM2_ALG.parse.
+
+        Args:
+            algorithms(str): A comma separated list of algorithm friendly names. May be a list of one item with no
+                comma.
+
+        Returns:
+            A populated TPML_ALG
+
+        Raises:
+            ValueError: Invalid algorithms list.
+
+        Example:
+            .. code-block:: python
+
+                TPML_ALG("aes")
+                TPML_ALG("aes,sha256")
+        """
 
         if algorithms is None or len(algorithms) == 0:
-            return TPML_ALG()
+            raise ValueError(
+                f"Expected algorithms to be not None or len > 0, got: {algorithms}"
+            )
 
         alglist = []
         for a in algorithms.split(","):
             a = a.strip()
             if len(a) > 0:
                 alglist.append(TPM2_ALG.parse(a))
+
+        if len(alglist) == 0:
+            raise ValueError(f'No algorithms found in algorithms, got "{algorithms}"')
 
         return TPML_ALG(alglist)
 
@@ -1284,7 +1576,34 @@ class TPML_INTEL_PTT_PROPERTY(TPML_OBJECT):
 
 class TPML_PCR_SELECTION(TPML_OBJECT):
     @staticmethod
-    def parse(selections):
+    def parse(selections: str) -> "TPML_PCR_SELECTION":
+        """Convert a PCR selection string into the TPML_PCR_SELECTION data structure.
+
+        PCR Bank Selection lists follow the below specification: ::
+
+        <BANK>:<PCR>[,<PCR>] or <BANK>:all
+
+        multiple banks may be separated by '+'.
+
+        For Example "sha1:3,4+sha256:all", will select PCRs 3 and 4 from the SHA1 bank
+        and PCRs 0 to 23 from the SHA256 bank.
+
+        Args:
+            algorithms(str): A comma separated list of algorithm friendly names. May be a list of one item with no
+                comma.
+
+        Returns:
+            A populated TPML_PCR_SELECTION
+
+        Raises:
+            ValueError: Invalid algorithms list.
+
+        Example:
+            .. code-block:: python
+
+                TPML_PCR_SELECTION.parse("sha256:1,3,5,7")
+                TPML_PCR_SELECTION.parse("sha1:3,4+sha256:all")
+        """
 
         if selections is None or len(selections) == 0:
             return TPML_PCR_SELECTION()
@@ -1292,19 +1611,19 @@ class TPML_PCR_SELECTION(TPML_OBJECT):
         selectors = selections.split("+") if "+" in selections else [selections]
 
         if len(selectors) - 1 != selections.count("+"):
-            raise RuntimeError(
+            raise ValueError(
                 f"Malformed PCR bank selection list (unbalanced +), got: {selections}"
             )
 
         for x in selectors:
             if len(x) == 0:
-                raise RuntimeError(
+                raise ValueError(
                     f"Malformed PCR bank selection list (unbalanced +), got: {selections}"
                 )
 
         count = len(selectors)
         if count > lib.TPM2_NUM_PCR_BANKS:
-            raise RuntimeError(
+            raise ValueError(
                 f"PCR Selection list greater than {lib.TPM2_NUM_PCR_BANKS}, "
                 f"got {len(selectors)}"
             )
@@ -1380,8 +1699,8 @@ class TPMS_COMMAND_AUDIT_INFO(TPM_OBJECT):
 
 class TPMS_CONTEXT(TPM_OBJECT):
     @classmethod
-    def from_tools(cls, data):
-        """Unmarshal tpm2-tools context.
+    def from_tools(cls, data: bytes) -> "TPMS_CONTEXT":
+        """Unmarshal a tpm2-tools context blob.
 
         Note:
             Currently only support key object contexts from tpm2-tools.
@@ -1447,7 +1766,7 @@ class TPMS_NV_PIN_COUNTER_PARAMETERS(TPM_OBJECT):
 
 
 class TPMS_NV_PUBLIC(TPM_OBJECT):
-    def get_name(self):
+    def get_name(self) -> TPM2B_NAME:
         """Get the TPM name of the NV public area.
 
         Returns:
@@ -1469,7 +1788,7 @@ class TPMS_PCR_SELECTION(TPM_OBJECT):
             return
 
         if bool(self.hash) != bool(pcrs):
-            raise RuntimeError("hash and pcrs MUST be specified")
+            raise ValueError("hash and pcrs MUST be specified")
 
         self._cdata.sizeofSelect = 3
 
@@ -1481,18 +1800,43 @@ class TPMS_PCR_SELECTION(TPM_OBJECT):
 
         for pcr in pcrs:
             if pcr < 0 or pcr > lib.TPM2_PCR_LAST:
-                raise RuntimeError(f"PCR Index out of range, got {pcr}")
+                raise ValueError(f"PCR Index out of range, got {pcr}")
             self._cdata.pcrSelect[pcr // 8] |= 1 << (pcr % 8)
 
     @staticmethod
-    def parse(selection):
+    def parse(selection: str) -> "TPMS_PCR_SELECTION":
+        """Given a PCR selection string populate a TPMS_PCR_SELECTION structure.
+
+        A PCR Bank selection lists: ::
+
+        <BANK>:<PCR>[,<PCR>] or <BANK>:all
+
+        For Example "sha1:3,4", will select PCRs 3 and 4 from the SHA1 bank.
+
+        Args:
+            selection(str): A PCR selection string.
+
+        Returns:
+            A populated TPMS_PCR_SELECTION
+
+        Raises:
+            ValueError: Invalid PCR specification.
+
+        Example:
+            .. code-block:: python
+
+                TPMS_PCR_SELECTION.parse("sha256:1,3,5,7")
+                TPMS_PCR_SELECTION.parse("sha1:all")
+        """
 
         if selection is None or len(selection) == 0:
-            return TPMS_PCR_SELECTION()
+            raise ValueError(
+                f'Expected selection to be not None and len > 0, got: "{selection}"'
+            )
 
         hunks = [x.strip() for x in selection.split(":")]
         if len(hunks) != 2:
-            raise RuntimeError(f"PCR Selection malformed, got {selection}")
+            raise ValueError(f"PCR Selection malformed, got {selection}")
 
         try:
             halg = int(hunks[0], 0)
@@ -1503,7 +1847,7 @@ class TPMS_PCR_SELECTION(TPM_OBJECT):
             try:
                 pcrs = [int(x.strip(), 0) for x in hunks[1].split(",")]
             except ValueError:
-                raise RuntimeError(f"Expected PCR number, got {hunks[1]}")
+                raise ValueError(f"Expected PCR number, got {hunks[1]}")
         else:
             pcrs = hunks[1]
 
@@ -1574,19 +1918,11 @@ class TPMU_ASYM_SCHEME(TPM_OBJECT):
     pass
 
 
-class TPMT_SYM_DEF_OBJECT(TPM_OBJECT):
-    pass
-
-
 class TPMT_KDF_SCHEME(TPM_OBJECT):
     pass
 
 
 class TPMT_TK_CREATION(TPM_OBJECT):
-    pass
-
-
-class TPMT_ASYM_SCHEME(TPM_OBJECT):
     pass
 
 
@@ -1797,10 +2133,6 @@ class TPMU_SENSITIVE_COMPOSITE(TPM_OBJECT):
     pass
 
 
-class TPMT_KEYEDHASH_SCHEME(TPM_OBJECT):
-    pass
-
-
 class TPMU_SCHEME_KEYEDHASH(TPM_OBJECT):
     pass
 
@@ -1814,7 +2146,15 @@ class TPMT_TK_HASHCHECK(TPM_OBJECT):
 
 
 class TPMT_HA(TPM_OBJECT):
-    def __bytes__(self):
+    def __bytes__(self) -> bytes:
+        """Returns the digest field as bytes.
+
+        If the hashAlg field is TPM2_ALG.NULL, it returns
+        bytes object of len 0.
+
+        Return:
+            The digest field as bytes.
+        """
         if self.hashAlg == TPM2_ALG.NULL:
             return b""
         ds = _get_digest_size(self.hashAlg)
