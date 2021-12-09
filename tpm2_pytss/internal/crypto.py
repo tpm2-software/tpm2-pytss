@@ -148,7 +148,7 @@ def _public_from_encoding(data, obj, password=None):
         _int_to_buffer(nums.x, obj.unique.ecc.x)
         _int_to_buffer(nums.y, obj.unique.ecc.y)
     else:
-        raise RuntimeError(f"unsupported key type: {key.__class__.__name__}")
+        raise ValueError(f"unsupported key type: {key.__class__.__name__}")
 
 
 def private_key_from_encoding(data, password=None):
@@ -181,7 +181,7 @@ def _private_from_encoding(data, obj, password=None):
         obj.sensitiveType = TPM2_ALG.ECC
         _int_to_buffer(nums.private_value, obj.sensitive.ecc)
     else:
-        raise RuntimeError(f"unsupported key type: {key.__class__.__name__}")
+        raise ValueError(f"unsupported key type: {key.__class__.__name__}")
 
 
 def public_to_key(obj):
@@ -542,7 +542,7 @@ def __ecc_secret_to_seed(
     xlen = int.from_bytes(outsymseed[0:2], byteorder="big")
     ylen = int.from_bytes(outsymseed[xlen + 2 : xlen + 4], byteorder="big")
     if xlen + ylen != len(outsymseed) - 4:
-        raise RuntimeError(
+        raise ValueError(
             f"Expected TPMS_ECC_POINT to have two points of len {xlen + ylen}, got: {len(outsymseed)}"
         )
 
