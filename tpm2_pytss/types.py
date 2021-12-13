@@ -289,6 +289,7 @@ class TPM2B_SIMPLE_OBJECT(TPM_OBJECT):
         This is the same as:
 
         .. code-block:: python
+
             bytes(tpm2b_type).hex()
 
         Returns (str):
