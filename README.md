@@ -19,12 +19,6 @@ and loading tpm2-tools context files.
 Documentation for the latest release is hosted at
 https://tpm2-pytss.readthedocs.io/en/latest/index.html
 
-## Releases
-
-Currently no production stable releases are available, however branch master is progressing into a stable point and the version 1.0.0 will
-come off of that branch. Until then, consider all pypi.org packages and releases below 1.0.0 unstable, deprecated and likely broken. The master
-branch will be a stable development branch, use with caution.
-
 ## Installing
 
 To install the master branch:
