@@ -9,5 +9,5 @@ Project details on release processes and contributing.
     Release Process <release>
 	Contributing <contributing>
     Maintainers <maintainers>
-    Code of Conduct <conduct>
+    Code of Conduct <CODE_OF_CONDUCT>
     LICENSE <https://github.com/tpm2-software/tpm2-pytss/blob/master/LICENSE>
