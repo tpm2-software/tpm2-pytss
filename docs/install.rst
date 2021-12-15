@@ -115,6 +115,11 @@ Install from PyPi:
 
     $ python3 -m pip install tpm2-pytss
 
+.. note::
+
+    You may need to use option ``--user`` or elevated permissions, i.e. ``sudo`` to install site-wide depending on your
+    particular environment.
+
 Or install from the Git repo:
 
 .. code-block:: console

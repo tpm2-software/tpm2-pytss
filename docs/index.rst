@@ -29,5 +29,6 @@ Supported versions of Python are:
 
     install
     API <api>
-    testing
+    Testing <testing>
+    Project Info <project>
     GitHub <https://github.com/tpm2-software/tpm2-pytss>
