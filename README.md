@@ -32,6 +32,12 @@ To install the master branch:
 python3 -m pip install git+https://github.com/tpm2-software/tpm2-pytss.git
 ```
 
+To install latest stable from PyPi:
+```bash
+python3 -m pip install tpm2-ptss
+```
+**NOTE**: You may need option `--user` or sitewide permissions through something like `sudo`.
+
 This is known to work with version 2.4.0 of tpm2-tss, testing is underway with more recent versions.
 
 ## Help
