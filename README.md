@@ -34,10 +34,6 @@ python3 -m pip install git+https://github.com/tpm2-software/tpm2-pytss.git
 
 This is known to work with version 2.4.0 of tpm2-tss, testing is underway with more recent versions.
 
-## Contributing
-
-See [HACKING](HACKING.md)
-
 ## Help
 
 - Ask a question via an [issue](https://github.com/tpm2-software/tpm2-pytss/issues/new)
