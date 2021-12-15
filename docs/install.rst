@@ -13,7 +13,11 @@ Install Dependencies
 --------------------
 
 The python package will install the required python dependencies when you perform something like a `pip install`. However, one must satisfy the
-dependencies on the following native libraries that comprise the `tpm2-software <https://github.com/tpm2-software>`_ suite:
+dependencies on the following native libraries that comprise the `tpm2-software <https://github.com/tpm2-software>`_ suite.
+
+.. note::
+
+   The **minimum supported version** of the **tpm2-tss** native library suite is **2.4.0**.
 
 The Core Libraries provided by the `tpm2-tss <https://github.com/tpm2-software/tpm2-tss>`_ project:
 
