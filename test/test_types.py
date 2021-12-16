@@ -1468,6 +1468,15 @@ class TypesTest(unittest.TestCase):
         r+ShbNtNnOUGnAYOhak3DMmOKdpBgAAAgAAA/wAWAAR53X6WF4cq4euj360A2EG67P+iZgAAAAEA
         JgAlAAQAAwByAAAABgCAABAAFIrV77jm23RSbSe0b3NqvEBvuN35"""
 
+        test_session = b"""utzA3gAAAAIDAAu63MDeAAAAAUAAAAcDAAAAAAAAAAAAAp8BkwAAAAABGwAg3+5wcQDG7hmg8aaC
+        g94E+NcznuqznZiXkmGiTHEL9AMA99ZtPnyRs1VxIGHVZcJJJyTyYmRO8bZAyXPPwq4fy8kkwqwv
+        0PE+S0UaVvmLA31rM5WhDryFIGp4CsCD+omQdwKNRhOHYLSmKLnvnIaA/ARauSFfl76+fpSTQRsG
+        OtHQO19livPgPBCXQhfUxKWVCN0N9Wf0QXSIzj9djnk5/hQPDZ/GnoRkq22gZ8QgViS5xZ2U5kN3
+        kF8pKLv5onlTlT3NleY6G3BWBwZ6oERS3WSkaquDO5H/soA4YOx7y4UuLpIz/hgsFrf9j7vyGYcY
+        JkkNOi6i0+hWpmDFnhn0gwZL6h+dJNd0qJIv5R7bjcnW7b4sJ5gaQPwAAAMAAAAABAMAAAAAAAAD
+        AAAAAAAAABAACwAAAwEAIMn6hieIgUZusbUvHkdT+fB6m7Nor7v/p4MunwkyviTNACCFA6yl1FMW
+        Oi6NOltEBFNSgQDnMCUgvgxixgL0nVUlcwAAAAAAAAAAAAAAAAAAAAA="""
+
         ctxbytes = b64decode(test_ctx)
         ctx = TPMS_CONTEXT.from_tools(ctxbytes)
 
@@ -1485,6 +1494,13 @@ class TypesTest(unittest.TestCase):
         badversion[5] = 0xFF
         with self.assertRaises(ValueError):
             ctx = TPMS_CONTEXT.from_tools(badversion)
+
+        sessbytes = b64decode(test_session)
+        sess = TPMS_CONTEXT.from_tools(sessbytes)
+        self.assertEqual(sess.hierarchy, TPM2_RH.NULL)
+        self.assertEqual(sess.savedHandle, 0x03000000)
+        self.assertEqual(sess.sequence, 671)
+        self.assertEqual(sess.contextBlob, sessbytes[37:])
 
     def test_TPM_FRIENDLY_INT_str(self):
         alg = TPM2_ALG(TPM2_ALG.ECC)

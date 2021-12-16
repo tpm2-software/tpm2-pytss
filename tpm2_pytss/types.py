@@ -1707,22 +1707,27 @@ class TPMS_CONTEXT(TPM_OBJECT):
     def from_tools(cls, data: bytes) -> "TPMS_CONTEXT":
         """Unmarshal a tpm2-tools context blob.
 
-        Note:
-            Currently only support key object contexts from tpm2-tools.
-
         Args:
             data (bytes): The bytes from a tpm2-tools context file.
 
         Returns:
             Returns a TPMS_CONTEXT instance.
+
+        Raises:
+            ValueError: if the header contains bad values
         """
         magic = int.from_bytes(data[0:4], byteorder="big")
         if magic != 0xBADCC0DE:
             raise ValueError(f"bad magic, expected 0xBADCC0DE, got 0x{magic:X}")
         version = int.from_bytes(data[4:8], byteorder="big")
-        if version != 1:
-            raise ValueError(f"bad version, expected 1, got {version}")
+        if version not in (1, 2):
+            raise ValueError(f"bad version, expected 1 or 2, got {version}")
         ctx = cls()
+        if version == 2:
+            # tpm2-tools version 2 context format is:
+            # magic + version 2 + TPM2_SE + TPM2_ALG + version 1 context
+            # as we can't store the session type or digest alg, just skip them
+            return cls.from_tools(data[11:])
         ctx.hierarchy = int.from_bytes(data[8:12], byteorder="big")
         ctx.savedHandle = int.from_bytes(data[12:16], byteorder="big")
         ctx.sequence = int.from_bytes(data[16:24], byteorder="big")
