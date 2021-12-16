@@ -1,16 +1,20 @@
 # SPDX-License-Identifier: BSD-2
-import pkgconfig
-
 from .types import *
 from .constants import *
-from .internal.utils import _chkrc, _get_dptr, _check_friendly_int, _fixup_classname
+from .internal.utils import (
+    _chkrc,
+    _get_dptr,
+    _check_friendly_int,
+    _fixup_classname,
+    _lib_version_atleast,
+)
 from .TCTI import TCTI
 from .TCTILdr import TCTILdr
 
 from typing import List, Optional, Tuple, Union
 
 # Work around this FAPI dependency if FAPI is not present with the constant value
-_fapi_installed_ = pkgconfig.installed("tss2-fapi", ">=3.0.0")
+_fapi_installed_ = _lib_version_atleast("tss2-fapi", "3.0.0")
 _DEFAULT_LOAD_BLOB_SELECTOR = FAPI_ESYSBLOB.CONTEXTLOAD if _fapi_installed_ else 1
 
 
@@ -6854,7 +6858,7 @@ class ESAPI:
             - ValueError: If a parameter is the incorrect value.
         """
 
-        if pkgconfig.installed("tss2-esys", "<3.0.0"):
+        if not _lib_version_atleast("tss2-esys", "3.0.0"):
             fixup_map = {
                 ESYS_TR.NULL: TPM2_RH.NULL,
                 ESYS_TR.OWNER: TPM2_RH.OWNER,

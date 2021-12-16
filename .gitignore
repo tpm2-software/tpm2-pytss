@@ -41,3 +41,4 @@ public/
 htmlcov
 /.pytest_cache/
 tpm2_pytss/internal/type_mapping.py
+tpm2_pytss/internal/versions.py
