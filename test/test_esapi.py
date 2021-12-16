@@ -4739,6 +4739,40 @@ class TestEsys(TSS2_EsapiTest):
         self.assertFalse(ectx._ctx_pp)
         self.assertEqual(ectx.tcti, None)
 
+    def test_TPMS_CONTEXT_to_tools(self):
+        hmac_session = self.ectx.start_auth_session(
+            ESYS_TR.NONE,
+            ESYS_TR.NONE,
+            TPM2_SE.HMAC,
+            TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL),
+            TPM2_ALG.SHA256,
+        )
+        ctx = self.ectx.context_save(hmac_session)
+        sessbytes = ctx.to_tools(TPM2_SE.HMAC, TPM2_ALG.SHA256)
+
+        self.assertEqual(sessbytes[0:4], int(0xBADCC0DE).to_bytes(4, "big"))
+        self.assertEqual(sessbytes[4:8], int(2).to_bytes(4, "big"))
+        self.assertEqual(sessbytes[8], TPM2_SE.HMAC)
+        self.assertEqual(sessbytes[9:11], TPM2_ALG.SHA256.to_bytes(2, "big"))
+        self.assertEqual(sessbytes[11:15], int(0xBADCC0DE).to_bytes(4, "big"))
+        self.assertEqual(sessbytes[15:19], int(1).to_bytes(4, "big"))
+        self.assertEqual(sessbytes[19:23], ctx.hierarchy.to_bytes(4, "big"))
+        self.assertEqual(sessbytes[23:27], ctx.savedHandle.to_bytes(4, "big"))
+        self.assertEqual(sessbytes[27:35], ctx.sequence.to_bytes(8, "big"))
+        self.assertEqual(sessbytes[35:37], ctx.contextBlob.size.to_bytes(2, "big"))
+        self.assertEqual(sessbytes[37:], bytes(ctx.contextBlob))
+
+        handle, _, _, _, _ = self.ectx.create_primary(TPM2B_SENSITIVE_CREATE(), "ecc")
+        ctx = self.ectx.context_save(handle)
+        objbytes = ctx.to_tools()
+        self.assertEqual(objbytes[0:4], int(0xBADCC0DE).to_bytes(4, "big"))
+        self.assertEqual(objbytes[4:8], int(1).to_bytes(4, "big"))
+        self.assertEqual(objbytes[8:12], ctx.hierarchy.to_bytes(4, "big"))
+        self.assertEqual(objbytes[12:16], ctx.savedHandle.to_bytes(4, "big"))
+        self.assertEqual(objbytes[16:24], ctx.sequence.to_bytes(8, "big"))
+        self.assertEqual(objbytes[24:26], ctx.contextBlob.size.to_bytes(2, "big"))
+        self.assertEqual(objbytes[26:], bytes(ctx.contextBlob))
+
 
 if __name__ == "__main__":
     unittest.main()
