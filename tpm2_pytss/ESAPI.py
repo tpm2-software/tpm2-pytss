@@ -6808,7 +6808,7 @@ class ESAPI:
 
         Deserialize the metadata of an ESYS_TR object from a byte buffer that was
         stored on disk for later use by a different program or context.
-        An object can be serialized suing Esys_TR_Serialize.
+        An object can be serialized suing tr_serialize.
 
         Args:
             esys_handle (ESYS_TR): The ESYS_TR object to serialize.
