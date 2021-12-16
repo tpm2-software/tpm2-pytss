@@ -6782,18 +6782,17 @@ class ESAPI:
         C Function: Esys_TR_Serialize
 
         Raises:
-            - TypeError: If esys_handle is not an ESYS_TR.
+            TypeError: If esys_handle is not an ESYS_TR.
+            TSS2_Exception:
+              - TSS2_ESYS_RC_BAD_TR if the ESYS_TR object is unknown to the
+                ESYS_CONTEXT.
 
-            - TSS2_Exception:
-                - TSS2_ESYS_RC_BAD_TR if the ESYS_TR object is unknown to the
-                  ESYS_CONTEXT.
+              - TSS2_ESYS_RC_MEMORY if the buffer for marshaling the object can't
+                be allocated.
 
-                - TSS2_ESYS_RC_MEMORY if the buffer for marshaling the object can't
-                  be allocated.
+              - TSS2_ESYS_RC_BAD_VALUE For invalid ESYS data to be marshaled.
 
-                - TSS2_ESYS_RC_BAD_VALUE For invalid ESYS data to be marshaled.
-
-                - TSS2_RCs produced by lower layers of the software stack.
+              - TSS2_RCs produced by lower layers of the software stack.
         """
         _check_handle_type(esys_handle, "esys_handle")
 
@@ -6820,13 +6819,13 @@ class ESAPI:
         C_Function: Esys_TR_Deserialize
 
         Raises:
-            - TypeError: If a parameter is the incorrect type.
+            TypeError: If a parameter is the incorrect type.
 
-            - TSS2_Exception:
+            TSS2_Exception:
 
-                 - TSS2_ESYS_RC_MEMORY if the object can not be allocated.
+               - TSS2_ESYS_RC_MEMORY if the object can not be allocated.
 
-                 - TSS2_RCs produced by lower layers of the software stack.
+               - TSS2_RCs produced by lower layers of the software stack.
         """
 
         if not isinstance(buffer, bytes):
