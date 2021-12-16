@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2
-import pkgconfig
+from .internal.utils import _lib_version_atleast
 
-if not pkgconfig.installed("tss2-fapi", ">=3.0.0"):
+if not _lib_version_atleast("tss2-fapi", "3.0.0"):
     raise NotImplementedError("FAPI Not installed or version is not 3.0.0")
 
 import contextlib

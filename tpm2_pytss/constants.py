@@ -7,8 +7,7 @@
 Along with helpers to go from string values to constants and constant values to string values.
 """
 from ._libtpm2_pytss import lib, ffi
-from tpm2_pytss.internal.utils import _CLASS_INT_ATTRS_from_string
-import pkgconfig
+from tpm2_pytss.internal.utils import _CLASS_INT_ATTRS_from_string, _lib_version_atleast
 
 
 class TPM_FRIENDLY_INT(int):
@@ -800,7 +799,7 @@ class TSS2_RC(TPM_BASE_RC):
     BASE_RC_BAD_KEY = lib.TSS2_BASE_RC_BAD_KEY
     BASE_RC_NO_HANDLE = lib.TSS2_BASE_RC_NO_HANDLE
 
-    if pkgconfig.installed("tss2-esapi", ">=3.0.0"):
+    if _lib_version_atleast("tss2-esapi", "3.0.0"):
         BASE_RC_NOT_PROVISIONED = lib.TSS2_BASE_RC_NOT_PROVISIONED
         BASE_RC_ALREADY_PROVISIONED = lib.TSS2_BASE_RC_ALREADY_PROVISIONED
 
@@ -865,7 +864,7 @@ class TSS2_RC(TPM_BASE_RC):
     ESYS_RC_MULTIPLE_DECRYPT_SESSIONS = lib.TSS2_ESYS_RC_MULTIPLE_DECRYPT_SESSIONS
     ESYS_RC_MULTIPLE_ENCRYPT_SESSIONS = lib.TSS2_ESYS_RC_MULTIPLE_ENCRYPT_SESSIONS
     ESYS_RC_RSP_AUTH_FAILED = lib.TSS2_ESYS_RC_RSP_AUTH_FAILED
-    if pkgconfig.installed("tss2-fapi", ">=3.0.0"):
+    if _lib_version_atleast("tss2-fapi", "3.0.0"):
         FAPI_RC_GENERAL_FAILURE = lib.TSS2_FAPI_RC_GENERAL_FAILURE
         FAPI_RC_NOT_IMPLEMENTED = lib.TSS2_FAPI_RC_NOT_IMPLEMENTED
         FAPI_RC_BAD_REFERENCE = lib.TSS2_FAPI_RC_BAD_REFERENCE

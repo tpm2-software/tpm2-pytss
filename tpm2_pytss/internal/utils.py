@@ -2,11 +2,19 @@
 import logging
 import sys
 from typing import List
-
-import pkgconfig
+from distutils.version import LooseVersion
 
 from .._libtpm2_pytss import ffi, lib
 from ..TSS2_Exception import TSS2_Exception
+
+try:
+    from .versions import _versions
+except ImportError:
+    # this is needed so docs can be generated without building
+    if "sphinx" not in sys.modules:
+        raise e
+    else:
+        _versions = dict()
 
 logger = logging.getLogger(__name__)
 
@@ -194,12 +202,11 @@ def is_bug_fixed(
     fixed_in=None, backports: List[str] = None, lib: str = "tss2-fapi"
 ) -> bool:
     """Use pkg-config to determine if a bug was fixed in the currently installed tpm2-tss version."""
-    if fixed_in and pkgconfig.installed(lib, f">= {fixed_in}"):
+    if fixed_in and _lib_version_atleast(lib, fixed_in):
         return True
 
-    try:
-        version = pkgconfig.modversion(lib)
-    except pkgconfig.pkgconfig.PackageNotFoundError:
+    version = _versions.get(lib)
+    if not version:
         return False
 
     version = version.split("-")[0]
@@ -225,10 +232,19 @@ def _check_bug_fixed(
 ) -> None:
     """Emit a warning or exception if there is an unfixed bug in the currently installed tpm2-tss version."""
     if not is_bug_fixed(fixed_in=fixed_in, backports=backports, lib=lib):
-        version = pkgconfig.modversion(lib)
+        version = _versions.get(lib)
         message = f"This API call {'is' if error else 'may be'} affected by a bug in {lib} version {version}: {details}\nPlease use >= {fixed_in}. Backports exist for {backports}."
 
         if error:
             raise RuntimeError(message)
 
         logger.warning(message)
+
+
+def _lib_version_atleast(tss2_lib, version):
+    if tss2_lib not in _versions:
+        return False
+    libv = LooseVersion(_versions[tss2_lib])
+    lv = LooseVersion(version)
+
+    return libv >= lv
