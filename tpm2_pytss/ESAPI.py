@@ -6864,7 +6864,7 @@ class ESAPI:
                 ESYS_TR.ENDORSEMENT: TPM2_RH.ENDORSEMENT,
             }
             if hierarchy not in fixup_map:
-                raise RunTimeError(
+                raise RuntimeError(
                     "Expected hierarchy to be one of ESYS_TR.NULL, ESYS_TR.PLATFORM, ESYS_TR.OWNER, ESYS_TR.ENDORSMENT"
                 )
 
