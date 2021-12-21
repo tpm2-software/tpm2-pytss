@@ -387,7 +387,10 @@ class TPM2_RH(TPM_FRIENDLY_INT):
     EK = lib.TPM2_RH_EK
     NULL = lib.TPM2_RH_NULL
     UNASSIGNED = lib.TPM2_RH_UNASSIGNED
-    PW = lib.TPM2_RS_PW
+    try:
+        PW = lib.TPM2_RS_PW
+    except AttributeError:
+        PW = lib.TPM2_RH_PW
     LOCKOUT = lib.TPM2_RH_LOCKOUT
     ENDORSEMENT = lib.TPM2_RH_ENDORSEMENT
     PLATFORM = lib.TPM2_RH_PLATFORM
