@@ -59,6 +59,15 @@ def remove_poll_stuff(s, poll_handle_type):
     return s
 
 
+def remove_INTERNALBUILD(s):
+
+    r = r"#if\s+defined\(INTERNALBUILD\)(?:(?!endif).)*#endif"
+    s = re.sub(r, "", s, flags=re.MULTILINE | re.DOTALL)
+    s = re.sub(r"DEPRECATED", "", s)
+
+    return re.sub(r"__attribute__\(\(deprecated\)\)", "", s)
+
+
 def prepare_common(dirpath):
 
     s = pathlib.Path(dirpath, "tss2_common.h").read_text(encoding="utf-8")
@@ -77,6 +86,8 @@ def prepare_types(dirpath):
         s,
         flags=re.MULTILINE,
     )
+
+    s = remove_INTERNALBUILD(s)
 
     return remove_common_guards(s)
 
@@ -172,6 +183,8 @@ def prepare_rcdecode(dirpath):
 def prepare_mu(dirpath):
 
     s = pathlib.Path(dirpath, "tss2_mu.h").read_text(encoding="utf-8")
+
+    s = remove_INTERNALBUILD(s)
 
     s = remove_common_guards(s)
 
