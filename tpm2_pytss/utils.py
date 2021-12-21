@@ -222,7 +222,7 @@ def unwrap(
     s, l = TPM2B_SENSITIVE.unmarshal(decsens)
     if len(decsens) != l:
         raise RuntimeError(
-            f"Expected the sensitive buffer to be size {l}, got: {len(encdupsens)}"
+            f"Expected the sensitive buffer to be size {l}, got: {len(decsens)}"
         )
 
     return s
