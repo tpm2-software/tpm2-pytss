@@ -285,7 +285,9 @@ def private_to_key(private: "types.TPMT_SENSITIVE", public: "types.TPMT_PUBLIC")
 
         curve = _get_curve(public.parameters.eccDetail.curveID)
         if curve is None:
-            raise ValueError(f"unsupported curve: {obj.parameters.eccDetail.curveID}")
+            raise ValueError(
+                f"unsupported curve: {public.parameters.eccDetail.curveID}"
+            )
 
         p = int.from_bytes(bytes(private.sensitive.ecc), byteorder="big")
         x = int.from_bytes(bytes(public.unique.ecc.x), byteorder="big")
