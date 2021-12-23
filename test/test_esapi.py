@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: BSD-2
 
 import unittest
+import gc
 
 from tpm2_pytss import *
 from .TSS2_BaseTest import TSS2_EsapiTest
@@ -4687,6 +4688,33 @@ class TestEsys(TSS2_EsapiTest):
 
         with self.assertRaises(TSS2_Exception):
             self.ectx.tr_deserialize(b"0123456890")
+
+    def test_ref_parent(self):
+        # Test keeping a reference to the parent in a child structure
+        _, pub, _, _, _ = self.ectx.create_primary(None, "ecc")
+        pa = pub.publicArea
+        del pub
+        gc.collect()
+        self.assertEqual(pa.type, TPM2_ALG.ECC)
+        self.assertEqual(
+            pa.objectAttributes, TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS
+        )
+
+        # Test keeping a reference to the parent in an element from a TPML_OBJECT
+        _, sels, _ = self.ectx.pcr_read("sha256:16")
+        sel = sels[0]
+        del sels
+        gc.collect()
+        self.assertEqual(sel.hash, TPM2_ALG.SHA256)
+        self.assertEqual(bytes(sel.pcrSelect), b"\x00\x00\x01\x00")
+
+        # Test keeping a reference to the parent when accessing a TPM2_SIMPLE_OBJECT buffer
+        handle, _, _, _, _ = self.ectx.create_primary(None, "ecc")
+        _, name, _ = self.ectx.read_public(handle)
+        algb = name.name[0:2]
+        del name
+        gc.collect()
+        self.assertEqual(bytes(algb), TPM2_ALG.SHA256.to_bytes(2, "big"))
 
 
 if __name__ == "__main__":

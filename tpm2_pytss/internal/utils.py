@@ -125,10 +125,24 @@ def _fixup_cdata_kwargs(this, _cdata, kwargs):
     return (_cdata, kwargs)
 
 
-def _convert_to_python_native(global_map, data):
+def _ref_parent(data, parent):
+    tipe = ffi.typeof(parent)
+    if tipe.kind != "pointer":
+        return data
+
+    def deconstructor(ptr):
+        parent
+
+    return ffi.gc(data, deconstructor)
+
+
+def _convert_to_python_native(global_map, data, parent=None):
 
     if not isinstance(data, ffi.CData):
         return data
+
+    if parent is not None:
+        data = _ref_parent(data, parent)
 
     tipe = ffi.typeof(data)
 

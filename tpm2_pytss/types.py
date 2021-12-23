@@ -18,6 +18,7 @@ from tpm2_pytss.internal.utils import (
     _fixup_classname,
     _convert_to_python_native,
     _mock_bail,
+    _ref_parent,
 )
 from tpm2_pytss.internal.crypto import (
     _calculate_sym_unique,
@@ -127,7 +128,7 @@ class TPM_OBJECT(object):
             elif tm is not None:
                 obj = globals()[tm](x)
             else:
-                obj = _convert_to_python_native(globals(), x)
+                obj = _convert_to_python_native(globals(), x, parent=self._cdata)
             return obj
 
     def __setattr__(self, key, value):
@@ -260,7 +261,8 @@ class TPM2B_SIMPLE_OBJECT(TPM_OBJECT):
         _bytefield = type(self)._get_bytefield()
         if key == _bytefield:
             b = getattr(self._cdata, _bytefield)
-            return memoryview(ffi.buffer(b, self._cdata.size))
+            rb = _ref_parent(b, self._cdata)
+            return memoryview(ffi.buffer(rb, self._cdata.size))
         return super().__getattribute__(key)
 
     def __len__(self):
@@ -455,7 +457,7 @@ class TPML_OBJECT(TPM_OBJECT):
             return cdatas[0] if item_was_int else cdatas
 
         # convert it to python native
-        objects = [_convert_to_python_native(globals(), x) for x in cdatas]
+        objects = [_convert_to_python_native(globals(), x, self._cdata) for x in cdatas]
 
         if isinstance(objects[0], TPM2B_SIMPLE_OBJECT):
             objects = [bytes(x) for x in objects]
