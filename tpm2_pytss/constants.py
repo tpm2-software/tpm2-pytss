@@ -211,6 +211,8 @@ class TPM_FRIENDLY_INT(int):
 
 
 class TPMA_FRIENDLY_INTLIST(TPM_FRIENDLY_INT):
+    _MASKS = tuple()
+
     @classmethod
     def parse(cls, value: str) -> int:
         """ Converts a string of | separated constant values into it's integer value.
@@ -240,6 +242,26 @@ class TPMA_FRIENDLY_INTLIST(TPM_FRIENDLY_INT):
             raise TypeError(f'Expected value to be a str, got: "{type(value)}"')
 
         hunks = value.split("|") if "|" in value else [value]
+        for k in list(hunks):
+            if "=" not in k:
+                continue
+            hname, hval = k.split("=", 1)
+            v = int(hval, base=0)
+            hunks.remove(k)
+            found = False
+            for mask, shift, name in cls._MASKS:
+                if hname != name:
+                    continue
+                mv = mask >> shift
+                if v > mv:
+                    raise ValueError(
+                        f"value for {name} is to large, got 0x{v:x}, max is 0x{mv:x}"
+                    )
+                intvalue = intvalue | (v << shift)
+                found = True
+                break
+            if not found:
+                raise ValueError(f"unknown mask type {hname}")
         for k in hunks:
             try:
                 intvalue |= _CLASS_INT_ATTRS_from_string(cls, k, cls._FIXUP_MAP)
@@ -269,7 +291,11 @@ class TPMA_FRIENDLY_INTLIST(TPM_FRIENDLY_INT):
         for k, v in vars(self.__class__).items():
             if cv == 0:
                 break
-            if not isinstance(v, int) or k.startswith("_") or k.startswith("DEFAULT"):
+            if (
+                not isinstance(v, int)
+                or k.startswith(("_", "_DEFAULT"))
+                or k.endswith(("_MASK", "_SHIFT"))
+            ):
                 continue
             for fk, fv in self._FIXUP_MAP.items():
                 if k == fv:
@@ -279,6 +305,13 @@ class TPMA_FRIENDLY_INTLIST(TPM_FRIENDLY_INT):
                 continue
             ints.append(k.lower())
             cv = cv ^ v
+        for mask, shift, name in self._MASKS:
+            if not cv & mask:
+                continue
+            v = (cv & mask) >> shift
+            s = f"{name}=0x{v:x}"
+            cv = cv ^ (cv & mask)
+            ints.append(s)
         if cv:
             raise ValueError(f"unnmatched values left: 0x{cv:x}")
         return "|".join(ints)
@@ -1238,6 +1271,7 @@ TPM2_CLOCK_ADJUST = TPM2_CLOCK
 class TPMA_NV(TPMA_FRIENDLY_INTLIST):
 
     _FIXUP_MAP = {"NODA": "NO_DA"}
+    _MASKS = ((lib.TPMA_NV_TPM2_NT_MASK, lib.TPMA_NV_TPM2_NT_SHIFT, "nt"),)
 
     PPWRITE = lib.TPMA_NV_PPWRITE
     OWNERWRITE = lib.TPMA_NV_OWNERWRITE
@@ -1263,9 +1297,18 @@ class TPMA_NV(TPMA_FRIENDLY_INTLIST):
     PLATFORMCREATE = lib.TPMA_NV_PLATFORMCREATE
     READ_STCLEAR = lib.TPMA_NV_READ_STCLEAR
 
+    @property
+    def nt(self) -> TPM2_NT:
+        """TPM2_NT: The type of the NV area"""
+        return TPM2_NT((self & self.TPM2_NT_MASK) >> self.TPM2_NT_SHIFT)
+
 
 @TPM_FRIENDLY_INT._fix_const_type
 class TPMA_CC(TPMA_FRIENDLY_INTLIST):
+    _MASKS = (
+        (lib.TPMA_CC_COMMANDINDEX_MASK, lib.TPMA_CC_COMMANDINDEX_SHIFT, "commandindex"),
+        (lib.TPMA_CC_CHANDLES_MASK, lib.TPMA_CC_CHANDLES_SHIFT, "chandles"),
+    )
     COMMANDINDEX_MASK = lib.TPMA_CC_COMMANDINDEX_MASK
     COMMANDINDEX_SHIFT = lib.TPMA_CC_COMMANDINDEX_SHIFT
     NV = lib.TPMA_CC_NV
@@ -1277,6 +1320,16 @@ class TPMA_CC(TPMA_FRIENDLY_INTLIST):
     V = lib.TPMA_CC_V
     RES_MASK = lib.TPMA_CC_RES_MASK
     RES_SHIFT = lib.TPMA_CC_RES_SHIFT
+
+    @property
+    def commandindex(self) -> int:
+        """int: The command index"""
+        return self & self.COMMANDINDEX_MASK
+
+    @property
+    def chandles(self) -> int:
+        """int: The number of handles in the handle area"""
+        return (self & self.CHANDLES_MASK) >> self.CHANDLES_SHIFT
 
 
 @TPM_FRIENDLY_INT._fix_const_type
