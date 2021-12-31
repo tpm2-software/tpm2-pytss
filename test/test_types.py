@@ -445,6 +445,20 @@ class TypesTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             TPMA_NV.parse("foo")
 
+        self.assertEqual(str(TPMA_NV.NO_DA | TPM2_NT.COUNTER << 4), "noda|nt=0x1")
+
+        self.assertEqual(TPMA_NV.parse("noda|nt=0x1").nt, TPM2_NT.COUNTER)
+
+        with self.assertRaises(ValueError) as e:
+            TPMA_NV.parse("madeup=1234")
+        self.assertEqual(str(e.exception), "unknown mask type madeup")
+
+        with self.assertRaises(ValueError) as e:
+            TPMA_NV.parse("nt=0x10")
+        self.assertEqual(
+            str(e.exception), "value for nt is to large, got 0x10, max is 0xf"
+        )
+
     def test_TPM2_SPEC(self):
         self.assertEqual(TPM2_SPEC.parse("Family"), TPM2_SPEC.FAMILY)
         self.assertEqual(TPM2_SPEC.parse("Level"), TPM2_SPEC.LEVEL)
@@ -1748,6 +1762,18 @@ class TypesTest(unittest.TestCase):
         hl = TPML_HANDLE((0x40000000,))
         self.assertEqual(hl[0], TPM2_HANDLE(0x40000000))
         self.assertIsInstance(hl[0], TPM2_HANDLE)
+
+    def test_TPMA_CC(self):
+        cca = TPMA_CC.NV | 0x1234 | (5 << TPMA_CC.CHANDLES_SHIFT)
+        self.assertEqual(str(cca), "nv|commandindex=0x1234|chandles=0x5")
+
+        pcca = TPMA_CC.parse("nv|commandindex=1234|chandles=5")
+        self.assertEqual(pcca & TPMA_CC.NV, TPMA_CC.NV)
+        self.assertEqual(pcca.commandindex, 1234)
+        self.assertEqual(pcca.chandles, 5)
+
+        ccs = str(TPMA_CC.NV | TPMA_CC.V)
+        self.assertEqual(ccs, "nv|v")
 
 
 if __name__ == "__main__":
