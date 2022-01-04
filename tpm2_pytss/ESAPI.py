@@ -4750,7 +4750,7 @@ class ESAPI:
         self,
         nv_index: ESYS_TR,
         policy_session: ESYS_TR,
-        auth_handle: ESYS_TR = 0,
+        auth_handle: Optional[ESYS_TR] = None,
         session1: ESYS_TR = ESYS_TR.PASSWORD,
         session2: ESYS_TR = ESYS_TR.NONE,
         session3: ESYS_TR = ESYS_TR.NONE,
@@ -4779,7 +4779,7 @@ class ESAPI:
         TPM Command: TPM2_PolicyAuthorizeNV
         """
 
-        if auth_handle == 0:
+        if auth_handle is None:
             auth_handle = nv_index
 
         _check_handle_type(auth_handle, "auth_handle")
@@ -6172,7 +6172,7 @@ class ESAPI:
         nv_index: ESYS_TR,
         data: Union[TPM2B_MAX_NV_BUFFER, bytes, str],
         offset: int = 0,
-        auth_handle: ESYS_TR = 0,
+        auth_handle: Optional[ESYS_TR] = None,
         session1: ESYS_TR = ESYS_TR.PASSWORD,
         session2: ESYS_TR = ESYS_TR.NONE,
         session3: ESYS_TR = ESYS_TR.NONE,
@@ -6202,7 +6202,7 @@ class ESAPI:
         TPM Command: TPM2_NV_Write
         """
 
-        if auth_handle == 0:
+        if auth_handle is None:
             auth_handle = nv_index
         _check_handle_type(nv_index, "nv_index")
         _check_handle_type(auth_handle, "auth_handle")
@@ -6226,7 +6226,7 @@ class ESAPI:
     def nv_increment(
         self,
         nv_index: ESYS_TR,
-        auth_handle: ESYS_TR = 0,
+        auth_handle: Optional[ESYS_TR] = None,
         session1: ESYS_TR = ESYS_TR.PASSWORD,
         session2: ESYS_TR = ESYS_TR.NONE,
         session3: ESYS_TR = ESYS_TR.NONE,
@@ -6254,7 +6254,7 @@ class ESAPI:
         TPM Command: TPM2_NV_Increment
         """
 
-        if auth_handle == 0:
+        if auth_handle is None:
             auth_handle = nv_index
         _check_handle_type(auth_handle, "auth_handle")
         _check_handle_type(nv_index, "nv_index")
@@ -6271,7 +6271,7 @@ class ESAPI:
         self,
         nv_index: ESYS_TR,
         data: Union[TPM2B_MAX_NV_BUFFER, bytes, str],
-        auth_handle: ESYS_TR = 0,
+        auth_handle: Optional[ESYS_TR] = None,
         session1: ESYS_TR = ESYS_TR.PASSWORD,
         session2: ESYS_TR = ESYS_TR.NONE,
         session3: ESYS_TR = ESYS_TR.NONE,
@@ -6300,7 +6300,7 @@ class ESAPI:
         TPM Command: TPM2_NV_Extend
         """
 
-        if auth_handle == 0:
+        if auth_handle is None:
             auth_handle = nv_index
         _check_handle_type(auth_handle, "auth_handle")
         _check_handle_type(nv_index, "nv_index")
@@ -6324,7 +6324,7 @@ class ESAPI:
         self,
         nv_index: ESYS_TR,
         bits: int,
-        auth_handle=0,
+        auth_handle: Optional[ESYS_TR] = None,
         session1: ESYS_TR = ESYS_TR.PASSWORD,
         session2: ESYS_TR = ESYS_TR.NONE,
         session3: ESYS_TR = ESYS_TR.NONE,
@@ -6353,7 +6353,7 @@ class ESAPI:
         TPM Command: TPM2_NV_SetBits
         """
 
-        if auth_handle == 0:
+        if auth_handle is None:
             auth_handle = nv_index
 
         _check_handle_type(auth_handle, "auth_handle")
@@ -6374,7 +6374,7 @@ class ESAPI:
     def nv_write_lock(
         self,
         nv_index: ESYS_TR,
-        auth_handle: ESYS_TR = 0,
+        auth_handle: Optional[ESYS_TR] = None,
         session1: ESYS_TR = ESYS_TR.PASSWORD,
         session2: ESYS_TR = ESYS_TR.NONE,
         session3: ESYS_TR = ESYS_TR.NONE,
@@ -6402,7 +6402,7 @@ class ESAPI:
         TPM Command: TPM2_NV_WriteLock
         """
 
-        if auth_handle == 0:
+        if auth_handle is None:
             auth_handle = nv_index
         _check_handle_type(auth_handle, "auth_handle")
         _check_handle_type(nv_index, "nv_index")
@@ -6460,7 +6460,7 @@ class ESAPI:
         nv_index: ESYS_TR,
         size: int,
         offset: int = 0,
-        auth_handle: ESYS_TR = 0,
+        auth_handle: Optional[ESYS_TR] = None,
         session1: ESYS_TR = ESYS_TR.PASSWORD,
         session2: ESYS_TR = ESYS_TR.NONE,
         session3: ESYS_TR = ESYS_TR.NONE,
@@ -6493,7 +6493,7 @@ class ESAPI:
         TPM Command: TPM2_NV_Read
         """
 
-        if auth_handle == 0:
+        if auth_handle is None:
             auth_handle = nv_index
         _check_handle_type(nv_index, "nv_index")
 
@@ -6527,7 +6527,7 @@ class ESAPI:
     def nv_read_lock(
         self,
         nv_index: ESYS_TR,
-        auth_handle: ESYS_TR = 0,
+        auth_handle: Optional[ESYS_TR] = None,
         session1: ESYS_TR = ESYS_TR.PASSWORD,
         session2: ESYS_TR = ESYS_TR.NONE,
         session3: ESYS_TR = ESYS_TR.NONE,
@@ -6555,7 +6555,7 @@ class ESAPI:
         TPM Command: TPM2_NV_ReadLock
         """
 
-        if auth_handle == 0:
+        if auth_handle is None:
             auth_handle = nv_index
         _check_handle_type(nv_index, "nv_index")
         _check_handle_type(auth_handle, "auth_handle")
@@ -6618,7 +6618,7 @@ class ESAPI:
         in_scheme: TPMT_SIG_SCHEME,
         size: int,
         offset: int = 0,
-        auth_handle: ESYS_TR = 0,
+        auth_handle: Optional[ESYS_TR] = None,
         session1: ESYS_TR = ESYS_TR.PASSWORD,
         session2: ESYS_TR = ESYS_TR.PASSWORD,
         session3: ESYS_TR = ESYS_TR.NONE,
@@ -6656,7 +6656,7 @@ class ESAPI:
         TPM Command: TPM2_NV_Certify
         """
 
-        if auth_handle == 0:
+        if auth_handle is None:
             auth_handle = nv_index
         _check_handle_type(sign_handle, "sign_handle")
         _check_handle_type(auth_handle, "auth_handle")
