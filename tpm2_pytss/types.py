@@ -37,12 +37,14 @@ from tpm2_pytss.constants import (
     TPM2_ECC_CURVE,
 )
 from typing import Union, Tuple
+import sys
 
 try:
     from tpm2_pytss.internal.type_mapping import _type_map, _element_type_map
-except ImportError:
+except ImportError as e:
     # this is needed so docs can be generated without building
-    pass
+    if "sphinx" not in sys.modules:
+        raise e
 
 import binascii
 import secrets
