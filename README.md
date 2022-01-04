@@ -32,7 +32,7 @@ python3 -m pip install tpm2-ptss
 ```
 **NOTE**: You may need option `--user` or sitewide permissions through something like `sudo`.
 
-This is known to work with version 2.4.0 of tpm2-tss, testing is underway with more recent versions.
+This is known to work with versions 2.4.0 of tpm2-tss or higher.
 
 ## Help
 
