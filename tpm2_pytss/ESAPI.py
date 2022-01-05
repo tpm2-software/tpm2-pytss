@@ -247,7 +247,7 @@ class ESAPI:
         esys_tr_ptr[0] = esys_handle
         _chkrc(lib.Esys_TR_Close(self._ctx, esys_tr_ptr))
 
-    def set_auth(
+    def tr_set_auth(
         self, esys_handle: ESYS_TR, auth_value: Union[TPM2B_AUTH, bytes, str, None]
     ) -> None:
         """Set the authorization value of an ESYS_TR.
@@ -256,7 +256,7 @@ class ESAPI:
         are then picked up whenever an authorization is needed.
 
         Note: The authorization value is not stored in the metadata during
-        tr_serialize. Therefore set_auth needs to be called again after
+        tr_serialize. Therefore tr_set_auth needs to be called again after
         every tr_deserialize.
 
         Args:

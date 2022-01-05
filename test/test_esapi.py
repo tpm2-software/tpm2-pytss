@@ -192,7 +192,7 @@ class TestEsys(TSS2_EsapiTest):
         self.ectx.hierarchy_change_auth(ESYS_TR.OWNER, "passwd")
 
         # force esys to forget about the 'good' password
-        self.ectx.set_auth(ESYS_TR.OWNER, "badpasswd")
+        self.ectx.tr_set_auth(ESYS_TR.OWNER, "badpasswd")
 
         with self.assertRaises(TSS2_Exception):
             self.ectx.hierarchy_change_auth(ESYS_TR.OWNER, "anotherpasswd")
@@ -260,7 +260,7 @@ class TestEsys(TSS2_EsapiTest):
         self.ectx.hierarchy_change_auth(ESYS_TR.OWNER, "passwd", session1=hmac_session)
 
         # force esys to forget about the 'good' password
-        self.ectx.set_auth(ESYS_TR.OWNER, "badpasswd")
+        self.ectx.tr_set_auth(ESYS_TR.OWNER, "badpasswd")
 
         with self.assertRaises(TSS2_Exception):
             self.ectx.hierarchy_change_auth(
@@ -717,7 +717,7 @@ class TestEsys(TSS2_EsapiTest):
             childHandle, credential, primaryKeyName
         )
 
-        self.ectx.set_auth(childHandle, "childpassword")
+        self.ectx.tr_set_auth(childHandle, "childpassword")
 
         certInfo = self.ectx.activate_credential(
             parentHandle, childHandle, credentialBlob, secret
@@ -790,7 +790,7 @@ class TestEsys(TSS2_EsapiTest):
 
         childHandle = self.ectx.load(parentHandle, priv, pub)
 
-        self.ectx.set_auth(childHandle, "childpassword")
+        self.ectx.tr_set_auth(childHandle, "childpassword")
 
         secret = self.ectx.unseal(childHandle)
         self.assertEqual(bytes(secret), b"sealedsecret")
@@ -836,12 +836,12 @@ class TestEsys(TSS2_EsapiTest):
         childHandle = self.ectx.load(parentHandle, priv, pub)
 
         # force an error
-        self.ectx.set_auth(childHandle, "BADchildpassword")
+        self.ectx.tr_set_auth(childHandle, "BADchildpassword")
 
         with self.assertRaises(TSS2_Exception):
             self.ectx.object_change_auth(childHandle, parentHandle, "newauth")
 
-        self.ectx.set_auth(childHandle, "childpassword")
+        self.ectx.tr_set_auth(childHandle, "childpassword")
 
         self.ectx.object_change_auth(childHandle, parentHandle, TPM2B_AUTH("newauth"))
 
@@ -1485,7 +1485,7 @@ class TestEsys(TSS2_EsapiTest):
         seqHandle = self.ectx.hmac_start(handle, TPM2B_AUTH(b"1234"), TPM2_ALG.SHA256)
         self.assertNotEqual(seqHandle, 0)
 
-        # self.ectx.set_auth(seqHandle, b"1234")
+        # self.ectx.tr_set_auth(seqHandle, b"1234")
 
         self.ectx.sequence_update(seqHandle, "here is some data")
 
@@ -1539,7 +1539,7 @@ class TestEsys(TSS2_EsapiTest):
         seqHandle = self.ectx.hash_sequence_start(TPM2B_AUTH(b"1234"), TPM2_ALG.SHA256)
         self.assertNotEqual(seqHandle, 0)
 
-        self.ectx.set_auth(seqHandle, b"1234")
+        self.ectx.tr_set_auth(seqHandle, b"1234")
 
         self.ectx.sequence_update(seqHandle, "here is some data")
 
@@ -1622,7 +1622,7 @@ class TestEsys(TSS2_EsapiTest):
         seqHandle = self.ectx.hash_sequence_start(TPM2B_AUTH(b"1234"), TPM2_ALG.NULL)
         self.assertNotEqual(seqHandle, 0)
 
-        self.ectx.set_auth(seqHandle, b"1234")
+        self.ectx.tr_set_auth(seqHandle, b"1234")
 
         self.ectx.sequence_update(seqHandle, "here is some data")
 
@@ -3553,9 +3553,9 @@ class TestEsys(TSS2_EsapiTest):
     def test_pcr_set_auth_value(self):
 
         self.ectx.pcr_set_auth_value(ESYS_TR.PCR20, b"password")
-        self.ectx.set_auth(ESYS_TR.PCR20, b"password")
+        self.ectx.tr_set_auth(ESYS_TR.PCR20, b"password")
         self.ectx.pcr_set_auth_value(ESYS_TR.PCR20, "password")
-        self.ectx.set_auth(ESYS_TR.PCR20, "password")
+        self.ectx.tr_set_auth(ESYS_TR.PCR20, "password")
         self.ectx.pcr_set_auth_value(ESYS_TR.PCR20, TPM2B_DIGEST("password"))
 
         with self.assertRaises(TypeError):
