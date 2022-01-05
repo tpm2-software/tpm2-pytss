@@ -60,7 +60,7 @@ def _check_handle_type(handle, varname, expected=None):
 
 
 class ESAPI:
-    """ Initialize an ESAPI object for further use.
+    """Initialize an ESAPI object for further use.
 
     Initialize an ESAPI object that holds all the state and metadata information
     during an interaction with the TPM.
@@ -225,8 +225,8 @@ class ESAPI:
         )
         return ESYS_TR(obj[0])
 
-    def tr_close(self, esys_handle: ESYS_TR):
-        """ Close an ESYS_TR without removing it from the TPM.
+    def tr_close(self, esys_handle: ESYS_TR) -> None:
+        """Close an ESYS_TR without removing it from the TPM.
 
         This function deletes an ESYS_TR object from an ESYS_CONTEXT without deleting
         it from the TPM. This is useful for NV-Indices or persistent keys, after
@@ -234,10 +234,12 @@ class ESAPI:
         ESAPI.flush_context.
 
         Args:
-            object(ESYS_TR): The ESYS_TR metadata object to be deleted from ESAPI.
+            esys_handle (ESYS_TR): The ESYS_TR metadata object to be deleted from ESAPI.
 
         Raises:
             TSS2_Exception: Any of the various TSS2_RC's the lower layers can return.
+
+        C Function: Esys_TR_Close
         """
 
         _check_handle_type(esys_handle, "esys_handle")
@@ -247,7 +249,7 @@ class ESAPI:
 
     def set_auth(
         self, esys_handle: ESYS_TR, auth_value: Union[TPM2B_AUTH, bytes, str, None]
-    ):
+    ) -> None:
         """Set the authorization value of an ESYS_TR.
 
         Authorization values are associated with ESYS_TR Tpm Resource object. They
@@ -258,8 +260,8 @@ class ESAPI:
         every tr_deserialize.
 
         Args:
-            esys_handle(ESYS_TR): The ESYS_TR for which to set the auth_value value.
-            auth_value(TPM2B_AUTH, bytes, str, None): The auth_value value to set for the ESYS_TR or None to zero.
+            esys_handle (ESYS_TR): The ESYS_TR for which to set the auth_value value.
+            auth_value (Union[TPM2B_AUTH, bytes, str, None]): The auth_value value to set for the ESYS_TR or None to zero.
                 Defaults to None.
 
         Raises:
@@ -285,7 +287,7 @@ class ESAPI:
         to be passed. Esys_TR_GetName provides this name to the caller.
 
         Args:
-            esys_handle(ESYS_TR): The ESYS_TR for which to get the name value.
+            handle (ESYS_TR): The ESYS_TR for which to get the name value.
 
         Returns:
             A TPM2B_NAME containing the name of the object referenced in the esys_handle.
@@ -310,10 +312,7 @@ class ESAPI:
         available.
 
         Args:
-            shutdown_type(TPM2_SU): TPM2_SU_CLEAR or TPM2_SU_STATE.
-            session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
-            session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
-            session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
+            startup_type (TPM2_SU): TPM2_SU_CLEAR or TPM2_SU_STATE.
 
         Raises:
             TypeError: If a parameter is not of an expected type.
@@ -342,7 +341,7 @@ class ESAPI:
         available.
 
         Args:
-            shutdown_type(TPM2_SU): TPM2_SU_CLEAR or TPM2_SU_STATE.
+            shutdown_type (TPM2_SU): TPM2_SU_CLEAR or TPM2_SU_STATE.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -378,10 +377,10 @@ class ESAPI:
 
         This function invokes the TPM2_SelfTest command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
-            full_test(bool): True to run a full test. False to run tests that have yet to be executed.
+            full_test (bool): True to run a full test. False to run tests that have yet to be executed.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -413,10 +412,10 @@ class ESAPI:
 
         This function invokes the TPM2_IncrementalSelfTest command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
-            to_test(TPML_ALG): List of algorithms that should be tested.
+            to_test (TPML_ALG): List of algorithms that should be tested.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -458,7 +457,7 @@ class ESAPI:
 
         This function invokes the TPM2_GetTestResult command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -508,7 +507,7 @@ class ESAPI:
 
         This function invokes the TPM2_StartAuthSession command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             tpm_key (ESYS_TR): Handle of a loaded decrypt key used to encrypt salt.
@@ -579,8 +578,8 @@ class ESAPI:
 
         Args:
             session (ESYS_TR): The session handle.
-            attributes(int): The attributes to be set or unset for the session.
-            mask(int): The mask for the flags to be set or unset. Defaults to 0xFF.
+            attributes (int): The attributes to be set or unset for the session.
+            mask (int): The mask for the flags to be set or unset. Defaults to 0xFF.
 
         Raises:
             TypeError: If a parameter is not of an expected type.
@@ -638,10 +637,10 @@ class ESAPI:
 
         This function invokes the TPM2_PolicyRestart command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
-            session_handle(ESYS_TR): The handle for the policy session.
+            session_handle (ESYS_TR): The handle for the policy session.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -683,7 +682,7 @@ class ESAPI:
 
         This function invokes the TPM2_Create command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             parent_handle (ESYS_TR): Handle of parent for new object.
@@ -771,7 +770,7 @@ class ESAPI:
 
         This function invokes the TPM2_Load command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             parent_handle (ESYS_TR): parentHandle TPM handle of parent key; shall not be a reserved
@@ -823,7 +822,7 @@ class ESAPI:
         self,
         in_public: TPM2B_PUBLIC,
         in_private: TPM2B_SENSITIVE = None,
-        hierarchy=ESYS_TR.NULL,
+        hierarchy: ESYS_TR = ESYS_TR.NULL,
         session1: ESYS_TR = ESYS_TR.NONE,
         session2: ESYS_TR = ESYS_TR.NONE,
         session3: ESYS_TR = ESYS_TR.NONE,
@@ -832,7 +831,7 @@ class ESAPI:
 
         This function invokes the TPM2_LoadExternal command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             in_public (TPM2B_PUBLIC): The public portion of the object.
@@ -896,12 +895,10 @@ class ESAPI:
 
         This function invokes the TPM2_ReadPublic command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
-            in_private (TPM2B_PRIVATE): The private portion of the object.
-            in_public (TPM2B_PUBLIC): The public portion of the object.
-            hierarchy (ESYS_TR): Hierarchy with which the object area is associated.
+            object_handle (ESYS_TR): Handle of the object.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -960,16 +957,16 @@ class ESAPI:
 
         This function invokes the TPM2_ActivateCredential command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
-            activate_handle(ESYS_TR): Handle of the object associated with certificate
+            activate_handle (ESYS_TR): Handle of the object associated with certificate
                 in credentialBlob.
-            key_handle(ESYS_TR): Loaded key used to decrypt the TPMS_SENSITIVE in
-               credentialBlob.
-            credential_blob(TPM2_ID_OBJECT): The credential.
-            secret(TPM2B_ENCRYPTED_SECRET): KeyHandle algorithm-dependent encrypted seed that
-               protects credentialBlob.
+            key_handle (ESYS_TR): Loaded key used to decrypt the TPMS_SENSITIVE in
+                credentialBlob.
+            credential_blob (TPM2B_ID_OBJECT): The credential.
+            secret (TPM2B_ENCRYPTED_SECRET): KeyHandle algorithm-dependent encrypted seed that
+                protects credentialBlob.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.PASSWORD.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.PASSWORD.
             session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -1027,13 +1024,13 @@ class ESAPI:
 
         This function invokes the TPM2_MakeCredential command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
-            handle(ESYS_TR): Loaded public area, used to encrypt the sensitive area
+            handle (ESYS_TR): Loaded public area, used to encrypt the sensitive area
                 containing the credential key.
-            credential(TPM2B_DIGEST): The credential information.
-            object_name(TPM2B_NAME): Name of the object to which the credential applies.
+            credential (TPM2B_DIGEST): The credential information.
+            object_name (TPM2B_NAME): Name of the object to which the credential applies.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -1093,10 +1090,10 @@ class ESAPI:
 
         This function invokes the TPM2_Unseal command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
-            item_handle(ESYS_TR): The handle of a loaded data object.
+            item_handle (ESYS_TR): The handle of a loaded data object.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.PASSWORD.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -1140,12 +1137,12 @@ class ESAPI:
 
         This function invokes the TPM2_ObjectChangeAuth command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
-            object_handle(ESYS_TR): Handle of the object.
-            parent_handle(ESYS_TR): Handle of the parent.
-            new_auth(Union[TPM2B_AUTH, str, bytes]): New authorization value.
+            object_handle (ESYS_TR): Handle of the object.
+            parent_handle (ESYS_TR): Handle of the parent.
+            new_auth (Union[TPM2B_AUTH, str, bytes]): New authorization value.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.PASSWORD.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -1199,15 +1196,15 @@ class ESAPI:
 
         This function invokes the TPM2_CreateLoaded command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
-            parent_handle(ESYS_TR): TPM2_Handle of a transient storage key, a persistent
-              storage key, ESYS_TR.ENDORSEMENT, ESYS_TR.OWNER, ESYS_TR.PLATFORM+{PP},
-              or ESYS_TR.NULL.
-            in_sensitive(TPM2B_SENSITIVE_CREATE): The sensitive data, see TPM 2.0 Part 1 Sensitive
+            parent_handle (ESYS_TR): TPM2_Handle of a transient storage key, a persistent
+                storage key, ESYS_TR.ENDORSEMENT, ESYS_TR.OWNER, ESYS_TR.PLATFORM+{PP},
+                or ESYS_TR.NULL.
+            in_sensitive (TPM2B_SENSITIVE_CREATE): The sensitive data, see TPM 2.0 Part 1 Sensitive
                 Values. Accepts None for an empty TPM2B_SENSITIVE_CREATE.
-            in_public(Union[TPM2B_TEMPLATE, str]): The public template (optional). Defaults to an rsa2048 key.
+            in_public (Union[TPM2B_TEMPLATE, str]): The public template (optional). Defaults to an rsa2048 key.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.PASSWORD.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -1279,7 +1276,7 @@ class ESAPI:
 
         This function invokes the TPM2_Duplicate command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             object_handle (ESYS_TR): Loaded object to duplicate.
@@ -1363,7 +1360,7 @@ class ESAPI:
 
         This function invokes the TPM2_Rewrap command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             old_parent (ESYS_TR): Parent of object.
@@ -1442,7 +1439,7 @@ class ESAPI:
 
         This function invokes the TPM2_Import command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             parent_handle (ESYS_TR): The handle of the new parent for the object.
@@ -1522,7 +1519,7 @@ class ESAPI:
 
         This function invokes the TPM2_RSA_Encrypt command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             key_handle (ESYS_TR): Reference to public portion of RSA key to use for
@@ -1588,7 +1585,7 @@ class ESAPI:
 
         This function invokes the TPM2_RSA_Decrypt command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             key_handle (ESYS_TR): RSA key to use for decryption.
@@ -1649,7 +1646,7 @@ class ESAPI:
 
         This function invokes the TPM2_ECDH_KeyGen command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             key_handle (ESYS_TR): Handle of a loaded ECC key public area.
@@ -1690,7 +1687,7 @@ class ESAPI:
     def ecdh_zgen(
         self,
         key_handle: ESYS_TR,
-        in_point=TPM2B_ECC_POINT,
+        in_point: TPM2B_ECC_POINT,
         session1: ESYS_TR = ESYS_TR.PASSWORD,
         session2: ESYS_TR = ESYS_TR.NONE,
         session3: ESYS_TR = ESYS_TR.NONE,
@@ -1699,7 +1696,7 @@ class ESAPI:
 
         This function invokes the TPM2_ECDH_ZGen command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             key_handle (ESYS_TR): Handle of a loaded ECC key.
@@ -1754,7 +1751,7 @@ class ESAPI:
 
         This function invokes the TPM2_ECC_Parameters command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             curve_id (TPM2_ECC_CURVE): Parameter set selector.
@@ -1803,7 +1800,7 @@ class ESAPI:
 
         This function invokes the TPM2_ZGen_2Phase command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             key_a (ESYS_TR): Handle of an unrestricted decryption key ECC.
@@ -1886,7 +1883,7 @@ class ESAPI:
 
         This function invokes the TPM2_EncryptDecrypt command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             key_handle (ESYS_TR): The symmetric key used for the operation.
@@ -1964,15 +1961,15 @@ class ESAPI:
 
         This function invokes the TPM2_EncryptDecrypt2 command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             key_handle (ESYS_TR): The symmetric key used for the operation.
-            in_data (Union[TPM2B_MAX_BUFFER, bytes, str]): The data to be encrypted/decrypted.
             decrypt (bool): If True, then the operation is decryption; if False, the
                 operation is encryption.
             mode (TPM2_ALG): Symmetric mode.
             iv_in (Union[TPM2B_IV, bytes, str]): An initial value as required by the algorithm.
+            in_data (Union[TPM2B_MAX_BUFFER, bytes, str]): The data to be encrypted/decrypted.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.PASSWORD.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -2040,12 +2037,12 @@ class ESAPI:
 
         This function invokes the TPM2_Hash command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             data (Union[TPM2B_MAX_BUFFER, bytes, str]): Data to be hashed.
             hash_alg (TPM2_ALG): TPM2_Algorithm for the hash being computed - shall not be TPM2_ALG_NULL.
-            hierarchy (EYS_TR): TPM2_Hierarchy to use for the ticket (TPM2_RH_NULL allowed). Defaults to ESYS_TR.OWNER.
+            hierarchy (ESYS_TR): TPM2_Hierarchy to use for the ticket (TPM2_RH_NULL allowed). Defaults to ESYS_TR.OWNER.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -2108,7 +2105,7 @@ class ESAPI:
 
         This function invokes the TPM2_HMAC command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             handle (ESYS_TR): Handle for the symmetric signing key providing the HMAC key.
@@ -2165,7 +2162,7 @@ class ESAPI:
 
         This function invokes the TPM2_GetRandom command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             bytes_requested (int): Number of octets to return.
@@ -2214,7 +2211,7 @@ class ESAPI:
 
         This function invokes the TPM2_StirRandom command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             in_data (Union[TPM2B_SENSITIVE_DATA, bytes, str]): Additional information.
@@ -2254,7 +2251,7 @@ class ESAPI:
 
         This function invokes the TPM2_HMAC_Start command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             handle (ESYS_TR): Handle of an HMAC key.
@@ -2318,10 +2315,9 @@ class ESAPI:
 
         This function invokes the TPM2_HashSequenceStart command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
-            handle (ESYS_TR): Handle of an HMAC key.
             auth (Union[TPM2B_AUTH, bytes, str]): Authorization value for subsequent use of the sequence.
             hash_alg (TPM2_ALG): The hash algorithm to use for the hash sequence.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.PASSWORD.
@@ -2379,10 +2375,10 @@ class ESAPI:
 
         This function invokes the TPM2_SequenceUpdate command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
-            sequence (ESYS_TR): Handle for the sequence object.
+            sequence_handle (ESYS_TR): Handle for the sequence object.
             buffer (Union[TPM2B_MAX_BUFFER, bytes, str]): Data to be added to hash.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.PASSWORD.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -2424,10 +2420,10 @@ class ESAPI:
 
         This function invokes the TPM2_SequenceComplete command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
-            sequence (ESYS_TR): Authorization for the sequence.
+            sequence_handle (ESYS_TR): Authorization for the sequence.
             buffer (Union[TPM2B_MAX_BUFFER, bytes, str]): Data to be added to the hash/HMAC.
             hierarchy (ESYS_TR): Hierarchy of the ticket for a hash.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.PASSWORD.
@@ -2493,7 +2489,7 @@ class ESAPI:
 
         This function invokes the TPM2_EventSequenceComplete command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             pcr_handle (ESYS_TR): PCR to be extended with the Event data.
@@ -2554,7 +2550,7 @@ class ESAPI:
 
         This function invokes the TPM2_Certify command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             object_handle (ESYS_TR): Handle of the object to be certified.
@@ -2572,7 +2568,7 @@ class ESAPI:
             TSS2_Exception: Any of the various TSS2_RC's the lower layers can return.
 
         Returns:
-            A Tuple[TPM2B_ATTEST, TPMT_SIGNATURE] which is the structure that was signed, known as certfiy_info and
+            A Tuple[TPM2B_ATTEST, TPMT_SIGNATURE] which is the structure that was signed, known as certify_info and
             the signature computed over certify_info.
 
         C Function: Esys_Certify
@@ -2628,7 +2624,7 @@ class ESAPI:
 
         This function invokes the TPM2_CertifyCreation command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             sign_handle (ESYS_TR): Handle of the key that will sign the attestation block.
@@ -2638,6 +2634,7 @@ class ESAPI:
                 or TPM2_CreatePrimary().
             in_scheme (TPMT_SIG_SCHEME): TPM2_Signing scheme to use if the scheme for signHandle is
                 TPM2_ALG_NULL.
+            creation_ticket (TPMT_TK_CREATION): Ticket produced by TPM2_Create() or TPM2_CreatePrimary().
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.PASSWORD.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -2648,7 +2645,7 @@ class ESAPI:
             TSS2_Exception: Any of the various TSS2_RC's the lower layers can return.
 
         Returns:
-            A Tuple[TPM2B_ATTEST, TPMT_SIGNATURE] which is the structure that was signed, known as certfiy_info and
+            A Tuple[TPM2B_ATTEST, TPMT_SIGNATURE] which is the structure that was signed, known as certify_info and
             the signature computed over certify_info.
 
         C Function: Esys_CertifyCreation
@@ -2708,7 +2705,7 @@ class ESAPI:
 
         This function invokes the TPM2_Quote command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             sign_handle (ESYS_TR): Handle of key that will perform signature.
@@ -2783,7 +2780,7 @@ class ESAPI:
 
         This function invokes the TPM2_GetSessionAuditDigest command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             sign_handle (ESYS_TR): Handle of the signing key.
@@ -2865,14 +2862,14 @@ class ESAPI:
 
         This function invokes the TPM2_GetCommandAuditDigest command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             sign_handle (ESYS_TR): Handle of the signing key.
             qualifying_data (Union[TPM2B_DATA, bytes, str]): Other data to associate with this audit digest.
             in_scheme (TPMT_SIG_SCHEME): TPM2_Signing scheme to use if the scheme for signHandle is
                 TPM2_ALG_NULL (optional). Defaults to TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL).
-            privacy_admin_handle (ESYS_TR): TPM2_Handle of the privacy administrator must be ESYS_TR.ENDORSEMENT.
+            privacy_handle (ESYS_TR): TPM2_Handle of the privacy administrator must be ESYS_TR.ENDORSEMENT.
                 Defaults to ESYS_TR.ENDORSEMENT (optional).
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.PASSWORD.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.PASSWORD.
@@ -2941,7 +2938,7 @@ class ESAPI:
 
         This function invokes the TPM2_GetTime command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             sign_handle (ESYS_TR): Handle of the signing key.
@@ -3017,7 +3014,7 @@ class ESAPI:
 
         This function invokes the TPM2_Commit command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             sign_handle (ESYS_TR): Handle of the key that will be used in the signing
@@ -3090,7 +3087,7 @@ class ESAPI:
 
         This function invokes the TPM2_EC_Ephemeral command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             curve_id (TPM2_ECC_CURVE): The curve for the computed ephemeral point .
@@ -3139,7 +3136,7 @@ class ESAPI:
 
         This function invokes the TPM2_VerifySignature command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             key_handle (ESYS_TR): Handle of public key that will be used in the validation.
@@ -3198,7 +3195,7 @@ class ESAPI:
 
         This function invokes the TPM2_Sign command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             key_handle (ESYS_TR):
@@ -3261,7 +3258,7 @@ class ESAPI:
 
         This function invokes the TPM2_SetCommandCodeAuditStatus command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             audit_alg (TPM2_ALG): TPM2_Hash algorithm for the audit digest; if TPM2_ALG_NULL,
@@ -3318,7 +3315,7 @@ class ESAPI:
 
         This function invokes the TPM2_PCR_Extend command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             pcr_handle (ESYS_TR): Handle of the PCR.
@@ -3363,13 +3360,11 @@ class ESAPI:
 
         This function invokes the TPM2_PCR_Event command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             pcr_handle (ESYS_TR): Handle of the PCR.
             event_data (Union[TPM2B_EVENT, bytes, str]): The event data.
-            in_scheme (TPMT_SIG_SCHEME): TPM2_Signing scheme to use if the scheme for keyHandle is TPM2_ALG_NULL.
-            validation (TPMT_TK_HASHCHECK): Proof that digest was created by the TPM.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.PASSWORD.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -3420,7 +3415,7 @@ class ESAPI:
 
         This function invokes the TPM2_PCR_Read command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             pcr_selection_in (Union[TPML_PCR_SELECTION, str]): The selection of PCR to read.
@@ -3483,7 +3478,7 @@ class ESAPI:
 
         This function invokes the TPM2_PCR_Allocate command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             pcr_allocation (Union[TPML_PCR_SELECTION, str]): The requested allocation.
@@ -3554,7 +3549,7 @@ class ESAPI:
 
         This function invokes the TPM2_PCR_SetAuthPolicy command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             auth_policy (Union[TPM2B_DIGEST, bytes, str]): The desired authPolicy.
@@ -3611,7 +3606,7 @@ class ESAPI:
 
         This function invokes the TPM2_PCR_SetAuthValue command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             pcr_handle (ESYS_TR): Handle for a PCR that may have an authorization value set.
@@ -3655,7 +3650,7 @@ class ESAPI:
 
         This function invokes the TPM2_PCR_Reset command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             pcr_handle (ESYS_TR): The PCR to reset.
@@ -3698,13 +3693,13 @@ class ESAPI:
 
         This function invokes the TPM2_PolicySigned command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             auth_object (ESYS_TR): Handle for a key that will validate the signature.
             policy_session (ESYS_TR): Handle for the policy session being extended.
             nonce_tpm (Union[TPM2B_NONCE, bytes, str]): The policy nonce for the session.
-            cp_hash_a (Union[TPM2B_NONCE, bytes, str]): Digest of the command parameters to which this
+            cp_hash_a (Union[TPM2B_DIGEST, bytes, str]): Digest of the command parameters to which this
                 authorization is limited.
             policy_ref (Union[TPM2B_NONCE, bytes, str]): policyRef A reference to a policy relating to the authorization
                 - may be the Empty Buffer.
@@ -3789,13 +3784,13 @@ class ESAPI:
 
         This function invokes the TPM2_PolicySecret command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             auth_handle (ESYS_TR): Handle for an entity providing the authorization.
             policy_session (ESYS_TR): Handle for the policy session being extended.
             nonce_tpm (Union[TPM2B_NONCE, bytes, str]): The policy nonce for the session.
-            cp_hash_a (Union[TPM2B_NONCE, bytes, str]): Digest of the command parameters to which this
+            cp_hash_a (Union[TPM2B_DIGEST, bytes, str]): Digest of the command parameters to which this
                 authorization is limited.
             policy_ref (Union[TPM2B_NONCE, bytes, str]): policyRef A reference to a policy relating to the authorization
                 - may be the Empty Buffer.
@@ -3877,13 +3872,12 @@ class ESAPI:
 
         This function invokes the TPM2_PolicyTicket command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             policy_session (ESYS_TR): Handle for the policy session being extended.
             timeout (TPM2B_TIMEOUT): Time when authorization will expire.
-            nonce_tpm (Union[TPM2B_NONCE, bytes, str]): The policy nonce for the session.
-            cp_hash_a (Union[TPM2B_NONCE, bytes, str]): Digest of the command parameters to which this
+            cp_hash_a (Union[TPM2B_DIGEST, bytes, str]): Digest of the command parameters to which this
                 authorization is limited.
             policy_ref (Union[TPM2B_NONCE, bytes, str]): policyRef A reference to a policy relating to the authorization
                 - may be the Empty Buffer.
@@ -3942,7 +3936,7 @@ class ESAPI:
 
         This function invokes the TPM2_PolicyOr command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             policy_session (ESYS_TR): Handle for the policy session being extended.
@@ -3989,11 +3983,11 @@ class ESAPI:
         session2: ESYS_TR = ESYS_TR.NONE,
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
-        """Invoke the TPM2_PolicyOR command.
+        """Invoke the TPM2_PolicyPCR command.
 
-        This function invokes the TPM2_PolicyOR command in a one-call
+        This function invokes the TPM2_PolicyPCR command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             policy_session (ESYS_TR): Handle for the policy session being extended.
@@ -4009,9 +4003,9 @@ class ESAPI:
             ValueError: If a parameter is not of an expected value.
             TSS2_Exception: Any of the various TSS2_RC's the lower layers can return.
 
-        C Function: Esys_PolicyOR
+        C Function: Esys_PolicyPCR
 
-        TPM Command: TPM2_PolicyOR
+        TPM Command: TPM2_PolicyPCR
         """
 
         _check_handle_type(policy_session, "policy_session")
@@ -4047,7 +4041,7 @@ class ESAPI:
 
         This function invokes the TPM2_PolicyLocality command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             policy_session (ESYS_TR): Handle for the policy session being extended.
@@ -4107,7 +4101,7 @@ class ESAPI:
 
         This function invokes the TPM2_PolicyNV command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             auth_handle (ESYS_TR): Handle indicating the source of the authorization value.
@@ -4174,7 +4168,7 @@ class ESAPI:
 
         This function invokes the TPM2_PolicyCounterTimer command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             policy_session (ESYS_TR): Handle for the policy session being extended.
@@ -4234,11 +4228,11 @@ class ESAPI:
 
         This function invokes the TPM2_PolicyCommandCode command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             policy_session (ESYS_TR): Handle for the policy session being extended.
-            code (TPM2B_CC): The allowed commandCode.
+            code (TPM2_CC): The allowed commandCode.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -4276,7 +4270,7 @@ class ESAPI:
 
         This function invokes the TPM2_PolicyPhysicalPresence command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             policy_session (ESYS_TR): Handle for the policy session being extended.
@@ -4317,7 +4311,7 @@ class ESAPI:
 
         This function invokes the TPM2_PolicyCpHash command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             policy_session (ESYS_TR): Handle for the policy session being extended.
@@ -4362,7 +4356,7 @@ class ESAPI:
 
         This function invokes the TPM2_PolicyNameHash command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             policy_session (ESYS_TR): Handle for the policy session being extended.
@@ -4408,7 +4402,7 @@ class ESAPI:
 
         This function invokes the TPM2_PolicyDuplicationSelect command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             policy_session (ESYS_TR): Handle for the policy session being extended.
@@ -4474,7 +4468,7 @@ class ESAPI:
 
         This function invokes the TPM2_PolicyAuthorize command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             policy_session (ESYS_TR): Handle for the policy session being extended.
@@ -4535,7 +4529,7 @@ class ESAPI:
 
         This function invokes the TPM2_PolicyAuthValue command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             policy_session (ESYS_TR): Handle for the policy session being extended.
@@ -4575,7 +4569,7 @@ class ESAPI:
 
         This function invokes the TPM2_PolicyPassword command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             policy_session (ESYS_TR): Handle for the policy session being extended.
@@ -4615,7 +4609,7 @@ class ESAPI:
 
         This function invokes the TPM2_PolicyGetDigest command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             policy_session (ESYS_TR): Handle for the policy session being extended.
@@ -4629,7 +4623,7 @@ class ESAPI:
             TSS2_Exception: Any of the various TSS2_RC's the lower layers can return.
 
         Returns:
-            The current The current value of the policySession->policyDigest as a TPM2B_DIGEST.
+            The current value of the policySession->policyDigest as a TPM2B_DIGEST.
 
         C Function: Esys_PolicyGetDigest
 
@@ -4660,7 +4654,7 @@ class ESAPI:
 
         This function invokes the TPM2_PolicyNvWritten command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             policy_session (ESYS_TR): Handle for the policy session being extended.
@@ -4708,7 +4702,7 @@ class ESAPI:
 
         This function invokes the TPM2_PolicyTemplate command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             policy_session (ESYS_TR): Handle for the policy session being extended.
@@ -4759,7 +4753,7 @@ class ESAPI:
 
         This function invokes the TPM2_PolicyAuthorizeNV command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             nv_index (ESYS_TR): The NV Index of the area to read.
@@ -4819,11 +4813,11 @@ class ESAPI:
 
         This function invokes the TPM2_CreatePrimary command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             in_sensitive (TPM2B_SENSITIVE_CREATE): The sensitive data, see TPM 2.0 Part 1 Sensitive Values. Accepts
-            None for an empty TPM2B_SENSITIVE_CREATE.
+                None for an empty TPM2B_SENSITIVE_CREATE.
             in_public (Union[TPM2B_PUBLIC, str]): The public template. Defaults to "rsa2048".
             primary_handle (ESYS_TR): ESYS_TR.ENDORSEMENT, ESYS_TR.OWNER, ESYS_TR.PLATFORM or ESYS_TR.NULL.
                 Defaults to ESYS_TR.OWNER.
@@ -4831,7 +4825,7 @@ class ESAPI:
                 this object to provide permanent, verifiable linkage between this object and some object owner data.
                 Defaults to an empty TPM2B_DATA.
             creation_pcr (Union[TPML_PCR_SELECTION, str]): PCR that will be used in creation data. Defaults to an empty
-            TPML_PCR_SELCTION().
+                TPML_PCR_SELECTION().
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.PASSWORD.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -4917,7 +4911,7 @@ class ESAPI:
 
         This function invokes the TPM2_HierarchyControl command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             auth_handle (ESYS_TR): ESYS_TR.ENDORSEMENT, ESYS_TR.OWNER or ESYS_TR.PLATFORM.
@@ -4972,16 +4966,11 @@ class ESAPI:
         session2: ESYS_TR = ESYS_TR.NONE,
         session3: ESYS_TR = ESYS_TR.NONE,
     ) -> None:
-        _check_handle_type(
-            auth_handle,
-            "auth_handle",
-            expected=(ESYS_TR.ENDORSEMENT, ESYS_TR.OWNER, ESYS_TR.PLATFORM),
-        )
         """Invoke the TPM2_SetPrimaryPolicy command.
 
         This function invokes the TPM2_SetPrimaryPolicy command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             auth_handle (ESYS_TR): ESYS_TR.ENDORSEMENT, ESYS_TR.OWNER or ESYS_TR.PLATFORM.
@@ -5002,6 +4991,11 @@ class ESAPI:
         TPM Command: TPM2_SetPrimaryPolicy
         """
 
+        _check_handle_type(
+            auth_handle,
+            "auth_handle",
+            expected=(ESYS_TR.ENDORSEMENT, ESYS_TR.OWNER, ESYS_TR.PLATFORM),
+        )
         _check_handle_type(session1, "session1")
         _check_handle_type(session2, "session2")
         _check_handle_type(session3, "session3")
@@ -5032,7 +5026,7 @@ class ESAPI:
 
         This function invokes the TPM2_ChangePPS command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             auth_handle (ESYS_TR): ESYS_TR.PLATFORM+{PP}. Defaults to ESYS_TR.PLATFORM.
@@ -5069,7 +5063,7 @@ class ESAPI:
 
         This function invokes the TPM2_ChangeEPS command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             auth_handle (ESYS_TR): ESYS_TR.PLATFORM+{PP}. Defaults to ESYS_TR.PLATFORM.
@@ -5106,7 +5100,7 @@ class ESAPI:
 
         This function invokes the TPM2_Clear command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             auth_handle (ESYS_TR): ESYS_TR.LOCKOUT or ESYS_TR.PLATFORM+{PP}.
@@ -5145,7 +5139,7 @@ class ESAPI:
 
         This function invokes the TPM2_ClearControl command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             auth (ESYS_TR): ESYS_TR.LOCKOUT or ESYS_TR.PLATFORM+{PP}.
@@ -5191,7 +5185,7 @@ class ESAPI:
 
         This function invokes the TPM2_HierarchyChangeAuth command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             auth_handle (ESYS_TR): ESYS_TR.LOCKOUT, ESYS_TR.ENDORSEMENT, ESYS_TR.OWNER or ESYS_TR.PLATFORM+{PP}.
@@ -5244,7 +5238,7 @@ class ESAPI:
 
         This function invokes the TPM2_DictionaryAttackLockReset command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             lock_handle (ESYS_TR): ESYS_TR.LOCKOUT. Defaults to ESYS_TR.LOCKOUT.
@@ -5277,7 +5271,7 @@ class ESAPI:
         new_max_tries: int,
         new_recovery_time: int,
         lockout_recovery: int,
-        lock_handle=ESYS_TR.LOCKOUT,
+        lock_handle: ESYS_TR = ESYS_TR.LOCKOUT,
         session1: ESYS_TR = ESYS_TR.PASSWORD,
         session2: ESYS_TR = ESYS_TR.NONE,
         session3: ESYS_TR = ESYS_TR.NONE,
@@ -5286,7 +5280,7 @@ class ESAPI:
 
         This function invokes the TPM2_DictionaryAttackParameters command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             new_max_tries (int): Count of authorization failures before the lockout is imposed.
@@ -5353,7 +5347,7 @@ class ESAPI:
 
         This function invokes the TPM2_PP_Commands command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             set_list (TPML_CC): List of commands to be added to those that will require
@@ -5405,7 +5399,7 @@ class ESAPI:
 
         This function invokes the TPM2_SetAlgorithmSet command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             algorithm_set (Union[List[int], int]): A TPM vendor-dependent value indicating the
@@ -5449,15 +5443,15 @@ class ESAPI:
 
         This function invokes the TPM2_FieldUpgradeStart command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
-            authorization (ESYS_TR): ESYS_TR.PLATFORM+{PP}. Defaults to ESYS_TR.PLATFORM.
             key_handle (ESYS_TR): Handle of a public area that contains the TPM Vendor
                 Authorization Key that will be used to validate manifestSignature.
             fu_digest (Union[TPM2B_DIGEST, bytes, str]): Digest of the first block in the field upgrade sequence.
-            manifest_siganture (TPMT_SIGNATURE): Signature over fuDigest using the key
+            manifest_signature (TPMT_SIGNATURE): Signature over fuDigest using the key
                 associated with keyHandle (not optional).
+            authorization (ESYS_TR): ESYS_TR.PLATFORM+{PP}. Defaults to ESYS_TR.PLATFORM.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.PASSWORD.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -5507,7 +5501,7 @@ class ESAPI:
 
         This function invokes the TPM2_FieldUpgradeData command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             fu_data (Union[TPM2B_MAX_BUFFER, bytes, str]): Field upgrade image data.
@@ -5564,7 +5558,7 @@ class ESAPI:
 
         This function invokes the TPM2_FirmwareRead command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             sequence_number (int):  sequenceNumber The number of previous calls to this command in this sequence.
@@ -5607,7 +5601,7 @@ class ESAPI:
 
         This function invokes the TPM2_ContextSave command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             save_handle (ESYS_TR): Handle of the resource to save.
@@ -5635,7 +5629,7 @@ class ESAPI:
 
         This function invokes the TPM2_ContextLoad command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             context (TPMS_CONTEXT): The context blob.
@@ -5664,7 +5658,7 @@ class ESAPI:
 
         This function invokes the TPM2_FlushContext command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             flush_handle (ESYS_TR): The handle of the item to flush.
@@ -5694,7 +5688,7 @@ class ESAPI:
 
         This function invokes the TPM2_EvictControl command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             auth (ESYS_TR): ESYS_TR.OWNER or ESYS_TR.PLATFORM+{PP}.
@@ -5751,7 +5745,7 @@ class ESAPI:
 
         This function invokes the TPM2_ReadClock command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -5791,7 +5785,7 @@ class ESAPI:
 
         This function invokes the TPM2_ClockSet command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             new_time (int): New Clock setting in milliseconds.
@@ -5834,7 +5828,7 @@ class ESAPI:
 
         This function invokes the TPM2_ClockRateAdjust command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             rate_adjust (TPM2_CLOCK): Adjustment to current Clock update rate.
@@ -5880,12 +5874,12 @@ class ESAPI:
 
         This function invokes the TPM2_GetCapability command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             capability (TPM2_CAP): Group selection; determines the format of the response.
             prop (int): Further definition of information.
-            property_count (int). Number of properties of the indicated type to return. Defaults to 1.
+            property_count (int): Number of properties of the indicated type to return. Defaults to 1.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -5949,7 +5943,7 @@ class ESAPI:
 
         This function invokes the TPM2_TestParms command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             parameters (TPMT_PUBLIC_PARMS): Algorithm parameters to be validated.
@@ -5987,7 +5981,7 @@ class ESAPI:
 
         This function invokes the TPM2_NV_DefineSpace command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             auth (Union[TPM2B_AUTH, bytes, str, None]): The authorization value.
@@ -6046,7 +6040,7 @@ class ESAPI:
 
         This function invokes the TPM2_NV_UndefineSpace command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             nv_index (ESYS_TR): he NV Index to remove from NV space.
@@ -6088,7 +6082,7 @@ class ESAPI:
 
         This function invokes the TPM2_NV_UndefineSpaceSpecial command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             nv_index (ESYS_TR): Index to be deleted.
@@ -6129,7 +6123,7 @@ class ESAPI:
 
         This function invokes the TPM2_NV_ReadPublic command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             nv_index (ESYS_TR): The NV Index.
@@ -6181,7 +6175,7 @@ class ESAPI:
 
         This function invokes the TPM2_NV_Write command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             nv_index (ESYS_TR): The NV Index of the area to write.
@@ -6235,7 +6229,7 @@ class ESAPI:
 
         This function invokes the TPM2_NV_Increment command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             nv_index (ESYS_TR): The NV Index to increment.
@@ -6280,7 +6274,7 @@ class ESAPI:
 
         This function invokes the TPM2_NV_Extend command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             nv_index (ESYS_TR): The NV Index to extend.
@@ -6333,7 +6327,7 @@ class ESAPI:
 
         This function invokes the TPM2_NV_SetBits command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             nv_index (ESYS_TR): The NV Index to extend.
@@ -6383,7 +6377,7 @@ class ESAPI:
 
         This function invokes the TPM2_NV_WriteLock command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             nv_index (ESYS_TR): The NV Index to extend.
@@ -6426,10 +6420,9 @@ class ESAPI:
 
         This function invokes the TPM2_NV_GlobalWriteLock command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
-            nv_index (ESYS_TR): The NV Index to extend.
             auth_handle (ESYS_TR): Handle indicating the source of the authorization. Defaults to the nv_index.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.PASSWORD.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -6469,7 +6462,7 @@ class ESAPI:
 
         This function invokes the TPM2_NV_Read command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             nv_index (ESYS_TR): The NV Index to be read.
@@ -6536,7 +6529,7 @@ class ESAPI:
 
         This function invokes the TPM2_NV_ReadLock command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             nv_index (ESYS_TR): The NV Index to be locked.
@@ -6580,7 +6573,7 @@ class ESAPI:
 
         This function invokes the TPM2_NV_ChangeAuth command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             nv_index (ESYS_TR): Handle of the entity.
@@ -6627,13 +6620,13 @@ class ESAPI:
 
         This function invokes the TPM2_NV_Certify command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             sign_handle (ESYS_TR): Handle of the key used to sign the attestation structure.
             nv_index (ESYS_TR): Index for the area to be certified.
             qualifying_data (Union[TPM2B_DATA, bytes, str]): User-provided qualifying data.
-            in_scheme (): TPM2_Signing scheme to use if the scheme for signHandle is
+            in_scheme (TPMT_SIG_SCHEME): TPM2_Signing scheme to use if the scheme for signHandle is
                 TPM2_ALG.NULL.
             size (int): Number of octets to certify.
             offset (int): Octet offset into the area (optional). Defaults to 0.
@@ -6710,7 +6703,7 @@ class ESAPI:
 
         This function invokes the TPM2_Vendor_TCG_Test command in a one-call
         variant. This means the function will block until the TPM response is
-        available
+        available.
 
         Args:
             input_data (Union[TPM2B_DATA, bytes, str]): Dummy data.
@@ -6752,8 +6745,8 @@ class ESAPI:
 
         Args:
             data (bytes): Binary blob of the ESAPI object to load.
-            type_ (int, optional): :const:`FAPI_ESYSBLOB.CONTEXTLOAD` or :const:`FAPI_ESYSBLOB.DESERIALIZE`. Defaults to :const:`FAPI_ESYSBLOB.CONTEXTLOAD`
-            if FAPI is installed else :const: `FAPI_ESYSBLOB.DESERIALIZE`.
+            type_ (int): :const:`FAPI_ESYSBLOB.CONTEXTLOAD` or :const:`FAPI_ESYSBLOB.DESERIALIZE`. Defaults to :const:`FAPI_ESYSBLOB.CONTEXTLOAD`
+                if FAPI is installed else :const: `FAPI_ESYSBLOB.DESERIALIZE`.
 
         Returns:
             ESYS_TR: The ESAPI handle to the loaded object.
@@ -6778,6 +6771,9 @@ class ESAPI:
 
         Args:
             esys_handle (ESYS_TR): The ESYS_TR object to serialize.
+
+        Returns:
+            The serialized object as bytes.
 
         C Function: Esys_TR_Serialize
 
@@ -6811,12 +6807,12 @@ class ESAPI:
         An object can be serialized using tr_serialize.
 
         Args:
-            esys_handle (ESYS_TR): The ESYS_TR object to serialize.
+            buffer (bytes): The ESYS_TR object to deserialize.
 
         Returns:
-          The buffer (bytes) containing the serialized metadata.
+            ESYS_TR: The ESAPI handle to the deserialized object.
 
-        C_Function: Esys_TR_Deserialize
+        C Function: Esys_TR_Deserialize
 
         Raises:
             TypeError: If a parameter is the incorrect type.
