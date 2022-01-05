@@ -111,15 +111,12 @@ class ESAPI:
                 f"Expected tcti to be type TCTI, str or None, got {type(tcti)}"
             )
 
-        self._passed_tcti = self._did_load_tcti = False
+        self._did_load_tcti = False
 
         # support tpm2-tools style tcti strings
         if isinstance(tcti, str):
             self._did_load_tcti = True
-            self._passed_tcti = True
             tcti = TCTILdr.parse(tcti)
-        elif isinstance(tcti, TCTI):
-            self._passed_tcti = True
 
         self._tcti: Optional[TCTI] = tcti
         tctx = ffi.NULL if tcti is None else tcti._tcti_context
@@ -148,10 +145,11 @@ class ESAPI:
 
         C Function: Esys_Finalize
         """
-
-        lib.Esys_Finalize(self._ctx_pp)
-        self._ctx = ffi.NULL
-        if self._did_load_tcti:
+        if self._ctx_pp:
+            lib.Esys_Finalize(self._ctx_pp)
+            self._ctx = ffi.NULL
+            self._ctx_pp = ffi.NULL
+        if self._did_load_tcti and self._tcti is not None:
             self._tcti.close()
         self._tcti = None
 
@@ -165,10 +163,8 @@ class ESAPI:
 
         Returns:
             A TCTI or None if None was passed to the ESAPI constructor.
-
-        C Function: Esys_GetTcti
         """
-        return self._tcti if self._passed_tcti else None
+        return self._tcti
 
     @property
     def tcti(self) -> Optional[TCTI]:
