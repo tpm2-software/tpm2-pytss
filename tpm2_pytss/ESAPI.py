@@ -2042,7 +2042,7 @@ class ESAPI:
         Args:
             data (Union[TPM2B_MAX_BUFFER, bytes, str]): Data to be hashed.
             hash_alg (TPM2_ALG): TPM2_Algorithm for the hash being computed - shall not be TPM2_ALG_NULL.
-            hierarchy (ESYS_TR): TPM2_Hierarchy to use for the ticket (TPM2_RH_NULL allowed). Defaults to ESYS_TR.OWNER.
+            hierarchy (ESYS_TR): Hierarchy to use for the ticket (ESYS_TR.NULL allowed). Defaults to ESYS_TR.OWNER.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
