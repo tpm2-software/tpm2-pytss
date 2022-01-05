@@ -3126,7 +3126,7 @@ class ESAPI:
     def verify_signature(
         self,
         key_handle: ESYS_TR,
-        digest: Union[TPM2B_DIGEST, bytes, int],
+        digest: Union[TPM2B_DIGEST, bytes, str],
         signature: TPMT_SIGNATURE,
         session1: ESYS_TR = ESYS_TR.NONE,
         session2: ESYS_TR = ESYS_TR.NONE,
@@ -3140,7 +3140,7 @@ class ESAPI:
 
         Args:
             key_handle (ESYS_TR): Handle of public key that will be used in the validation.
-            digest (Union[TPM2B_DIGEST, bytes, int]): Digest of the signed message.
+            digest (Union[TPM2B_DIGEST, bytes, str]): Digest of the signed message.
             signature (TPMT_SIGNATURE): Signature to be tested.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
