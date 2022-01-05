@@ -265,6 +265,14 @@ class Common:
         esys.read_public(esys_handle)
         esys.flush_context(esys_handle)
 
+    def test_get_esys_blob_bad(self, esys):
+        with pytest.raises(ValueError) as e:
+            esys.load_blob(None, 1234)
+        assert (
+            str(e.value)
+            == "Expected type_ to be FAPI_ESYSBLOB.CONTEXTLOAD or FAPI_ESYSBLOB.DESERIALIZE, got 1234"
+        )
+
     def test_get_esys_blob_deserialize(self, esys, nv_ordinary):
         blob_data, blob_type = self.fapi.get_esys_blob(path=nv_ordinary)
         assert blob_type == FAPI_ESYSBLOB.DESERIALIZE

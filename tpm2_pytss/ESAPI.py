@@ -6755,6 +6755,9 @@ class ESAPI:
             type_ (int, optional): :const:`FAPI_ESYSBLOB.CONTEXTLOAD` or :const:`FAPI_ESYSBLOB.DESERIALIZE`. Defaults to :const:`FAPI_ESYSBLOB.CONTEXTLOAD`
             if FAPI is installed else :const: `FAPI_ESYSBLOB.DESERIALIZE`.
 
+        Raises:
+            ValueError: If type_ is not of an expected value.
+
         Returns:
             ESYS_TR: The ESAPI handle to the loaded object.
         """
@@ -6766,6 +6769,10 @@ class ESAPI:
             _chkrc(lib.Esys_ContextLoad(self._ctx, key_ctx, esys_handle))
         elif type_ == FAPI_ESYSBLOB.DESERIALIZE:
             _chkrc(lib.Esys_TR_Deserialize(self._ctx, data, len(data), esys_handle))
+        else:
+            raise ValueError(
+                f"Expected type_ to be FAPI_ESYSBLOB.CONTEXTLOAD or FAPI_ESYSBLOB.DESERIALIZE, got {type_}"
+            )
 
         return ESYS_TR(esys_handle[0])
 
