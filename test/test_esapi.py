@@ -4716,6 +4716,21 @@ class TestEsys(TSS2_EsapiTest):
         gc.collect()
         self.assertEqual(bytes(algb), TPM2_ALG.SHA256.to_bytes(2, "big"))
 
+    def test_double_close(self):
+        ectx = ESAPI(self.tpm.tcti_name_conf)
+        self.assertTrue(ectx._did_load_tcti)
+        self.assertTrue(ectx._ctx)
+        self.assertTrue(ectx._ctx_pp)
+        self.assertEqual(ectx.tcti.name_conf, self.tpm.tcti_name_conf)
+        ectx.close()
+        self.assertFalse(ectx._ctx)
+        self.assertFalse(ectx._ctx_pp)
+        self.assertEqual(ectx.tcti, None)
+        ectx.close()
+        self.assertFalse(ectx._ctx)
+        self.assertFalse(ectx._ctx_pp)
+        self.assertEqual(ectx.tcti, None)
+
 
 if __name__ == "__main__":
     unittest.main()

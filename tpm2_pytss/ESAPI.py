@@ -148,10 +148,11 @@ class ESAPI:
 
         C Function: Esys_Finalize
         """
-
-        lib.Esys_Finalize(self._ctx_pp)
-        self._ctx = ffi.NULL
-        if self._did_load_tcti:
+        if self._ctx_pp:
+            lib.Esys_Finalize(self._ctx_pp)
+            self._ctx = ffi.NULL
+            self._ctx_pp = ffi.NULL
+        if self._did_load_tcti and self._tcti is not None:
             self._tcti.close()
         self._tcti = None
 
