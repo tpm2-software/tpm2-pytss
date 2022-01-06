@@ -182,6 +182,17 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(len(n), 68)
         self.assertTrue(isinstance(n, str))
 
+        # Read the NV index using tr_from_tpmpublic
+        nv_handle = self.ectx.tr_from_tpmpublic(TPM2_HC.NV_INDEX_FIRST)
+        public_2, name_2 = self.ectx.nv_read_public(nv_handle)
+        self.assertEqual(public_2.marshal(), public.marshal())
+        self.assertEqual(name_2, name)
+        value = self.ectx.nv_read(nv_handle, 11)
+        self.assertEqual(bytes(value), b"hello world")
+        self.ectx.tr_close(nv_handle)
+        with self.assertRaises(TSS2_Exception):
+            self.ectx.nv_read_public(nv_handle)
+
         self.ectx.nv_undefine_space(nv_index)
 
         with self.assertRaises(TSS2_Exception):
