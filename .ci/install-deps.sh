@@ -8,9 +8,8 @@ export TPM2_TSS_VERSION=${TPM2_TSS_VERSION:-"3.0.3"}
 #
 # Get dependencies for building and install tpm2-tss and abrmd projects
 #
-export DEBIAN_FRONTEND=noninteractive
-sudo apt-get update
-sudo apt-get install -y \
+sudo DEBIAN_FRONTEND=noninteractive apt-get update
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
     autoconf-archive \
     curl \
     libcmocka0 \
