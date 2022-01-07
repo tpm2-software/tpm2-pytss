@@ -1495,6 +1495,11 @@ class TypesTest(unittest.TestCase):
             str(badattrs)
         self.assertEqual(str(e.exception), "unnmatched values left: 0x80000")
 
+        aw = TPMA_NV.AUTHWRITE | TPMA_NV.AUTHREAD
+        self.assertEqual(str(aw), "authwrite|authread")
+
+        self.assertEqual(str(TPMA_CC()), "")
+
     def test_TPM_FRIENDLY_INTLIST_math(self):
         ab = abs(TPM2_ALG.RSA)
         self.assertIsInstance(ab, TPM2_ALG)

@@ -267,13 +267,15 @@ class TPMA_FRIENDLY_INTLIST(TPM_FRIENDLY_INT):
         cv = int(self)
         ints = list()
         for k, v in vars(self.__class__).items():
-            if k.startswith("_") or k.startswith("DEFAULT"):
+            if cv == 0:
+                break
+            if not isinstance(v, int) or k.startswith("_") or k.startswith("DEFAULT"):
                 continue
             for fk, fv in self._FIXUP_MAP.items():
                 if k == fv:
                     k = fk
                     break
-            if not v & self:
+            if v == 0 or v & cv != v:
                 continue
             ints.append(k.lower())
             cv = cv ^ v
@@ -1257,7 +1259,7 @@ class TPMA_NV(TPMA_FRIENDLY_INTLIST):
 
 
 @TPM_FRIENDLY_INT._fix_const_type
-class TPMA_CC(TPM_FRIENDLY_INT):
+class TPMA_CC(TPMA_FRIENDLY_INTLIST):
     COMMANDINDEX_MASK = lib.TPMA_CC_COMMANDINDEX_MASK
     COMMANDINDEX_SHIFT = lib.TPMA_CC_COMMANDINDEX_SHIFT
     NV = lib.TPMA_CC_NV
