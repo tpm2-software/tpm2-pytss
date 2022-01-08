@@ -1,0 +1,75 @@
+#!/usr/bin/python3
+
+import argparse
+import os
+from binascii import hexlify
+from tpm2_pytss.ESAPI import ESAPI
+from tpm2_pytss.TCTILdr import TCTILdr
+from tpm2_pytss.constants import TPMA_NV, TPM2_CAP, TPM2_HC
+
+
+output_template = """{pub.nvIndex:#x}:
+  name: {hexname}
+  hash algorithm:
+    friendly: {pub.nameAlg}
+    value: {pub.nameAlg:#x}
+  attributes:
+    friendly: {pub.attributes}
+    value: {pub.attributes:#x}
+  size: {pub.dataSize}
+"""
+
+
+def get_tcti(arg):
+    if arg:
+        return TCTILdr.parse(arg)
+    elif os.getenv("PYTSS_EXAMPLE_TCTI"):
+        return TCTILdr.parse(os.getenv("PYTSS_EXAMPLE_TCTI"))
+    return TCTILdr()
+
+
+def tpma_nv_arg(arg):
+    try:
+        return TPMA_NV(arg, base=0)
+    except ValueError:
+        pass
+    return TPMA_NV.parse(arg)
+
+
+def run(ectx, filter_attrs):
+    indices = list()
+    more = True
+    while more:
+        more, data = ectx.get_capability(TPM2_CAP.HANDLES, TPM2_HC.HR_NV_INDEX, 4096)
+        indices += list(data.data.handles)
+
+    for index in indices:
+        handle = ectx.tr_from_tpmpublic(index)
+        pub2b, name = ectx.nv_read_public(handle)
+        pub = pub2b.nvPublic
+        if pub.attributes & filter_attrs != filter_attrs:
+            continue
+        hexname = hexlify(name.name).decode("ascii")
+        output = output_template.format(pub=pub, hexname=hexname)
+        if len(pub.authPolicy) > 0:
+            hexpolicy = hexlify(pub.authPolicy.buffer).upper().decode("ascii")
+            output += f"  authorization policy: {hexpolicy}\n"
+        print(output)
+
+
+if __name__ == "__main__":
+    argp = argparse.ArgumentParser(
+        description="simple tool to list NV areas matching a set of NV attributes"
+    )
+    argp.add_argument("-T", "--tcti", help="TCTI configuration to use")
+    argp.add_argument(
+        "-F",
+        "--filter",
+        type=tpma_nv_arg,
+        default=TPMA_NV(),
+        help='NV attributes to filter by, for example "written|ownerread"',
+    )
+    args = argp.parse_args()
+
+    with get_tcti(args.tcti) as tctx, ESAPI(tctx) as ectx:
+        run(ectx, args.filter)

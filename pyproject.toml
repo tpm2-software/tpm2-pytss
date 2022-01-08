@@ -22,3 +22,9 @@ exclude = '''
   )
 )
 '''
+include = '''
+(
+  \.pyi?$
+  | examples/tpm2_filternv/tpm2_filternv
+)
+'''
