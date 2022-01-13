@@ -286,6 +286,12 @@ class TPMA_FRIENDLY_INTLIST(TPM_FRIENDLY_INT):
 
 @TPM_FRIENDLY_INT._fix_const_type
 class ESYS_TR(TPM_FRIENDLY_INT):
+    """ESYS_TR is an ESAPI identifier representing a TPM resource
+
+    To get the ESYS_TR identifier for a persistent handle, such as a NV area
+    or a persistent key use :func:`tpm2_pytss.ESAPI.tr_from_tpmpublic`
+    """
+
     NONE = lib.ESYS_TR_NONE
     PASSWORD = lib.ESYS_TR_PASSWORD
     PCR0 = lib.ESYS_TR_PCR0
