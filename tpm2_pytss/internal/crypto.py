@@ -240,11 +240,7 @@ class _MyRSAPrivateNumbers(rsa.RSAPrivateNumbers):
     @staticmethod
     def _modinv(a, m):
 
-        major = sys.version_info.major
-        minor = sys.version_info.minor
-        x = float(str(major) + "." + str(minor))
-
-        if x < 3.8:
+        if sys.version_info < (3, 8):
             g, x, y = _MyRSAPrivateNumbers._xgcd(a, m)
             if g != 1:
                 raise Exception("modular inverse does not exist")
