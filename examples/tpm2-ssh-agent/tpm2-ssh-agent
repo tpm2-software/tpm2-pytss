@@ -1,0 +1,236 @@
+#!/usr/bin/python3
+
+import os
+import sys
+import atexit
+import argparse
+import socketserver
+import hashlib
+from tpm2_pytss.ESAPI import ESAPI
+from tpm2_pytss.TCTILdr import TCTILdr
+from tpm2_pytss.tsskey import TSSPrivKey
+from tpm2_pytss.constants import TPM2_ALG, TPM2_ECC, TPM2_ST, TPM2_RH
+from tpm2_pytss.types import TPMT_SIG_SCHEME, TPMT_TK_HASHCHECK, TPMT_RSA_DECRYPT
+from paramiko import pkey, Message
+
+
+def get_tcti(arg):
+    if arg:
+        return TCTILdr.parse(arg)
+    elif os.getenv("PYTSS_EXAMPLE_TCTI"):
+        return TCTILdr.parse(os.getenv("PYTSS_EXAMPLE_TCTI"))
+    return TCTILdr()
+
+
+def unlink_socket(path):
+    os.unlink(path)
+
+
+class TPMKey(pkey.PKey):
+    def __init__(self, ectx, key):
+        self._ectx = ectx
+        self._key = key
+        self._handle = key.load(ectx)
+        self._public = key.public.publicArea
+        if (
+            self._public.type == TPM2_ALG.ECC
+            and self._public.parameters.eccDetail.curveID != TPM2_ECC.NIST_P256
+        ):
+            raise ValueError(
+                f"unsupported ECC curve {self._public.parameters.eccDetail.curveID}"
+            )
+
+    def _encode_rsa(self):
+        msg = Message()
+        msg.add_string("ssh-rsa")
+        e = self._public.parameters.rsaDetail.exponent
+        if e == 0:
+            e = 65537
+        msg.add_mpint(e)
+        n = int.from_bytes(self._public.unique.rsa, "big")
+        msg.add_mpint(n)
+        return msg.asbytes()
+
+    def _encode_ecc(self):
+        msg = Message()
+        msg.add_string("ecdsa-sha2-nistp256")
+        msg.add_string("nistp256")
+        pb = (
+            b"\x04"
+            + self._public.unique.ecc.x.buffer
+            + self._public.unique.ecc.y.buffer
+        )
+        msg.add_string(pb)
+        return msg.asbytes()
+
+    def asbytes(self):
+        if self._public.type == TPM2_ALG.RSA:
+            return self._encode_rsa()
+        elif self._public.type == TPM2_ALG.ECC:
+            return self._encode_ecc()
+        raise ValueError(f"unsupported key type {self._public.type}")
+
+    def _sign_rsa(self, data, algorithm="ssh-rsa"):
+        if algorithm in ("ssh-rsa", "ssh-rsa-cert-v01@openssh.com"):
+            h = hashlib.sha1()
+            oidb = b"0!0\t\x06\x05+\x0e\x03\x02\x1a\x05\x00\x04\x14"
+        elif algorithm in ("rsa-sha2-256", "rsa-sha2-256-cert-v01@openssh.com"):
+            h = hashlib.sha256()
+            oidb = b"010\r\x06\t`\x86H\x01e\x03\x04\x02\x01\x05\x00\x04 "
+        elif algorithm in ("rsa-sha2-512", "rsa-sha2-512-cert-v01@openssh.com"):
+            h = hashlib.sha512()
+            oidb = b"0Q0\r\x06\t`\x86H\x01e\x03\x04\x02\x03\x05\x00\x04@"
+        else:
+            raise ValueError(f"unsupported RSA digest algorithm {algorithm}")
+        h.update(data)
+        digest = h.digest()
+        digestinfo = oidb + digest
+        padding = b"\x00\x01"
+        klen = len(self._public.unique.rsa)
+        ps = klen - len(digestinfo) - len(padding) - 1
+        pdata = padding + (b"\xFF" * ps) + b"\x00" + digestinfo
+        scheme = TPMT_RSA_DECRYPT(scheme=TPM2_ALG.NULL)
+        sig = self._ectx.rsa_decrypt(self._handle, pdata, scheme, None)
+        msg = Message()
+        msg.add_string(algorithm)
+        msg.add_string(sig.buffer)
+        return msg
+
+    def _sign_ecc(self, data):
+        msg = Message()
+        h = hashlib.sha256()
+        h.update(data)
+        digest = h.digest()
+        scheme = TPMT_SIG_SCHEME(scheme=TPM2_ALG.ECDSA)
+        scheme.details.ecdsa.hashAlg = TPM2_ALG.SHA256
+        val = TPMT_TK_HASHCHECK(tag=TPM2_ST.HASHCHECK, hierarchy=TPM2_RH.NULL)
+        sig = self._ectx.sign(self._handle, digest, scheme, val)
+        msg.add_string("ecdsa-sha2-nistp256")
+        r = int.from_bytes(sig.signature.ecdsa.signatureR, byteorder="big")
+        s = int.from_bytes(sig.signature.ecdsa.signatureS, byteorder="big")
+        eccmsg = Message()
+        eccmsg.add_mpint(r)
+        eccmsg.add_mpint(s)
+        msg.add_string(eccmsg.asbytes())
+        return msg
+
+    def sign_ssh_data(self, data, algorithm="ssh-rsa"):
+        if self._public.type == TPM2_ALG.RSA:
+            return self._sign_rsa(data, algorithm)
+        elif self._public.type == TPM2_ALG.ECC:
+            return self._sign_ecc(data)
+        raise ValueError(f"unsupported key type {self._public.type}")
+
+
+class AgentHandler(socketserver.StreamRequestHandler):
+    AGENT_FAIL = b"\x05"
+    AGENT_LIST_REQUEST = b"\x0B"
+    AGENT_LIST_RESPONSE = b"\x0C"
+    AGENT_SIGN_REQUEST = b"\x0D"
+    AGENT_SIGN_RESPONSE = b"\x0E"
+    RSA_SHA1 = 0x0
+    RSA_SHA256 = 0x2
+    RSA_SHA512 = 0x4
+
+    def read_message(self):
+        lb = self.rfile.read(4)
+        msglen = int.from_bytes(lb, "big")
+        mb = self.rfile.read(msglen)
+        return Message(mb)
+
+    def write_message(self, rmsg):
+        rb = rmsg.asbytes()
+        rb = len(rb).to_bytes(4, "big") + rb
+        self.wfile.write(rb)
+
+    def handle_list_request(self, rmsg):
+        rmsg.add_int(len(self._keys))
+        for key in self._keys:
+            kb = key.asbytes()
+            rmsg.add_string(kb)
+            rmsg.add_string(b"")
+
+    def handle_sign_request(self, rmsg, msg):
+        kblob = msg.get_string()
+        skey = None
+        for key in self._keys:
+            if kblob == key.asbytes():
+                skey = key
+                break
+        if skey is None:
+            raise RuntimeError("no matching key for signing")
+        data = msg.get_string()
+        flags = msg.get_int()
+        aflag = flags & 0x7
+        if aflag == self.RSA_SHA1:
+            algorithm = "ssh-rsa"
+        elif aflag == self.RSA_SHA256:
+            algorithm = "rsa-sha2-256"
+        elif aflag == self.RSA_SHA512:
+            algorithm = "rsa-sha2-512"
+        else:
+            algorithm = None
+        smsg = skey.sign_ssh_data(data, algorithm)
+        rmsg.add_string(smsg.asbytes())
+
+    def handle(self):
+        failmsg = Message(self.AGENT_FAIL)
+        while True:
+            msg = self.read_message()
+            rtype = msg.get_byte()
+            rmsg = Message()
+            try:
+                if rtype == self.AGENT_LIST_REQUEST:
+                    rmsg.add_byte(self.AGENT_LIST_RESPONSE)
+                    self.handle_list_request(rmsg)
+                elif rtype == self.AGENT_SIGN_REQUEST:
+                    rmsg.add_byte(self.AGENT_SIGN_RESPONSE)
+                    self.handle_sign_request(rmsg, msg)
+                else:
+                    rmsg = failmsg
+            except Exception as e:
+                sys.stderr.write(e)
+                rmsg = failmsg
+            try:
+                self.write_message(rmsg)
+            except BrokenPipeError:
+                return
+
+
+def get_handler(ectx, keys):
+    setattr(AgentHandler, "_ectx", ectx)
+    setattr(AgentHandler, "_keys", keys)
+    return AgentHandler
+
+
+def run(ectx, keypaths, spath):
+    keys = list()
+    for kp in keypaths:
+        with open(kp, "rb") as kf:
+            pemdata = kf.read()
+        key = TSSPrivKey.from_pem(pemdata)
+        if not key.empty_auth:
+            raise ValueError(f"{kp} requires a password, which isn't supported")
+        tpmkey = TPMKey(ectx, key)
+        keys.append(tpmkey)
+
+    handler = get_handler(ectx, keys)
+    with socketserver.UnixStreamServer(spath, handler) as agent:
+        atexit.register(unlink_socket, spath)
+        agent.serve_forever()
+
+
+if __name__ == "__main__":
+    argp = argparse.ArgumentParser(description="Simple ssh-agent using TPM keys")
+    argp.add_argument("-T", "--tcti", help="TCTI configuration to use")
+    argp.add_argument("-S", "--socket", required=True, help="agent socket path")
+    argp.add_argument(
+        "keys",
+        metavar="KEY",
+        nargs="+",
+        help="path to tpm2-tss-engine / tpm2-openssl key",
+    )
+    args = argp.parse_args()
+
+    with get_tcti(args.tcti) as tctx, ESAPI(tctx) as ectx:
+        run(ectx, args.keys, args.socket)

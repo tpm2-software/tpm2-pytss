@@ -3,12 +3,16 @@
 
 import os
 import sys
+import time
 import unittest
 import subprocess
+from base64 import b64decode
 from textwrap import dedent
+from paramiko import Agent, RSAKey, ECDSAKey, Message
 from .TSS2_BaseTest import TSS2_BaseTest
 from tpm2_pytss.ESAPI import ESAPI
-from tpm2_pytss.constants import TPM2_SU, TPM2_ALG, TPMA_NV
+from tpm2_pytss.tsskey import TSSPrivKey
+from tpm2_pytss.constants import TPM2_SU, TPM2_ALG, TPMA_NV, TPM2_CAP, TPM2_HC
 from tpm2_pytss.types import TPM2B_NV_PUBLIC, TPMS_NV_PUBLIC
 
 
@@ -114,3 +118,121 @@ class ExamplesTest(TSS2_BaseTest):
         self.assertEqual(res.stderr, "")
         self.assertEqual(res.stdout, expected_filtered)
         self.assertEqual(res.returncode, 0)
+
+    def test_tpm2_ssh_agent_rsa(self):
+        if sys.version_info < (3, 7):
+            self.skipTest("missing arguments to subprocess.run in 3.6")
+        with ESAPI(self.tpm.tcti_name_conf) as ectx:
+            rsatss = TSSPrivKey.create_rsa(ectx)
+            rsassh = rsatss.public.to_ssh()
+            rsakey = rsatss.to_pem()
+            rsapath = os.path.join(self.tpm.working_dir.name, "rsa.pem")
+            with open(rsapath, "wb") as kf:
+                kf.write(rsakey)
+
+        socket_path = os.path.join(self.tpm.working_dir.name, "agent.socket")
+        os.environ["SSH_AUTH_SOCK"] = socket_path
+
+        rsa_proc = subprocess.Popen(
+            (
+                "python3",
+                "./examples/tpm2-ssh-agent/tpm2-ssh-agent",
+                "--tcti",
+                self.tpm.tcti_name_conf,
+                "--socket",
+                socket_path,
+                rsapath,
+            ),
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        tries = 0
+        while not os.path.exists(socket_path) and tries < 3:
+            time.sleep(0.5)
+            tries += 1
+        if tries >= 3:
+            raise RuntimeError(
+                "timeout while wating for tpm2-ssh-agent socket creation"
+            )
+
+        agent = Agent()
+        keys = agent.get_keys()
+        self.assertEqual(len(keys), 1)
+
+        key = keys[0]
+        agent_key = f"{key.get_name()} {key.get_base64()}".encode("ascii")
+        self.assertEqual(agent_key, rsassh)
+        keybytes = b64decode(key.get_base64())
+        sshkey = RSAKey(data=keybytes)
+
+        sig = key.sign_ssh_data(b"sign me")
+        sigmsg = Message(sig)
+        correct_sig = sshkey.verify_ssh_sig(b"sign me", sigmsg)
+        self.assertTrue(correct_sig)
+
+        rsa_proc.send_signal(subprocess.signal.SIGTERM)
+        stdout, stderr = rsa_proc.communicate(timeout=10)
+        self.assertEqual(stdout, "")
+        self.assertEqual(stderr, "")
+        self.assertEqual(rsa_proc.returncode, -15)
+
+    def test_tpm2_ssh_agent_ecc(self):
+        if sys.version_info < (3, 7):
+            self.skipTest("missing arguments to subprocess.run in 3.6")
+        with ESAPI(self.tpm.tcti_name_conf) as ectx:
+            ecctss = TSSPrivKey.create_ecc(ectx)
+            eccssh = ecctss.public.to_ssh().decode("ascii")
+            ecckey = ecctss.to_pem()
+            eccpath = os.path.join(self.tpm.working_dir.name, "ecc.pem")
+            with open(eccpath, "wb") as kf:
+                kf.write(ecckey)
+
+        socket_path = os.path.join(self.tpm.working_dir.name, "agent.socket")
+        os.environ["SSH_AUTH_SOCK"] = socket_path
+
+        ecc_proc = subprocess.Popen(
+            (
+                "python3",
+                "./examples/tpm2-ssh-agent/tpm2-ssh-agent",
+                "--tcti",
+                self.tpm.tcti_name_conf,
+                "--socket",
+                socket_path,
+                eccpath,
+            ),
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        tries = 0
+        while not os.path.exists(socket_path) and tries < 3:
+            time.sleep(0.5)
+            tries += 1
+        if tries >= 3:
+            raise RuntimeError(
+                "timeout while wating for tpm2-ssh-agent socket creation"
+            )
+
+        agent = Agent()
+        keys = agent.get_keys()
+        self.assertEqual(len(keys), 1)
+
+        key = keys[0]
+        agent_key = f"{key.get_name()} {key.get_base64()}"
+        self.assertEqual(agent_key, eccssh)
+        keybytes = b64decode(key.get_base64())
+        sshkey = ECDSAKey(data=keybytes)
+
+        sig = key.sign_ssh_data(b"sign me")
+        sigmsg = Message(sig)
+        correct_sig = sshkey.verify_ssh_sig(b"sign me", sigmsg)
+        self.assertTrue(correct_sig)
+
+        ecc_proc.send_signal(subprocess.signal.SIGTERM)
+        stdout, stderr = ecc_proc.communicate(timeout=10)
+        self.assertEqual(stdout, "")
+        self.assertEqual(stderr, "")
+        self.assertEqual(ecc_proc.returncode, -15)

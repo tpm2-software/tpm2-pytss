@@ -26,5 +26,6 @@ include = '''
 (
   \.pyi?$
   | examples/tpm2_filternv/tpm2_filternv
+  | examples/ssh-agent/ssh-agent
 )
 '''
