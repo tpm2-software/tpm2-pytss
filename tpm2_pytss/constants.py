@@ -1178,7 +1178,7 @@ class TPMA_SESSION(TPM_FRIENDLY_INT):
 
 
 @TPM_FRIENDLY_INT._fix_const_type
-class TPMA_LOCALITY(TPM_FRIENDLY_INT):
+class TPMA_LOCALITY(TPMA_FRIENDLY_INTLIST):
     ZERO = lib.TPMA_LOCALITY_TPM2_LOC_ZERO
     ONE = lib.TPMA_LOCALITY_TPM2_LOC_ONE
     TWO = lib.TPMA_LOCALITY_TPM2_LOC_TWO
@@ -1193,6 +1193,44 @@ class TPMA_LOCALITY(TPM_FRIENDLY_INT):
         if x > 255:
             raise ValueError("Extended Localities must be less than 256")
         return x
+
+    @classmethod
+    def parse(cls, value: str) -> "TPMA_LOCALITY":
+        """Converts a string of | separated localities or an extended locality into a TPMA_LOCALITY instance
+
+        Args:
+            value (str): The string "bitwise" expression of the localities or the extended locality.
+
+        Returns:
+            The locality or set of localities as a TPMA_LOCALITY instance.
+
+        Raises:
+            TypeError: If the value is not a str.
+            ValueError: If a field portion of the str does not match a constant.
+
+        Examples:
+            TPMA_LOCALITY.parse("zero|one") -> 0x03
+            TPMA_LOCALITY.parse("0xf0") -> 0xf0
+        """
+        try:
+            return cls(value, base=0)
+        except ValueError:
+            pass
+        return super().parse(value)
+
+    def __str__(self) -> str:
+        """Given a set of localities or an extended locality, return the string representation
+
+        Returns:
+            (str): a bitwise string value of the localities or the exteded locality.
+
+        Example:
+            str(TPMA_LOCALITY.THREE|TPMA_LOCALITY.FOUR) -> 'three|four'
+            str(TPMA_LOCALITY(0xf0)) -> '0xf0'
+        """
+        if self > 31:
+            return f"{self:#x}"
+        return super().__str__()
 
 
 @TPM_FRIENDLY_INT._fix_const_type
