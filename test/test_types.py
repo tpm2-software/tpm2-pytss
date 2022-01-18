@@ -1452,6 +1452,14 @@ class TypesTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             TPMA_LOCALITY.create_extended(255 - 32 + 1)
 
+        loc = TPMA_LOCALITY.parse("zero|four")
+        self.assertEqual(loc, TPMA_LOCALITY.ZERO | TPMA_LOCALITY.FOUR)
+        self.assertEqual(str(loc), "zero|four")
+
+        loc = TPMA_LOCALITY.parse("240")
+        self.assertEqual(loc, 240)
+        self.assertEqual(str(loc), "0xf0")
+
     def test_TPMS_CONTEXT_from_tools(self):
         test_ctx = b"""utzA3gAAAAFAAAABgAAAAAAAAAAAAAOkAvIAAAAAAqIAIFNJEhgwU8zxMhuTBhSqPktXguCbMgUg
         mACnGHIlDr0mAn7QtSMsTy1hAOqPvR8LRxcCphVs1owzQuHIe1Ez4kwA5xSl2zU+xFMhuD9coN4Z
