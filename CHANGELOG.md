@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.0] - 2022-01-24
 ### Added
-- Bindings to the Enanced System (ESAPI) API.
+- Bindings to the Enhanced System (ESAPI) API.
 - Bindings to the Feature (FAPI) API .
 - Bindings to Dynamic TCTI Loading (TCTILdr) API .
 - Bindings to Marshalling and Unmarshalling (MU) API.
