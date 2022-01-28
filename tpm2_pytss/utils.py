@@ -10,6 +10,7 @@ from .internal.crypto import (
     _hmac,
 )
 from .types import *
+from .constants import TPM2_CC
 from cryptography.hazmat.primitives import constant_time as ct
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
@@ -17,6 +18,64 @@ from typing import Optional, Tuple
 
 import secrets
 
+def parse_command_header(buf : bytes):
+    """Parse a command header, and extract all the relevant field
+
+    Args:
+        buf (bytes): The command header to parse
+
+    Returns:
+        A list of (tag: int, command_size: int, command_code: int)
+    """
+    tag = buf[0:2]
+    command_size = buf[2:6]
+    command_code = TPM2_CC(int.from_bytes(buf[6:10], 'big'))
+
+    return tag, command_size, command_code
+
+def unmarshal_from_bytes(buf : bytes):
+    """Unmarshal a byte sequence into a list of TPM structure
+
+    Args:
+        buf (bytes): The byte sequence to unmarshal
+    
+    Returns:
+        A list of (TPM_OBJECT)
+
+    Raises:
+        ValueError: If the byte sequence is not valid
+    """
+    tag, command_size, command_code = parse_command_header(buf[0:10])
+
+    # Command map
+    if command_code == TPM2_CC.Create:
+        # Structure: Handle Area (parent) | TPM2B_SENSITIVE_CREATE | (TPM2B_PUBLIC) | (TPM2B_DATA) | (TPML_PCR_SELECTION)
+        handle_area = buf[10:14]
+        authorization_area_size = int.from_bytes(buf[14:18], 'big')
+
+        # Parameter area
+        parameter_area = buf[18 + authorization_area_size:]
+
+        # TPM2B_SENSITIVE_CREATE
+        sensitive_create, x = TPM2B_SENSITIVE_CREATE.unmarshal(parameter_area)
+
+        # TPM2B_PUBLIC
+        public_area = parameter_area[2 + sensitive_create.size:]
+        public, x = TPM2B_PUBLIC.unmarshal(public_area)
+
+        # TPM2B_DATA
+        data_area = public_area[2 + public.size:]
+        data, x = TPM2B_DATA.unmarshal(data_area)
+
+        # TPML_PCR_SELECTION
+        pcr_area = data_area[2 + data.size:]
+        pcr, x = TPML_PCR_SELECTION.unmarshal(pcr_area)
+
+        return sensitive_create, public, data, pcr
+    elif command_code == TPM2_CC.CreatePrimary:
+        raise(ValueError("not implemented"))
+    else:
+        raise(ValueError("the byte sequence is not valid, unknown command code"))
 
 def make_credential(
     public: TPM2B_PUBLIC, credential: bytes, name: TPM2B_NAME

@@ -103,6 +103,30 @@ Qa6C2sTmPHlvWopRgWslXt1JmxbBKwWf2Q==
 
 
 class TestUtils(TSS2_EsapiTest):
+    def test_hexstream_unmarshall(self):
+        # tpm2_create -C primary.ctx -P abcd -p 1234 -q 'aabbccdd' -l sha256:2 -i secret.txt (secret.txt contains the string: Secret\x0a)
+        hexstream = "80020000008c0000015380000000000000490200000000202b6f1a3c1d8f647f317054774d3201b26162c4ce80517e4b60960726c563f8a90100200e675ed6e4709c78551324650eeab23d4c597fc1a9eda8957895c0652af45f53000f00043132333400075365637265740a000e0008000b000000520000001000000004aabbccdd00000001000b03040000"
+        sensitive_create, public, data, pcr = unmarshal_from_bytes(bytes.fromhex(hexstream))
+
+        # 1234
+        self.assertEqual(str(sensitive_create.sensitive.userAuth), "31323334")
+
+        self.assertEqual(str(data.buffer.hex()), "aabbccdd")
+
+        # Secret
+        self.assertEqual(str(sensitive_create.sensitive.data), "5365637265740a")
+
+        # Unexistant command code 0x999
+        bad_hexstream = "80020000008c0000099980000000000000490200000000202b6f1a3c1d8f647f317054774d3201b26162c4ce80517e4b60960726c563f8a90100200e675ed6e4709c78551324650eeab23d4c597fc1a9eda8957895c0652af45f53000f00043132333400075365637265740a000e0008000b000000520000001000000004aabbccdd00000001000b03040000"
+
+        with self.assertRaises(ValueError) as e:
+            sensitive_create, public, data, pcr = unmarshal_from_bytes(bytes.fromhex(bad_hexstream))
+
+        bad_hexstream2 = "ffffffff"
+
+        with self.assertRaises(ValueError) as e:
+            sensitive_create, public, data, pcr = unmarshal_from_bytes(bytes.fromhex(bad_hexstream2))
+
     def test_generate_seed_rsa(self):
         insens = TPM2B_SENSITIVE_CREATE()
         _, public, _, _, _ = self.ectx.create_primary(insens)
