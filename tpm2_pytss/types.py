@@ -36,6 +36,7 @@ from tpm2_pytss.constants import (
     TPM2_ALG,
     TPM2_ECC_CURVE,
     TPM2_SE,
+    TPM2_HR,
 )
 from typing import Union, Tuple
 import sys
@@ -1743,29 +1744,40 @@ class TPMS_CONTEXT(TPM_OBJECT):
             auth_hash (TPM2_ALG): The session hash algorithm, default is None.
 
         Note:
-            It is up to the caller to pass session_type and auth_hash if it is a session context.
+            Both session_type and auth_hash are required for HMAC and policy sessions.
 
         Returns:
             The context blob as bytes
+
+        Raises:
+            TypeError: if session_type and auth_hash is missing for a session context.
         """
 
-        if isinstance(session_type, type(None)) != isinstance(auth_hash, type(None)):
-            raise TypeError(f"both session_type and auth_hash most be defined")
+        handle_range = TPM2_HR.RANGE_MASK & self.savedHandle
+        if handle_range in (TPM2_HR.HMAC_SESSION, TPM2_HR.POLICY_SESSION) and (
+            session_type is None or auth_hash is None
+        ):
+            raise TypeError(
+                f"session_type and auth_hash most be defined for session contexts"
+            )
 
         version = 1
         if session_type is not None:
             version = 2
 
-        data = int(0xBADCC0DE).to_bytes(4, "big") + version.to_bytes(4, "big")
+        data = b""
+
         if version == 2:
+            data = int(0xBADCC0DE).to_bytes(4, "big") + version.to_bytes(4, "big")
             data = data + session_type.to_bytes(1, "big")
             data = data + auth_hash.to_bytes(2, "big")
-            data = data + self.to_tools()
-        else:
-            data = data + self.hierarchy.to_bytes(4, "big")
-            data = data + self.savedHandle.to_bytes(4, "big")
-            data = data + self.sequence.to_bytes(8, "big")
-            data = data + self.contextBlob.marshal()
+
+        data = data + int(0xBADCC0DE).to_bytes(4, "big") + int(1).to_bytes(4, "big")
+        data = data + self.hierarchy.to_bytes(4, "big")
+        data = data + self.savedHandle.to_bytes(4, "big")
+        data = data + self.sequence.to_bytes(8, "big")
+        data = data + self.contextBlob.marshal()
+
         return data
 
 
