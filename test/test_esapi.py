@@ -3761,7 +3761,7 @@ class TestEsys(TSS2_EsapiTest):
 
         with self.assertRaises(ValueError):
             self.ectx.set_primary_policy(
-                ESYS_TR.ENDORSEMENT, b"\x00" * 32, TPM2_SE.TRIAL
+                ESYS_TR.ENDORSEMENT, b"\x00" * 32, TPM2_ALG.LAST + 1
             )
 
     def test_change_pps(self):
