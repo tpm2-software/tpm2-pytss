@@ -9,7 +9,7 @@ from ..TSS2_Exception import TSS2_Exception
 
 try:
     from .versions import _versions
-except ImportError:
+except ImportError as e:
     # this is needed so docs can be generated without building
     if "sphinx" not in sys.modules:
         raise e
