@@ -10,6 +10,7 @@ from .TSS2_BaseTest import TSS2_EsapiTest
 
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
+from base64 import b64decode
 
 rsa_private_key = b"""
 -----BEGIN RSA PRIVATE KEY-----
@@ -652,6 +653,16 @@ class TestUtils(TSS2_EsapiTest):
         self.assertEqual(
             template.marshal(), TPM2B_PUBLIC(publicArea=ek_test_template).marshal()
         )
+
+    def test_unmarshal_tools_pcr_values(self):
+        b64val = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP//////////////////////////////////////////"
+        buf = b64decode(b64val)
+        sels = TPML_PCR_SELECTION.parse("sha1:8,9+sha256:17")
+        n, digs = unmarshal_tools_pcr_values(buf, sels)
+        self.assertEqual(n, 72)
+        self.assertEqual(digs[0], b"\x00" * 20)
+        self.assertEqual(digs[1], b"\x00" * 20)
+        self.assertEqual(digs[2], b"\xFF" * 32)
 
 
 if __name__ == "__main__":

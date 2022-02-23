@@ -8,6 +8,7 @@ from .internal.crypto import (
     _encrypt,
     _check_hmac,
     _hmac,
+    _get_digest_size,
 )
 from .types import *
 from .ESAPI import ESAPI
@@ -24,7 +25,7 @@ from .TSS2_Exception import TSS2_Exception
 from cryptography.hazmat.primitives import constant_time as ct
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
-from typing import Optional, Tuple, Callable
+from typing import Optional, Tuple, Callable, List
 
 import secrets
 
@@ -394,3 +395,35 @@ def create_ek_template(
         template.publicArea.unique.ecc.y = b"\x00" * 32
 
     return cert, template
+
+
+def unmarshal_tools_pcr_values(
+    buf: bytes, selections: TPML_PCR_SELECTION
+) -> Tuple[int, List[bytes]]:
+    """Unmarshal PCR digests from tpm2_quote using the values format.
+
+    Args:
+        buf (bytes): content of tpm2_quote PCR output.
+        selections (TPML_PCR_SELECTION): The selected PCRs.
+
+    Returns:
+        A tuple of the number of bytes consumed from buf and a list of digests.
+    """
+    trs = list()
+    for sel in selections:
+        digsize = _get_digest_size(sel.hash)
+        pb = bytes(reversed(bytes(sel.pcrSelect)))
+        pi = int.from_bytes(pb, "big")
+        for i in range(0, sel.sizeofSelect * 8):
+            if pi & (1 << i):
+                trs.append(digsize)
+
+    n = 0
+    digs = list()
+    for s in trs:
+        dig = buf[:s]
+        n += s
+        digs.append(dig)
+        buf = buf[s:]
+
+    return n, digs
