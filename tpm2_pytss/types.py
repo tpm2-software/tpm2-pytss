@@ -210,6 +210,8 @@ class TPM_OBJECT(object):
         umfunc = getattr(lib, f"Tss2_MU_{cls.__name__}_Unmarshal", None)
         if umfunc is None:
             raise RuntimeError(f"No unmarshal function found for {cls.__name__}")
+        if isinstance(buf, TPM2B_SIMPLE_OBJECT):
+            buf = bytes(buf)
         _cdata = ffi.new(f"{cls.__name__} *")
         offset = ffi.new("size_t *")
         _chkrc(umfunc(buf, len(buf), offset, _cdata))

@@ -641,6 +641,12 @@ class TypesTest(unittest.TestCase):
         db = d.buffer
         self.assertEqual(db, b"test1")
 
+        name2b = TPM2B_NAME(b"\x00\x04" + b"\xAA" * 20)
+        name, offset = TPMT_HA.unmarshal(name2b)
+        self.assertEqual(offset, len(name2b))
+        self.assertEqual(name.hashAlg, TPM2_ALG.SHA1)
+        self.assertEqual(bytes(name.digest.sha1), b"\xAA" * 20)
+
     def test_unsupported_unmarshal(self):
         with self.assertRaises(RuntimeError) as e:
             TPM_OBJECT.unmarshal(b"")
