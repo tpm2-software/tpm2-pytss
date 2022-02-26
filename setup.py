@@ -29,6 +29,7 @@ class type_generator(build_ext):
             "TPMA_OBJECT",
             "TPMA_ALGORITHM",
             "TPM2_HANDLE",
+            "TPM2_GENERATED",
         )
     )
 

@@ -615,6 +615,9 @@ class SerializationTest(unittest.TestCase):
         self.assertIsInstance(ev, int)
         self.assertEqual(ev, int(TPM2_ALG.LAST + 1))
 
+        ev = enc.encode(TPM2_GENERATED.VALUE)
+        self.assertEqual(ev, "value")
+
     def test_json_enc_friendly_intlist(self):
         enc = json_encdec()
         ev = enc.encode(TPMA_OBJECT.USERWITHAUTH | TPMA_OBJECT.RESTRICTED)
