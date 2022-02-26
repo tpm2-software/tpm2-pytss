@@ -474,18 +474,16 @@ class TypesTest(unittest.TestCase):
             TPM2_SPEC.parse("foo")
 
     def test_TPM2_GENERATED_VALUE(self):
-        self.assertEqual(
-            TPM2_GENERATED_VALUE.parse("value"), TPM2_GENERATED_VALUE.VALUE
-        )
+        self.assertEqual(TPM2_GENERATED.parse("value"), TPM2_GENERATED.VALUE)
 
         with self.assertRaises(ValueError):
-            TPM2_GENERATED_VALUE.parse("")
+            TPM2_GENERATED.parse("")
 
         with self.assertRaises(TypeError):
-            TPM2_GENERATED_VALUE.parse(None)
+            TPM2_GENERATED.parse(None)
 
         with self.assertRaises(ValueError):
-            TPM2_GENERATED_VALUE.parse("foo")
+            TPM2_GENERATED.parse("foo")
 
     def test_TPM2_RC(self):
         self.assertEqual(TPM2_RC.parse("Success"), TPM2_RC.SUCCESS)
