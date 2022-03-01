@@ -626,6 +626,34 @@ class ESAPI:
 
         return TPM2B_NONCE(_get_dptr(nonce, lib.Esys_Free))
 
+    def tr_get_tpm_handle(self, esys_handle: ESYS_TR) -> TPM2_HANDLE:
+        """Retrieves the associated TPM2_HANDLE from an ESYS_TR object.
+         Retrieves the TPM2_HANDLE for an associated ESYS_TR object for use with the
+         SAPI API or comparisons against raw TPM2_HANDLES from commands like
+         TPM2_GetCapability or use of various handle bitwise comparisons. For example
+         the mask TPM2_HR_NV_INDEX.
+
+        Args:
+            esys_handle (ESYS_TR): The ESYS_TR object to retrieve the TPM2_HANDLE from.
+
+        Returns:
+            The TPM2_HANDLE retrieved from the ESYS_TR object.
+
+        Raises:
+            TypeError: If a parameter is not of an expected type.
+            TSS2_Exception: Any of the various TSS2_RC's the lower layers can return.
+
+        C Function: Esys_TR_GetTpmHandle
+        """
+
+        _check_handle_type(esys_handle, "esys_handle")
+
+        tpm_handle = ffi.new("ESYS_TR *")
+
+        _chkrc(lib.Esys_TR_GetTpmHandle(self._ctx, esys_handle, tpm_handle))
+
+        return TPM2_HANDLE(tpm_handle[0])
+
     def policy_restart(
         self,
         session_handle: ESYS_TR,

@@ -4773,6 +4773,18 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(objbytes[24:26], ctx.contextBlob.size.to_bytes(2, "big"))
         self.assertEqual(objbytes[26:], bytes(ctx.contextBlob))
 
+    def test_tr_get_tpm_handle(self):
+
+        esys_handle = self.ectx.create_primary(TPM2B_SENSITIVE_CREATE())[0]
+        tpm_handle = self.ectx.tr_get_tpm_handle(esys_handle)
+        self.assertEqual(type(tpm_handle), TPM2_HANDLE)
+
+        with self.assertRaises(TSS2_Exception):
+            self.ectx.tr_get_tpm_handle(ESYS_TR.NONE)
+
+        with self.assertRaises(TypeError):
+            self.ectx.tr_get_tpm_handle(42)
+
 
 if __name__ == "__main__":
     unittest.main()
