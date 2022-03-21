@@ -4,12 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 1.1.0-rc0 - 2022-03-14
+## 1.1.0-rc1 - 2022-03-21
 ### Fixed
 - Spelling of "Enhanced" in CHANGELOG for 1.0.0 release.
 - Ensure that TPM2_GENERATED.VALUE is encoded the same way as other constants.
 - Add support to unmarshal simple TPM2B types (such as TPM2B_ATTEST and TPM2B_NAME) directly using the 
   unmarshal method
+- utils: catch the ImportError as "e" enabling raising the exception later
+- types: add check in TPMS_CONTEXT.to_tools for session handles
 
 ### Changed
 - Drop pkgconfig from runtime dependencies, thus no longer need dev packages of built bindings at runtime.
