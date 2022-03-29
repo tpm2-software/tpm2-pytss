@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 1.1.0-rc1 - 2022-03-21
+## 1.1.0 - 2022-03-29
 ### Fixed
 - Spelling of "Enhanced" in CHANGELOG for 1.0.0 release.
 - Ensure that TPM2_GENERATED.VALUE is encoded the same way as other constants.
