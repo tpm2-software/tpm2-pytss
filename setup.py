@@ -176,7 +176,10 @@ class type_generator(build_ext):
     def get_versions(self):
         versions = dict()
         for lib in self.version_libs:
-            versions[lib] = pkgconfig.modversion(lib)
+            try:
+                versions[lib] = pkgconfig.modversion(lib)
+            except pkgconfig.PackageNotFoundError:
+                pass
         return versions
 
     def run(self):
