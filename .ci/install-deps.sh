@@ -53,8 +53,12 @@ if ! pkg-config tss2-sys; then
   git -C /tmp clone ${extra_git_flags} \
     --branch "${TPM2_TSS_VERSION}" https://github.com/tpm2-software/tpm2-tss.git
   pushd /tmp/tpm2-tss
+
+  if [ "${TPM2_TSS_FAPI}" != "true" ]; then
+    extra_configure_flags="--disable-fapi"
+  fi
   ./bootstrap
-  ./configure --sysconfdir=/etc CFLAGS=-g
+  ./configure --sysconfdir=/etc ${extra_configure_flags} CFLAGS=-g
   make -j4
   sudo make install
   sudo ldconfig
