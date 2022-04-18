@@ -1803,6 +1803,16 @@ class TypesTest(unittest.TestCase):
         ccs = str(TPMA_CC.NV | TPMA_CC.V)
         self.assertEqual(ccs, "nv|v")
 
+    def test_TPMA_SESSION(self):
+
+        x = TPMA_SESSION.CONTINUESESSION | TPMA_SESSION.DECRYPT
+        y = str(x)
+        self.assertEqual(y, "continuesession|decrypt")
+
+        x = TPMA_SESSION.CONTINUESESSION | TPMA_SESSION.DECRYPT | 0x128
+        with self.assertRaises(ValueError):
+            str(x)
+
 
 if __name__ == "__main__":
     unittest.main()
