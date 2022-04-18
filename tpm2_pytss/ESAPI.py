@@ -568,7 +568,7 @@ class ESAPI:
         return ESYS_TR(session_handle[0])
 
     def trsess_set_attributes(
-        self, session: ESYS_TR, attributes: int, mask: int = 0xFF
+        self, session: ESYS_TR, attributes: TPMA_SESSION, mask: int = 0xFF
     ) -> None:
         """Set session attributes.
 
@@ -589,10 +589,7 @@ class ESAPI:
         """
         _check_handle_type(session, "session")
 
-        if not isinstance(attributes, int):
-            raise TypeError(
-                f"Expected attributes to be type int, got {type(attributes)}"
-            )
+        _check_friendly_int(attributes, "attributes", TPMA_SESSION)
 
         if not isinstance(mask, int):
             raise TypeError(f"Expected mask to be type int, got {type(attributes)}")
