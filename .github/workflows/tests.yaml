@@ -9,7 +9,12 @@ jobs:
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9]
         tss-version: [master, 2.4.0, 2.4.6, 3.0.0, 3.0.3, 3.1.0]
-        with-fapi: [true, false]
+        with-fapi: [true]
+        include:
+          - python-version: 3.9
+            tss-version: 3.1.0
+            with-fapi: false
+
 
     steps:
       - name: Checkout Repository
