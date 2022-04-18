@@ -568,7 +568,7 @@ class ESAPI:
         return ESYS_TR(session_handle[0])
 
     def trsess_set_attributes(
-        self, session: ESYS_TR, attributes: int, mask: int = 0xFF
+        self, session: ESYS_TR, attributes: Union[TPMA_SESSION, int], mask: int = 0xFF
     ) -> None:
         """Set session attributes.
 
@@ -578,7 +578,7 @@ class ESAPI:
 
         Args:
             session (ESYS_TR): The session handle.
-            attributes (int): The attributes to be set or unset for the session.
+            attributes (Union[TPMA_SESSION, int]): The attributes to be set or unset for the session.
             mask (int): The mask for the flags to be set or unset. Defaults to 0xFF.
 
         Raises:
@@ -589,7 +589,7 @@ class ESAPI:
         """
         _check_handle_type(session, "session")
 
-        if not isinstance(attributes, int):
+        if not isinstance(attributes, (TPMA_SESSION, int)):
             raise TypeError(
                 f"Expected attributes to be type int, got {type(attributes)}"
             )
