@@ -237,3 +237,5 @@ setup(
     cffi_modules=["scripts/libtss2_build.py:ffibuilder"],
     cmdclass={"build_ext": type_generator},
 )
+
+# falafel
