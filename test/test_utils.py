@@ -6,7 +6,11 @@ from tpm2_pytss import *
 from tpm2_pytss.internal.crypto import _generate_seed, private_to_key, public_to_key
 from tpm2_pytss.utils import *
 from tpm2_pytss.internal.templates import _ek
-from .TSS2_BaseTest import TSS2_EsapiTest
+
+try:
+    from .TSS2_BaseTest import TSS2_EsapiTest
+except ModuleNotFoundError:
+    from TSS2_BaseTest import TSS2_EsapiTest
 
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding

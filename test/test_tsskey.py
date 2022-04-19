@@ -2,7 +2,11 @@
 # SPDX-License-Identifier: BSD-3
 from tpm2_pytss import *
 from tpm2_pytss.tsskey import TSSPrivKey, _parent_rsa_template, _parent_ecc_template
-from .TSS2_BaseTest import TSS2_EsapiTest
+
+try:
+    from .TSS2_BaseTest import TSS2_EsapiTest
+except ModuleNotFoundError:
+    from TSS2_BaseTest import TSS2_EsapiTest
 from asn1crypto.core import ObjectIdentifier
 from asn1crypto import pem
 

@@ -4,7 +4,11 @@ import unittest
 
 from tpm2_pytss import *
 from tpm2_pytss.internal import *
-from .TSS2_BaseTest import TSS2_EsapiTest
+
+try:
+    from .TSS2_BaseTest import TSS2_EsapiTest
+except ModuleNotFoundError:
+    from TSS2_BaseTest import TSS2_EsapiTest
 from base64 import b64decode
 from hashlib import sha256, sha384
 

@@ -5,7 +5,11 @@ import unittest
 import gc
 
 from tpm2_pytss import *
-from .TSS2_BaseTest import TSS2_EsapiTest
+
+try:
+    from .TSS2_BaseTest import TSS2_EsapiTest
+except ModuleNotFoundError:
+    from TSS2_BaseTest import TSS2_EsapiTest
 
 
 class TestEsys(TSS2_EsapiTest):
