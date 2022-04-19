@@ -2,7 +2,7 @@
 import logging
 import sys
 from typing import List
-from distutils.version import LooseVersion
+from packaging.version import Version
 
 from .._libtpm2_pytss import ffi, lib
 from ..TSS2_Exception import TSS2_Exception
@@ -244,7 +244,12 @@ def _check_bug_fixed(
 def _lib_version_atleast(tss2_lib, version):
     if tss2_lib not in _versions:
         return False
-    libv = LooseVersion(_versions[tss2_lib])
-    lv = LooseVersion(version)
+    # Needed to remove git commit from version strings
+    lib_parts = _versions[tss2_lib].rsplit("-", 1)
+    fixed_lib_version = lib_parts[0]
+    version_parts = version.rsplit("-", 1)
+    fixed_version = version_parts[0]
+    libv = Version(fixed_lib_version)
+    lv = Version(fixed_version)
 
     return libv >= lv

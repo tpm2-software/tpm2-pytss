@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-2
 
-from distutils import spawn
+import shutil
 import logging
 import os
 import random
@@ -154,7 +154,7 @@ class TpmSimulator(object):
     def getSimulator():
 
         for sim in TpmSimulator.SIMULATORS:
-            exe = spawn.find_executable(sim.exe)
+            exe = shutil.which(sim.exe)
             if not exe:
                 print(f'Could not find executable: "{sim.exe}"', file=sys.stderr)
                 continue
