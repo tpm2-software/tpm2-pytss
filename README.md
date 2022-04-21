@@ -28,11 +28,21 @@ python3 -m pip install git+https://github.com/tpm2-software/tpm2-pytss.git
 
 To install latest stable from PyPi:
 ```bash
-python3 -m pip install tpm2-ptss
+python3 -m pip install tpm2-pytss
 ```
 **NOTE**: You may need option `--user` or sitewide permissions through something like `sudo`.
 
 This is known to work with versions 2.4.0 of tpm2-tss or higher.
+
+
+### Libraries
+The following libraries are required to be available in order for the python libraries to be installed. Swap `apt` for `yum` or other installer as required.
+
+```bash
+sudo apt install libtss2-dev pkg-config libtss2-esys libssl-dev libcurl4-openssl-dev libjson-c-dev
+```
+
+See the installation document for more details.
 
 ## Help
 

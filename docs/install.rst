@@ -68,14 +68,14 @@ Example from Ubuntu 20.04 (No FAPI support):
 .. code-block:: bash
 
     apt-get update
-    apt-get install libtss2-dev
+    apt-get install libtss2-dev pkg-config libtss2-esys libssl-dev libcurl4-openssl-dev libjson-c-dev
 
 Example from Fedora 32:
 
 .. code-block:: bash
 
     dnf update
-    dnf install tpm2-tss-devel
+    dnf install tpm2-tss-devel pkg-config libtss2-esys libssl-dev libcurl4-openssl-dev libjson-c-dev
 
 .. _run ldconfig:
 
