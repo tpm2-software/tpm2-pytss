@@ -42,7 +42,7 @@ The following libraries are required to be available in order for the python lib
 sudo apt install libtss2-dev pkg-config libtss2-esys libssl-dev libcurl4-openssl-dev libjson-c-dev
 ```
 
-See the installation document for more details.
+See the installation document for more specific details on which libraries are required.
 
 ## Help
 
