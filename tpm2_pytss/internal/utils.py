@@ -2,7 +2,7 @@
 import logging
 import sys
 from typing import List
-from packaging.version import Version
+from packaging.version import Version, InvalidVersion
 
 from .._libtpm2_pytss import ffi, lib
 from ..TSS2_Exception import TSS2_Exception
@@ -241,15 +241,48 @@ def _check_bug_fixed(
         logger.warning(message)
 
 
+def _lib_version_normalize(version: str) -> Version:
+    """ Normalize a git describe version string to a PEP 440 version string
+
+    Normalize git describe --always --dirty version strings for Python's packing
+    Version class to be happy. That library takes PEP440 strings as defined in:
+      - https://peps.python.org/pep-0440/
+
+    | case | inputs | output         |
+    | ---- | -------| -------------- |
+    | 0    | 3.1.0-126-g0fd1c5fbbaf2      | X.Y.devM = 3.1.0.dev126       |
+    | 1    | 1.1.0-13-gb574eae194a2-dirty | X.YaN.devM = 3.1.0a126.dev126 |
+    | 2    | 1.1.0-rc0                    | X.yrcN = 1.1.0rc0             |
+    | 3    | 1.1.0                        | X.Y = 1.1.0                   |
+    """
+
+    chunks = version.split("-")
+    normalized = None
+    # case 0
+    if len(chunks) == 3:
+        normalized = f"{chunks[0]}.dev{chunks[1]}"
+    # case 1
+    elif len(chunks) == 4:
+        normalized = f"{chunks[0]}a{chunks[1]}.dev{chunks[1]}"
+    # case 2
+    elif len(chunks) == 2:
+        normalized = f"{chunks[0]}{chunks[1]}"
+    # case 3
+    elif len(chunks) == 1:
+        normalized = f"{chunks[0]}"
+    else:
+        raise InvalidVersion(
+            f"Expected at most 4 dash delimited version information, got: {version}"
+        )
+
+    return Version(normalized)
+
+
 def _lib_version_atleast(tss2_lib, version):
     if tss2_lib not in _versions:
         return False
-    # Needed to remove git commit from version strings
-    lib_parts = _versions[tss2_lib].rsplit("-", 1)
-    fixed_lib_version = lib_parts[0]
-    version_parts = version.rsplit("-", 1)
-    fixed_version = version_parts[0]
-    libv = Version(fixed_lib_version)
-    lv = Version(fixed_version)
+
+    libv = _lib_version_normalize(_versions[tss2_lib])
+    lv = _lib_version_normalize(version)
 
     return libv >= lv
