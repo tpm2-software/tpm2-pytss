@@ -57,8 +57,8 @@ tss2_header_dirs = get_include_paths(libraries)
 
 found_dir = None
 for hd in tss2_header_dirs:
-    full_path = os.path.join(hd, "tss2")
-    if os.path.isdir(full_path):
+    full_path = os.path.join(hd, "tss2", "tss2_common.h")
+    if os.path.isfile(full_path):
         found_dir = hd
         break
 if found_dir is None:
