@@ -341,7 +341,7 @@ def create_ek_template(
         ektype (str): The endoresment key type.
         nv_read_cb (Callable[Union[int, TPM2_RH]]): The callback to use for reading NV areas.
 
-    None:
+    Note:
         nv_read_cb MUST raise a NoSuchIndex exception if the NV index isn't defined.
 
     Returns:
