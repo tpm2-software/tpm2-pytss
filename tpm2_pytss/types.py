@@ -619,6 +619,19 @@ class TPMT_PUBLIC(TPM_OBJECT):
         return False
 
     @staticmethod
+    def _handle_sm4(objstr, templ):
+        templ.type = TPM2_ALG.SYMCIPHER
+        templ.parameters.symDetail.sym.algorithm = TPM2_ALG.SM4
+
+        bits, mode = TPMT_PUBLIC._handle_sym_common(objstr)
+        if bits != 128:
+            raise ValueError(f'Expected bits to be 128, got: "{bits}"')
+        templ.parameters.symDetail.sym.keyBits.sym = bits
+        templ.parameters.symDetail.sym.mode.sym = mode
+
+        return False
+
+    @staticmethod
     def _handle_xor(_, templ):
         templ.type = TPM2_ALG.KEYEDHASH
         templ.parameters.keyedHashDetail.scheme.scheme = TPM2_ALG.XOR
@@ -807,9 +820,12 @@ class TPMT_PUBLIC(TPM_OBJECT):
         elif detail.startswith("camellia"):
             templ.parameters.symDetail.sym.algorithm = TPM2_ALG.CAMELLIA
             detail = detail[8:]
+        elif detail.startswith("sm4"):
+            templ.parameters.symDetail.sym.algorithm = TPM2_ALG.SM4
+            detail = detail[3:]
         else:
             raise ValueError(
-                f'Expected symmetric detail to be null or start with one of aes, camellia, got: "{detail}"'
+                f'Expected symmetric detail to be null or start with one of aes, camellia, sm4, got: "{detail}"'
             )
 
         bits, mode = TPMT_PUBLIC._handle_sym_common(detail)
@@ -886,7 +902,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
         scheme = hunks[1].lower() if len(hunks) > 1 else None
         symdetail = hunks[2].lower() if len(hunks) > 2 else None
 
-        expected = ("rsa", "ecc", "aes", "camellia", "xor", "hmac", "keyedhash")
+        expected = ("rsa", "ecc", "aes", "camellia", "sm4", "xor", "hmac", "keyedhash")
 
         keep_processing = False
         prefix = tuple(filter(lambda x: objstr.startswith(x), expected))
