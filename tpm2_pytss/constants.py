@@ -503,6 +503,7 @@ class TPM2_ECC(TPM_FRIENDLY_INT):
         "256": "NIST_P256",
         "384": "NIST_P384",
         "521": "NIST_P521",
+        "SM2": "SM2_P256",
     }
 
 
