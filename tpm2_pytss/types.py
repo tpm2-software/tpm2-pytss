@@ -560,6 +560,8 @@ class TPMT_PUBLIC(TPM_OBJECT):
 
         if objstr is None or objstr == "":
             curve = TPM2_ECC_CURVE.NIST_P256
+        elif objstr.startswith("_"):
+            curve = TPM2_ECC_CURVE.parse(objstr[1:])
         else:
             curve = TPM2_ECC_CURVE.parse(objstr)
 
