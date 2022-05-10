@@ -1054,6 +1054,14 @@ class TypesTest(unittest.TestCase):
             templ.parameters.eccDetail.symmetric.mode.camellia, TPM2_ALG.CFB
         )
 
+    def test_TPMT_PUBLIC_parse_ecc_sm4(self):
+        templ = TPMT_PUBLIC.parse(alg="ecc:sm4128cfb")
+        self.assertEqual(templ.parameters.eccDetail.symmetric.algorithm, TPM2_ALG.SM4)
+        self.assertEqual(templ.parameters.eccDetail.symmetric.keyBits.camellia, 128)
+        self.assertEqual(
+            templ.parameters.eccDetail.symmetric.mode.camellia, TPM2_ALG.CFB
+        )
+
     def test_TPMT_PUBLIC_parse_rsa_oaep(self):
         templ = TPMT_PUBLIC.parse(
             "rsa2048:oaep-sha512",
@@ -1081,6 +1089,17 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(templ.parameters.symDetail.sym.algorithm, TPM2_ALG.CAMELLIA)
         self.assertEqual(templ.parameters.symDetail.sym.keyBits.sym, 256)
         self.assertEqual(templ.parameters.symDetail.sym.mode.sym, TPM2_ALG.CFB)
+
+    def test_TPMT_PUBLIC_parse_sm4(self):
+        templ = TPMT_PUBLIC.parse("sm4128cfb")
+        self.assertEqual(templ.type, TPM2_ALG.SYMCIPHER)
+        self.assertEqual(templ.parameters.symDetail.sym.algorithm, TPM2_ALG.SM4)
+        self.assertEqual(templ.parameters.symDetail.sym.keyBits.sym, 128)
+        self.assertEqual(templ.parameters.symDetail.sym.mode.sym, TPM2_ALG.CFB)
+
+        with self.assertRaises(ValueError) as e:
+            TPMT_PUBLIC.parse("sm4256cfb")
+        self.assertEqual(str(e.exception), 'Expected bits to be 128, got: "256"')
 
     def test_TPML_ALG_parse_none(self):
         with self.assertRaises(ValueError):
