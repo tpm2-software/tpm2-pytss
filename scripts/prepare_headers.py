@@ -11,7 +11,7 @@ import textwrap
 
 # import tpm2_pytss.constants
 constants_spec = importlib.util.spec_from_file_location(
-    "tpm2_pytss.internal.constants", "tpm2_pytss/internal/constants.py"
+    "tpm2_pytss.internal.constants", "src/tpm2_pytss/internal/constants.py"
 )
 constants = importlib.util.module_from_spec(constants_spec)
 constants_spec.loader.exec_module(constants)

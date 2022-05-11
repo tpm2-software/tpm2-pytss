@@ -200,13 +200,15 @@ class type_generator(build_ext):
 
         p = os.path.join(self.build_lib, "tpm2_pytss/internal/type_mapping.py")
         sp = os.path.join(
-            os.path.dirname(__file__), "tpm2_pytss/internal/type_mapping.py"
+            os.path.dirname(__file__), "src/tpm2_pytss/internal/type_mapping.py"
         )
 
         vp = os.path.join(self.build_lib, "tpm2_pytss/internal/versions.py")
-        svp = os.path.join(os.path.dirname(__file__), "tpm2_pytss/internal/versions.py")
+        svp = os.path.join(
+            os.path.dirname(__file__), "src/tpm2_pytss/internal/versions.py"
+        )
 
-        print(f"generated _type_map with {len(type_map)} mappings")
+        print(f"generated _type_map with {len(type_map)} mappings in {p} and {sp}")
         print(f"generated _element_type_map with {len(element_type_map)} mappings")
         print(f"generated _versions with {len(versions)} versions")
 
