@@ -3,7 +3,13 @@
 import unittest
 
 from tpm2_pytss import *
-from tpm2_pytss.internal.crypto import _generate_seed, private_to_key, public_to_key
+from tpm2_pytss.internal.crypto import (
+    _generate_seed,
+    private_to_key,
+    public_to_key,
+    _get_alg,
+    _get_digest,
+)
 from tpm2_pytss.utils import *
 from tpm2_pytss.internal.templates import _ek
 from .TSS2_BaseTest import TSS2_EsapiTest
@@ -185,6 +191,41 @@ class TestUtils(TSS2_EsapiTest):
         self.assertEqual(
             parent.publicArea.parameters.eccDetail.symmetric.algorithm,
             TPM2_ALG.CAMELLIA,
+        )
+        private, public, _, _, _ = self.ectx.create(phandle, insens, "ecc")
+        credblob, secret = make_credential(
+            parent, b"credential data", public.get_name()
+        )
+        handle = self.ectx.load(phandle, private, public)
+        certinfo = self.ectx.activate_credential(handle, phandle, credblob, secret)
+        self.assertEqual(b"credential data", bytes(certinfo))
+
+    def test_make_credential_ecc_sm4(self):
+        if _get_alg(TPM2_ALG.SM4) is None:
+            self.skipTest("SM4 is not supported by the cryptography module")
+        elif _get_digest(TPM2_ALG.SM3_256) is None:
+            self.skipTest("SM3 is not supported by the cryptography module")
+        has_sm4 = False
+        has_sm3 = False
+        more = True
+        while more:
+            more, data = self.ectx.get_capability(
+                TPM2_CAP.ALGS, 0, lib.TPM2_MAX_CAP_ALGS
+            )
+            algs = [x.alg for x in data.data.algorithms]
+            if TPM2_ALG.SM4 in algs:
+                has_sm4 = True
+            if TPM2_ALG.SM3_256 in algs:
+                has_sm3 = True
+        if not has_sm4:
+            self.skipTest("SM4 not supported by simulator")
+        elif not has_sm3:
+            self.skipTest("SM3 not supported by simulator")
+        insens = TPM2B_SENSITIVE_CREATE()
+        templ = TPM2B_PUBLIC.parse("ecc:sm4128cfb", nameAlg=TPM2_ALG.SM3_256)
+        phandle, parent, _, _, _ = self.ectx.create_primary(insens, templ)
+        self.assertEqual(
+            parent.publicArea.parameters.eccDetail.symmetric.algorithm, TPM2_ALG.SM4
         )
         private, public, _, _, _ = self.ectx.create(phandle, insens, "ecc")
         credblob, secret = make_credential(
