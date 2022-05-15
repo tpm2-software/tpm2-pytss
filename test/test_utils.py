@@ -177,6 +177,23 @@ class TestUtils(TSS2_EsapiTest):
         certinfo = self.ectx.activate_credential(handle, phandle, credblob, secret)
         self.assertEqual(b"credential data", bytes(certinfo))
 
+    def test_make_credential_ecc_camellia(self):
+        insens = TPM2B_SENSITIVE_CREATE()
+        phandle, parent, _, _, _ = self.ectx.create_primary(
+            insens, "ecc:camellia128cfb"
+        )
+        self.assertEqual(
+            parent.publicArea.parameters.eccDetail.symmetric.algorithm,
+            TPM2_ALG.CAMELLIA,
+        )
+        private, public, _, _, _ = self.ectx.create(phandle, insens, "ecc")
+        credblob, secret = make_credential(
+            parent, b"credential data", public.get_name()
+        )
+        handle = self.ectx.load(phandle, private, public)
+        certinfo = self.ectx.activate_credential(handle, phandle, credblob, secret)
+        self.assertEqual(b"credential data", bytes(certinfo))
+
     def test_Wrap_rsa(self):
         insens = TPM2B_SENSITIVE_CREATE()
         phandle, parent, _, _, _ = self.ectx.create_primary(insens)

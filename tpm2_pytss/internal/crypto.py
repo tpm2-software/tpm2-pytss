@@ -19,8 +19,8 @@ from cryptography.hazmat.primitives.serialization import (
 from cryptography.x509 import load_pem_x509_certificate, load_der_x509_certificate
 from cryptography.hazmat.primitives.kdf.kbkdf import CounterLocation, KBKDFHMAC, Mode
 from cryptography.hazmat.primitives.kdf.concatkdf import ConcatKDFHash
-from cryptography.hazmat.primitives.ciphers.algorithms import AES
-from cryptography.hazmat.primitives.ciphers import modes, Cipher
+from cryptography.hazmat.primitives.ciphers.algorithms import AES, Camellia
+from cryptography.hazmat.primitives.ciphers import modes, Cipher, CipherAlgorithm
 from cryptography.hazmat.backends import default_backend
 from cryptography.exceptions import UnsupportedAlgorithm, InvalidSignature
 from typing import Tuple, Type
@@ -47,6 +47,7 @@ _digesttable = (
 
 _algtable = (
     (TPM2_ALG.AES, AES),
+    (TPM2_ALG.CAMELLIA, Camellia),
     (TPM2_ALG.CFB, modes.CFB),
 )
 
@@ -597,7 +598,7 @@ def _check_hmac(
     h.verify(expected)
 
 
-def _encrypt(cipher: Type[AES], key: bytes, data: bytes) -> bytes:
+def _encrypt(cipher: Type[CipherAlgorithm], key: bytes, data: bytes) -> bytes:
     iv = len(key) * b"\x00"
     ci = cipher(key)
     ciph = Cipher(ci, modes.CFB(iv), backend=default_backend())
@@ -606,7 +607,7 @@ def _encrypt(cipher: Type[AES], key: bytes, data: bytes) -> bytes:
     return encdata
 
 
-def _decrypt(cipher: Type[AES], key: bytes, data: bytes) -> bytes:
+def _decrypt(cipher: Type[CipherAlgorithm], key: bytes, data: bytes) -> bytes:
     iv = len(key) * b"\x00"
     ci = cipher(key)
     ciph = Cipher(ci, modes.CFB(iv), backend=default_backend())
