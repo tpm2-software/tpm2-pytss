@@ -45,11 +45,21 @@ _digesttable = (
     (TPM2_ALG.SHA3_512, hashes.SHA3_512),
 )
 
+if hasattr(hashes, "SM3"):
+    _digesttable += ((TPM2_ALG.SM3_256, hashes.SM3),)
+
 _algtable = (
     (TPM2_ALG.AES, AES),
     (TPM2_ALG.CAMELLIA, Camellia),
     (TPM2_ALG.CFB, modes.CFB),
 )
+
+try:
+    from cryptography.hazmat.primitives.ciphers.algorithms import SM4
+
+    _algtable += ((TPM2_ALG.SM4, SM4),)
+except ImportError:
+    pass
 
 
 def _get_curveid(curve):
