@@ -29,9 +29,10 @@ if os.environ.get("READTHEDOCS", False):
     repo = git.Repo(cwd, search_parent_directories=True)
     root = repo.git.rev_parse("--show-toplevel")
     logger.info(f"Adding to PATH: {root}")
-    sys.path.insert(0, root)
-    l = os.listdir(root)
-    logger.info(f"Root ls: {l}")
+    path = os.path.join(root, "src")
+    sys.path.insert(0, path)
+    l = os.listdir(path)
+    logger.info(f"{path} ls: {l}")
 
 logger.info("Mocking tpm2_pytss._libtpm2_pytss")
 from unittest.mock import MagicMock
