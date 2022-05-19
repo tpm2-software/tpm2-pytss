@@ -44,6 +44,9 @@ function run_publish_pkg() {
 
 function run_test() {
 
+  # installs the deps so sdist and bdist work.
+  python3 -m pip install wheel $(./scripts/get_deps.py)
+
   python3 setup.py sdist && python3 setup.py bdist
 
   python3 -m pytest -n $(nproc) --cov=tpm2_pytss -v
@@ -59,6 +62,25 @@ function run_test() {
   # over whats installed.
   pushd /tmp
   python3 -c 'import tpm2_pytss'
+  popd
+
+  # verify wheel build works
+  git clean -fdx
+  python3 -m pip uninstall --yes tpm2-pytss
+  python3 -Bm build --no-isolation
+  python3 -m installer --destdir=installation dist/*.whl
+  # find site-packages
+  site_packages=$(realpath $(find . -type d -name site-packages))
+  export PYTHONPATH="${site_packages}"
+  totest=$(realpath test/test_esapi.py)
+  pushd /tmp
+
+  # ensure module imports OK
+  python3 -c 'import tpm2_pytss'
+
+  # ensure a test suite can run, but don't run the whole thing and slow down the CI since
+  # we already ran the tests.
+  pytest "$totest" -k test_get_random
   popd
 }
 
