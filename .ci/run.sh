@@ -48,7 +48,7 @@ function run_test() {
   # verify that package is sane on a user install that is not editable
   git clean -fdx
   python3 -m pip uninstall --yes tpm2-pytss
-  python3 -m pip install --user .
+  python3 -m pip install --user .[dev]
   # can't be in a directory that has the package as a folder, Python tries to use that
   # over whats installed.
   pushd /tmp
