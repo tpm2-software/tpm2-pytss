@@ -54,6 +54,24 @@ function run_test() {
   pushd /tmp
   python3 -c 'import tpm2_pytss'
   popd
+
+  # verify wheel build works
+  git clean -fdx
+  python3 -m pip uninstall --yes tpm2-pytss
+  python3 -Bm build --no-isolation
+  python3 -m installer --destdir=installation dist/*.whl
+  pyver=$(python3 -c 'from sys import version_info as v; print(f"{v.major}.{v.minor}");')
+  export PYTHONPATH="${PWD}/installation/usr/lib/python${pyver}/site-packages"
+  totest="${PWD}/test/test_esapi.py"
+  pushd /tmp
+
+  # ensure module imports OK
+  python3 -c 'import tpm2_pytss'
+
+  # ensure a test suite can run, but don't run the whole thing and slow down the CI since
+  # we already ran the tests.
+  pytest "$totest" -k test_get_random
+  popd
 }
 
 function run_whitespace() {
