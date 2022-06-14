@@ -31,6 +31,13 @@ function run_publish_pkg() {
     echo "Nothing to do, exiting."
     exit 0
   fi
+  # get the dependencies from setup.cfg and install them
+  python3 -c "import configparser; c = configparser.ConfigParser(); c.read('setup.cfg'); print(c['options']['install_requires'])" | \
+	  xargs pip install
+  python3 -c "import configparser; c = configparser.ConfigParser(); c.read('setup.cfg'); print(c['options']['setup_requires'])" | \
+	  xargs pip install
+
+
   python setup.py sdist
   python -m twine upload dist/*
 }
