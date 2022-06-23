@@ -20,6 +20,7 @@ from tpm2_pytss import *
 class BaseTpmSimulator(object):
     def __init__(self):
         self.tpm = None
+        self._port = None
 
     @staticmethod
     def ready(port):
@@ -28,20 +29,32 @@ class BaseTpmSimulator(object):
 
     def start(self):
         logger = logging.getLogger("DEBUG")
-        logger.debug('Setting up simulator: "{}"'.format(self.tpm))
+        logger.debug('Setting up simulator: "{}"'.format(self.exe))
 
         tpm = None
         for _ in range(0, 10):
 
             random_port = random.randrange(2321, 65534)
 
-            tpm = self._start(port=random_port)
+            sim = self._start(port=random_port)
+            for _ in range(0, 10):
+                rc = sim.poll()
+                if rc is not None:
+                    logger.debug(f"Simulator {self.exe} exited with {rc}")
+                    break
+                if (
+                    sim.poll() is None
+                    and self.ready(random_port)
+                    and self.ready(random_port + 1)
+                ):
+                    tpm = sim
+                    break
+                time.sleep(0.1)
+
             if tpm:
-                # Wait to ensure that the simulator is ready for clients.
-                time.sleep(1)
-                if not self.ready(random_port):
-                    continue
-                self.tpm = tpm
+                self.tpm = sim
+                self._port = random_port
+                logger.debug(f"started {self.exe} on port {random_port}\n")
                 break
 
         if not tpm:
@@ -80,13 +93,7 @@ class SwtpmSimulator(BaseTpmSimulator):
         ]
 
         tpm = subprocess.Popen(cmd)
-        sleep(2)
-
-        if not tpm.poll():
-            self._port = port
-            return tpm
-
-        return None
+        return tpm
 
     @property
     def tcti_name_conf(self):
@@ -118,13 +125,7 @@ class IBMSimulator(BaseTpmSimulator):
         try:
             cmd = ["tpm_server", "-rm", "-port", "{}".format(port)]
             tpm = subprocess.Popen(cmd)
-            sleep(2)
-
-            if not tpm.poll():
-                self._port = port
-                return tpm
-
-            return None
+            return tpm
 
         finally:
             os.chdir(cwd)
