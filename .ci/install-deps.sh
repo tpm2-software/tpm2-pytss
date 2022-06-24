@@ -78,7 +78,7 @@ if pkg-config --exists tss2-tcti-swtpm; then
   if ! pkg-config libtpms; then
     git -C /tmp clone --depth=1 https://github.com/stefanberger/libtpms.git
     pushd /tmp/libtpms
-    ./autogen.sh --prefix=/usr --with-openssl --with-tpm2
+    ./autogen.sh --prefix=/usr --with-openssl --with-tpm2 --without-tpm1
     make -j$(nproc)
     sudo make install
     popd
