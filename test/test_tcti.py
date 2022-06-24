@@ -32,7 +32,7 @@ class TestTCTI(TSS2_EsapiTest):
 
     def test_cancel(self):
         if getattr(self.tcti, "name", "") == "swtpm":
-            self.skipTest("cancel supported by swtpm")
+            self.skipTest("cancel not supported by swtpm")
 
         startup = b"\x80\x01\x00\x00\x00\x0C\x00\x00\x01\x44\x00\x00"
         self.tcti.transmit(startup)
@@ -55,7 +55,7 @@ class TestTCTI(TSS2_EsapiTest):
         tcti_name = getattr(self.tcti, "name", "")
         if tcti_name in ("swtpm", "mssim"):
             self.skipTest(f"make_sticky not supported by {tcti_name}")
-        raise Exception(self.tcti.name)
+
         self.tcti.make_sticky(0, 0)
 
         tcti._v2 = None
