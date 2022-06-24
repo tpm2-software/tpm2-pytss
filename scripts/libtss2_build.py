@@ -4,24 +4,7 @@ ffibuilder = FFI()
 
 import os
 import pkgconfig
-import re
 import sys
-
-
-def get_include_paths(library_names):
-    if not isinstance(library_names, list):
-        library_names = [library_names]
-
-    # find search paths for libraries and header via pkg-config
-    header_dirs = set()
-
-    # for manually installed packages, env var PKG_CONFIG_PATH might need to be changed
-    for library_name in library_names:
-        os.environ["PKG_CONFIG_ALLOW_SYSTEM_CFLAGS"] = "1"
-        cflags = pkgconfig.cflags(library_name)
-        header_dirs.update(re.findall(r"(?<=-I)\S+", cflags))
-
-    return header_dirs
 
 
 libraries = ["tss2-esys", "tss2-tctildr", "tss2-rc", "tss2-mu"]
@@ -53,16 +36,18 @@ print("adding path: {}".format(PATH))
 sys.path.insert(0, PATH)
 from prepare_headers import prepare
 
-tss2_header_dirs = get_include_paths(libraries)
+os.environ["PKG_CONFIG_ALLOW_SYSTEM_CFLAGS"] = "1"
+libs = " ".join(libraries)
+paths = pkgconfig.parse(libs)
 
 found_dir = None
-for hd in tss2_header_dirs:
+for hd in paths["include_dirs"]:
     full_path = os.path.join(hd, "tss2", "tss2_common.h")
     if os.path.isfile(full_path):
         found_dir = hd
         break
 if found_dir is None:
-    sys.exit("Could not find esys headers in {}".format(tss2_header_dirs))
+    sys.exit("Could not find esys headers in {}".format(paths["include_dirs"]))
 
 # strip tss2 prefix
 prepare(found_dir, "libesys.h", build_fapi=build_fapi)
@@ -83,7 +68,11 @@ if build_fapi:
 
 # so it is often just the "#include".
 ffibuilder.set_source(
-    "tpm2_pytss._libtpm2_pytss", source, libraries=libraries,
+    "tpm2_pytss._libtpm2_pytss",
+    source,
+    libraries=paths["libraries"],
+    library_dirs=paths["library_dirs"],
+    include_dirs=paths["include_dirs"],
 )  # library name, for the linker
 
 if __name__ == "__main__":
