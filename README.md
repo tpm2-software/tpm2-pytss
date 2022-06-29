@@ -28,7 +28,7 @@ python3 -m pip install git+https://github.com/tpm2-software/tpm2-pytss.git
 
 To install latest stable from PyPi:
 ```bash
-python3 -m pip install tpm2-ptss
+python3 -m pip install tpm2-pytss
 ```
 **NOTE**: You may need option `--user` or sitewide permissions through something like `sudo`.
 
