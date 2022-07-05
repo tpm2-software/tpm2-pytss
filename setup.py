@@ -5,7 +5,15 @@ from setuptools import setup
 from setuptools.command.build_ext import build_ext
 from pkgconfig import pkgconfig
 from pycparser import c_parser, preprocess_file
-from pycparser.c_ast import Typedef, TypeDecl, IdentifierType, Struct, ArrayDecl, Union
+from pycparser.c_ast import (
+    Typedef,
+    TypeDecl,
+    IdentifierType,
+    Struct,
+    ArrayDecl,
+    Union,
+    Enum,
+)
 from textwrap import dedent
 
 # workaround bug https://github.com/pypa/pip/issues/7953
@@ -30,6 +38,8 @@ class type_generator(build_ext):
             "TPMA_ALGORITHM",
             "TPM2_HANDLE",
             "TPM2_GENERATED",
+            "ESYS_TR",
+            "TSS2_POLICY_PCR_SELECTOR",
         )
     )
 
@@ -74,7 +84,7 @@ class type_generator(build_ext):
     }}
     """
 
-    version_libs = ("tss2-esys", "tss2-fapi")
+    version_libs = ("tss2-esys", "tss2-fapi", "tss2-policy")
 
     def get_types(self, ast):
         tm = dict()
@@ -82,9 +92,13 @@ class type_generator(build_ext):
             if (
                 isinstance(v, Typedef)
                 and isinstance(v.type, TypeDecl)
-                and isinstance(v.type.type, IdentifierType)
+                and isinstance(v.type.type, (IdentifierType, Enum))
             ):
-                name = " ".join(v.type.type.names)
+                if hasattr(v.type.type, "names"):
+                    names = v.type.type.names
+                elif hasattr(v.type.type, "name"):
+                    names = [v.type.type.name]
+                name = " ".join(names)
                 if v.name in self.type_mapping:
                     tm[v.name] = self.type_mapping[v.name]
                 elif name in self.type_mapping:
@@ -101,10 +115,14 @@ class type_generator(build_ext):
         nf = 0
         for d in v.decls:
             nf = nf + 1
-            if not isinstance(d.type.type, IdentifierType):
+            if not isinstance(d.type.type, (IdentifierType, Enum)):
                 continue
             dn = d.name
-            tname = " ".join(d.type.type.names)
+            if hasattr(d.type.type, "names"):
+                names = d.type.type.names
+            elif hasattr(d.type.type, "name"):
+                names = [d.type.type.name]
+            tname = " ".join(names)
             if tname not in tm:
                 continue
             fields.append((dn, tm[tname]))
@@ -171,7 +189,31 @@ class type_generator(build_ext):
         parser = c_parser.CParser()
         ast = parser.parse(pdata, "tss2_tpm2_types.h")
         tm = self.get_types(ast)
-        return self.generate_mappings(ast, tm)
+        (mapping, element_mapping) = self.generate_mappings(ast, tm)
+        if pkgconfig.exists("tss2-policy"):
+            pk = pkgconfig.parse("tss2-policy")
+            for ip in pk["include_dirs"]:
+                hp = os.path.join(ip, "tss2_policy.h")
+                if os.path.isfile(hp):
+                    policy_header_path = hp
+                    break
+                hp = os.path.join(ip, "tss2", "tss2_policy")
+                if os.path.isfile(hp):
+                    policy_header_path = hp
+                    break
+            if policy_header_path:
+                pdata = preprocess_file(
+                    policy_header_path,
+                    cpp_args=["-D__extension__=", "-D__attribute__(x)="],
+                )
+                parser = c_parser.CParser()
+                past = parser.parse(pdata, "tss2_policy.h")
+                ptm = self.get_types(past)
+                tm.update(ptm)
+                (pmapping, pelement_mapping) = self.generate_mappings(past, ptm)
+                mapping.update(pmapping)
+                element_mapping.update(pelement_mapping)
+        return (mapping, element_mapping)
 
     def get_versions(self):
         versions = dict()

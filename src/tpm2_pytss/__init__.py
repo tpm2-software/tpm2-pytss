@@ -5,6 +5,10 @@ try:
     from .FAPI import *
 except NotImplementedError:
     pass
+try:
+    from .policy import *
+except NotImplementedError:
+    pass
 from .TCTILdr import *
 from .TCTI import TCTI
 from .types import *
