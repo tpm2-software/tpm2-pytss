@@ -21,7 +21,7 @@ def remove_common_guards(s):
 
     # Remove includes and guards
     s = re.sub("#ifndef.*", "", s)
-    s = re.sub("#define .*_H\n", "", s)
+    s = re.sub("#define .*_H_*?\n", "", s)
     s = re.sub("#endif.*", "", s)
     s = re.sub("#error.*", "", s)
     s = re.sub('#ifdef __cplusplus\nextern "C" {', "", s, flags=re.MULTILINE)
@@ -213,7 +213,82 @@ def prepare_mu(dirpath):
     return s
 
 
-def prepare(indir, outfile, build_fapi=True):
+def prepare_policy(dirpath):
+    s = pathlib.Path(dirpath, "tss2_policy.h").read_text(encoding="utf-8")
+    s = remove_common_guards(s)
+    # cparser complains if a typedef of an enum is before the definition of the enum
+    s = re.sub(
+        "typedef enum TSS2_POLICY_PCR_SELECTOR TSS2_POLICY_PCR_SELECTOR;", "", s, 1
+    )
+    s = re.sub(
+        r"(enum TSS2_POLICY_PCR_SELECTOR.*?\};)",
+        r"\1" + "\ntypedef enum TSS2_POLICY_PCR_SELECTOR TSS2_POLICY_PCR_SELECTOR;",
+        s,
+        1,
+        re.DOTALL | re.MULTILINE,
+    )
+    s += """
+    extern "Python" TSS2_RC _policy_cb_calc_pcr(
+        TSS2_POLICY_PCR_SELECTION *selection,
+        TPML_PCR_SELECTION *out_selection,
+        TPML_DIGEST *out_digest,
+        void *userdata);
+    extern "Python" TSS2_RC _policy_cb_calc_name(
+        const char *path,
+        TPM2B_NAME *name,
+        void *userdata);
+    extern "Python" TSS2_RC _policy_cb_calc_public(
+        const char *path,
+        TPMT_PUBLIC *public,
+        void *userdata);
+    extern "Python" TSS2_RC _policy_cb_calc_nvpublic(
+        const char *path,
+        TPMI_RH_NV_INDEX nv_index,
+        TPMS_NV_PUBLIC *nv_public,
+        void *userdata);
+    extern "Python" TSS2_RC _policy_cb_exec_auth(
+        TPM2B_NAME *name,
+        ESYS_TR *object_handle,
+        ESYS_TR *auth_handle,
+        ESYS_TR *authSession,
+        void *userdata);
+    extern "Python" TSS2_RC _policy_cb_exec_polsel(
+        TSS2_OBJECT *auth_object,
+        const char **branch_names,
+        size_t branch_count,
+        size_t *branch_idx,
+        void *userdata);
+    extern "Python" TSS2_RC _policy_cb_exec_sign(
+        char *key_pem,
+        char *public_key_hint,
+        TPMI_ALG_HASH key_pem_hash_alg,
+        uint8_t *buffer,
+        size_t buffer_size,
+        const uint8_t **signature,
+        size_t *signature_size,
+        void *userdata);
+    extern "Python" TSS2_RC _policy_cb_exec_polauth(
+        TPMT_PUBLIC *key_public,
+        TPMI_ALG_HASH hash_alg,
+        TPM2B_DIGEST *digest,
+        TPM2B_NONCE *policyRef,
+        TPMT_SIGNATURE *signature,
+        void *userdata);
+    extern "Python" TSS2_RC _policy_cb_exec_polauthnv(
+        TPMS_NV_PUBLIC *nv_public,
+        TPMI_ALG_HASH hash_alg,
+        void *userdata);
+    extern "Python" TSS2_RC _policy_cb_exec_poldup(
+        TPM2B_NAME *name,
+        void *userdata);
+    extern "Python" TSS2_RC _policy_cb_exec_polaction(
+        const char *action,
+        void *userdata);
+    """
+    return s
+
+
+def prepare(indir, outfile, build_fapi=True, build_policy=True):
     indir = os.path.join(indir, "tss2")
 
     common = prepare_common(indir)
@@ -234,6 +309,9 @@ def prepare(indir, outfile, build_fapi=True):
     rcdecode = prepare_rcdecode(indir)
 
     mu = prepare_mu(indir)
+
+    if build_policy:
+        policy = prepare_policy(indir)
 
     # Write result
     with open(outfile, "w") as f:
@@ -258,6 +336,8 @@ def prepare(indir, outfile, build_fapi=True):
             f.write(fapi)
         f.write(rcdecode)
         f.write(mu)
+        if build_policy:
+            f.write(policy)
 
 
 if __name__ == "__main__":

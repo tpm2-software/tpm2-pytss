@@ -4,6 +4,7 @@ import itertools
 import unittest
 
 from tpm2_pytss import *
+from tpm2_pytss.internal.utils import _lib_version_atleast
 from base64 import b64decode
 
 rsa_parent_key = b"""-----BEGIN RSA PRIVATE KEY-----
@@ -1848,6 +1849,59 @@ class TypesTest(unittest.TestCase):
         x = TPMA_SESSION.CONTINUESESSION | TPMA_SESSION.DECRYPT | 0x128
         with self.assertRaises(ValueError):
             str(x)
+
+    def test_TSS2_OBJECT(self):
+        if not _lib_version_atleast("tss2-policy", "3.2.0-63-gdcdc8412"):
+            self.skipTest("tss2-policy required")
+        o = TSS2_OBJECT(handle=ESYS_TR.OWNER)
+        self.assertEqual(o.handle, ESYS_TR.OWNER)
+        self.assertIsInstance(o.handle, ESYS_TR)
+
+    def test_TSS2_POLICY_PCR_SELECTIONS(self):
+        if not _lib_version_atleast("tss2-policy", "3.2.0-63-gdcdc8412"):
+            self.skipTest("tss2-policy required")
+        select = TSS2_POLICY_PCR_SELECTIONS(
+            pcr_select=TPMS_PCR_SELECT(sizeofSelect=1, pcrSelect=b"\xAA",),
+        )
+        self.assertEqual(select.pcr_select.sizeofSelect, 1)
+        self.assertEqual(bytes(select.pcr_select.pcrSelect), b"\xAA\x00\x00\x00")
+
+        selection = TSS2_POLICY_PCR_SELECTIONS(
+            pcr_selection=TPML_PCR_SELECTION(
+                (
+                    TPMS_PCR_SELECTION(
+                        hash=TPM2_ALG.SHA1, sizeofSelect=2, pcrSelect=b"\xBB\xBB"
+                    ),
+                    TPMS_PCR_SELECTION(
+                        hash=TPM2_ALG.SHA256, sizeofSelect=3, pcrSelect=b"\xCC\xCC\xCC"
+                    ),
+                ),
+            ),
+        )
+        self.assertEqual(selection.pcr_selection[0].hash, TPM2_ALG.SHA1)
+        self.assertEqual(selection.pcr_selection[0].sizeofSelect, 2)
+        self.assertEqual(
+            bytes(selection.pcr_selection[0].pcrSelect), b"\xBB\xBB\x00\x00"
+        )
+        self.assertEqual(selection.pcr_selection[1].hash, TPM2_ALG.SHA256)
+        self.assertEqual(selection.pcr_selection[1].sizeofSelect, 3)
+        self.assertEqual(
+            bytes(selection.pcr_selection[1].pcrSelect), b"\xCC\xCC\xCC\x00"
+        )
+
+    def test_TSS2_POLICY_PCR_SELECTION(self):
+        if not _lib_version_atleast("tss2-policy", "3.2.0-63-gdcdc8412"):
+            self.skipTest("tss2-policy required")
+        s = TSS2_POLICY_PCR_SELECTION(
+            type=TSS2_POLICY_PCR_SELECTOR.PCR_SELECT,
+            selections=TSS2_POLICY_PCR_SELECTIONS(
+                pcr_select=TPMS_PCR_SELECT(sizeofSelect=3, pcrSelect=b"\xFF\xFF\xFF",),
+            ),
+        )
+        self.assertEqual(s.type, TSS2_POLICY_PCR_SELECTOR.PCR_SELECT)
+        self.assertIsInstance(s.type, TSS2_POLICY_PCR_SELECTOR)
+        self.assertEqual(s.selections.pcr_select.sizeofSelect, 3)
+        self.assertEqual(bytes(s.selections.pcr_select.pcrSelect), b"\xFF\xFF\xFF\x00")
 
 
 if __name__ == "__main__":

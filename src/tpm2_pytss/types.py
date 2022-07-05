@@ -19,6 +19,7 @@ from tpm2_pytss.internal.utils import (
     _convert_to_python_native,
     _mock_bail,
     _ref_parent,
+    _lib_version_atleast,
 )
 from tpm2_pytss.internal.crypto import (
     _calculate_sym_unique,
@@ -99,7 +100,7 @@ class TPM_OBJECT(object):
                     f"{self.__class__.__name__} has no field by the name of {k}"
                 )
             cname = fields[k]
-            if cname.kind != "primitive" and cname.kind != "array":
+            if cname.kind not in ("primitive", "array", "enum"):
                 clsname = _fixup_classname(cname)
                 clazz = globals()[clsname]
                 # If subclass object is a TPM2B SIMPLE object, and we have a raw str, or bytes, convert
@@ -2286,3 +2287,15 @@ class TPMT_TK_AUTH(TPM_OBJECT):
 
 class TPM2B_OPERAND(TPM2B_SIMPLE_OBJECT):
     pass
+
+
+if _lib_version_atleast("tss2-policy", "3.2.0-63-gdcdc8412"):
+
+    class TSS2_OBJECT(TPM_OBJECT):
+        pass
+
+    class TSS2_POLICY_PCR_SELECTIONS(TPM_OBJECT):
+        pass
+
+    class TSS2_POLICY_PCR_SELECTION(TPM_OBJECT):
+        pass
