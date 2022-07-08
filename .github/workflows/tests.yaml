@@ -50,7 +50,7 @@ jobs:
 
       - name: Install dependencies
         env:
-          TPM2_TSS_VERSION: 3.0.3
+          TPM2_TSS_VERSION: 3.2.0
         run: ./.ci/install-deps.sh
 
       - name: Check
