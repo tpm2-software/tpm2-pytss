@@ -12,3 +12,4 @@ The API documentation for the tpm2-pytss project.
     Feature API (FAPI) <fapi>
     Utility Routines <utils>
     TSS PEM Key (OpenSSL) <tsskey>
+    TSS2_Exception <exception>
