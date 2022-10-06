@@ -1188,7 +1188,7 @@ class ToolsTest(TSS2_BaseTest):
         nvp = from_yaml(yml, TPMS_NV_PUBLIC())
         self.assertEqual(nvp.nvIndex, 0x1800004)
         self.assertEqual(nvp.nameAlg, TPM2_ALG.SHA256)
-        self.assertEqual(nvp.attributes, 0x6000600)
+        self.assertEqual(nvp.attributes, 0x60006)
         self.assertEqual(nvp.dataSize, 8)
 
     def test_tools_decode_tpmt_public(self):
