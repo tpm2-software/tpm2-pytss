@@ -9,12 +9,12 @@ import sys
 
 libraries = ["tss2-esys", "tss2-tctildr", "tss2-rc", "tss2-mu"]
 
-if not pkgconfig.installed("tss2-esys", ">=2.0.0"):
-    raise RuntimeError("Require tss2-esapi to be installed and at least version 2.0.0")
+if not pkgconfig.installed("tss2-esys", ">=2.4.0"):
+    raise RuntimeError("Require tss2-esapi to be installed and at least version 2.4.0")
 
 # Needs some missing marshal routines like Tss2_MU_TPMU_ENCRYPTED_SECRET_Marshal
 if not pkgconfig.installed("tss2-mu", ">=2.4.0"):
-    raise RuntimeError("Require tss2-mu to be installed")
+    raise RuntimeError("Require tss2-mu 2.4.0 or greater to be installed")
 
 if not pkgconfig.exists("tss2-tctildr"):
     raise RuntimeError("Require tss2-tctildr to be installed")
