@@ -12,6 +12,7 @@
 #
 import os
 import sys
+import time
 import datetime
 import subprocess
 
@@ -57,7 +58,10 @@ import tpm2_pytss
 
 project = "tpm2-pytss"
 author = "tpm2-software"
-copyright = f"2019 - {datetime.datetime.today().year}, {author}"
+build_date = datetime.datetime.utcfromtimestamp(
+    int(os.environ.get("SOURCE_DATE_EPOCH", time.time()))
+)
+copyright = f"2019 - {build_date.year}, {author}"
 
 # The short X.Y version
 version = get_version(root="..", relative_to=__file__)
