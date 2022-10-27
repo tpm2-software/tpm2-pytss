@@ -59,7 +59,7 @@ def make_credential(
     )
     symkey = _kdfa(public.nameAlg, seed, b"STORAGE", name, b"", symbits)
 
-    enc_cred = _encrypt(cipher, symkey, credential.marshal())
+    enc_cred = _encrypt(cipher, symmode, symkey, credential.marshal())
 
     halg = _get_digest(public.nameAlg)
     hmackey = _kdfa(public.nameAlg, seed, b"INTEGRITY", b"", b"", halg.digest_size * 8)
@@ -127,15 +127,15 @@ def wrap(
         h.update(sensb)
         h.update(name)
         innerint = TPM2B_DIGEST(buffer=h.finalize()).marshal()
-        encsens = _encrypt(cipher, symkey, innerint + sensb)
+        encsens = _encrypt(cipher, mode, symkey, innerint + sensb)
         enckeyout.buffer = symkey
     else:
         encsens = sensb
 
     seed, outsymseed.secret = _generate_seed(newparent, b"DUPLICATE\x00")
-    cipher, _, bits = _symdef_to_crypt(newparent.parameters.asymDetail.symmetric)
+    cipher, mode, bits = _symdef_to_crypt(newparent.parameters.asymDetail.symmetric)
     outerkey = _kdfa(newparent.nameAlg, seed, b"STORAGE", name, b"", bits)
-    dupsens = _encrypt(cipher, outerkey, encsens)
+    dupsens = _encrypt(cipher, mode, outerkey, encsens)
 
     halg = _get_digest(newparent.nameAlg)
     hmackey = _kdfa(
@@ -207,10 +207,10 @@ def unwrap(
     name = bytes(public.get_name())
     _check_hmac(halg, hmackey, dupsens, name, outerhmac)
 
-    cipher, _, bits = _symdef_to_crypt(newparentpub.parameters.asymDetail.symmetric)
+    cipher, mode, bits = _symdef_to_crypt(newparentpub.parameters.asymDetail.symmetric)
     outerkey = _kdfa(newparentpub.nameAlg, seed, b"STORAGE", name, b"", bits)
 
-    sensb = _decrypt(cipher, outerkey, dupsens)
+    sensb = _decrypt(cipher, mode, outerkey, dupsens)
 
     if symdef and symdef.algorithm != TPM2_ALG.NULL:
         if not symkey:
@@ -222,7 +222,7 @@ def unwrap(
         halg = _get_digest(public.publicArea.nameAlg)
 
         # unwrap the inner encryption which is the integrity + TPM2B_SENSITIVE
-        innerint_and_decsens = _decrypt(cipher, symkey, sensb)
+        innerint_and_decsens = _decrypt(cipher, mode, symkey, sensb)
         innerint, offset = TPM2B_DIGEST.unmarshal(innerint_and_decsens)
         innerint = bytes(innerint)
         decsensb = innerint_and_decsens[offset:]

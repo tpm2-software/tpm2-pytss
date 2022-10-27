@@ -608,19 +608,23 @@ def _check_hmac(
     h.verify(expected)
 
 
-def _encrypt(cipher: Type[CipherAlgorithm], key: bytes, data: bytes) -> bytes:
+def _encrypt(
+    cipher: Type[CipherAlgorithm], mode: Type[modes.Mode], key: bytes, data: bytes
+) -> bytes:
     iv = len(key) * b"\x00"
     ci = cipher(key)
-    ciph = Cipher(ci, modes.CFB(iv), backend=default_backend())
+    ciph = Cipher(ci, mode(iv), backend=default_backend())
     encr = ciph.encryptor()
     encdata = encr.update(data) + encr.finalize()
     return encdata
 
 
-def _decrypt(cipher: Type[CipherAlgorithm], key: bytes, data: bytes) -> bytes:
+def _decrypt(
+    cipher: Type[CipherAlgorithm], mode: Type[modes.Mode], key: bytes, data: bytes
+) -> bytes:
     iv = len(key) * b"\x00"
     ci = cipher(key)
-    ciph = Cipher(ci, modes.CFB(iv), backend=default_backend())
+    ciph = Cipher(ci, mode(iv), backend=default_backend())
     decr = ciph.decryptor()
     plaintextdata = decr.update(data) + decr.finalize()
     return plaintextdata
