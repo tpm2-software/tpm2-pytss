@@ -42,8 +42,8 @@ class FAPIConfig(contextlib.ExitStack):
         and/or if `temp_dirs` is True.
 
         Args:
-            config (dict, optional): Fapi configuration to use instead of the installed `fapi-config.json`. Defaults to None.
-            temp_dirs (bool, optional): Create temporary keystore and log directories and set the respective config entries. Defaults to True.
+            config (dict): Fapi configuration to use instead of the installed `fapi-config.json`. Defaults to None.
+            temp_dirs (bool): Create temporary keystore and log directories and set the respective config entries. Defaults to True.
             **kwargs: Single configuration entries which override those in `config` or `fapi-config.json`.
         """
         super().__init__()
@@ -191,10 +191,10 @@ class FAPI:
         objects. See also config file `/etc/tpm2-tss/fapi-config.json`.
 
         Args:
-            auth_value_eh (bytes or str, optional): Endorsement Hierarchy password. Defaults to None.
-            auth_value_sh (bytes or str, optional, optional): Storage/Owner Hierarchy password. Defaults to None.
-            auth_value_lockout (bytes or str, optional): Lockout Hierarchy password. Defaults to None.
-            is_provisioned_ok (bool, optional): Do not throw a TSS2_Exception if Fapi is already provisioned. Defaults to True.
+            auth_value_eh (bytes or str): Endorsement Hierarchy password. Defaults to None.
+            auth_value_sh (bytes or str): Storage/Owner Hierarchy password. Defaults to None.
+            auth_value_lockout (bytes or str): Lockout Hierarchy password. Defaults to None.
+            is_provisioned_ok (bool): Do not throw a TSS2_Exception if Fapi is already provisioned. Defaults to True.
 
         Raises:
             TSS2_Exception: If Fapi returned an error code.
@@ -255,7 +255,7 @@ class FAPI:
         """Get a list of all Fapi current object paths.
 
         Args:
-            search_path (bytes or str, optional): If given, only list children of `search_path`. Defaults to None.
+            search_path (bytes or str): If given, only list children of `search_path`. Defaults to None.
 
         Raises:
             TSS2_Exception: If Fapi returned an error code.
@@ -285,9 +285,9 @@ class FAPI:
 
         Args:
             path (bytes or str): Path to the new key object, e.g. `/HS/SRK/new_signing_key`.
-            type_ (bytes or str, optional): Comma separated list. Possible values: system, sign, decrypt, restricted, exportable, noda, 0x81000000. Defaults to None.
-            auth_value (bytes or str, optional): Password to key. Defaults to None.
-            exists_ok (bool, optional): Do not throw a TSS2_Exception if an object with the given path already exists. Defaults to False.
+            type_ (bytes or str): Comma separated list. Possible values: system, sign, decrypt, restricted, exportable, noda, 0x81000000. Defaults to None.
+            auth_value (bytes or str): Password to key. Defaults to None.
+            exists_ok (bool): Do not throw a TSS2_Exception if an object with the given path already exists. Defaults to False.
 
         Raises:
             TSS2_Exception: If Fapi returned an error code.
@@ -316,7 +316,7 @@ class FAPI:
         Args:
             path (bytes or str): Path to the signing key.
             digest (bytes): Digest to sign.
-            padding (bytes or str, optional): `"rsa_ssa"` or `"rsa_pss"`. Defaults to None (using the scheme specified in the crypto profile).
+            padding (bytes or str): `"rsa_ssa"` or `"rsa_pss"`. Defaults to None (using the scheme specified in the crypto profile).
 
         Raises:
             TSS2_Exception: If Fapi returned an error code.
@@ -437,12 +437,12 @@ class FAPI:
 
         Args:
             path (bytes or str): The path of the new sealed object.
-            data (bytes or str, optional): Data to be sealed (often a digest). If None, random data will be generated. Defaults to None.
-            type_ (bytes or str, optional): Comma separated list. Possible values: system, sign, decrypt, restricted, exportable, noda, 0x81000000. Defaults to None.
-            policy_path (bytes or str, optional): The path to the policy which will be associated with the sealed object. Defaults to None.
-            auth_value (bytes or str, optional): Password to protect the new sealed object. Defaults to None.
-            size (int, optional): If data is None, random bytes of length size are generated. Parameters data and size cannot be given at the same time. Defaults to None.
-            exists_ok (bool, optional): Do not throw a TSS2_Exception if an object with the given path already exists. Defaults to False.
+            data (bytes or str): Data to be sealed (often a digest). If None, random data will be generated. Defaults to None.
+            type_ (bytes or str): Comma separated list. Possible values: system, sign, decrypt, restricted, exportable, noda, 0x81000000. Defaults to None.
+            policy_path (bytes or str): The path to the policy which will be associated with the sealed object. Defaults to None.
+            auth_value (bytes or str): Password to protect the new sealed object. Defaults to None.
+            size (int): If data is None, random bytes of length size are generated. Parameters data and size cannot be given at the same time. Defaults to None.
+            exists_ok (bool): Do not throw a TSS2_Exception if an object with the given path already exists. Defaults to False.
 
         Raises:
             TSS2_Exception: If Fapi returned an error code.
@@ -501,7 +501,7 @@ class FAPI:
         Args:
             path (bytes or str): Path of the future Fapi object.
             import_data (bytes or str): JSON-encoded data to import.
-            exists_ok (bool, optional): Do not throw a TSS2_Exception if an object with the given path already exists. Defaults to False.
+            exists_ok (bool): Do not throw a TSS2_Exception if an object with the given path already exists. Defaults to False.
 
         Raises:
             TSS2_Exception: If Fapi returned an error code.
@@ -541,7 +541,7 @@ class FAPI:
 
         Args:
             path (bytes or str): Path to the Fapi object.
-            auth_value (bytes or str, optional): New password. Defaults to None.
+            auth_value (bytes or str): New password. Defaults to None.
 
         Raises:
             TSS2_Exception: If Fapi returned an error code.
@@ -558,7 +558,7 @@ class FAPI:
 
         Args:
             path (bytes or str): Path to the existing Fapi object.
-            new_path (bytes or str, optional): New path to the Fapi object. Defaults to None.
+            new_path (bytes or str): New path to the Fapi object. Defaults to None.
 
         Raises:
             TSS2_Exception: If Fapi returned an error code.
@@ -580,7 +580,7 @@ class FAPI:
 
         Args:
             path (bytes or str): Path to the Fapi object.
-            description (bytes or str, optional): New description of the Fapi object. Defaults to None.
+            description (bytes or str): New description of the Fapi object. Defaults to None.
 
         Raises:
             TSS2_Exception: If Fapi returned an error code.
@@ -616,7 +616,7 @@ class FAPI:
 
         Args:
             path (bytes or str): Path to the Fapi object.
-            app_data (bytes or str, optional): Custom application data to be associated with the Fapi object. Defaults to None.
+            app_data (bytes or str): Custom application data to be associated with the Fapi object. Defaults to None.
 
         Raises:
             TSS2_Exception: If Fapi returned an error code.
@@ -658,7 +658,7 @@ class FAPI:
 
         Args:
             path (bytes or str): Path to the Fapi object.
-            certificate (bytes or str, optional): x509 certificate to be associated with the Fapi object. Defaults to None.
+            certificate (bytes or str): x509 certificate to be associated with the Fapi object. Defaults to None.
 
         Raises:
             TSS2_Exception: If Fapi returned an error code.
@@ -691,7 +691,7 @@ class FAPI:
         """Get the platform certificate and the so-called delta certificates.
 
         Args:
-            no_cert_ok (bool, optional): If True, an empty byte string is returned if no certificate is found. If False, in this case a TSS2_Exception is raised. Defaults to False.
+            no_cert_ok (bool): If True, an empty byte string is returned if no certificate is found. If False, in this case a TSS2_Exception is raised. Defaults to False.
 
         Raises:
             TSS2_Exception:  If Fapi returned an error code.
@@ -780,7 +780,7 @@ class FAPI:
             TSS2_Exception: If Fapi returned an error code.
 
         Returns:
-            Tuple[bytes, Any]: A tuple of the binary blob and its type (:const:`FAPI_ESYSBLOB.CONTEXTLOAD` or :const:`FAPI_ESYSBLOB.DESERIALIZE)`
+            Tuple[bytes, Any]: A tuple of the binary blob and its type (:const:`constants.FAPI_ESYSBLOB.CONTEXTLOAD` or :const:`constants.FAPI_ESYSBLOB.DESERIALIZE`)
         """
         path = _to_bytes_or_null(path)
         type_ = ffi.new("uint8_t *")
@@ -819,7 +819,7 @@ class FAPI:
         Args:
             policy_path (bytes or str): Path to the underlying policy.
             key_path (bytes or str): Path to the key associated with the policy Authorize.
-            policy_ref (bytes or str, optional): Additional application data (e.g. a reference to another policy). Defaults to None.
+            policy_ref (bytes or str): Additional application data (e.g. a reference to another policy). Defaults to None.
 
         Raises:
             TSS2_Exception: If Fapi returned an error code.
@@ -874,7 +874,7 @@ class FAPI:
         Args:
             index (int): Index of the PCR (in the range of 0-23 in most cases).
             data (bytes or str): Input data to the extend operation.
-            log (bytes or str, optional): JSON-encoded event log data. Defaults to None.
+            log (bytes or str): JSON-encoded event log data. Defaults to None.
 
         Raises:
             TSS2_Exception: If Fapi returned an error code.
@@ -900,8 +900,8 @@ class FAPI:
         Args:
             path (bytes or str): Path to the key used for signing.
             pcrs (List[int]): List of PCR indices to be included in the quote.
-            quote_type (bytes or str, optional): Type of quote to create. The default "TPM-Quote" is used if None is given. Defaults to None.
-            qualifying_data (bytes or str, optional): Additional application-defined data. Defaults to None.
+            quote_type (bytes or str): Type of quote to create. The default "TPM-Quote" is used if None is given. Defaults to None.
+            qualifying_data (bytes or str): Additional application-defined data. Defaults to None.
 
         Raises:
             TSS2_Exception: If Fapi returned an error code.
@@ -965,9 +965,9 @@ class FAPI:
         Args:
             path (bytes or str): Path to the key used for verifying the signature.
             signature (bytes): Signature to the quote.
-            quote_info (bytes or str, optional): Quote info structure.
-            qualifying_data (bytes or str, optional): Additional application-defined data. Defaults to None.
-            pcr_log (bytes or str, optional): JSON-encoded PCR log entry.
+            quote_info (bytes or str): Quote info structure.
+            qualifying_data (bytes or str): Additional application-defined data. Defaults to None.
+            pcr_log (bytes or str): JSON-encoded PCR log entry.
 
         Raises:
             TSS2_Exception: If Fapi returned an error code.
@@ -1006,9 +1006,9 @@ class FAPI:
         Args:
             path (bytes or str): Path to the NV storage area.
             size (int): Size of the storage area in bytes.
-            type_ (bytes or str, optional): Type of the storage area. A combination of `bitfield`, `counter`, `pcr`, `system`, `noda`. Defaults to None.
-            policy_path (bytes or str, optional): The path to the policy which will be associated with the storage area. Defaults to None.
-            auth_value (bytes or str, optional): Password to protect the new storage area. Defaults to None.
+            type_ (bytes or str): Type of the storage area. A combination of `bitfield`, `counter`, `pcr`, `system`, `noda`. Defaults to None.
+            policy_path (bytes or str): The path to the policy which will be associated with the storage area. Defaults to None.
+            auth_value (bytes or str): Password to protect the new storage area. Defaults to None.
 
         Raises:
             TSS2_Exception: If Fapi returned an error code.
@@ -1071,7 +1071,7 @@ class FAPI:
         Args:
             path (bytes or str): Path to the NV storage area.
             data (bytes or str): Input data to the extend operation.
-            log (bytes or str, optional): JSON-encoded event to be associated with this change. Defaults to None.
+            log (bytes or str): JSON-encoded event to be associated with this change. Defaults to None.
 
         Raises:
             TSS2_Exception: If Fapi returned an error code.
@@ -1173,8 +1173,8 @@ class FAPI:
         needed. Typically, this callback implements a password prompt. If `callback` is None, the callback function is reset.
 
         Args:
-            callback (Callable[[str, str, Optional[bytes]], bytes], optional): A callback function `callback(path, description, user_data=None)` which returns the password (:class:`bytes`). Defaults to None.
-            user_data (byte, optional): Bytes that will be handed to the callback. Defaults to None.
+            callback (Callable[[str, str, Optional[bytes]], bytes]): A callback function `callback(path, description, user_data=None)` which returns the password (:class:`bytes`). Defaults to None.
+            user_data (bytes): Bytes that will be handed to the callback. Defaults to None.
 
         Raises:
             TSS2_Exception: If Fapi returned an error code.
@@ -1223,8 +1223,8 @@ class FAPI:
         """Set the Fapi policy branch callback, called to decide which policy path to take in a policy Or. If `callback` is None, the callback function is reset.
 
         Args:
-            callback (Callable[[str, str, List[str], Optional[bytes]], int], optional): A callback function `callback(path, description, branch_names, user_data=None)` which returns the index (:class:`int`) of the selected branch in `branch_names`. Defaults to None.
-            user_data (bytes or str, optional): Custom data passed to the callback function. Defaults to None.
+            callback (Callable[[str, str, List[str], Optional[bytes]], int]): A callback function `callback(path, description, branch_names, user_data=None)` which returns the index (:class:`int`) of the selected branch in `branch_names`. Defaults to None.
+            user_data (bytes or str): Custom data passed to the callback function. Defaults to None.
 
         Raises:
             TSS2_Exception: If Fapi returned an error code.
@@ -1277,8 +1277,8 @@ class FAPI:
         """Set the Fapi signing callback which is called to satisfy the policy Signed. If `callback` is None, the callback function is reset.
 
         Args:
-            callback (Callable[[str, str, str, str, int, bytes, Optional[bytes]], bytes], optional): A callback function `callback(path, description, public_key, public_key_hint, hash_alg, data_to_sign, user_data=None)` which returns a signature (:class:`bytes`) of `data_to_sign`. Defaults to None.
-            user_data (bytes or str, optional): Custom data passed to the callback function. Defaults to None.
+            callback (Callable[[str, str, str, str, int, bytes, Optional[bytes]], bytes]): A callback function `callback(path, description, public_key, public_key_hint, hash_alg, data_to_sign, user_data=None)` which returns a signature (:class:`bytes`) of `data_to_sign`. Defaults to None.
+            user_data (bytes or str): Custom data passed to the callback function. Defaults to None.
 
         Raises:
             TSS2_Exception: If Fapi returned an error code.
@@ -1352,8 +1352,8 @@ class FAPI:
         """Set the policy Action callback which is called to satisfy the policy Action. If `callback` is None, the callback function is reset.
 
         Args:
-            callback (Callable[[str, str, Optional[bytes]], None], optional): A callback function `callback(path, action, user_data=None)`. Defaults to None.
-            user_data (bytes or str, optional): Custom data passed to the callback function. Defaults to None.
+            callback (Callable[[str, str, Optional[bytes]], None]): A callback function `callback(path, action, user_data=None)`. Defaults to None.
+            user_data (bytes or str): Custom data passed to the callback function. Defaults to None.
 
         Raises:
             TSS2_Exception: If Fapi returned an error code.
