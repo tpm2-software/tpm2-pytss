@@ -200,12 +200,33 @@ class TPM_FRIENDLY_INT(int):
         return self.__class__(int(self).__xor__(value))
 
     @staticmethod
-    def _fix_const_type(cls):
-        for k, v in vars(cls).items():
-            if not isinstance(v, int) or k.startswith("_"):
+    def _copy_and_set(dstcls, srccls):
+        """Copy class variables from srccls to dstcls
+
+        srccls must be a subclass on TPM_FRIENDLY_INT.
+        Sets the the variable type to dstcls when copying.
+        dstcls and srccls can be the same.
+        Skip setting destination if the dstcls variable already have the correct type.
+        """
+        if not issubclass(srccls, TPM_FRIENDLY_INT):
+            return
+        for k, v in vars(srccls).items():
+            dv = getattr(dstcls, k, None)
+            if not isinstance(v, int) or k.startswith("_") or type(dv) == type(dstcls):
                 continue
-            fv = cls(v)
-            setattr(cls, k, fv)
+            fv = dstcls(v)
+            setattr(dstcls, k, fv)
+
+    @staticmethod
+    def _fix_const_type(cls):
+        """Ensure constants in a TPM2 constant class have the correct type
+
+        We also copy constants from a superclass in case it's of the correct type.
+        """
+        for sc in cls.__mro__:
+            if sc in (TPM_FRIENDLY_INT, TPMA_FRIENDLY_INTLIST):
+                break
+            TPM_FRIENDLY_INT._copy_and_set(cls, sc)
         return cls
 
 
@@ -483,7 +504,9 @@ class TPM2_ALG(TPM_FRIENDLY_INT):
     LAST = lib.TPM2_ALG_LAST
 
 
-TPM2_ALG_ID = TPM2_ALG
+@TPM_FRIENDLY_INT._fix_const_type
+class TPM2_ALG_ID(TPM2_ALG):
+    pass
 
 
 @TPM_FRIENDLY_INT._fix_const_type
@@ -508,7 +531,9 @@ class TPM2_ECC(TPM_FRIENDLY_INT):
     }
 
 
-TPM2_ECC_CURVE = TPM2_ECC
+@TPM_FRIENDLY_INT._fix_const_type
+class TPM2_ECC_CURVE(TPM2_ECC):
+    pass
 
 
 @TPM_FRIENDLY_INT._fix_const_type
@@ -1316,7 +1341,9 @@ class TPM2_CLOCK(TPM_FRIENDLY_INT):
     COARSE_FASTER = lib.TPM2_CLOCK_COARSE_FASTER
 
 
-TPM2_CLOCK_ADJUST = TPM2_CLOCK
+@TPM_FRIENDLY_INT._fix_const_type
+class TPM2_CLOCK_ADJUST(TPM2_CLOCK):
+    pass
 
 
 @TPM_FRIENDLY_INT._fix_const_type
