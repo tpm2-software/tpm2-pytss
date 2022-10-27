@@ -6777,7 +6777,7 @@ class ESAPI:
               if FAPI is installed else :const:`constants.FAPI_ESYSBLOB.DESERIALIZE`.
 
         Raises:
-            ValueError: If type\_ is not of an expected value.
+            ValueError: If type\\_ is not of an expected value.
 
         Returns:
             ESYS_TR: The ESAPI handle to the loaded object.
