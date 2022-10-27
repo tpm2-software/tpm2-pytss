@@ -20,6 +20,7 @@ Supported versions of Python are:
 - 3.8
 - 3.9
 - 3.10
+- 3.11
 
 .. toctree::
     :hidden:
