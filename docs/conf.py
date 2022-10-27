@@ -92,7 +92,10 @@ source_suffix = {
 # Autodoc settings
 autodoc_typehints = "none"
 
-intersphinx_mapping = {"python": ("https://docs.python.org/3", None)}
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "cryptography": ("https://cryptography.io/en/latest", None),
+}
 
 autosectionlabel_prefix_document = True
 autosectionlabel_maxdepth = 1

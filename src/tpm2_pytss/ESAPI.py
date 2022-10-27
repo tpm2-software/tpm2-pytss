@@ -81,9 +81,9 @@ class ESAPI:
         - TCP socket localhost:2321 (TPM simulator)
 
     Args:
-        tcti Union[TCTI, str]: The TCTI context used to connect to the TPM (may be None). This
-        is established using TCTILdr or a tpm2-tools style --tcti string in the format of
-        <tcti-name>:<tcti-conf> where :<tcti-conf> is optional. Defaults to None.
+        tcti (Union[TCTI, str]): The TCTI context used to connect to the TPM (may be None).
+          This is established using TCTILdr or a tpm2-tools style --tcti string in the format
+          of <tcti-name>:<tcti-conf> where :<tcti-conf> is optional. Defaults to None.
 
     Returns:
         An instance of the ESAPI class.
@@ -1687,7 +1687,7 @@ class ESAPI:
             TSS2_Exception: Any of the various TSS2_RC's the lower layers can return.
 
         Returns:
-            A Tuple[TPM2B_ECC_POINT, TPM2B_ECC_POINT] which is the zPoint Results of P := h[de]Qs
+            :A Tuple[TPM2B_ECC_POINT, TPM2B_ECC_POINT] which is the zPoint Results of P := h[de]Qs
             and pubPoint Generated ephemeral public point (Qe) respectively.
 
         C Function: Esys_ECDH_KeyGen
@@ -3118,7 +3118,7 @@ class ESAPI:
         available.
 
         Args:
-            curve_id (TPM2_ECC_CURVE): The curve for the computed ephemeral point .
+            curve_id (TPM2_ECC_CURVE): The curve for the computed ephemeral point.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -3129,7 +3129,7 @@ class ESAPI:
             TSS2_Exception: Any of the various TSS2_RC's the lower layers can return.
 
         Returns:
-            A Tuple[TPM2B_ECC_POINT, int] which is the Ephemeral public key Q := [r]G, known as Q,
+            :A Tuple[TPM2B_ECC_POINT, int] which is the Ephemeral public key Q := [r]G, known as Q,
             and the least-significant 16 bits of commitCount.
 
         C Function: Esys_EC_Ephemeral
@@ -6769,15 +6769,15 @@ class ESAPI:
     def load_blob(
         self, data: bytes, type_: int = _DEFAULT_LOAD_BLOB_SELECTOR
     ) -> ESYS_TR:
-        """load binary ESAPI object as binary blob. Supported are the types :const:`FAPI_ESYSBLOB.CONTEXTLOAD` and :const:`FAPI_ESYSBLOB.DESERIALIZE`.
+        """load binary ESAPI object as binary blob. Supported are the types :const:`constants.FAPI_ESYSBLOB.CONTEXTLOAD` and :const:`constants.FAPI_ESYSBLOB.DESERIALIZE`.
 
         Args:
             data (bytes): Binary blob of the ESAPI object to load.
-            type_ (int): :const:`FAPI_ESYSBLOB.CONTEXTLOAD` or :const:`FAPI_ESYSBLOB.DESERIALIZE`. Defaults to :const:`FAPI_ESYSBLOB.CONTEXTLOAD`
-                if FAPI is installed else :const: `FAPI_ESYSBLOB.DESERIALIZE`.
+            type_ (int): :const:`constants.FAPI_ESYSBLOB.CONTEXTLOAD` or :const:`constants.FAPI_ESYSBLOB.DESERIALIZE`. Defaults to :const:`constants.FAPI_ESYSBLOB.CONTEXTLOAD`
+              if FAPI is installed else :const:`constants.FAPI_ESYSBLOB.DESERIALIZE`.
 
         Raises:
-            ValueError: If type_ is not of an expected value.
+            ValueError: If type\_ is not of an expected value.
 
         Returns:
             ESYS_TR: The ESAPI handle to the loaded object.

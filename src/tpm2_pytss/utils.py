@@ -91,16 +91,20 @@ def wrap(
         newparent (TPMT_PUBLIC): The public area of the parent
         public (TPM2B_PUBLIC): The public area of the key
         sensitive (TPM2B_SENSITIVE): The sensitive area of the key
-        symkey (bytes or None): Symmetric key for inner encryption. Defaults to None. When None
-        and symdef is defined a key will be generated based on the key size for symdef.
-        symdef (TPMT_SYMDEF_OBJECT): Symmetric algorithm to be used for inner encryption, defaults to None.
-        If None no inner wrapping is performed, else this should be set to aes128CFB since that is what
-        the TPM supports. To set to aes128cfb, do:
-        TPMT_SYM_DEF(
-          algorithm=TPM2_ALG.AES,
-          keyBits=TPMU_SYM_KEY_BITS(sym=128),
-          mode=TPMU_SYM_MODE(sym=TPM2_ALG.CFB),
-        )
+        symkey (bytes or None):
+          Symmetric key for inner encryption. Defaults to None.
+          When None and symdef is defined a key will be generated based on the key size for symdef.
+        symdef (TPMT_SYM_DEF_OBJECT or None):
+          Symmetric algorithm to be used for inner encryption, defaults to None.
+          If None no inner wrapping is performed, else this should be set to aes128CFB since that is
+          what the TPM supports. To set to aes128cfb, do:
+          ::
+
+            TPMT_SYM_DEF(
+              algorithm=TPM2_ALG.AES,
+              keyBits=TPMU_SYM_KEY_BITS(sym=128),
+              mode=TPMU_SYM_MODE(sym=TPM2_ALG.CFB),
+            )
 
     Returns:
         A tuple of (TPM2B_DATA, TPM2B_PRIVATE, TPM2B_ENCRYPTED_SECRET) which is the encryption key, the
@@ -162,20 +166,24 @@ def unwrap(
 
     Args:
         newparentpub (TPMT_PUBLIC): The public area of the parent the key was duplicated/wrapped under.
-        newparentpriv(TPMT_SENSITIVE): The private key of the parent the key was duplicated/wrapped under.
+        newparentpriv (TPMT_SENSITIVE): The private key of the parent the key was duplicated/wrapped under.
         public (TPM2B_PUBLIC): The public area of the key to be unwrapped.
-        duplicate(TPM2B_PRIVATE): The private or wrapped key to be unwrapped.
-        outsymseed(TPM2B_ENCRYPTED_SECRET): The output symmetric seed from a wrap or duplicate call.
-        symkey (bytes or None): Symmetric key for inner encryption. Defaults to None. When None
-        and symdef is defined a key will be generated based on the key size for symdef.
-        symdef (TPMT_SYMDEF_OBJECT): Symmetric algorithm to be used for inner encryption, defaults to None.
-        If None no inner wrapping is performed, else this should be set to aes128CFB since that is what
-        the TPM supports. To set to aes128cfb, do:
-        TPMT_SYM_DEF(
-          algorithm=TPM2_ALG.AES,
-          keyBits=TPMU_SYM_KEY_BITS(sym=128),
-          mode=TPMU_SYM_MODE(sym=TPM2_ALG.CFB),
-        )
+        duplicate (TPM2B_PRIVATE): The private or wrapped key to be unwrapped.
+        outsymseed (TPM2B_ENCRYPTED_SECRET): The output symmetric seed from a wrap or duplicate call.
+        symkey (bytes or None):
+          Symmetric key for inner encryption. Defaults to None.
+          When None and symdef is defined a key will be generated based on the key size for symdef.
+        symdef (TPMT_SYM_DEF_OBJECT or None):
+          Symmetric algorithm to be used for inner encryption, defaults to None.
+          If None no inner wrapping is performed, else this should be set to aes128CFB since that is what
+          the TPM supports. To set to aes128cfb, do:
+          ::
+
+            TPMT_SYM_DEF(
+              algorithm=TPM2_ALG.AES,
+              keyBits=TPMU_SYM_KEY_BITS(sym=128),
+              mode=TPMU_SYM_MODE(sym=TPM2_ALG.CFB),
+            )
 
     Returns:
         A TPM2B_SENSITIVE which contains the raw key material.

@@ -39,7 +39,7 @@ from tpm2_pytss.constants import (
     TPM2_SE,
     TPM2_HR,
 )
-from typing import Union, Tuple
+from typing import Union, Tuple, Optional
 import sys
 
 try:
@@ -1335,14 +1335,16 @@ class TPMT_KEYEDHASH_SCHEME(TPM_OBJECT):
 
 class TPM2B_SENSITIVE(TPM_OBJECT):
     @classmethod
-    def from_pem(cls, data: bytes, password: bytes = None) -> "TPM2B_SENSITIVE":
+    def from_pem(
+        cls, data: bytes, password: Optional[bytes] = None
+    ) -> "TPM2B_SENSITIVE":
         """Decode the private part from standard key encodings.
 
         Currently supports PEM, DER and SSH encoded private keys.
 
         Args:
             data (bytes): The encoded key as bytes.
-            password (bytes, optional): The password used to decrypt the key, default is None.
+            password (bytes): The password used to decrypt the key, default is None.
 
         Returns:
             Returns an instance of TPM2B_SENSITIVE.
@@ -1417,7 +1419,7 @@ class TPM2B_SENSITIVE(TPM_OBJECT):
         Args:
             secret (bytes): the symmetric key.
             algorithm (TPM2_ALG, int): The symmetric cipher algorithm to use, default is TPM2_ALG.AES.
-            mode (TPM2_ALG. int): The symmetric mode to use, default is TPM2_ALG.CFB.
+            mode (TPM2_ALG, int): The symmetric mode to use, default is TPM2_ALG.CFB.
             nameAlg (TPM2_ALG, int): The name algorithm for the public part, default is TPM2_ALG.SHA256.
             objectAttributes (TPMA_OBJECT, int): The object attributes for the public area, default is (TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH).
             seed (bytes) optional: The obfuscate value, default is a randomized value.
@@ -2037,14 +2039,14 @@ class TPMU_PUBLIC_ID(TPM_OBJECT):
 
 class TPMT_SENSITIVE(TPM_OBJECT):
     @classmethod
-    def from_pem(cls, data, password=None):
+    def from_pem(cls, data, password: Optional[bytes] = None):
         """Decode the private part from standard key encodings.
 
         Currently supports PEM, DER and SSH encoded private keys.
 
         Args:
             data (bytes): The encoded key as bytes.
-            password (bytes, optional): The password used to decrypt the key, default is None.
+            password (bytes): The password used to decrypt the key, default is None.
 
         Returns:
             Returns an instance of TPMT_SENSITIVE.
@@ -2061,8 +2063,8 @@ class TPMT_SENSITIVE(TPM_OBJECT):
         objectAttributes=(
             TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH
         ),
-        scheme=None,
-        seed=None,
+        scheme: Optional[TPMT_KEYEDHASH_SCHEME] = None,
+        seed: Optional[bytes] = None,
     ):
         """Generate the private and public part for a keyed hash object from a secret.
 
@@ -2070,8 +2072,8 @@ class TPMT_SENSITIVE(TPM_OBJECT):
             secret (bytes): The HMAC key / data to be sealed.
             nameAlg (int): The name algorithm for the public part, default is TPM2_ALG.SHA256.
             objectAttributes (int): The object attributes for the public area, default is (TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH).
-            scheme (TPMT_KEYEDHASH_SCHEME, optional): The signing/key exchange scheme to use for the public area, default is None.
-            seed (bytes, optional): The obfuscate value, default is a randomized value.
+            scheme (TPMT_KEYEDHASH_SCHEME): The signing/key exchange scheme to use for the public area, default is None.
+            seed (bytes): The obfuscate value, default is a randomized value.
 
         Returns:
             A tuple of of TPMT_SENSITIVE and TPMT_PUBLIC
@@ -2106,7 +2108,7 @@ class TPMT_SENSITIVE(TPM_OBJECT):
         objectAttributes=(
             TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH
         ),
-        seed=None,
+        seed: Optional[bytes] = None,
     ):
         """
         Generate the private and public part for a symcipher object from a secret.
@@ -2117,7 +2119,7 @@ class TPMT_SENSITIVE(TPM_OBJECT):
             mode (int): The symmetric mode to use, default is TPM2_ALG.CFB.
             nameAlg (int): The name algorithm for the public part, default is TPM2_ALG.SHA256.
             objectAttributes (int): The object attributes for the public area, default is (TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH).
-            seed (bytes, optional): The obfuscate value, default is a randomized value.
+            seed (bytes): The obfuscate value, default is a randomized value.
 
         Returns:
             A tuple of TPMT_SENSITIVE and TPMT_PUBLIC
@@ -2264,7 +2266,7 @@ class TPMT_SIGNATURE(TPM_OBJECT):
             data (bytes): The signed data to verify.
 
         Raises:
-            InvalidSignature: when the signature doesn't match the data.
+            :py:class:`cryptography.exceptions.InvalidSignature`: when the signature doesn't match the data.
         """
         _verify_signature(self, key, data)
 
