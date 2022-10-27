@@ -184,6 +184,7 @@ class TestUtils(TSS2_EsapiTest):
         self.assertEqual(b"credential data", bytes(certinfo))
 
     def test_make_credential_ecc_camellia(self):
+        self.skipIfAlgNotSupported(TPM2_ALG.CAMELLIA)
         insens = TPM2B_SENSITIVE_CREATE()
         phandle, parent, _, _, _ = self.ectx.create_primary(
             insens, "ecc:camellia128cfb"
@@ -205,22 +206,10 @@ class TestUtils(TSS2_EsapiTest):
             self.skipTest("SM4 is not supported by the cryptography module")
         elif _get_digest(TPM2_ALG.SM3_256) is None:
             self.skipTest("SM3 is not supported by the cryptography module")
-        has_sm4 = False
-        has_sm3 = False
-        more = True
-        while more:
-            more, data = self.ectx.get_capability(
-                TPM2_CAP.ALGS, 0, lib.TPM2_MAX_CAP_ALGS
-            )
-            algs = [x.alg for x in data.data.algorithms]
-            if TPM2_ALG.SM4 in algs:
-                has_sm4 = True
-            if TPM2_ALG.SM3_256 in algs:
-                has_sm3 = True
-        if not has_sm4:
-            self.skipTest("SM4 not supported by simulator")
-        elif not has_sm3:
-            self.skipTest("SM3 not supported by simulator")
+
+        self.skipIfAlgNotSupported(TPM2_ALG.SM3_256)
+        self.skipIfAlgNotSupported(TPM2_ALG.SM4)
+
         insens = TPM2B_SENSITIVE_CREATE()
         templ = TPM2B_PUBLIC.parse("ecc:sm4128cfb", nameAlg=TPM2_ALG.SM3_256)
         phandle, parent, _, _, _ = self.ectx.create_primary(insens, templ)
