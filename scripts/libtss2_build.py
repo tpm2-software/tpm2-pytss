@@ -78,6 +78,7 @@ ffibuilder.set_source(
     libraries=paths["libraries"],
     library_dirs=paths["library_dirs"],
     include_dirs=paths["include_dirs"],
+    extra_compile_args=["-time", "-v", "-ftime-report"],
 )  # library name, for the linker
 
 if __name__ == "__main__":

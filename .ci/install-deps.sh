@@ -6,6 +6,10 @@ set -exo pipefail
 export TPM2_TSS_VERSION=${TPM2_TSS_VERSION:-"3.0.3"}
 export TPM2_TSS_FAPI=${TPM2_TSS_FAPI:-"true"}
 export TPM2_TOOLS_VERSION=${TPM2_TOOLS_VERSION:-"5.3"}
+export CI_DEPS_PATH="${HOME}/cideps"
+export PATH="${PATH}:${CI_DEPS_PATH}/bin"
+export PKG_CONFIG_PATH="${CI_DEPS_PATH}/lib/pkgconfig"
+export LD_LIBRARY_PATH="${CI_DEPS_PATH}/lib"
 
 #
 # Get dependencies for building and install tpm2-tss and abrmd projects
@@ -42,7 +46,12 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
     libtasn1-6-dev \
     socat \
     libseccomp-dev \
-    libjson-glib-dev
+    libjson-glib-dev \
+    time
+
+# add $HOME/cideps/lib to ld.so search paths
+echo "${CI_DEPS_PATH}/lib" | sudo tee /etc/ld.so.conf.d/cideps.conf
+sudo ldconfig
 
 #
 # Install tpm2-tss
@@ -60,10 +69,11 @@ if ! pkg-config tss2-sys; then
     extra_configure_flags="--disable-fapi"
   fi
   ./bootstrap
-  ./configure --sysconfdir=/etc ${extra_configure_flags} CFLAGS=-g
+  ./configure --prefix="${CI_DEPS_PATH}" ${extra_configure_flags} CFLAGS=-g
   make -j4
-  sudo make install
+  make install
   sudo ldconfig
+  sudo ln -s "${CI_DEPS_PATH}/etc/tpm2-tss" /etc/tpm2-tss
   popd
 fi
 
@@ -72,37 +82,40 @@ fi
 #
 
 # Does our tcti support the TCTI for swtpm? If so get the swtpm simulator
-if pkg-config --exists tss2-tcti-swtpm; then
+if swtpm --version && pkg-config --exists tss2-tcti-swtpm; then
+  echo "using cached swtpm"
+elif pkg-config --exists tss2-tcti-swtpm; then
 
   # libtpms
   if ! pkg-config libtpms; then
     git -C /tmp clone --depth=1 https://github.com/stefanberger/libtpms.git
     pushd /tmp/libtpms
-    ./autogen.sh --prefix=/usr --with-openssl --with-tpm2 --without-tpm1
+    ./autogen.sh --prefix="$CI_DEPS_PATH" --with-openssl --with-tpm2 --without-tpm1
     make -j$(nproc)
-    sudo make install
+    make install
     popd
     rm -fr /tmp/libtpms
     sudo ldconfig
   fi
 
   # swtpm
-  if ! command -v swtpm; then
+  if ! command -v swtpm || ! swtpm --version; then
     git -C /tmp clone --depth=1 https://github.com/stefanberger/swtpm.git
     pushd /tmp/swtpm
-    ./autogen.sh --prefix=/usr
+    ./autogen.sh --prefix="$CI_DEPS_PATH"
     make -j$(nproc)
-    sudo make install
+    make install
     popd
     rm -fr /tmp/swtpm
   fi
+
 # Get IBM Simulator (supported for a longer time)
-else
+elif ! command -v tpm_server; then
   # pull from fork that has fixes for RC handling not yet in mainline.
   git -C /tmp clone --depth=1 https://github.com/williamcroberts/ibmswtpm2.git -b fix-rc-exits
   pushd /tmp/ibmswtpm2/src
   make -j$(nproc)
-  sudo cp tpm_server /usr/local/bin
+  sudo cp tpm_server "${CI_DEPS_PATH}/bin/"
   popd
   rm -fr /tmp/ibmswtpm2
 fi
@@ -119,9 +132,9 @@ if ! command -v tpm2; then
     --branch "${TPM2_TOOLS_VERSION}" https://github.com/tpm2-software/tpm2-tools.git
   pushd /tmp/tpm2-tools
   ./bootstrap
-  ./configure CFLAGS=-g --disable-fapi
+  ./configure CFLAGS=-g --disable-fapi --prefix="$CI_DEPS_PATH"
   make -j$(nproc)
-  sudo make install
+  make install
   popd
 fi
 
@@ -135,6 +148,6 @@ python3 -m pip install --user --upgrade 'pip>21.3'
 #
 # Install Python Development Dependencies
 #
-python3 -m pip install --user -e .[dev]
+/usr/bin/time python3 -m pip install -v --user -e .[dev]
 
 exit 0

@@ -5,6 +5,11 @@ if [ -d "${HOME}/.local/bin" ]; then
   export PATH="${HOME}/.local/bin:${PATH}"
 fi
 
+export CI_DEPS_PATH="${HOME}/cideps"
+export PATH="${PATH}:${CI_DEPS_PATH}/bin"
+export PKG_CONFIG_PATH="${CI_DEPS_PATH}/lib/pkgconfig"
+export TSS2_FAPICONF="${CI_DEPS_PATH}/etc/tpm2-tss/fapi-config.json"
+
 SRC_ROOT=${SRC_ROOT:-"${PWD}"}
 PYTHON=${PYTHON:-"python3"}
 
@@ -54,7 +59,11 @@ function run_test() {
 
   # verify that package is sane on a user install that is not editable
   git clean -fdx
-  python3 -m pip install --user .
+  free -m
+  df -h
+  ps axuw
+  pkill -x swtpm || true
+  /usr/bin/time python3 -m pip install -v --user .
   # can't be in a directory that has the package as a folder, Python tries to use that
   # over whats installed.
   pushd /tmp
