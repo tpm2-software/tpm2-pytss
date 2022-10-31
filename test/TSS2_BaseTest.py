@@ -56,12 +56,21 @@ class BaseTpmSimulator(object):
                 self._port = random_port
                 logger.debug(f"started {self.exe} on port {random_port}\n")
                 break
+            else:
+                sim.kill()
 
         if not tpm:
             raise SystemError("Could not start simulator")
 
     def close(self):
+        if self.tpm.poll() is not None:
+            return
         self.tpm.terminate()
+        try:
+            self.tpm.wait(timeout=1)
+        except subprocess.TimeoutExpired:
+            self.tpm.kill()
+        self.tpm.wait(timeout=10)
 
     def __str__(self):
         return self.exe
