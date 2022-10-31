@@ -7,6 +7,12 @@ export TPM2_TSS_VERSION=${TPM2_TSS_VERSION:-"3.0.3"}
 export TPM2_TSS_FAPI=${TPM2_TSS_FAPI:-"true"}
 export TPM2_TOOLS_VERSION=${TPM2_TOOLS_VERSION:-"5.5"}
 
+# Setup environment for using cached libraries/binaries
+export CI_DEPS_PATH="${HOME}/cideps"
+export PATH="${PATH}:${CI_DEPS_PATH}/bin"
+export PKG_CONFIG_PATH="${CI_DEPS_PATH}/lib/pkgconfig"
+export LD_LIBRARY_PATH="${CI_DEPS_PATH}/lib/"
+
 #
 # Get dependencies for building and install tpm2-tss and abrmd projects
 #
@@ -72,15 +78,15 @@ fi
 #
 
 # Does our tcti support the TCTI for swtpm? If so get the swtpm simulator
-if pkg-config --exists tss2-tcti-swtpm; then
+if pkg-config --exists tss2-tcti-swtpm && ! swtpm --version; then
 
   # libtpms
   if ! pkg-config libtpms; then
     git -C /tmp clone --depth=1 https://github.com/stefanberger/libtpms.git
     pushd /tmp/libtpms
-    ./autogen.sh --prefix=/usr --with-openssl --with-tpm2 --without-tpm1
+    ./autogen.sh --prefix="${CI_DEPS_PATH}" --with-openssl --with-tpm2 --without-tpm1
     make -j$(nproc)
-    sudo make install
+    make install
     popd
     rm -fr /tmp/libtpms
     sudo ldconfig
@@ -90,19 +96,20 @@ if pkg-config --exists tss2-tcti-swtpm; then
   if ! command -v swtpm; then
     git -C /tmp clone --depth=1 https://github.com/stefanberger/swtpm.git
     pushd /tmp/swtpm
-    ./autogen.sh --prefix=/usr
+    ./autogen.sh --prefix="${CI_DEPS_PATH}"
     make -j$(nproc)
-    sudo make install
+    make install
     popd
     rm -fr /tmp/swtpm
   fi
 # Get IBM Simulator (supported for a longer time)
-else
+elif ! command -v tpm_server; then
   # pull from fork that has fixes for RC handling not yet in mainline.
   git -C /tmp clone --depth=1 https://github.com/williamcroberts/ibmswtpm2.git -b fix-rc-exits
   pushd /tmp/ibmswtpm2/src
   make -j$(nproc)
-  sudo cp tpm_server /usr/local/bin
+  mkdir -p "${CI_DEPS_PATH}/bin"
+  cp tpm_server "${CI_DEPS_PATH}/bin"
   popd
   rm -fr /tmp/ibmswtpm2
 fi

@@ -32,6 +32,21 @@ jobs:
           path: ~/.cache/pip
           key: pip-${{ hashFiles('**/setup.cfg') }}
 
+      - name: cache swtpm
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/cideps/lib/libtpms.so*
+            ~/cideps/bin/swtpm
+            ~/cideps/lib/swtpm/libswtpm_libtpms.so*
+          key: swtpm
+
+      - name: cache ibmswtpm2
+        uses: actions/cache@v3
+        with:
+          path: ~/cideps/bin/tpm_server
+          key: ibmswtpm2
+
       - name: Install dependencies
         env:
           TPM2_TSS_VERSION: ${{ matrix.tss-version }}

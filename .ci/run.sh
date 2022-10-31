@@ -5,6 +5,12 @@ if [ -d "${HOME}/.local/bin" ]; then
   export PATH="${HOME}/.local/bin:${PATH}"
 fi
 
+# Setup environment for using cached libraries/binaries
+export CI_DEPS_PATH="${HOME}/cideps"
+export PATH="${PATH}:${CI_DEPS_PATH}/bin"
+export PKG_CONFIG_PATH="${CI_DEPS_PATH}/lib/pkgconfig"
+export LD_LIBRARY_PATH="${CI_DEPS_PATH}/lib/"
+
 SRC_ROOT=${SRC_ROOT:-"${PWD}"}
 PYTHON=${PYTHON:-"python3"}
 
