@@ -10,11 +10,14 @@ jobs:
         python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
         tss-version: ['master', '2.4.0', '3.0.0', '3.0.3', '3.2.0', '4.0.0']
         with-fapi: [true]
-        tools-version: ['5.5']
+        tools-version: ['5.6']
         include:
           - python-version: '3.9'
             tss-version: '3.1.0'
             with-fapi: false
+          - python-version: '3.12'
+            tss-version: 'master'
+            tools-version: 'master'
 
 
     steps:
@@ -46,6 +49,13 @@ jobs:
         with:
           path: ~/cideps/bin/tpm_server
           key: ibmswtpm2
+
+      - name: cache tpm2-tools
+        uses: actions/cache@v3
+        if: matrix.tools-version != 'master'
+        with:
+          path: ~/cideps/bin/tpm2*
+          key: tools-${{ matrix.tools-version }}-${{ matrix.tss-version }}
 
       - name: Install dependencies
         env:

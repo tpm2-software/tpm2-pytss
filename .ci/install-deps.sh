@@ -126,9 +126,9 @@ if ! command -v tpm2; then
     --branch "${TPM2_TOOLS_VERSION}" https://github.com/tpm2-software/tpm2-tools.git
   pushd /tmp/tpm2-tools
   ./bootstrap
-  ./configure CFLAGS=-g --disable-fapi
+  ./configure CFLAGS=-g --prefix="${CI_DEPS_PATH}" --disable-fapi
   make -j$(nproc)
-  sudo make install
+  make install
   popd
 fi
 
