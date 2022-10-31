@@ -57,6 +57,17 @@ jobs:
           path: ~/cideps/bin/tpm2*
           key: tools-${{ matrix.tools-version }}-${{ matrix.tss-version }}
 
+      - name: cache tpm2-tss
+        uses: actions/cache@v3
+        if: matrix.tss-version != 'master'
+        with:
+          path: |
+            ~/cideps/lib/libtss2-*
+            ~/cideps/lib/pkgconfig/tss2-*
+            ~/cideps/include/tss2
+            ~/cideps/etc/tpm2-tss
+          key: tss2-${{ matrix.tss-version }}-c1
+
       - name: Install dependencies
         env:
           TPM2_TSS_VERSION: ${{ matrix.tss-version }}
