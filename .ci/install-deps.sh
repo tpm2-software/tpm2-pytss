@@ -66,12 +66,15 @@ if ! pkg-config tss2-sys; then
     extra_configure_flags="--disable-fapi"
   fi
   ./bootstrap
-  ./configure --sysconfdir=/etc ${extra_configure_flags} CFLAGS=-g
-  make -j4
-  sudo make install
+  ./configure --prefix="${CI_DEPS_PATH}" ${extra_configure_flags} CFLAGS=-g
+  make -j$(nproc)
+  make install
   sudo ldconfig
   popd
 fi
+
+# link ${CI_DEPS_PATH}/etc/tpm2-tss to /etc/ for the FAPI tests
+sudo ln -s "${CI_DEPS_PATH}/etc/tpm2-tss" /etc/
 
 #
 # Get a simulator
