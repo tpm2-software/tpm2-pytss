@@ -1431,8 +1431,8 @@ class ToolsTest(TSS2_BaseTest):
     def test_decode_int_nt(self):
         if not self.has_tools:
             self.skipTest("tools not in path")
-        elif self.tools_version < Version("5.2-153"):
-            self.skipTest("newer tpm2-tools version required")
+        elif self.tools_version < Version("5.3"):
+            self.skipTest("tpm2-tools version 5.3 or later required")
 
         self.run_tool("nvdefine", "0x01000000", "-a", "authwrite|authread|nt=bits")
         self.run_tool("nvsetbits", "0x01000000", "-i", "0x4000000000000001")
@@ -1449,8 +1449,8 @@ class ToolsTest(TSS2_BaseTest):
     def test_decode_nt_extend(self):
         if not self.has_tools:
             self.skipTest("tools not in path")
-        elif self.tools_version < Version("5.2-153"):
-            self.skipTest("newer tpm2-tools version required")
+        elif self.tools_version < Version("5.3"):
+            self.skipTest("tpm2-tools version 5.3 or later required")
 
         self.run_tool(
             "nvdefine",
@@ -1475,8 +1475,8 @@ class ToolsTest(TSS2_BaseTest):
     def test_decode_nt_pin(self):
         if not self.has_tools:
             self.skipTest("tools not in path")
-        elif self.tools_version < Version("5.2-153"):
-            self.skipTest("newer tpm2-tools version required")
+        elif self.tools_version < Version("5.3"):
+            self.skipTest("tpm2-tools version 5.3 or later required")
 
         self.run_tool(
             "nvdefine",
