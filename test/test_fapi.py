@@ -451,7 +451,7 @@ class Common:
         assert info_json["attest"]["type"] == "ATTEST_QUOTE"
         assert type(signature) is bytes
         pcr_log_json = json.loads(pcr_log)
-        assert pcr_log_json == []
+        assert type(pcr_log_json) == list
         assert certificate == ""
 
         # TODO verify via openssl
@@ -518,8 +518,9 @@ class Common:
 
     def test_pcr_read(self):
         value, log = self.fapi.pcr_read(7)
+        log_json = json.loads(log)
         assert value == b"\0" * 32
-        assert log == "[\n]"
+        assert type(log_json) == list
 
     def test_pcr_extend_read(self):
         index = 16
