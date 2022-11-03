@@ -18,6 +18,32 @@ if not _lib_version_atleast("tss2-policy", "3.2.0-63-gdcdc8412"):
     )
 
 
+def lowercase_dict(src):
+    if not isinstance(src, dict):
+        return src
+    dest = dict()
+    for k, v in src.items():
+        if isinstance(v, str):
+            lv = v.lower()
+            dest[k] = lv
+        elif isinstance(v, dict):
+            dest[k] = lowercase_dict(v)
+        elif isinstance(v, list):
+            l = list()
+            for e in v:
+                if isinstance(e, str):
+                    le = e.lower()
+                elif isinstance(e, dict):
+                    le = lowercase_dict(e)
+                else:
+                    le = e
+                l.append(le)
+            dest[k] = l
+        else:
+            dest[k] = v
+    return dest
+
+
 class TestPolicy(TSS2_EsapiTest):
     def test_password_policy(self):
         pol = {
@@ -60,7 +86,7 @@ class TestPolicy(TSS2_EsapiTest):
             dig.buffer, b"\xaf`8\xc7\x8c\\\x96-7\x12~1\x91$\xe3\xa8\xdcX.\x9b"
         )
         cj = json.loads(cjb)
-        self.assertEqual(cj, calcpol)
+        self.assertEqual(lowercase_dict(cj), lowercase_dict(calcpol))
 
     def test_password_policy_execute(self):
         pol = {
@@ -172,7 +198,7 @@ class TestPolicy(TSS2_EsapiTest):
         self.assertEqual(
             bytes(cb_selection.selections.pcr_select.pcrSelect), b"\x01\x01\x00\x00"
         )
-        self.assertEqual(cj, calc_pol)
+        self.assertEqual(lowercase_dict(cj), lowercase_dict(calc_pol))
 
         def bad_cb(*args):
             raise Exception("callback exception")
@@ -228,8 +254,7 @@ class TestPolicy(TSS2_EsapiTest):
         cj = json.loads(cjb)
         self.assertEqual(cb_called, 3)
         self.assertEqual(cb_names, [b"path1", b"path2", b"path3"])
-        print(cj)
-        self.assertEqual(cj, calc_pol)
+        self.assertEqual(lowercase_dict(cj), lowercase_dict(calc_pol))
 
         def bad_cb(*args):
             raise Exception("callback exception")
@@ -283,7 +308,7 @@ class TestPolicy(TSS2_EsapiTest):
 
         cj = json.loads(cjb)
         self.assertEqual(cb_path, b"parent_path")
-        self.assertEqual(cj, calc_pol)
+        self.assertEqual(lowercase_dict(cj), lowercase_dict(calc_pol))
 
         def bad_cb(*args):
             raise Exception("callback exception")
@@ -369,7 +394,7 @@ class TestPolicy(TSS2_EsapiTest):
         self.assertEqual(cb_nvpath, b"nv_path")
         self.assertEqual(cb_nvindex, 0)
         self.assertIsInstance(cb_nvindex, TPM2_HANDLE)
-        self.assertEqual(cj, calc_pol)
+        self.assertEqual(lowercase_dict(cj), lowercase_dict(calc_pol))
 
         def bad_cb(*args):
             raise Exception("callback exception")
