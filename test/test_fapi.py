@@ -37,6 +37,8 @@ def fapi_config_ecc(simulator):
         tcti=simulator.tcti_name_conf,
         ek_cert_less="yes",
         profile_name="P_ECCP256SHA256",
+        firmware_log_file="/dev/null",
+        ima_log_file="/dev/null",
     ) as fapi_config:
         yield fapi_config
 
@@ -48,6 +50,8 @@ def fapi_config_rsa(simulator):
         tcti=simulator.tcti_name_conf,
         ek_cert_less="yes",
         profile_name="P_RSA2048SHA256",
+        firmware_log_file="/dev/null",
+        ima_log_file="/dev/null",
     ) as fapi_config:
         yield fapi_config
 
