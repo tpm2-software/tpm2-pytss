@@ -4777,6 +4777,27 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.tr_get_tpm_handle(42)
 
+    def test_trsess_get_attributes(self):
+        sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL,)
+
+        session = self.ectx.start_auth_session(
+            tpm_key=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            session_type=TPM2_SE.POLICY,
+            symmetric=sym,
+            auth_hash=TPM2_ALG.SHA256,
+        )
+
+        attrs = self.ectx.trsess_get_attributes(session)
+        self.assertEqual(attrs, TPMA_SESSION.CONTINUESESSION)
+
+        self.ectx.trsess_set_attributes(
+            session, TPMA_SESSION.AUDIT | TPMA_SESSION.AUDITEXCLUSIVE
+        )
+
+        attrs = self.ectx.trsess_get_attributes(session)
+        self.assertEqual(attrs, TPMA_SESSION.AUDIT | TPMA_SESSION.AUDITEXCLUSIVE)
+
 
 if __name__ == "__main__":
     unittest.main()

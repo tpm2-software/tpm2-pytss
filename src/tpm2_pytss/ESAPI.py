@@ -567,6 +567,31 @@ class ESAPI:
 
         return ESYS_TR(session_handle[0])
 
+    def trsess_get_attributes(self, session: ESYS_TR) -> TPMA_SESSION:
+        """Get session attributes.
+
+        Get a sessions attributes.
+
+        Args:
+            session (ESYS_TR): The session handle.
+
+        Raises:
+            TypeError: If a parameter is not of an expected type.
+            TSS2_Exception: Any of the various TSS2_RC's the lower layers can return.
+
+        Returns:
+            The attributes as a TPMA_SESSION.
+
+        C_Function: Esys_TRSess_GetAttributes
+        """
+        _check_handle_type(session, "session")
+
+        attributes = ffi.new("TPMA_SESSION *")
+
+        _chkrc(lib.Esys_TRSess_GetAttributes(self._ctx, session, attributes))
+
+        return TPMA_SESSION(attributes[0])
+
     def trsess_set_attributes(
         self, session: ESYS_TR, attributes: Union[TPMA_SESSION, int], mask: int = 0xFF
     ) -> None:
