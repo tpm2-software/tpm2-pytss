@@ -1931,6 +1931,13 @@ class TypesTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             bytes(bad)
 
+    def test_TPM2_HANDLE(self):
+        handle = TPM2_HANDLE(TPM2_RH.OWNER)
+        ht = handle.type
+
+        self.assertEqual(ht, TPM2_HT.PERMANENT)
+        self.assertIsInstance(ht, TPM2_HT)
+
 
 if __name__ == "__main__":
     unittest.main()

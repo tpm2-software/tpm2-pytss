@@ -39,6 +39,7 @@ from tpm2_pytss.constants import (
     TPM2_ECC_CURVE,
     TPM2_SE,
     TPM2_HR,
+    TPM2_HT,
 )
 from typing import Union, Tuple, Optional
 import sys
@@ -65,7 +66,10 @@ class ParserAttributeError(Exception):
 class TPM2_HANDLE(int):
     """"A handle to a TPM address"""
 
-    pass
+    @property
+    def type(self) -> TPM2_HT:
+        """TPM2_HT: The handle type"""
+        return TPM2_HT((self >> 24) & 0xFF)
 
 
 class TPM_OBJECT(object):
