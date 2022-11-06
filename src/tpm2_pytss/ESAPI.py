@@ -12,6 +12,7 @@ from .TCTI import TCTI
 from .TCTILdr import TCTILdr
 
 from typing import List, Optional, Tuple, Union
+import weakref
 
 # Work around this FAPI dependency if FAPI is not present with the constant value
 _fapi_installed_ = _lib_version_atleast("tss2-fapi", "3.0.0")
@@ -84,6 +85,8 @@ class ESAPI:
         tcti (Union[TCTI, str]): The TCTI context used to connect to the TPM (may be None).
           This is established using TCTILdr or a tpm2-tools style --tcti string in the format
           of <tcti-name>:<tcti-conf> where :<tcti-conf> is optional. Defaults to None.
+        flush_on_close (bool): Flush transient/session handles on close or when the handle is no longer referenced.
+          Defaults to True.
 
     Returns:
         An instance of the ESAPI class.
@@ -108,7 +111,9 @@ class ESAPI:
     C Function: Esys_Initialize
     """
 
-    def __init__(self, tcti: Union[TCTI, str, None] = None):
+    def __init__(
+        self, tcti: Union[TCTI, str, None] = None, flush_on_close: bool = True
+    ):
 
         if not isinstance(tcti, (TCTI, type(None), str)):
             raise TypeError(
@@ -128,6 +133,9 @@ class ESAPI:
         self._ctx_pp = ffi.new("ESYS_CONTEXT **")
         _chkrc(lib.Esys_Initialize(self._ctx_pp, tctx, ffi.NULL))
         self._ctx = self._ctx_pp[0]
+
+        self._flush_on_close = flush_on_close
+        self._ref_handles = dict()
 
     def __enter__(self):
         return self
@@ -149,6 +157,12 @@ class ESAPI:
 
         C Function: Esys_Finalize
         """
+        if self._flush_on_close:
+            for handle, v in [(x, y) for x, y in self._ref_handles.items()]:
+                tracked, _ = v
+                if not tracked:
+                    continue
+                self.flush_context(handle)
         if self._ctx_pp:
             lib.Esys_Finalize(self._ctx_pp)
             self._ctx = ffi.NULL
@@ -223,6 +237,7 @@ class ESAPI:
                 self._ctx, handle, session1, session2, session3, obj,
             )
         )
+
         return ESYS_TR(obj[0])
 
     def tr_close(self, esys_handle: ESYS_TR) -> None:
@@ -565,7 +580,7 @@ class ESAPI:
             )
         )
 
-        return ESYS_TR(session_handle[0])
+        return self._handle_with_ref(ESYS_TR(session_handle[0]))
 
     def trsess_get_attributes(self, session: ESYS_TR) -> TPMA_SESSION:
         """Get session attributes.
@@ -623,6 +638,14 @@ class ESAPI:
             raise TypeError(f"Expected mask to be type int, got {type(attributes)}")
 
         _chkrc(lib.Esys_TRSess_SetAttributes(self._ctx, session, attributes, mask))
+
+        if attributes & mask & TPMA_SESSION.CONTINUESESSION:
+            self._set_tracking_ref(session, True)
+        elif (
+            mask & TPMA_SESSION.CONTINUESESSION
+            and not attributes & TPMA_SESSION.CONTINUESESSION
+        ):
+            self._set_tracking_ref(session, False)
 
     def trsess_get_nonce_tpm(self, session: ESYS_TR) -> TPM2B_NONCE:
         """Retrieve the TPM nonce of an Esys_TR session object.
@@ -869,7 +892,7 @@ class ESAPI:
             )
         )
 
-        return ESYS_TR(object_handle[0])
+        return self._handle_with_ref(ESYS_TR(object_handle[0]))
 
     def load_external(
         self,
@@ -935,7 +958,7 @@ class ESAPI:
             )
         )
 
-        return ESYS_TR(object_handle[0])
+        return self._handle_with_ref(ESYS_TR(object_handle[0]))
 
     def read_public(
         self,
@@ -1310,7 +1333,7 @@ class ESAPI:
         )
 
         return (
-            ESYS_TR(object_handle[0]),
+            self._handle_with_ref(ESYS_TR(object_handle[0])),
             TPM2B_PRIVATE(_get_dptr(out_private, lib.Esys_Free)),
             TPM2B_PUBLIC(_get_dptr(out_public, lib.Esys_Free)),
         )
@@ -2354,7 +2377,7 @@ class ESAPI:
             )
         )
 
-        return ESYS_TR(sequence_handle[0])
+        return self._handle_with_ref(ESYS_TR(sequence_handle[0]))
 
     def hash_sequence_start(
         self,
@@ -2414,7 +2437,7 @@ class ESAPI:
             )
         )
 
-        return ESYS_TR(sequence_handle[0])
+        return self._handle_with_ref(ESYS_TR(sequence_handle[0]))
 
     def sequence_update(
         self,
@@ -2524,6 +2547,7 @@ class ESAPI:
             )
         )
 
+        self._ref_handles.pop(sequence_handle, None)
         return (
             TPM2B_DIGEST(_get_dptr(result, lib.Esys_Free)),
             TPMT_TK_HASHCHECK(_get_dptr(validation, lib.Esys_Free)),
@@ -2587,6 +2611,8 @@ class ESAPI:
                 results,
             )
         )
+
+        self._ref_handles.pop(sequence_handle, None)
         return TPML_DIGEST_VALUES(_get_dptr(results, lib.Esys_Free))
 
     def certify(
@@ -4944,7 +4970,7 @@ class ESAPI:
         )
 
         return (
-            ESYS_TR(object_handle[0]),
+            self._handle_with_ref(ESYS_TR(object_handle[0])),
             TPM2B_PUBLIC(_cdata=_get_dptr(out_public, lib.Esys_Free)),
             TPM2B_CREATION_DATA(_cdata=_get_dptr(creation_data, lib.Esys_Free)),
             TPM2B_DIGEST(_cdata=_get_dptr(creation_hash, lib.Esys_Free)),
@@ -5675,6 +5701,7 @@ class ESAPI:
         _check_handle_type(save_handle, "save_handle")
         context = ffi.new("TPMS_CONTEXT **")
         _chkrc(lib.Esys_ContextSave(self._ctx, save_handle, context))
+        self._ref_handles.pop(save_handle, None)
         return TPMS_CONTEXT(_get_dptr(context, lib.Esys_Free))
 
     def context_load(self, context: TPMS_CONTEXT) -> ESYS_TR:
@@ -5704,7 +5731,15 @@ class ESAPI:
         loaded_handle = ffi.new("ESYS_TR *")
         _chkrc(lib.Esys_ContextLoad(self._ctx, context_cdata, loaded_handle))
 
-        return ESYS_TR(loaded_handle[0])
+        handle = ESYS_TR(loaded_handle[0])
+        if context.savedHandle.type == TPM2_HT.TRANSIENT:
+            handle = self._handle_with_ref(handle)
+        elif (
+            context.savedHandle.type in (TPM2_HT.HMAC_SESSION, TPM2_HT.POLICY_SESSION)
+            and self.trsess_get_attributes(handle) & TPMA_SESSION.CONTINUESESSION
+        ):
+            handle = self._handle_with_ref(handle)
+        return handle
 
     def flush_context(self, flush_handle: ESYS_TR) -> None:
         """Invoke the TPM2_FlushContext command.
@@ -5725,6 +5760,7 @@ class ESAPI:
         TPM Command: TPM2_FlushContext
         """
 
+        self._ref_handles.pop(flush_handle, None)
         _check_handle_type(flush_handle, "flush_handle")
         _chkrc(lib.Esys_FlushContext(self._ctx, flush_handle))
 
@@ -6807,20 +6843,17 @@ class ESAPI:
         Returns:
             ESYS_TR: The ESAPI handle to the loaded object.
         """
-        esys_handle = ffi.new("ESYS_TR *")
         if type_ == FAPI_ESYSBLOB.CONTEXTLOAD:
-            offs = ffi.new("size_t *", 0)
-            key_ctx = ffi.new("TPMS_CONTEXT *")
-            _chkrc(lib.Tss2_MU_TPMS_CONTEXT_Unmarshal(data, len(data), offs, key_ctx))
-            _chkrc(lib.Esys_ContextLoad(self._ctx, key_ctx, esys_handle))
+            context, _ = TPMS_CONTEXT.unmarshal(data)
+            esys_handle = self.context_load(context)
         elif type_ == FAPI_ESYSBLOB.DESERIALIZE:
-            _chkrc(lib.Esys_TR_Deserialize(self._ctx, data, len(data), esys_handle))
+            esys_handle = self.tr_deserialize(data)
         else:
             raise ValueError(
                 f"Expected type_ to be FAPI_ESYSBLOB.CONTEXTLOAD or FAPI_ESYSBLOB.DESERIALIZE, got {type_}"
             )
 
-        return ESYS_TR(esys_handle[0])
+        return esys_handle
 
     def tr_serialize(self, esys_handle: ESYS_TR) -> bytes:
         """Serialization of an ESYS_TR into a byte buffer.
@@ -6891,6 +6924,49 @@ class ESAPI:
         _chkrc(lib.Esys_TR_Deserialize(self._ctx, buffer, len(buffer), esys_handle))
 
         return ESYS_TR(esys_handle[0])
+
+    def _incr_handle_ref(self, handle):
+        if handle not in self._ref_handles:
+            return
+        tracked, count = self._ref_handles[handle]
+        count += 1
+        self._ref_handles[handle] = (tracked, count)
+
+    def _decr_handle_ref(self, handle):
+        if handle not in self._ref_handles:
+            return
+        tracked, count = self._ref_handles[handle]
+        count -= 1
+        if count <= 0 and tracked and self._flush_on_close:
+            self.flush_context(handle)
+        elif count <= 0 and not tracked:
+            # If a session is not tracked we don't know if it's flushed by the TPM or not.
+            # So just drop it from _ref_handles is the counter goes down to zero.
+            self._ref_handles.pop(handle, None)
+        else:
+            self._ref_handles[handle] = (tracked, count)
+
+    def _set_tracking_ref(self, handle, tracked):
+        if handle not in self._ref_handles:
+            return
+        _, count = self._ref_handles[handle]
+        self._ref_handles[handle] = (tracked, count)
+
+    def _handle_with_ref(self, handle: ESYS_TR) -> ESYS_TR:
+        """Set up weak references between ESAPI context and handle.
+
+           If ectx._flush_on_close is True create weak references so we can flush on close/unref.
+        """
+        if not self._flush_on_close:
+            return handle
+        handle._ectx_ref = weakref.ref(self)
+        # Each handle has a bool which is True if it's tracked or not and a reference counter.
+        # The reason for having a tracked/untracked bool is due to the TPM flushing sessions
+        # after use unless TPMA_SESSION.CONTINUESESSION is set and as it can be toggled on or off
+        # during runtime we need to keep the reference counter alive for the handle.
+        self._ref_handles[handle] = (True, 0)
+        handle._incr_ref()
+        return handle
 
     @staticmethod
     def _fixup_hierarchy(hierarchy: ESYS_TR) -> Union[TPM2_RH, ESYS_TR]:

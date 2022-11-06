@@ -392,6 +392,13 @@ class ESYS_TR(TPM_FRIENDLY_INT):
     RH_PLATFORM = lib.ESYS_TR_RH_PLATFORM
     RH_PLATFORM_NV = lib.ESYS_TR_RH_PLATFORM_NV
 
+    _ectx_ref = None
+
+    def __init__(self, *args, **kwargs):
+        if len(args) == 1 and isinstance(args[0], self.__class__):
+            self._ectx_ref = args[0]._ectx_ref
+        self._incr_ref()
+
     def serialize(self, ectx: "ESAPI") -> bytes:
         """Same as see tpm2_pytss.ESAPI.tr_serialize
 
@@ -435,6 +442,34 @@ class ESYS_TR(TPM_FRIENDLY_INT):
             ectx(ESAPI): The esapi context to close the ESYS_TR on.
         """
         return ectx.tr_close(self)
+
+    def __del__(self):
+        """Flush handle on deletion.
+
+        If the ESYS handle has reference to an ESAPI instance flush the handle
+        when the there is no more references to the handle.
+        """
+        self._decr_ref()
+
+    def _get_ectx(self):
+        if self._ectx_ref is None:
+            return None
+        ectx = self._ectx_ref()
+        if ectx is None or not ectx._ctx:
+            return None
+        return ectx
+
+    def _incr_ref(self):
+        ectx = self._get_ectx()
+        if ectx is None:
+            return
+        ectx._incr_handle_ref(self)
+
+    def _decr_ref(self):
+        ectx = self._get_ectx()
+        if ectx is None:
+            return
+        ectx._decr_handle_ref(self)
 
 
 @TPM_FRIENDLY_INT._fix_const_type

@@ -4778,7 +4778,7 @@ class TestEsys(TSS2_EsapiTest):
             self.ectx.tr_get_tpm_handle(42)
 
     def test_trsess_get_attributes(self):
-        sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL,)
+        sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL)
 
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
@@ -4797,6 +4797,184 @@ class TestEsys(TSS2_EsapiTest):
 
         attrs = self.ectx.trsess_get_attributes(session)
         self.assertEqual(attrs, TPMA_SESSION.AUDIT | TPMA_SESSION.AUDITEXCLUSIVE)
+
+    def test_flush_on_close_del_handle(self):
+        sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL)
+
+        session = self.ectx.start_auth_session(
+            tpm_key=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            session_type=TPM2_SE.HMAC,
+            symmetric=sym,
+            auth_hash=TPM2_ALG.SHA256,
+        )
+
+        handles = list()
+        more = True
+        while more:
+            more, data = self.ectx.get_capability(
+                TPM2_CAP.HANDLES, TPM2_HC.HMAC_SESSION_FIRST
+            )
+            handles += list(data.data.handles)
+            self.assertEqual(len(handles), 1)
+
+        session.__del__()
+
+        handles = list()
+        more = True
+        while more:
+            more, data = self.ectx.get_capability(
+                TPM2_CAP.HANDLES, TPM2_HC.HMAC_SESSION_FIRST
+            )
+            handles += list(data.data.handles)
+        self.assertEqual(len(handles), 0)
+
+    def test_flush_on_close_del_handle_with_copy(self):
+        sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL)
+
+        session = self.ectx.start_auth_session(
+            tpm_key=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            session_type=TPM2_SE.HMAC,
+            symmetric=sym,
+            auth_hash=TPM2_ALG.SHA256,
+        )
+
+        handles = list()
+        more = True
+        while more:
+            more, data = self.ectx.get_capability(
+                TPM2_CAP.HANDLES, TPM2_HC.HMAC_SESSION_FIRST
+            )
+            handles += list(data.data.handles)
+            self.assertEqual(len(handles), 1)
+
+        session_copy = ESYS_TR(session)
+        session.__del__()
+
+        handles = list()
+        more = True
+        while more:
+            more, data = self.ectx.get_capability(
+                TPM2_CAP.HANDLES, TPM2_HC.HMAC_SESSION_FIRST
+            )
+            handles += list(data.data.handles)
+        self.assertEqual(len(handles), 1)
+
+        session_copy.__del__()
+
+        handles = list()
+        more = True
+        while more:
+            more, data = self.ectx.get_capability(
+                TPM2_CAP.HANDLES, TPM2_HC.HMAC_SESSION_FIRST
+            )
+            handles += list(data.data.handles)
+        self.assertEqual(len(handles), 0)
+
+    def test_flush_on_close_off(self):
+        tcti = self.ectx.get_tcti()
+
+        ectx = ESAPI(tcti, flush_on_close=False)
+
+        sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL)
+
+        session = ectx.start_auth_session(
+            tpm_key=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            session_type=TPM2_SE.HMAC,
+            symmetric=sym,
+            auth_hash=TPM2_ALG.SHA256,
+        )
+
+        handles = list()
+        more = True
+        while more:
+            more, data = ectx.get_capability(
+                TPM2_CAP.HANDLES, TPM2_HC.HMAC_SESSION_FIRST
+            )
+            handles += list(data.data.handles)
+            self.assertEqual(len(handles), 1)
+
+        del session
+        ectx.close()
+
+        handles = list()
+        more = True
+        while more:
+            more, data = self.ectx.get_capability(
+                TPM2_CAP.HANDLES, TPM2_HC.HMAC_SESSION_FIRST
+            )
+            handles += list(data.data.handles)
+        self.assertEqual(len(handles), 1)
+
+    def test_flush_on_close(self):
+        tcti = self.ectx.get_tcti()
+
+        ectx = ESAPI(tcti)
+
+        sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL)
+
+        session = ectx.start_auth_session(
+            tpm_key=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            session_type=TPM2_SE.HMAC,
+            symmetric=sym,
+            auth_hash=TPM2_ALG.SHA256,
+        )
+
+        handles = list()
+        more = True
+        while more:
+            more, data = ectx.get_capability(
+                TPM2_CAP.HANDLES, TPM2_HC.HMAC_SESSION_FIRST
+            )
+            handles += list(data.data.handles)
+            self.assertEqual(len(handles), 1)
+
+        ectx.close()
+        session.__del__()
+
+        handles = list()
+        more = True
+        while more:
+            more, data = self.ectx.get_capability(
+                TPM2_CAP.HANDLES, TPM2_HC.HMAC_SESSION_FIRST
+            )
+            handles += list(data.data.handles)
+        self.assertEqual(len(handles), 0)
+
+    def test_flush_on_close_untracked_handle(self):
+        sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL)
+
+        session = self.ectx.start_auth_session(
+            tpm_key=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            session_type=TPM2_SE.HMAC,
+            symmetric=sym,
+            auth_hash=TPM2_ALG.SHA256,
+        )
+        self.ectx.trsess_set_attributes(session, TPMA_SESSION(0))
+
+        handles = list()
+        more = True
+        while more:
+            more, data = self.ectx.get_capability(
+                TPM2_CAP.HANDLES, TPM2_HC.HMAC_SESSION_FIRST
+            )
+            handles += list(data.data.handles)
+            self.assertEqual(len(handles), 1)
+
+        session.__del__()
+
+        handles = list()
+        more = True
+        while more:
+            more, data = self.ectx.get_capability(
+                TPM2_CAP.HANDLES, TPM2_HC.HMAC_SESSION_FIRST
+            )
+            handles += list(data.data.handles)
+        self.assertEqual(len(handles), 1)
 
 
 if __name__ == "__main__":
