@@ -2179,6 +2179,68 @@ class ESAPI:
         )
         return TPM2B_DIGEST(_get_dptr(out_hMAC, lib.Esys_Free))
 
+    def mac(
+        self,
+        handle: ESYS_TR,
+        buffer: Union[TPM2B_MAX_BUFFER, bytes, str],
+        hash_alg: TPM2_ALG,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> TPM2B_DIGEST:
+        """Invoke the TPM2_MAC command.
+
+        This function invokes the TPM2_MAC command in a one-call
+        variant. This means the function will block until the TPM response is
+        available.
+
+        Args:
+            handle (ESYS_TR): Handle for the symmetric signing key providing the HMAC key.
+            buffer (Union[TPM2B_MAX_BUFFER, bytes, str]): MAC data.
+            hash_alg (TPM2_ALG): Algorithm to use for MAC.
+            session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.PASSWORD.
+            session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
+            session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
+
+        Raises:
+            TypeError: If a parameter is not of an expected type.
+            ValueError: If a parameter is not of an expected value.
+            TSS2_Exception: Any of the various TSS2_RC's the lower layers can return.
+
+        Returns:
+            A TPM2B_DIGEST result of the MAC.
+
+        C Function: Esys_MAC
+
+        TPM Command: TPM2_MAC
+        """
+        if not _lib_version_atleast("tss2-esys", "3.2.0-167-gc17e3989"):
+            raise NotImplementedError("MAC api not supported below ESAPI v4")
+
+        _check_handle_type(handle, "handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
+
+        _check_friendly_int(hash_alg, "hash_alg", TPM2_ALG)
+
+        buffer_cdata = _get_cdata(buffer, TPM2B_MAX_BUFFER, "buffer")
+
+        out_MAC = ffi.new("TPM2B_DIGEST **")
+        _chkrc(
+            lib.Esys_MAC(
+                self._ctx,
+                handle,
+                session1,
+                session2,
+                session3,
+                buffer_cdata,
+                hash_alg,
+                out_MAC,
+            )
+        )
+        return TPM2B_DIGEST(_get_dptr(out_MAC, lib.Esys_Free))
+
     def get_random(
         self,
         bytes_requested: int,
@@ -2318,6 +2380,74 @@ class ESAPI:
         sequence_handle = ffi.new("ESYS_TR *")
         _chkrc(
             lib.Esys_HMAC_Start(
+                self._ctx,
+                handle,
+                session1,
+                session2,
+                session3,
+                auth_cdata,
+                hash_alg,
+                sequence_handle,
+            )
+        )
+
+        return ESYS_TR(sequence_handle[0])
+
+    def mac_start(
+        self,
+        handle: ESYS_TR,
+        auth: Union[TPM2B_AUTH, bytes, str],
+        hash_alg: TPM2_ALG,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> ESYS_TR:
+        """Invoke the TPM2_MAC_Start command.
+
+        This function invokes the TPM2_MAC_Start command in a one-call
+        variant. This means the function will block until the TPM response is
+        available.
+
+        Args:
+            handle (ESYS_TR): Handle of an MAC key.
+            auth (Union[TPM2B_AUTH, bytes, str]): Authorization value for subsequent use of the sequence.
+            hash_alg (TPM2_ALG): The hash algorithm to use for the MAC.
+            session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.PASSWORD.
+            session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
+            session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
+
+        Raises:
+            TypeError: If a parameter is not of an expected type.
+            ValueError: If a parameter is not of an expected value.
+            TSS2_Exception: Any of the various TSS2_RC's the lower layers can return.
+
+        Returns:
+            An ESYS_TR handle of ESYS resource for TPMI_DH_OBJECT.
+
+        C Function: Esys_MAC_Start
+
+        TPM Command: TPM2_MAC_Start
+        """
+
+        if not _lib_version_atleast("tss2-esys", "3.2.0-167-gc17e3989"):
+            raise NotImplementedError("MAC api not supported below ESAPI v4")
+
+        _check_handle_type(handle, "handle")
+
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
+
+        _check_friendly_int(hash_alg, "hash_alg", TPM2_ALG)
+
+        if auth is None:
+            auth = TPM2B_AUTH()
+
+        auth_cdata = _get_cdata(auth, TPM2B_AUTH, "auth")
+
+        sequence_handle = ffi.new("ESYS_TR *")
+        _chkrc(
+            lib.Esys_MAC_Start(
                 self._ctx,
                 handle,
                 session1,
@@ -5958,6 +6088,206 @@ class ESAPI:
         return (
             bool(more_data[0]),
             TPMS_CAPABILITY_DATA(_get_dptr(capability_data, lib.Esys_Free)),
+        )
+
+    def ac_get_capability(
+        self,
+        ac: ESYS_TR,
+        capability: TPM_AT,
+        count: int,
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[bool, TPML_AC_CAPABILITIES]:
+        """Invoke the TPM2_AC_GetCapability command.
+
+        This function invokes the TPM2_AC_GetCapability command in a one-call variant.
+        This means the function will block until the TPM response is available.
+
+        Args:
+            ac (ESYS_TR): Handle indicating the attached component.
+            capability (TPM_AT): Group selection; determines the format of the response.
+            count (int): Number of properties of the indicated type to return. Defaults to 1.
+            session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
+            session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
+            session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
+
+        Raises:
+            TypeError: If a parameter is not of an expected type.
+            ValueError: If a parameter is not of an expected value.
+            TSS2_Exception: Any of the various TSS2_RC's the lower layers can return.
+
+        Returns:
+            A Tuple[bool, TPML_AC_CAPABILITIES] which is the Flag to indicate if there are more values of this type
+            and the capability data respectively.
+
+        C Function: Esys_AC_GetCapability
+
+        TPM Command: TPM2_AC_GetCapability
+        """
+        if not _lib_version_atleast("tss2-esys", "3.2.0-167-gc17e3989"):
+            raise NotImplementedError("MAC api not supported below ESAPI v4")
+
+        _check_friendly_int(capability, "capability", TPM_AT)
+
+        if not isinstance(count, int):
+            raise TypeError(f"Expected count to be an int, got {type(prop)}")
+
+        _check_handle_type(ac, "ac")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
+
+        more_data = ffi.new("TPMI_YES_NO *")
+        capability_data = ffi.new("TPML_AC_CAPABILITIES **")
+        _chkrc(
+            lib.Esys_AC_GetCapability(
+                self._ctx,
+                session1,
+                session2,
+                session3,
+                ac,
+                capability,
+                count,
+                more_data,
+                capability_data,
+            )
+        )
+        return (
+            bool(more_data[0]),
+            TPML_AC_CAPABILITIES(_get_dptr(capability_data, lib.Esys_Free)),
+        )
+
+    def ac_send(
+        self,
+        ac: ESYS_TR,
+        send_object: ESYS_TR,
+        nv_auth_handle: ESYS_TR,
+        ac_data_in: Union[TPM2B_MAX_BUFFER, bytes, str],
+        session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> TPMS_AC_OUTPUT:
+        """Invoke the TPM2_AC_Send command.
+
+        This function invokes the TPM2_AC_Send command in a one-call
+        variant. This means the function will block until the TPM response is
+        available.
+
+        Args:
+            ac (ESYS_TR): Handle indicating the attached component.
+            send_object (ESYS_TR): Handle of the object being sent to ac
+            nv_auth_handle (ESYS_TR): Handle indicating the source of the authorization value
+            ac_data_in (Union[TPM2B_MAX_BUFFER, bytes, str]): Optional non sensitive information related to the object
+            session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
+            session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
+            session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
+
+        Raises:
+            TypeError: If a parameter is not of an expected type.
+            ValueError: If a parameter is not of an expected value.
+            TSS2_Exception: Any of the various TSS2_RC's the lower layers can return.
+
+        Returns:
+            A TPMS_AC_OUTPUT result, may include AC specific data or information about an error.
+
+        C Function: Esys_AC_Send
+
+        TPM Command: TPM2_AC_Send
+        """
+
+        if not _lib_version_atleast("tss2-esys", "3.2.0-167-gc17e3989"):
+            raise NotImplementedError("MAC api not supported below ESAPI v4")
+
+        _check_handle_type(ac, "ac")
+        _check_handle_type(send_object, "send_object")
+        _check_handle_type(nv_auth_handle, "nv_auth_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
+
+        buffer_cdata = _get_cdata(ac_data_in, TPM2B_MAX_BUFFER, "ac_data_in")
+        ac_data_out = ffi.new("TPMS_AC_OUTPUT **")
+        _chkrc(
+            lib.Esys_AC_Send(
+                self._ctx,
+                send_object,
+                nv_auth_handle,
+                session1,
+                session2,
+                session3,
+                ac,
+                buffer_cdata,
+                ac_data_out,
+            )
+        )
+        return TPMS_AC_OUTPUT(_get_dptr(acDataOut, lib.Esys_Free))
+
+    def policy_ac_send_select(
+        self,
+        object_name: Union[TPM2B_NAME, bytes, str],
+        auth_handle_name: Union[TPM2B_NAME, bytes, str],
+        ac_name: Union[TPM2B_NAME, bytes, str],
+        include_object: TPMI_YES_NO,
+        policy_session1: ESYS_TR = ESYS_TR.NONE,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> None:
+        """Invoke the TPM2_Policy_AC_SendSelect command.
+
+        This function invokes the TPM2_Policy_AC_SendSelect command in a one-call
+        variant. This means the function will block until the TPM response is
+        available.
+
+        Args:
+            ac (ESYS_TR): Handle indicating the attached component.
+            object_name (Union[TPM2B_NAME, bytes, str]): Name of the Object to be sent
+            auth_handle_name (Union[TPM2B_NAME, bytes, str]): Name associated with authHandle used in the
+                                                              TPM2_AC_Send() command
+            auth_handle_name (Union[TPM2B_NAME, bytes, str]): Name of the Attached Component to which the
+                                                              Object will be sent
+            include_object (TPMI_YES_NO): If SET, objectName will be included in the value in
+                                          policySession→policyDigest
+            policy_session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
+            session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
+            session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
+
+        Raises:
+            TypeError: If a parameter is not of an expected type.
+            ValueError: If a parameter is not of an expected value.
+            TSS2_Exception: Any of the various TSS2_RC's the lower layers can return.
+
+        Returns:
+            A TPMS_AC_OUTPUT result, may include AC specific data or information about an error.
+
+        C Function: Esys_Policy_AC_SendSelect
+
+        TPM Command: TPM2_Policy_AC_SendSelect
+        """
+
+        if not _lib_version_atleast("tss2-esys", "3.2.0-167-gc17e3989"):
+            raise NotImplementedError("MAC api not supported below ESAPI v4")
+
+        object_name_cdata = _get_cdata(object_name, TPM2B_NAME, "object_name")
+        auth_handle_name_cdata = _get_cdata(
+            auth_handle_name, TPM2B_NAME, "auth_handle_name"
+        )
+        ac_name_cdata = _get_cdata(ac_name, TPM2B_NAME, "ac_name")
+        _check_handle_type(policy_session1, "policy_session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
+
+        _chkrc(
+            lib.Esys_Policy_AC_SendSelect(
+                self._ctx,
+                policy_session1,
+                session2,
+                session3,
+                object_name_cdata,
+                auth_handle_name_cdata,
+                ac_name_cdata,
+                include_object,
+            )
         )
 
     def test_parms(

@@ -1052,6 +1052,20 @@ class TPM2_CAP(TPM_FRIENDLY_INT):
 
 
 @TPM_FRIENDLY_INT._fix_const_type
+class TPMI_YES_NO(TPM_FRIENDLY_INT):
+    YES = lib.TPM2_YES
+    NO = lib.TPM2_NO
+
+
+@TPM_FRIENDLY_INT._fix_const_type
+class TPM_AT(TPM_FRIENDLY_INT):
+    ANY = lib.TPM_AT_ANY
+    ERROR = lib.TPM_AT_ERROR
+    PV1 = lib.TPM_AT_PV1
+    VEND = lib.TPM_AT_VEND
+
+
+@TPM_FRIENDLY_INT._fix_const_type
 class TPM2_PT(TPM_FRIENDLY_INT):
     NONE = lib.TPM2_PT_NONE
     GROUP = lib.TPM2_PT_GROUP
