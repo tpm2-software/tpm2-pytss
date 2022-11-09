@@ -65,6 +65,18 @@ source = """
     #include <tss2/tss2_tctildr.h>
     #include <tss2/tss2_rc.h>
     #include <tss2/tss2_mu.h>
+
+    /*
+     * Add the structure for the Python TCTI which is the TCTI structure and void *
+     * for the pyobject representing the object instance. We add it here and to
+     * prepare headers so CFFI knows about it (prepare_headers) and here so
+     * C code knows about it.
+     */
+    typedef struct PYTCTI_CONTEXT PYTCTI_CONTEXT;
+    struct PYTCTI_CONTEXT {
+        TSS2_TCTI_CONTEXT_COMMON_V2 common;
+        void *thiz;
+    };
 """
 
 if build_fapi:

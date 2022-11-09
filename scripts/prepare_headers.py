@@ -111,6 +111,49 @@ def prepare_tcti(dirpath):
     };
     """
 
+    # Add the callbacks for a TCTI
+    s += """
+    extern "Python" TSS2_RC _tcti_transmit_wrapper (
+        TSS2_TCTI_CONTEXT *tctiContext,
+        size_t size,
+        uint8_t const *command);
+
+    extern "Python" TSS2_RC _tcti_receive_wrapper (
+        TSS2_TCTI_CONTEXT *tctiContext,
+        size_t *size,
+        uint8_t *response,
+        int32_t timeout);
+
+    extern "Python" void _tcti_finalize_wrapper (
+        TSS2_TCTI_CONTEXT *tctiContext);
+
+    extern "Python" TSS2_RC _tcti_cancel_wrapper (
+        TSS2_TCTI_CONTEXT *tctiContext);
+
+    extern "Python" TSS2_RC _tcti_get_pollfds_wrapper (
+    TSS2_TCTI_CONTEXT *tctiContext,
+    TSS2_TCTI_POLL_HANDLE *handles,
+    size_t *num_handles);
+
+    extern "Python" TSS2_RC _tcti_set_locality_wrapper (
+        TSS2_TCTI_CONTEXT *tctiContext,
+        uint8_t locality);
+
+    extern "Python" TSS2_RC _tcti_make_sticky_wrapper (
+        TSS2_TCTI_CONTEXT *tctiContext,
+        TPM2_HANDLE *handle,
+        uint8_t sticky);
+    """
+
+    # Add this struct here so CFFI knows about it and its size
+    s += """
+    typedef struct PYTCTI_CONTEXT PYTCTI_CONTEXT;
+    struct PYTCTI_CONTEXT {
+        TSS2_TCTI_CONTEXT_COMMON_V2 common;
+        void *thiz;
+    };
+    """
+
     return remove_common_guards(s)
 
 
