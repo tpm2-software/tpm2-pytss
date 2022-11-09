@@ -87,3 +87,9 @@ class TCTI:
         hptr = ffi.new("TPM2_HANDLE *", handle)
         _chkrc(self._v2.makeSticky(self._ctx, hptr, sticky))
         return hptr[0]
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.finalize()
