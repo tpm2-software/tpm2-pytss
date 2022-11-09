@@ -26,12 +26,27 @@ class TCTI:
     def version(self):
         return self._v1.version
 
+    def _common_checks(self, method, version=1):
+
+        if self._v1.version < 1:
+            raise TSS2_Exception(TSS2_RC.TCTI_RC_ABI_MISMATCH)
+
+        sub_struct = getattr(self, f"_v{version}")
+        got_method = getattr(sub_struct, method)
+
+        if got_method == ffi.NULL:
+            raise TSS2_Exception(TSS2_RC.TCTI_RC_NOT_IMPLEMENTED)
+
     def transmit(self, command):
+        self._common_checks("transmit")
+
         cmd = ffi.new("uint8_t []", command)
         clen = len(command)
         _chkrc(self._v1.transmit(self._ctx, clen, cmd))
 
     def receive(self, size=-1, timeout=-1):
+        self._common_checks("receive")
+
         if size == -1:
             size = 4096
         resp = ffi.new("uint8_t []", b"\x00" * size)
@@ -40,12 +55,17 @@ class TCTI:
         return bytes(ffi.buffer(resp, rsize[0]))
 
     def finalize(self):
-        self._v1.finalize(self._ctx)
+        if self._v1.finalize != ffi.NULL:
+            self._v1.finalize(self._ctx)
 
     def cancel(self):
+        self._common_checks("cancel")
+
         _chkrc(self._v1.cancel(self._ctx))
 
     def get_poll_handles(self):
+        self._common_checks("getPollHandles")
+
         nhandles = ffi.new("size_t *", 0)
         _chkrc(self._v1.getPollHandles(self._ctx, ffi.NULL, nhandles))
         if nhandles[0] == 0:
@@ -58,11 +78,12 @@ class TCTI:
         return tuple(rh)
 
     def set_locality(self, locality):
+        self._common_checks("setLocality")
         _chkrc(self._v1.setLocality(self._ctx, locality))
 
     def make_sticky(self, handle, sticky):
-        if self._v2 is None:
-            raise RuntimeError("unsupported by TCTI API version")
+        self._common_checks("makeSticky", version=2)
+
         hptr = ffi.new("TPM2_HANDLE *", handle)
         _chkrc(self._v2.makeSticky(self._ctx, hptr, sticky))
         return hptr[0]
