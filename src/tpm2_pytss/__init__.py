@@ -10,7 +10,7 @@ try:
 except NotImplementedError:
     pass
 from .TCTILdr import *
-from .TCTI import TCTI
+from .TCTI import TCTI, PyTCTI, PollData
 from .types import *
 from .constants import *
 from .TSS2_Exception import TSS2_Exception
