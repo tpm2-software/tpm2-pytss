@@ -10,10 +10,17 @@ from .TSS2_BaseTest import TSS2_EsapiTest
 class MyTCTI(PyTCTI):
     def __init__(self, subtcti, magic=None):
         self._tcti = subtcti
+        self._is_finalized = False
+        self._error = None
+
         if magic is not None:
             super().__init__(magic=magic)
         else:
             super().__init__()
+
+    @property
+    def is_finalized(self):
+        return self._is_finalized
 
     def do_transmit(self, command):
         self._tcti.transmit(command)
@@ -34,6 +41,11 @@ class MyTCTI(PyTCTI):
         if self._tcti is not None:
             self._tcti.make_sticky(handle, is_sticky)
 
+        if self._error is not None:
+            raise self._error
+
+    def do_finalize(self):
+        self._is_finalized = True
         if self._error is not None:
             raise self._error
 
@@ -131,10 +143,9 @@ class TestTCTI(TSS2_EsapiTest):
         t.cancel()
 
     def test_custom_pytcti_finalize(self):
-        # This is NOP for the PyTCTI but nothing should break
-        # TODO maybe it should implement it?
         t = MyTCTI(self.tcti)
         t.finalize()
+        self.assertTrue(t.is_finalized)
 
     def test_custom_pytcti_get_poll_handles(self):
         tcti_name = getattr(self.tcti, "name", "")
@@ -200,6 +211,22 @@ class TestTCTI(TSS2_EsapiTest):
 
         with self.assertRaises(ValueError):
             t = MyTCTI(None, b"THISISTOOBIG")
+
+    def test_custom_pytcti_ctx_manager_finalize(self):
+        with MyTCTI(self.tcti) as t:
+            e = ESAPI(t)
+            r = e.get_random(4)
+            self.assertEqual(len(r), 4)
+            e.startup(TPM2_SU.CLEAR)
+
+        self.assertTrue(t.is_finalized)
+
+    def test_custom_pytcti_finalize_error(self):
+
+        t = MyTCTI(self.tcti)
+        t._error = RuntimeError("Bills Error 2")
+        with self.assertRaises(RuntimeError, msg="Bills Error 2"):
+            t.finalize()
 
 
 if __name__ == "__main__":

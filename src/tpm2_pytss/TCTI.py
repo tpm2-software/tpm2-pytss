@@ -218,6 +218,10 @@ class TCTI:
 
         if self._v1.finalize != ffi.NULL:
             self._v1.finalize(self._ctx)
+            if self._last_exception:
+                e = self._last_exception
+                self._clear_exceptions()
+                raise e
 
     @common_checks()
     def cancel(self) -> None:
@@ -429,6 +433,18 @@ def _tcti_make_sticky_wrapper(ctx, handle, sticky):
     return TPM2_RC.SUCCESS
 
 
+@ffi.def_extern()
+def _tcti_finalize_wrapper(ctx):
+    pi = PyTCTI._cffi_cast(ctx)
+    if not hasattr(pi, "do_finalize"):
+        return
+
+    try:
+        pi.do_finalize()
+    except Exception as e:
+        pi._last_exception = e
+
+
 class PyTCTI(TCTI):
     """Subclass for implementing a TCTI in Python.
 
@@ -451,9 +467,11 @@ class PyTCTI(TCTI):
         - def do_make_sticky(self, handle: int, is_sticky: bool) -> None:
              Makes a handle sticky to persist across client exits with an RM. This method is OPTIONAL.
 
+        - def do_finalize(self) -> None:
+             Finalizes a TCTI, this is analogous to close on a file. This method is OPTIONAL.
+
     Note:
         All methods may throw exceptions as needed.
-        No Finalize is needed as Python objects have __del__.
 
     Args:
         max_size (int): The size of the response buffer for callers to allocate. Defaults to 4096.
@@ -482,6 +500,7 @@ class PyTCTI(TCTI):
         cdata.common.v1.getPollHandles = lib._tcti_get_pollfds_wrapper
         cdata.common.v1.setLocality = lib._tcti_set_locality_wrapper
         cdata.common.makeSticky = lib._tcti_make_sticky_wrapper
+        cdata.common.v1.finalize = lib._tcti_finalize_wrapper
 
         # Keep a pointer to this object in the TCTI Context to use later
         # This is how we multiplex N objects through a set of static
@@ -567,6 +586,18 @@ class PyTCTI(TCTI):
         Args:
             handle(int): The TPM handle to make sticky.
             is_sticky(bool): True to make sticky, False to make it not sticky.
+
+        Raises:
+            Exception: Implementations are free to raise any Exception. Exceptions are retained
+            across the native boundary.
+        """
+        pass
+
+    def do_finalize(self) -> None:
+        """Finalizes a TCTI, this is analogous to close on a file. This method is OPTIONAL.
+
+        Note: Native TCTIs do not return anything and thus cannot raise any errors. Python
+        TCTIs MAY raise exceptions across this interface.
 
         Raises:
             Exception: Implementations are free to raise any Exception. Exceptions are retained
