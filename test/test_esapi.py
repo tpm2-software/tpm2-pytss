@@ -3,9 +3,11 @@
 
 import unittest
 import gc
+import pytest
 
 from tpm2_pytss import *
 from .TSS2_BaseTest import TSS2_EsapiTest
+from tpm2_pytss.internal.utils import _lib_version_atleast
 
 
 class TestEsys(TSS2_EsapiTest):
@@ -1435,6 +1437,67 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.hmac(primaryHandle, inData, TPM2_ALG.SHA256, session3=45.6)
 
+    @pytest.mark.skipif(
+        not _lib_version_atleast("tss2-esapi", "3.2.0-167-gc17e3989"),
+        reason="Attached Components not supported prior to tss v4",
+    )
+    def test_mac(self):
+
+        attrs = (
+            TPMA_OBJECT.SIGN_ENCRYPT
+            | TPMA_OBJECT.USERWITHAUTH
+            | TPMA_OBJECT.SENSITIVEDATAORIGIN
+        )
+        templ = TPMT_PUBLIC.parse(alg="hmac", objectAttributes=attrs)
+        inPublic = TPM2B_PUBLIC(templ)
+
+        inSensitive = TPM2B_SENSITIVE_CREATE(TPMS_SENSITIVE_CREATE())
+
+        primaryHandle = self.ectx.create_primary(inSensitive, inPublic)[0]
+
+        # Test for tss v < 3.2.0-167-gc17e3989
+        if not _lib_version_atleast("tss2-esapi", "3.2.0-167-gc17e3989"):
+            with self.assertRaises(NotImplementedError):
+                self.ectx.mac(primaryHandle, b"1234", TPM2_ALG.SHA256)
+            return
+
+        # Test bytes
+        mac = self.ectx.mac(primaryHandle, b"1234", TPM2_ALG.SHA256)
+        self.assertNotEqual(mac, None)
+        self.assertEqual(len(bytes(mac)), 32)
+
+        # Test str
+        mac = self.ectx.mac(primaryHandle, "1234", TPM2_ALG.SHA256)
+        self.assertNotEqual(mac, None)
+        self.assertEqual(len(bytes(mac)), 32)
+
+        # Test Native
+        inData = TPM2B_MAX_BUFFER("1234")
+        mac = self.ectx.mac(primaryHandle, inData, TPM2_ALG.SHA256)
+        self.assertNotEqual(mac, None)
+        self.assertEqual(len(bytes(mac)), 32)
+
+        with self.assertRaises(TypeError):
+            self.ectx.mac(45.6, inData, TPM2_ALG.SHA256)
+
+        with self.assertRaises(TypeError):
+            self.ectx.mac(primaryHandle, object(), TPM2_ALG.SHA256)
+
+        with self.assertRaises(TypeError):
+            self.ectx.mac(primaryHandle, inData, "baz")
+
+        with self.assertRaises(ValueError):
+            self.ectx.mac(primaryHandle, inData, 42)
+
+        with self.assertRaises(TypeError):
+            self.ectx.mac(primaryHandle, inData, TPM2_ALG.SHA256, session1=object())
+
+        with self.assertRaises(TypeError):
+            self.ectx.mac(primaryHandle, inData, TPM2_ALG.SHA256, session2="object")
+
+        with self.assertRaises(TypeError):
+            self.ectx.mac(primaryHandle, inData, TPM2_ALG.SHA256, session3=45.6)
+
     def test_stir_random(self):
 
         self.ectx.stir_random(b"1234")
@@ -1763,6 +1826,36 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.get_capability(
                 TPM2_CAP.COMMANDS, TPM2_CC.FIRST, TPM2_MAX.CAP_CC, session3="baz"
+            )
+
+    @pytest.mark.skipif(
+        not _lib_version_atleast("tss2-esapi", "3.2.0-167-gc17e3989"),
+        reason="Attached Components not supported prior to tss v4",
+    )
+    def test_ac_get_capability(self):
+        with self.assertRaisesRegex(TSS2_Exception, "command code not supported"):
+            self.ectx.ac_get_capability(ESYS_TR.NONE, TPM_AT.ANY, 0)
+
+    @pytest.mark.skipif(
+        not _lib_version_atleast("tss2-esapi", "3.2.0-167-gc17e3989"),
+        reason="Attached Components not supported prior to tss v4",
+    )
+    def test_ac_send(self):
+        inData = TPM2B_MAX_BUFFER(b"this is data to encrypt")
+        with self.assertRaisesRegex(TSS2_Exception, "command code not supported"):
+            self.ectx.ac_send(ESYS_TR.NONE, ESYS_TR.NONE, ESYS_TR.NONE, inData)
+
+    @pytest.mark.skipif(
+        not _lib_version_atleast("tss2-esapi", "3.2.0-167-gc17e3989"),
+        reason="Attached Components not supported prior to tss v4",
+    )
+    def test_policy_ac_send_select(self):
+        with self.assertRaisesRegex(TSS2_Exception, "command code not supported"):
+            self.ectx.policy_ac_send_select(
+                b"0123456789ABCDEF",
+                b"0123456789ABCDEF",
+                b"0123456789ABCDEF",
+                TPMI_YES_NO.NO,
             )
 
     def test_test_parms(self):
