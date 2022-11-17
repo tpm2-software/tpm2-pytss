@@ -205,7 +205,7 @@ class TestTCTI(TSS2_EsapiTest):
         self.assertEqual(t.magic, magic)
 
         with self.assertRaises(ValueError):
-            t = MyTCTI(None, b"THISISTOOBIG")
+            MyTCTI(None, b"THISISTOOBIG")
 
     def test_custom_pytcti_ctx_manager_finalize(self):
         with MyTCTI(self.tcti) as t:
