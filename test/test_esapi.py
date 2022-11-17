@@ -2240,24 +2240,16 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(type(signature), TPMT_SIGNATURE)
 
         with self.assertRaises(TypeError):
-            certifyInfo, signature = self.ectx.certify(
-                TPM2B_ATTEST(), eccHandle, qualifyingData, inScheme
-            )
+            self.ectx.certify(TPM2B_ATTEST(), eccHandle, qualifyingData, inScheme)
 
         with self.assertRaises(TypeError):
-            certifyInfo, signature = self.ectx.certify(
-                eccHandle, 2.0, qualifyingData, inScheme
-            )
+            self.ectx.certify(eccHandle, 2.0, qualifyingData, inScheme)
 
         with self.assertRaises(TypeError):
-            certifyInfo, signature = self.ectx.certify(
-                eccHandle, eccHandle, TPM2B_PUBLIC(), inScheme
-            )
+            self.ectx.certify(eccHandle, eccHandle, TPM2B_PUBLIC(), inScheme)
 
         with self.assertRaises(TypeError):
-            certifyInfo, signature = self.ectx.certify(
-                eccHandle, eccHandle, qualifyingData, TPM2B_PRIVATE()
-            )
+            self.ectx.certify(eccHandle, eccHandle, qualifyingData, TPM2B_PRIVATE())
 
         with self.assertRaises(TypeError):
             self.ectx.certify(
