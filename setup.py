@@ -221,6 +221,7 @@ class type_generator(build_ext):
             try:
                 versions[lib] = pkgconfig.modversion(lib)
             except pkgconfig.PackageNotFoundError:
+                # Library not installed, ignore
                 pass
         return versions
 
