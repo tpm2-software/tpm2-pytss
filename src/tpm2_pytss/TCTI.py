@@ -129,6 +129,9 @@ class TCTI:
         # error.
         self._last_exception = None
 
+    def _set_last_exception(self, exc):
+        self._last_exception = exc
+
     @property
     def _tcti_context(self):
         return self._ctx
@@ -317,7 +320,7 @@ def _tcti_transmit_wrapper(ctx, size, command):
         pi.do_transmit(bytes(ffi.buffer(command, size)))
     except Exception as e:
         rc = e.rc if isinstance(e, TSS2_Exception) else TSS2_RC.TCTI_RC_GENERAL_FAILURE
-        pi._last_exception = e
+        pi._set_last_exception(e)
         return rc
 
     return TPM2_RC.SUCCESS
@@ -344,7 +347,7 @@ def _tcti_receive_wrapper(ctx, size, response, timeout):
         ffi.memmove(response, resp, len(resp))
     except Exception as e:
         rc = e.rc if isinstance(e, TSS2_Exception) else TSS2_RC.TCTI_RC_GENERAL_FAILURE
-        pi._last_exception = e
+        pi._set_last_exception(e)
         return rc
 
     return TPM2_RC.SUCCESS
@@ -359,7 +362,7 @@ def _tcti_cancel_wrapper(ctx):
         pi.do_cancel()
     except Exception as e:
         rc = e.rc if isinstance(e, TSS2_Exception) else TSS2_RC.TCTI_RC_GENERAL_FAILURE
-        pi._last_exception = e
+        pi._set_last_exception(e)
         return rc
 
     return TPM2_RC.SUCCESS
@@ -397,7 +400,7 @@ def _tcti_get_pollfds_wrapper(ctx, handles, cnt):
                     handles[i] = pd.handle
     except Exception as e:
         rc = e.rc if isinstance(e, TSS2_Exception) else TSS2_RC.TCTI_RC_GENERAL_FAILURE
-        pi._last_exception = e
+        pi._set_last_exception(e)
         return rc
 
     return TPM2_RC.SUCCESS
@@ -412,7 +415,7 @@ def _tcti_set_locality_wrapper(ctx, locality):
         pi.do_set_locality(locality)
     except Exception as e:
         rc = e.rc if isinstance(e, TSS2_Exception) else TSS2_RC.TCTI_RC_GENERAL_FAILURE
-        pi._last_exception = e
+        pi._set_last_exception(e)
         return rc
 
     return TPM2_RC.SUCCESS
@@ -427,7 +430,7 @@ def _tcti_make_sticky_wrapper(ctx, handle, sticky):
         pi.do_make_sticky(handle, bool(sticky))
     except Exception as e:
         rc = e.rc if isinstance(e, TSS2_Exception) else TSS2_RC.TCTI_RC_GENERAL_FAILURE
-        pi._last_exception = e
+        pi._set_last_exception(e)
         return rc
 
     return TPM2_RC.SUCCESS
@@ -442,7 +445,7 @@ def _tcti_finalize_wrapper(ctx):
     try:
         pi.do_finalize()
     except Exception as e:
-        pi._last_exception = e
+        pi._set_last_exception(e)
 
 
 class PyTCTI(TCTI):
@@ -491,7 +494,6 @@ class PyTCTI(TCTI):
         self._max_size = max_size
         self._poll_handle_cache = None
         self._magic_len = len(magic)
-        self._last_exception = None
         cdata.common.v1.version = 2
         cdata.common.v1.magic = int.from_bytes(magic, "big")
         cdata.common.v1.transmit = lib._tcti_transmit_wrapper
