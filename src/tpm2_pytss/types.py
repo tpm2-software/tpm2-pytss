@@ -249,6 +249,7 @@ class TPM2B_SIMPLE_OBJECT(TPM_OBJECT):
         for f in tipe.fields:
             if f[0] != "size":
                 return f[0]
+        return None
 
     def __setattr__(self, key, value):
 
