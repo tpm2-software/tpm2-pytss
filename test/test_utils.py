@@ -135,7 +135,7 @@ class TestUtils(TSS2_EsapiTest):
     def test_generate_seed_rsa(self):
         insens = TPM2B_SENSITIVE_CREATE()
         _, public, _, _, _ = self.ectx.create_primary(insens)
-        seed, enc_seed = _generate_seed(public.publicArea, b"test")
+        _generate_seed(public.publicArea, b"test")
 
         public.publicArea.nameAlg = TPM2_ALG.LAST + 1
         with self.assertRaises(ValueError) as e:
@@ -152,7 +152,7 @@ class TestUtils(TSS2_EsapiTest):
     def test_generate_seed_ecc(self):
         insens = TPM2B_SENSITIVE_CREATE()
         _, public, _, _, _ = self.ectx.create_primary(insens, "ecc")
-        seed, enc_seed = _generate_seed(public.publicArea, b"test")
+        _generate_seed(public.publicArea, b"test")
 
         public.publicArea.nameAlg = TPM2_ALG.LAST + 1
         with self.assertRaises(ValueError) as e:
