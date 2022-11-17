@@ -9,6 +9,7 @@ except NotImplementedError:
 try:
     from .policy import *
 except NotImplementedError:
+    # Built on a system lacking libpolicy, ignore
     pass
 from .TCTILdr import *
 from .TCTI import TCTI, PyTCTI, PollData
