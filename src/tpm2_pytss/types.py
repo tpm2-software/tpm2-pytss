@@ -149,7 +149,7 @@ class TPM_OBJECT(object):
             # Get _cdata without invoking getattr
             setattr(_cdata, key, value)
         except AttributeError:
-            return object.__setattr__(self, key, value)
+            object.__setattr__(self, key, value)
         except TypeError as e:
             data = getattr(_cdata, key)
             tipe = ffi.typeof(data)
