@@ -370,6 +370,7 @@ class TPML_OBJECT(TPM_OBJECT):
             clsname = _fixup_classname(tipe)
             expected_class = globals()[clsname]
         except TypeError:
+            # Was a native type, just use it
             pass
 
         for i, x in enumerate(kwargs[key]):
