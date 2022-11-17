@@ -541,7 +541,7 @@ class SerializationTest(unittest.TestCase):
         points = {"x": "01", "y": "02", "z": "03"}
         decoder = base_encdec(strict=True)
         with self.assertRaises(ValueError) as e:
-            dv = decoder.decode(TPMS_ECC_POINT(), points)
+            decoder.decode(TPMS_ECC_POINT(), points)
         self.assertEqual(str(e.exception), "unknown field(s) z in source")
 
     def test_base_decode_case_insensitive(self):
@@ -554,11 +554,11 @@ class SerializationTest(unittest.TestCase):
     def test_base_decode_bad(self):
         dec = base_encdec()
         with self.assertRaises(TypeError) as e:
-            dv = dec.decode(TPMU_KDF_SCHEME(), {})
+            dec.decode(TPMU_KDF_SCHEME(), {})
         self.assertEqual(str(e.exception), "tried to decode union TPMU_KDF_SCHEME")
 
         with self.assertRaises(TypeError) as e:
-            dv = dec.decode("", {})
+            dec.decode("", {})
         self.assertEqual(str(e.exception), "unable to decode value of type str")
 
     def test_base_bad_selector(self):
