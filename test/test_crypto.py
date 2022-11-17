@@ -580,7 +580,7 @@ class CryptoTest(TSS2_EsapiTest):
 
     def test_ecc_bad_curves(self):
         with self.assertRaises(ValueError) as e:
-            pub = TPMT_PUBLIC.from_pem(ecc_bad_curve)
+            TPMT_PUBLIC.from_pem(ecc_bad_curve)
         self.assertEqual(str(e.exception), "unsupported curve: sect163r2")
 
         pub = TPMT_PUBLIC.from_pem(ecc_public_key)
