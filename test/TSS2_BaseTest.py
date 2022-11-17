@@ -10,7 +10,6 @@ import sys
 import tempfile
 import time
 import unittest
-from time import sleep
 from ctypes import cdll
 
 
