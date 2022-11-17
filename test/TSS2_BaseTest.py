@@ -31,7 +31,7 @@ class BaseTpmSimulator(object):
         logger.debug('Setting up simulator: "{}"'.format(self.exe))
 
         tpm = None
-        for _ in range(0, 10):
+        for _ in range(0, 20):
 
             random_port = random.randrange(2321, 65534)
 
