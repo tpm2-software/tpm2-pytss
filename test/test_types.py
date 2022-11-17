@@ -1009,7 +1009,7 @@ class TypesTest(unittest.TestCase):
 
         # should fail, cannot have additional specifiers
         with self.assertRaises(ValueError):
-            templ = TPMT_PUBLIC.parse(alg="keyedhash:sha512")
+            TPMT_PUBLIC.parse(alg="keyedhash:sha512")
 
     def test_TPMT_PUBLIC_parse_hmac(self):
         templ = TPMT_PUBLIC.parse(alg="hmac")
