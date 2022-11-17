@@ -84,7 +84,7 @@ class TestTCTI(TSS2_EsapiTest):
     def test_get_poll_handles(self):
         tcti_name = getattr(self.tcti, "name", "")
         try:
-            handles = self.tcti.get_poll_handles()
+            self.tcti.get_poll_handles()
         except TSS2_Exception as e:
             if e.rc != lib.TSS2_TCTI_RC_NOT_IMPLEMENTED:
                 raise e
