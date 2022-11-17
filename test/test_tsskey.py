@@ -61,7 +61,7 @@ class TSSKeyTest(TSS2_EsapiTest):
         insens = TPM2B_SENSITIVE_CREATE()
         inpublic = TPM2B_PUBLIC(publicArea=_parent_rsa_template)
         parent, _, _, _, _ = self.ectx.create_primary(insens, inpublic)
-        phandle = self.ectx.evict_control(
+        self.ectx.evict_control(
             ESYS_TR.RH_OWNER, parent, 0x81000081, session1=ESYS_TR.PASSWORD
         )
 
@@ -73,7 +73,7 @@ class TSSKeyTest(TSS2_EsapiTest):
         insens = TPM2B_SENSITIVE_CREATE()
         inpublic = TPM2B_PUBLIC(publicArea=_parent_ecc_template)
         parent, _, _, _, _ = self.ectx.create_primary(insens, inpublic)
-        phandle = self.ectx.evict_control(
+        self.ectx.evict_control(
             ESYS_TR.RH_OWNER, parent, 0x81000081, session1=ESYS_TR.PASSWORD
         )
 
