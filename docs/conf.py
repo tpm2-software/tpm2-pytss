@@ -52,8 +52,6 @@ class MyMagicMock(MagicMock):
 
 sys.modules["tpm2_pytss._libtpm2_pytss"] = MyMagicMock()
 
-import tpm2_pytss
-
 # -- Project information -----------------------------------------------------
 
 project = "tpm2-pytss"
