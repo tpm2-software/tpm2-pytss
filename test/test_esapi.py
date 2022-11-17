@@ -185,7 +185,7 @@ class TestEsys(TSS2_EsapiTest):
         self.ectx.nv_undefine_space(nv_index)
 
         with self.assertRaises(TSS2_Exception):
-            public, name = self.ectx.nv_read_public(nv_index)
+            self.ectx.nv_read_public(nv_index)
 
     def test_hierarchychangeauth(self):
 
