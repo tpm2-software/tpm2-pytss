@@ -26,7 +26,7 @@ RmxDJYOlsFlR3mG/MiqSSB6dZ67H/Q==
 
 class TSSKeyTest(TSS2_EsapiTest):
     def test_rsa_frompem(self):
-        key = TSSPrivKey.from_pem(rsa_pem)
+        TSSPrivKey.from_pem(rsa_pem)
 
     def test_rsa_topem(self):
         key = TSSPrivKey.from_pem(rsa_pem)
