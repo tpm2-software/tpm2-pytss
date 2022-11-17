@@ -654,14 +654,14 @@ class TestUtils(TSS2_EsapiTest):
         )
         tnh = self.ectx.nv_define_space(b"", nv_template, ESYS_TR.OWNER)
         self.ectx.nv_write(tnh, tb)
-        nv_read = nv_read_ek(self.ectx)
+        nv_read = NVReadEK(self.ectx)
         cert, template = create_ek_template("EK-HIGH-ECC256", nv_read)
         self.assertEqual(cert, b"I am a certificate")
         self.assertEqual(
             template.marshal(), TPM2B_PUBLIC(publicArea=ek_test_template).marshal()
         )
 
-    def test_create_ek_high_ecc256(self):
+    def test_create_ek_high_ecc384(self):
         nv_read = NVReadEK(self.ectx)
         with self.assertRaises(ValueError) as e:
             create_ek_template("EK-HIGH-ECC384", nv_read)
