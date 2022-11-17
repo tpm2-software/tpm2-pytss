@@ -599,7 +599,7 @@ class CryptoTest(TSS2_EsapiTest):
         self.assertEqual(str(e.exception), "unsupported key type: _DSAPrivateKey")
 
         with self.assertRaises(ValueError) as e:
-            pub = TPMT_PUBLIC.from_pem(dsa_public_key)
+            TPMT_PUBLIC.from_pem(dsa_public_key)
         self.assertEqual(str(e.exception), "unsupported key type: _DSAPublicKey")
 
     def test_from_pem_with_symmetric(self):
