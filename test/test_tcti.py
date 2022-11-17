@@ -161,7 +161,6 @@ class TestTCTI(TSS2_EsapiTest):
                 self.skipTest(f"get_poll_handles not supported by {tcti_name}")
 
     def test_custom_pytcti_set_locality(self):
-        tcti_name = getattr(self.tcti, "name", "")
         t = MyTCTI(self.tcti)
         t.set_locality(TPMA_LOCALITY.TWO)
 
@@ -180,10 +179,6 @@ class TestTCTI(TSS2_EsapiTest):
         t._v2 = None
         with self.assertRaises(TSS2_Exception):
             t.make_sticky(0, 0)
-
-    def test_custom_pytcti_set_locality(self):
-        t = MyTCTI(self.tcti)
-        t.set_locality(TPMA_LOCALITY.TWO)
 
     def test_custom_pytcti_version(self):
         t = MyTCTI(None)
