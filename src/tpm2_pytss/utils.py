@@ -393,6 +393,9 @@ def create_ek_template(
         try:
             nonce = nv_read_cb(nonce_index)
         except NoSuchIndex:
+            # The TPM is not required to have these Indices, but we must try
+            # Avoids a race on checking for NV and then reading if a delete
+            # comes in
             pass
 
     if nonce and template.publicArea.type == TPM2_ALG.RSA:
