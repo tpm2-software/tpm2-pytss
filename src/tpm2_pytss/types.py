@@ -694,7 +694,6 @@ class TPMT_PUBLIC(TPM_OBJECT):
         if scheme == "rsaes":
             templ.parameters.asymDetail.scheme.scheme = TPM2_ALG.RSAES
             TPMT_PUBLIC._error_on_conflicting_sign_attrs(templ)
-            return
         elif scheme == "null":
             templ.parameters.asymDetail.scheme.scheme = TPM2_ALG.NULL
         elif scheme.startswith("rsassa"):
