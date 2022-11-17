@@ -59,6 +59,7 @@ try:
 
     _algtable += ((TPM2_ALG.SM4, SM4),)
 except ImportError:
+    # SM4 not implemented by cryptography package, ignore, no SM4 support.
     pass
 
 
