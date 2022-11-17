@@ -1537,12 +1537,12 @@ class TypesTest(unittest.TestCase):
         badmagic = bytearray(ctxbytes)
         badmagic[0] = 1
         with self.assertRaises(ValueError):
-            ctx = TPMS_CONTEXT.from_tools(badmagic)
+            TPMS_CONTEXT.from_tools(badmagic)
 
         badversion = bytearray(ctxbytes)
         badversion[5] = 0xFF
         with self.assertRaises(ValueError):
-            ctx = TPMS_CONTEXT.from_tools(badversion)
+            TPMS_CONTEXT.from_tools(badversion)
 
         sessbytes = b64decode(test_session)
         sess = TPMS_CONTEXT.from_tools(sessbytes)
