@@ -94,10 +94,10 @@ class FAPIConfig(contextlib.ExitStack):
 
             self.config = {**self.config, **temp_dir_config}
 
-        fapi_conf_file = tempfile.NamedTemporaryFile(mode="w", delete=False)
-        self.config_tmp_path = fapi_conf_file.name
-        fapi_conf_file.write(json.dumps(self.config))
-        fapi_conf_file.close
+        with tempfile.NamedTemporaryFile(mode="w", delete=False) as fapi_conf_file:
+            self.config_tmp_path = fapi_conf_file.name
+            fapi_conf_file.write(json.dumps(self.config))
+
         logger.debug(
             f"Creating FAPIConfig: {self.config_tmp_path}:\n{json.dumps(self.config, indent=4)}"
         )
