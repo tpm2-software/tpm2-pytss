@@ -383,6 +383,9 @@ def create_ek_template(
         tt, _ = TPMT_PUBLIC.unmarshal(templb)
         template = TPM2B_PUBLIC(publicArea=tt)
     except NoSuchIndex:
+        # The TPM is not required to have these Indices, but we must try
+        # Avoids a race on checking for NV and then reading if a delete
+        # comes in
         pass
 
     nonce = None
