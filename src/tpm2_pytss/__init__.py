@@ -4,6 +4,7 @@ from .ESAPI import ESAPI
 try:
     from .FAPI import *
 except NotImplementedError:
+    # Built on a system lacking FAPI, ignore
     pass
 try:
     from .policy import *
