@@ -15,7 +15,7 @@ from tpm2_pytss import *
 
 from tpm2_pytss.internal.utils import is_bug_fixed
 
-from .TSS2_BaseTest import TpmSimulator, TSS2_BaseTest
+from .TSS2_BaseTest import TpmSimulator
 
 pytestmark = pytest.mark.skipif(
     "tpm2_pytss.FAPI" not in sys.modules, reason="FAPI Not Detected"
