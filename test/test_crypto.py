@@ -324,7 +324,7 @@ class CryptoTest(TSS2_EsapiTest):
         pub.publicArea.type = TPM2_ALG.NULL
 
         with self.assertRaises(ValueError) as e:
-            pem = crypto._public_to_pem(pub.publicArea)
+            crypto._public_to_pem(pub.publicArea)
         self.assertEqual(str(e.exception), f"unsupported key type: {TPM2_ALG.NULL}")
 
     def test_topem_rsa(self):
