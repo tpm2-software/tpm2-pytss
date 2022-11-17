@@ -595,7 +595,7 @@ class CryptoTest(TSS2_EsapiTest):
         der = b64decode(b64)
 
         with self.assertRaises(ValueError) as e:
-            priv = TPMT_SENSITIVE.from_pem(der)
+            TPMT_SENSITIVE.from_pem(der)
         self.assertEqual(str(e.exception), "unsupported key type: _DSAPrivateKey")
 
         with self.assertRaises(ValueError) as e:
