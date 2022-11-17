@@ -454,7 +454,7 @@ class CryptoTest(TSS2_EsapiTest):
         self.assertEqual(key, ekey)
 
         with self.assertRaises(ValueError) as e:
-            key = crypto._kdfa(
+            crypto._kdfa(
                 TPM2_ALG.SHA256,
                 b"key data",
                 b"label data",
@@ -465,7 +465,7 @@ class CryptoTest(TSS2_EsapiTest):
         self.assertEqual(str(e.exception), "bad key length 123, not a multiple of 8")
 
         with self.assertRaises(ValueError) as e:
-            key = crypto._kdfa(
+            crypto._kdfa(
                 TPM2_ALG.LAST + 1,
                 b"key data",
                 b"label data",
@@ -490,7 +490,7 @@ class CryptoTest(TSS2_EsapiTest):
         self.assertEqual(key, ekey)
 
         with self.assertRaises(ValueError) as e:
-            key = crypto.kdfe(
+            crypto.kdfe(
                 TPM2_ALG.SHA256,
                 b"z data",
                 b"use data",
@@ -501,7 +501,7 @@ class CryptoTest(TSS2_EsapiTest):
         self.assertEqual(str(e.exception), "bad key length 123, not a multiple of 8")
 
         with self.assertRaises(ValueError) as e:
-            key = crypto.kdfe(
+            crypto.kdfe(
                 TPM2_ALG.LAST + 1,
                 b"z data",
                 b"use data",
