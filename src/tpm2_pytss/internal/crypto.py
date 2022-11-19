@@ -402,6 +402,21 @@ def _get_digest_size(alg):
     return dt.digest_size
 
 
+def _get_signature_bytes(sig):
+    if sig.sigAlg in (TPM2_ALG.RSAPSS, TPM2_ALG.RSASSA):
+        rb = bytes(sig.signature.rsapss.sig)
+    elif sig.sigAlg == TPM2_ALG.ECDSA:
+        r = int.from_bytes(sig.signature.ecdsa.signatureR, byteorder="big")
+        s = int.from_bytes(sig.signature.ecdsa.signatureS, byteorder="big")
+        rb = encode_dss_signature(r, s)
+    elif sig.sigAlg == TPM2_ALG.HMAC:
+        rb = bytes(sig.signature.hmac)
+    else:
+        raise TypeError(f"unsupported signature algorithm: {sig.sigAlg}")
+
+    return rb
+
+
 def verify_signature_rsa(signature, key, data):
     dt = _get_digest(signature.signature.any.hashAlg)
     if dt is None:
