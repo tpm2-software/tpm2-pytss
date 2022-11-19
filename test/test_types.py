@@ -1903,6 +1903,34 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(s.selections.pcr_select.sizeofSelect, 3)
         self.assertEqual(bytes(s.selections.pcr_select.pcrSelect), b"\xFF\xFF\xFF\x00")
 
+    def test_TPMT_SIGNATURE(self):
+        ecdsa = TPMT_SIGNATURE(sigAlg=TPM2_ALG.ECDSA)
+        ecdsa.signature.ecdsa.signatureR = b"\x52" * 32
+        ecdsa.signature.ecdsa.signatureS = b"\x53" * 32
+        ecbytes = bytes(ecdsa)
+
+        self.assertEqual(
+            ecbytes,
+            b"0D\x02 RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR\x02 SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS",
+        )
+
+        rsa = TPMT_SIGNATURE(sigAlg=TPM2_ALG.RSAPSS)
+        rsa.signature.rsapss.sig = b"RSA" * 85
+        rsabytes = bytes(rsa)
+
+        self.assertEqual(rsabytes, b"RSA" * 85)
+
+        hmac = TPMT_SIGNATURE(sigAlg=TPM2_ALG.HMAC)
+        hmac.signature.hmac.hashAlg = TPM2_ALG.SHA256
+        hmac.signature.hmac.digest.sha256 = b"HMAC" * 8
+        hmacbytes = bytes(hmac)
+
+        self.assertEqual(hmacbytes, b"HMAC" * 8)
+
+        bad = TPMT_SIGNATURE(sigAlg=TPM2_ALG.NULL)
+        with self.assertRaises(TypeError):
+            bytes(bad)
+
 
 if __name__ == "__main__":
     unittest.main()

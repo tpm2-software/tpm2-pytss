@@ -29,6 +29,7 @@ from tpm2_pytss.internal.crypto import (
     _public_to_pem,
     _getname,
     _verify_signature,
+    _get_signature_bytes,
     private_to_key,
 )
 import tpm2_pytss.constants as constants  # lgtm [py/import-and-import-from]
@@ -2270,6 +2271,16 @@ class TPMT_SIGNATURE(TPM_OBJECT):
             :py:class:`cryptography.exceptions.InvalidSignature`: when the signature doesn't match the data.
         """
         _verify_signature(self, key, data)
+
+    def __bytes__(self):
+        """Return the underlying bytes for the signature.
+
+        For RSA and HMAC signatures return the signature bytes, for ECDSA return a ASN.1 encoded signature.
+
+        Raises:
+            TypeError: when the signature algorithm is unsupported.
+        """
+        return _get_signature_bytes(self)
 
 
 class TPMU_SIG_SCHEME(TPM_OBJECT):
