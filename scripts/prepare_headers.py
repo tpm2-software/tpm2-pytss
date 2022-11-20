@@ -21,6 +21,7 @@ def remove_common_guards(s):
 
     # Remove includes and guards
     s = re.sub("#ifndef.*", "", s)
+    s = re.sub("#if .*", "", s)
     s = re.sub("#define .*_H_*?\n", "", s)
     s = re.sub("#endif.*", "", s)
     s = re.sub("#error.*", "", s)
