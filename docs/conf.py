@@ -22,6 +22,15 @@ from sphinx.util import logging
 
 logger = logging.getLogger(__name__)
 
+
+class FakeVersions:
+    _versions = {
+        "tss2-esys": "255.255.255",
+        "tss2-fapi": "255.255.255",
+        "tss2-policy": "255.255.255",
+    }
+
+
 if os.environ.get("READTHEDOCS", False):
     import git
 
@@ -34,6 +43,7 @@ if os.environ.get("READTHEDOCS", False):
     sys.path.insert(0, path)
     l = os.listdir(path)
     logger.info(f"{path} ls: {l}")
+    sys.modules["tpm2_pytss.internal.versions"] = FakeVersions
 
 logger.info("Mocking tpm2_pytss._libtpm2_pytss")
 from unittest.mock import MagicMock
