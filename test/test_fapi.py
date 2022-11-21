@@ -81,8 +81,7 @@ def sha256(data: bytes) -> bytes:
     """Calculate the SHA256 digest of given data."""
     digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
     digest.update(data)
-    digest = digest.finalize()
-    return digest
+    return digest.finalize()
 
 
 # TODO unprovisioned tests
