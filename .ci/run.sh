@@ -104,7 +104,7 @@ function run_style() {
 }
 
 function run_mypy_check() {
-  "${PYTHON}" -m mypy --exclude=docs --exclude=scripts "${SRC_ROOT}"
+  "${PYTHON}" -m mypy --exclude=docs --exclude=scripts --exclude='setup.py' "${SRC_ROOT}"
 }
 
 if [ "x${TEST}" != "x" ]; then

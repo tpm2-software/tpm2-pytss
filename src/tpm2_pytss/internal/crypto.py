@@ -23,11 +23,21 @@ from cryptography.hazmat.primitives.ciphers.algorithms import AES, Camellia
 from cryptography.hazmat.primitives.ciphers import modes, Cipher, CipherAlgorithm
 from cryptography.hazmat.backends import default_backend
 from cryptography.exceptions import UnsupportedAlgorithm, InvalidSignature
-from typing import Tuple, Type
+from typing import Tuple, Type, Any, Union
 import secrets
 import sys
 
-_curvetable = (
+# Despite below, it won't allow us to use the right classes for the
+# typehint so we just use Any...
+# from cryptography.hazmat.primitives.asymmetric import rsa, ec, padding
+# ec.SECP192R1
+# <class 'cryptography.hazmat.primitives.asymmetric.ec.SECP192R1'>
+# type(ec.SECP192R1)
+# <class 'abc.ABCMeta'>
+# ec.SECP192R1.__bases__
+# (<class 'cryptography.hazmat.primitives.asymmetric.ec.EllipticCurve'>,)
+
+_curvetable: Tuple[Tuple[TPM2_ECC, Any], ...] = (
     (TPM2_ECC.NIST_P192, ec.SECP192R1),
     (TPM2_ECC.NIST_P224, ec.SECP224R1),
     (TPM2_ECC.NIST_P256, ec.SECP256R1),
@@ -35,7 +45,7 @@ _curvetable = (
     (TPM2_ECC.NIST_P521, ec.SECP521R1),
 )
 
-_digesttable = (
+_digesttable: Tuple[Tuple[TPM2_ALG, Any], ...] = (
     (TPM2_ALG.SHA1, hashes.SHA1),
     (TPM2_ALG.SHA256, hashes.SHA256),
     (TPM2_ALG.SHA384, hashes.SHA384),
@@ -48,14 +58,14 @@ _digesttable = (
 if hasattr(hashes, "SM3"):
     _digesttable += ((TPM2_ALG.SM3_256, hashes.SM3),)
 
-_algtable = (
+_algtable: Tuple[Tuple[TPM2_ALG, Any], ...] = (
     (TPM2_ALG.AES, AES),
     (TPM2_ALG.CAMELLIA, Camellia),
     (TPM2_ALG.CFB, modes.CFB),
 )
 
 try:
-    from cryptography.hazmat.primitives.ciphers.algorithms import SM4
+    from cryptography.hazmat.primitives.ciphers.algorithms import SM4  # type: ignore[attr-defined]
 
     _algtable += ((TPM2_ALG.SM4, SM4),)
 except ImportError:
@@ -274,8 +284,7 @@ class _MyRSAPrivateNumbers(rsa.RSAPrivateNumbers):
         return d
 
 
-def private_to_key(private: "types.TPMT_SENSITIVE", public: "types.TPMT_PUBLIC"):
-    key = None
+def private_to_key(private: "types.TPMT_SENSITIVE", public: "types.TPMT_PUBLIC") -> Union[ec.EllipticCurvePrivateKey, rsa.RSAPrivateKey]:  # type: ignore[name-defined]
     if private.sensitiveType == TPM2_ALG.RSA:
 
         p = int.from_bytes(bytes(private.sensitive.rsa), byteorder="big")
@@ -286,7 +295,7 @@ def private_to_key(private: "types.TPMT_SENSITIVE", public: "types.TPMT_PUBLIC")
             else 65537
         )
 
-        key = _MyRSAPrivateNumbers(p, n, e, rsa.RSAPublicNumbers(e, n)).private_key(
+        return _MyRSAPrivateNumbers(p, n, e, rsa.RSAPublicNumbers(e, n)).private_key(
             backend=default_backend()
         )
     elif private.sensitiveType == TPM2_ALG.ECC:
@@ -301,13 +310,11 @@ def private_to_key(private: "types.TPMT_SENSITIVE", public: "types.TPMT_PUBLIC")
         x = int.from_bytes(bytes(public.unique.ecc.x), byteorder="big")
         y = int.from_bytes(bytes(public.unique.ecc.y), byteorder="big")
 
-        key = ec.EllipticCurvePrivateNumbers(
+        return ec.EllipticCurvePrivateNumbers(
             p, ec.EllipticCurvePublicNumbers(x, y, curve())
         ).private_key(backend=default_backend())
-    else:
-        raise ValueError(f"unsupported key type: {private.sensitiveType}")
 
-    return key
+    raise ValueError(f"unsupported key type: {private.sensitiveType}")
 
 
 def _public_to_pem(obj, encoding="pem"):
@@ -535,7 +542,7 @@ def _generate_ecc_seed(
     return (seed, secret)
 
 
-def _generate_seed(public: "types.TPMT_PUBLIC", label: bytes) -> Tuple[bytes, bytes]:
+def _generate_seed(public: "types.TPMT_PUBLIC", label: bytes) -> Tuple[bytes, bytes]:  # type: ignore[name-defined]
     key = public_to_key(public)
     if public.type == TPM2_ALG.RSA:
         return _generate_rsa_seed(key, public.nameAlg, label)
@@ -588,8 +595,8 @@ def __ecc_secret_to_seed(
 
 
 def _secret_to_seed(
-    private: "types.TPMT_SENSITIVE",
-    public: "types.TPMT_PUBLIC",
+    private: "types.TPMT_SENSITIVE",  # type: ignore[name-defined]
+    public: "types.TPMT_PUBLIC",  # type: ignore[name-defined]
     label: bytes,
     outsymseed: bytes,
 ):
@@ -605,7 +612,7 @@ def _secret_to_seed(
 def _hmac(
     halg: hashes.HashAlgorithm, hmackey: bytes, enc_cred: bytes, name: bytes
 ) -> bytes:
-    h = HMAC(hmackey, halg(), backend=default_backend())
+    h = HMAC(hmackey, halg(), backend=default_backend())  # type: ignore[operator]
     h.update(enc_cred)
     h.update(name)
     return h.finalize()
@@ -618,7 +625,7 @@ def _check_hmac(
     name: bytes,
     expected: bytes,
 ):
-    h = HMAC(hmackey, halg(), backend=default_backend())
+    h = HMAC(hmackey, halg(), backend=default_backend())  # type: ignore[operator]
     h.update(enc_cred)
     h.update(name)
     h.verify(expected)
@@ -628,8 +635,8 @@ def _encrypt(
     cipher: Type[CipherAlgorithm], mode: Type[modes.Mode], key: bytes, data: bytes
 ) -> bytes:
     iv = len(key) * b"\x00"
-    ci = cipher(key)
-    ciph = Cipher(ci, mode(iv), backend=default_backend())
+    ci = cipher(key)  # type: ignore[call-arg]
+    ciph = Cipher(ci, mode(iv), backend=default_backend())  # type: ignore[call-arg]
     encr = ciph.encryptor()
     encdata = encr.update(data) + encr.finalize()
     return encdata
@@ -639,8 +646,8 @@ def _decrypt(
     cipher: Type[CipherAlgorithm], mode: Type[modes.Mode], key: bytes, data: bytes
 ) -> bytes:
     iv = len(key) * b"\x00"
-    ci = cipher(key)
-    ciph = Cipher(ci, mode(iv), backend=default_backend())
+    ci = cipher(key)  # type: ignore[call-arg]
+    ciph = Cipher(ci, mode(iv), backend=default_backend())  # type: ignore[call-arg]
     decr = ciph.decryptor()
     plaintextdata = decr.update(data) + decr.finalize()
     return plaintextdata

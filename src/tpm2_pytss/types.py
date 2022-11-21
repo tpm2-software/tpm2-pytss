@@ -9,7 +9,7 @@ The classes contained within can be initialized based on named argument value pa
 of key-value objects where the keys are the names of the associated type.
 
 """
-from ._libtpm2_pytss import ffi, lib # type: ignore
+from ._libtpm2_pytss import ffi, lib  # type: ignore[import]
 
 from tpm2_pytss.internal.utils import (
     _chkrc,
@@ -44,7 +44,7 @@ from typing import Union, Tuple, Optional
 import sys
 
 try:
-    from tpm2_pytss.internal.type_mapping import _type_map, _element_type_map
+    from tpm2_pytss.internal.type_mapping import _type_map, _element_type_map  # type: ignore[import]
 except ImportError as e:
     # this is needed so docs can be generated without building
     if "sphinx" not in sys.modules:
@@ -845,7 +845,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
             TPMA_OBJECT, int, str
         ] = TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS,
         nameAlg: Union[TPM2_ALG, int, str] = "sha256",
-        authPolicy: bytes = None,
+        authPolicy: Optional[bytes] = None,
     ) -> "TPMT_PUBLIC":
         """Builds a TPMT_PUBLIC from a tpm2-tools like specifier strings.
 
@@ -867,7 +867,8 @@ class TPMT_PUBLIC(TPM_OBJECT):
                 integer value or a friendly name string. This is tpm2-tools option "-n" as described in:
                 https://github.com/tpm2-software/tpm2-tools/blob/master/man/common/alg.md#hashing-algorithms
 
-            authPolicy (bytes): The policy digest of the object. This is tpm2-tools option "-L".
+            authPolicy (bytes): Optional, The policy digest of the object. This is tpm2-tools option "-L".
+                Defaults to None.
 
         Returns:
             A populated TPMT_PUBLIC for use.
@@ -912,9 +913,9 @@ class TPMT_PUBLIC(TPM_OBJECT):
         keep_processing = False
         prefix = tuple(filter(lambda x: objstr.startswith(x), expected))
         if len(prefix) == 1:
-            prefix = prefix[0]
-            keep_processing = getattr(TPMT_PUBLIC, f"_handle_{prefix}")(
-                objstr[len(prefix) :], templ
+            prefix_str = prefix[0]
+            keep_processing = getattr(TPMT_PUBLIC, f"_handle_{prefix_str}")(
+                objstr[len(prefix_str) :], templ
             )
         else:
             raise ValueError(
@@ -947,9 +948,9 @@ class TPMT_PUBLIC(TPM_OBJECT):
         objectAttributes: Union[TPMA_OBJECT, int] = (
             TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH
         ),
-        symmetric: TPMT_SYM_DEF_OBJECT = None,
-        scheme: TPMT_ASYM_SCHEME = None,
-        password: bytes = None,
+        symmetric: Optional[TPMT_SYM_DEF_OBJECT] = None,
+        scheme: Optional[TPMT_ASYM_SCHEME] = None,
+        password: Optional[bytes] = None,
     ) -> "TPMT_PUBLIC":
         """Decode the public part from standard key encodings.
 
@@ -1166,9 +1167,9 @@ class TPM2B_PUBLIC(TPM_OBJECT):
         objectAttributes: Union[TPMA_OBJECT, int] = (
             TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH
         ),
-        symmetric: TPMT_SYM_DEF_OBJECT = None,
-        scheme: TPMT_ASYM_SCHEME = None,
-        password: bytes = None,
+        symmetric: Optional[TPMT_SYM_DEF_OBJECT] = None,
+        scheme: Optional[TPMT_ASYM_SCHEME] = None,
+        password: Optional[bytes] = None,
     ) -> "TPM2B_PUBLIC":
         """Decode the public part from standard key encodings.
 
@@ -1371,8 +1372,8 @@ class TPM2B_SENSITIVE(TPM_OBJECT):
         objectAttributes: Union[TPMA_OBJECT, int] = (
             TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH
         ),
-        scheme: TPMT_KEYEDHASH_SCHEME = None,
-        seed: bytes = None,
+        scheme: Optional[TPMT_KEYEDHASH_SCHEME] = None,
+        seed: Optional[bytes] = None,
     ) -> Tuple["TPM2B_SENSITIVE", TPM2B_PUBLIC]:
         """Generate the private and public part for a keyed hash object from a secret.
 
@@ -1414,7 +1415,7 @@ class TPM2B_SENSITIVE(TPM_OBJECT):
         objectAttributes: Union[TPMA_OBJECT, int] = (
             TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH
         ),
-        seed: bytes = None,
+        seed: Optional[bytes] = None,
     ) -> Tuple["TPM2B_SENSITIVE", TPM2B_PUBLIC]:
         """Generate the private and public part for a symcipher object from a secret.
 
@@ -1487,7 +1488,7 @@ class TPM2B_SENSITIVE(TPM_OBJECT):
 
         return self.sensitiveArea.to_der(public)
 
-    def to_ssh(self, public: TPMT_PUBLIC, password: bytes = None) -> bytes:
+    def to_ssh(self, public: TPMT_PUBLIC, password: Optional[bytes] = None) -> bytes:
         """Encode the key as OPENSSH PEM format.
 
         Args:
@@ -1660,9 +1661,7 @@ class TPML_PCR_SELECTION(TPML_OBJECT):
                 f"got {len(selectors)}"
             )
 
-        selections = [TPMS_PCR_SELECTION.parse(x) for x in selectors]
-
-        return TPML_PCR_SELECTION(selections)
+        return TPML_PCR_SELECTION([TPMS_PCR_SELECTION.parse(x) for x in selectors])
 
 
 class TPML_TAGGED_PCR_PROPERTY(TPML_OBJECT):
@@ -1761,7 +1760,11 @@ class TPMS_CONTEXT(TPM_OBJECT):
         ctx.contextBlob, _ = TPM2B_CONTEXT_DATA.unmarshal(data[24:])
         return ctx
 
-    def to_tools(self, session_type: TPM2_SE = None, auth_hash: TPM2_ALG = None):
+    def to_tools(
+        self,
+        session_type: Optional[TPM2_SE] = None,
+        auth_hash: Optional[TPM2_ALG] = None,
+    ):
         """Marshal the context into a tpm2-tools context blob.
 
         Args:
@@ -1794,8 +1797,9 @@ class TPMS_CONTEXT(TPM_OBJECT):
 
         if version == 2:
             data = int(0xBADCC0DE).to_bytes(4, "big") + version.to_bytes(4, "big")
-            data = data + session_type.to_bytes(1, "big")
-            data = data + auth_hash.to_bytes(2, "big")
+            # cannot hit "version 2" if session_type and auth_hash are None
+            data = data + session_type.to_bytes(1, "big")  # type: ignore[union-attr]
+            data = data + auth_hash.to_bytes(2, "big")  # type: ignore[union-attr]
 
         data = data + int(0xBADCC0DE).to_bytes(4, "big") + int(1).to_bytes(4, "big")
         data = data + self.hierarchy.to_bytes(4, "big")
@@ -1926,13 +1930,13 @@ class TPMS_PCR_SELECTION(TPM_OBJECT):
 
         if hunks[1] != "all":
             try:
-                pcrs = [int(x.strip(), 0) for x in hunks[1].split(",")]
+                return TPMS_PCR_SELECTION(
+                    hash=halg, pcrs=[int(x.strip(), 0) for x in hunks[1].split(",")]
+                )
             except ValueError:
                 raise ValueError(f"Expected PCR number, got {hunks[1]}")
-        else:
-            pcrs = hunks[1]
 
-        return TPMS_PCR_SELECTION(hash=halg, pcrs=pcrs)
+        return TPMS_PCR_SELECTION(hash=halg, pcrs=hunks[1])
 
 
 class TPMS_QUOTE_INFO(TPM_OBJECT):
@@ -2154,10 +2158,10 @@ class TPMT_SENSITIVE(TPM_OBJECT):
 
     def _serialize(
         self,
-        encoding: str,
+        encoding: serialization.Encoding,
         public: TPMT_PUBLIC,
-        format: str = serialization.PrivateFormat.TraditionalOpenSSL,
-        password: bytes = None,
+        format: serialization.PrivateFormat = serialization.PrivateFormat.TraditionalOpenSSL,
+        password: Optional[bytes] = None,
     ):
         k = private_to_key(self, public)
 
@@ -2173,7 +2177,7 @@ class TPMT_SENSITIVE(TPM_OBJECT):
 
         return data
 
-    def to_pem(self, public: TPMT_PUBLIC, password: bytes = None):
+    def to_pem(self, public: TPMT_PUBLIC, password: Optional[bytes] = None):
         """Encode the key as PEM encoded ASN.1.
 
         public(TPMT_PUBLIC): The corresponding public key.
@@ -2196,7 +2200,7 @@ class TPMT_SENSITIVE(TPM_OBJECT):
 
         return self._serialize(serialization.Encoding.DER, public)
 
-    def to_ssh(self, public: TPMT_PUBLIC, password: bytes = None):
+    def to_ssh(self, public: TPMT_PUBLIC, password: Optional[bytes] = None):
         """Encode the key as SSH format.
 
         public(TPMT_PUBLIC): The corresponding public key.

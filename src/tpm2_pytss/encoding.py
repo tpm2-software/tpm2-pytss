@@ -1,6 +1,6 @@
 from binascii import hexlify, unhexlify
 from typing import Any, Union, List, Dict, Tuple
-from ._libtpm2_pytss import ffi # type: ignore
+from ._libtpm2_pytss import ffi  # type: ignore[name-defined]
 from .internal.crypto import _get_digest_size
 from .constants import (
     TPM_FRIENDLY_INT,

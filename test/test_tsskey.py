@@ -3,8 +3,8 @@
 from tpm2_pytss import *
 from tpm2_pytss.tsskey import TSSPrivKey, _parent_rsa_template, _parent_ecc_template
 from .TSS2_BaseTest import TSS2_EsapiTest
-from asn1crypto.core import ObjectIdentifier # type: ignore
-from asn1crypto import pem # type: ignore
+from asn1crypto.core import ObjectIdentifier  # type: ignore[name-defined]
+from asn1crypto import pem  # type: ignore[name-defined]
 
 import unittest
 
