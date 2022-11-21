@@ -10,6 +10,7 @@ jobs:
         python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
         tss-version: ['master', '2.4.0', '2.4.6', '3.0.0', '3.0.3', '3.1.0']
         with-fapi: [true]
+        tools-version: ['master']
         include:
           - python-version: '3.9'
             tss-version: '3.1.0'
@@ -29,6 +30,7 @@ jobs:
         env:
           TPM2_TSS_VERSION: ${{ matrix.tss-version }}
           TPM2_TSS_FAPI: ${{ matrix.with-fapi }}
+          TPM2_TOOLS_VERSION: ${{ matrix.tools-version }}
         run: ./.ci/install-deps.sh
 
       - name: Check
