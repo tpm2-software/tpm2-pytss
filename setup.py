@@ -3,9 +3,9 @@ import sys
 import os
 from setuptools import setup
 from setuptools.command.build_ext import build_ext
-from pkgconfig import pkgconfig
-from pycparser import c_parser, preprocess_file
-from pycparser.c_ast import (
+from pkgconfig import pkgconfig # type: ignore
+from pycparser import c_parser, preprocess_file # type: ignore
+from pycparser.c_ast import ( # type: ignore
     Typedef,
     TypeDecl,
     IdentifierType,
