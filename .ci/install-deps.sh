@@ -50,9 +50,9 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
 if ! pkg-config tss2-sys; then
   # for git describe to work, one needs either a tag or a deep clone of master.
   if [ "${TPM2_TSS_VERSION}" != "master" ]; then
-    extra_git_flags="--depth 1"
+    tpm2_tss2_extra_git_flags="--depth 1"
   fi
-  git -C /tmp clone ${extra_git_flags} \
+  git -C /tmp clone ${tpm2_tss2_extra_git_flags} \
     --branch "${TPM2_TSS_VERSION}" https://github.com/tpm2-software/tpm2-tss.git
   pushd /tmp/tpm2-tss
 
@@ -113,9 +113,9 @@ fi
 if ! command -v tpm2; then
   # for git describe to work, one needs either a tag or a deep clone of master.
   if [ "${TPM2_TOOLS_VERSION}" != "master" ]; then
-    extra_git_flags="--depth 1"
+    tpm2_tools_extra_git_flags="--depth 1"
   fi
-  git -C /tmp clone ${extra_git_flags} \
+  git -C /tmp clone ${tpm2_tools_extra_git_flags} \
     --branch "${TPM2_TOOLS_VERSION}" https://github.com/tpm2-software/tpm2-tools.git
   pushd /tmp/tpm2-tools
   ./bootstrap
