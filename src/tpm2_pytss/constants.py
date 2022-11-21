@@ -6,7 +6,7 @@
 
 Along with helpers to go from string values to constants and constant values to string values.
 """
-from ._libtpm2_pytss import lib, ffi
+from ._libtpm2_pytss import lib, ffi # type: ignore
 from tpm2_pytss.internal.utils import _CLASS_INT_ATTRS_from_string, _lib_version_atleast
 
 

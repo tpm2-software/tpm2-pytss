@@ -9,7 +9,7 @@ The classes contained within can be initialized based on named argument value pa
 of key-value objects where the keys are the names of the associated type.
 
 """
-from ._libtpm2_pytss import ffi, lib
+from ._libtpm2_pytss import ffi, lib # type: ignore
 
 from tpm2_pytss.internal.utils import (
     _chkrc,

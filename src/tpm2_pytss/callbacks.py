@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2
 
 
-from ._libtpm2_pytss import lib
+from ._libtpm2_pytss import lib # type: ignore
 from .internal.constants import CALLBACK_BASE_NAME, CALLBACK_COUNT, CallbackType
 
 

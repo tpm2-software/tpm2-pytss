@@ -18,7 +18,7 @@ from .types import (
 )
 from .constants import TPM2_ALG, ESYS_TR, TSS2_RC, TPM2_RC
 from .TSS2_Exception import TSS2_Exception
-from ._libtpm2_pytss import ffi, lib
+from ._libtpm2_pytss import ffi, lib # type: ignore
 from .ESAPI import ESAPI
 from enum import Enum
 from typing import Callable, Union

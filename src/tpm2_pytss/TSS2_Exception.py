@@ -1,12 +1,11 @@
-from ._libtpm2_pytss import lib, ffi
+from ._libtpm2_pytss import lib, ffi # type: ignore
 from typing import Union
-
 
 class TSS2_Exception(RuntimeError):
     """TSS2_Exception represents an error returned by the TSS APIs."""
 
     # prevent cirular dependency and don't use the types directly here.
-    def __init__(self, rc: Union["TSS2_RC", "TPM2_RC", int]):
+    def __init__(self, rc: Union["TSS2_RC", "TPM2_RC", int]): # type: ignore
         if isinstance(rc, int):
             # defer this to avoid circular dep.
             from .constants import TSS2_RC

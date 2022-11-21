@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: BSD-2
 
 import warnings
-from ._libtpm2_pytss import lib
+from ._libtpm2_pytss import lib # type: ignore
 from .types import *
 from .constants import TPM2_ECC, TPM2_CAP, ESYS_TR
 from asn1crypto.core import ObjectIdentifier, Sequence, Boolean, OctetString, Integer
