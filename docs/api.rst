@@ -10,6 +10,7 @@ The API documentation for the tpm2-pytss project.
     TPM Command Transmission Interface (TCTI) <tcti>
     Enhanced System API (ESAPI) <esys>
     Feature API (FAPI) <fapi>
+    Policy <policy>
     Utility Routines <utils>
     TSS PEM Key (OpenSSL) <tsskey>
     TSS2_Exception <exception>
