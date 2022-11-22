@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-2
 
-from ._libtpm2_pytss import ffi, lib
+from ._libtpm2_pytss import ffi, lib  # type: ignore[import]
 
 from .internal.utils import _chkrc
 from .constants import TSS2_RC, TPM2_RC
@@ -241,7 +241,7 @@ class TCTI:
         _chkrc(self._v1.cancel(self._ctx))
 
     @common_checks()
-    def get_poll_handles(self) -> Tuple[PollData]:
+    def get_poll_handles(self) -> Tuple[PollData, ...]:
         """Gets the poll handles from the TPM.
 
         Returns:

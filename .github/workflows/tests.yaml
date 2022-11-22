@@ -87,3 +87,24 @@ jobs:
       env:
         STYLE: 1
       run: ./.ci/run.sh
+
+  mypy-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        env:
+          TPM2_TSS_VERSION: master
+          TPM2_TSS_FAPI: true
+          TPM2_TOOLS_VERSION: master
+        run: ./.ci/install-deps.sh
+
+      - name: Install tpm2-pytss
+        run: pip install -e .[dev]
+
+      - name: MyPy Check
+        env:
+          MYPY: 1
+        run: ./.ci/run.sh

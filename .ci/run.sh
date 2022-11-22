@@ -103,6 +103,10 @@ function run_style() {
   "${PYTHON}" -m black --diff --check "${SRC_ROOT}"
 }
 
+function run_mypy_check() {
+  "${PYTHON}" -m mypy --exclude=docs --exclude=scripts --exclude='setup.py' "${SRC_ROOT}"
+}
+
 if [ "x${TEST}" != "x" ]; then
   run_test
 elif [ "x${WHITESPACE}" != "x" ]; then
@@ -111,4 +115,6 @@ elif [ "x${STYLE}" != "x" ]; then
   run_style
 elif [ "x${PUBLISH_PKG}" != "x" ]; then
   run_publish_pkg
+elif [ "x${MYPY}" != "x" ]; then
+  run_mypy_check
 fi

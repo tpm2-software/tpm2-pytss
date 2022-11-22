@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: BSD-2
 
-from ._libtpm2_pytss import lib, ffi
+from ._libtpm2_pytss import lib, ffi  # type: ignore[import]
 from .TCTI import TCTI
 from .internal.utils import _chkrc
 

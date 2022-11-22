@@ -6,12 +6,13 @@
 
 Along with helpers to go from string values to constants and constant values to string values.
 """
-from ._libtpm2_pytss import lib, ffi
+from ._libtpm2_pytss import lib, ffi  # type: ignore[import]
 from tpm2_pytss.internal.utils import _CLASS_INT_ATTRS_from_string, _lib_version_atleast
+from typing import Dict, Tuple
 
 
 class TPM_FRIENDLY_INT(int):
-    _FIXUP_MAP = {}
+    _FIXUP_MAP: Dict[str, str] = {}
 
     @classmethod
     def parse(cls, value: str) -> int:
@@ -231,7 +232,7 @@ class TPM_FRIENDLY_INT(int):
 
 
 class TPMA_FRIENDLY_INTLIST(TPM_FRIENDLY_INT):
-    _MASKS = tuple()
+    _MASKS: Tuple[Tuple[int, int, str], ...] = tuple()
 
     @classmethod
     def parse(cls, value: str) -> int:
@@ -392,7 +393,7 @@ class ESYS_TR(TPM_FRIENDLY_INT):
     RH_PLATFORM = lib.ESYS_TR_RH_PLATFORM
     RH_PLATFORM_NV = lib.ESYS_TR_RH_PLATFORM_NV
 
-    def serialize(self, ectx: "ESAPI") -> bytes:
+    def serialize(self, ectx: "ESAPI") -> bytes:  # type: ignore[name-defined]
         """Same as see tpm2_pytss.ESAPI.tr_serialize
 
         Args:
@@ -405,7 +406,7 @@ class ESYS_TR(TPM_FRIENDLY_INT):
         return ectx.tr_serialize(self)
 
     @staticmethod
-    def deserialize(ectx: "ESAPI", buffer: bytes) -> "ESYS_TR":
+    def deserialize(ectx: "ESAPI", buffer: bytes) -> "ESYS_TR":  # type: ignore[name-defined]
         """Same as see tpm2_pytss.ESAPI.tr_derialize
 
         Args:
@@ -417,7 +418,7 @@ class ESYS_TR(TPM_FRIENDLY_INT):
 
         return ectx.tr_deserialize(buffer)
 
-    def get_name(self, ectx: "ESAPI") -> "TPM2B_NAME":
+    def get_name(self, ectx: "ESAPI") -> "TPM2B_NAME":  # type: ignore[name-defined]
         """Same as see tpm2_pytss.ESAPI.tr_get_name
 
         Args:
@@ -428,7 +429,7 @@ class ESYS_TR(TPM_FRIENDLY_INT):
         """
         return ectx.tr_get_name(self)
 
-    def close(self, ectx: "ESAPI"):
+    def close(self, ectx: "ESAPI"):  # type: ignore[name-defined]
         """Same as see tpm2_pytss.ESAPI.tr_close
 
         Args:
@@ -1256,7 +1257,7 @@ class TPMA_LOCALITY(TPMA_FRIENDLY_INTLIST):
             return cls(value, base=0)
         except ValueError:
             pass
-        return super().parse(value)
+        return TPMA_LOCALITY(super().parse(value))
 
     def __str__(self) -> str:
         """Given a set of localities or an extended locality, return the string representation
