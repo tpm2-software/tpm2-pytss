@@ -1,20 +1,12 @@
 #!/usr/bin/python3
 # SPDX-License-Identifier: BSD-2
 
-import importlib.util
 import os
 import pkgconfig
 import pathlib
 import re
 import sys
 import textwrap
-
-# import tpm2_pytss.constants
-constants_spec = importlib.util.spec_from_file_location(
-    "tpm2_pytss.internal.constants", "src/tpm2_pytss/internal/constants.py"
-)
-constants = importlib.util.module_from_spec(constants_spec)
-constants_spec.loader.exec_module(constants)
 
 
 def remove_common_guards(s):
@@ -181,21 +173,20 @@ def prepare_fapi(dirpath):
 
     s = remove_poll_stuff(s, "FAPI_POLL_HANDLE")
 
-    s += "".join(
-        f"""
-    extern "Python" TSS2_RC {constants.CALLBACK_BASE_NAME[constants.CallbackType.FAPI_AUTH]}{i}(
+    s += """
+    extern "Python" TSS2_RC _fapi_auth_callback(
         char     const *objectPath,
         char     const *description,
         char    const **auth,
         void           *userData);
-    extern "Python" TSS2_RC {constants.CALLBACK_BASE_NAME[constants.CallbackType.FAPI_BRANCH]}{i}(
+    extern "Python" TSS2_RC _fapi_branch_callback(
         char     const *objectPath,
         char     const *description,
         char    const **branchNames,
         size_t          numBranches,
         size_t         *selectedBranch,
         void           *userData);
-    extern "Python" TSS2_RC {constants.CALLBACK_BASE_NAME[constants.CallbackType.FAPI_SIGN]}{i}(
+    extern "Python" TSS2_RC _fapi_sign_callback(
         char     const *objectPath,
         char     const *description,
         char     const *publicKey,
@@ -206,13 +197,11 @@ def prepare_fapi(dirpath):
         uint8_t const **signature,
         size_t         *signatureSize,
         void           *userData);
-    extern "Python" TSS2_RC {constants.CALLBACK_BASE_NAME[constants.CallbackType.FAPI_POLICYACTION]}{i}(
+    extern "Python" TSS2_RC _fapi_policy_action_callback(
         char     const *objectPath,
         char     const *action,
         void           *userData);
      """
-        for i in range(0, constants.CALLBACK_COUNT)
-    )
 
     return remove_common_guards(s)
 
