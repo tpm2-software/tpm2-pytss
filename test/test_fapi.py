@@ -16,6 +16,7 @@ from tpm2_pytss import *
 from tpm2_pytss.internal.utils import is_bug_fixed
 
 from .TSS2_BaseTest import TpmSimulator
+from tpm2_pytss.TSS2_Exception import TSS2_Exception
 
 pytestmark = pytest.mark.skipif(
     "tpm2_pytss.FAPI" not in sys.modules, reason="FAPI Not Detected"
@@ -781,6 +782,12 @@ class Common:
         # use key for signing: success
         self.fapi.sign(path=key_path, digest=b"\x11" * 32)
 
+        # unset signing callback, should fail
+        self.fapi.set_sign_callback(callback=None)
+
+        with pytest.raises(TSS2_Exception):
+            self.fapi.sign(path=key_path, digest=b"\x11" * 32)
+
     def test_policy_branched(self):
         pcr_index = 15
         pcr_data = b"ABCDEF"
@@ -885,6 +892,15 @@ class Common:
         nv_data, _ = self.fapi.nv_read(nv_path)
         assert nv_data == b"Hello World"
 
+        # test without a callback set
+        if not is_bug_fixed(fixed_in="3.1", backports=["2.4.3", "3.0.1", "3.1.0"]):
+            # skip tests as theirs a bug
+            return
+
+        self.fapi.set_branch_callback(callback=None)
+        with pytest.raises(TSS2_Exception):
+            self.fapi.nv_read(nv_path)
+
         # clean up
         self.fapi.delete(path=nv_path)
 
@@ -938,6 +954,12 @@ class Common:
 
         # use key for signing: success
         self.fapi.sign(path=key_path, digest=b"\x11" * 32)
+
+        # set policy Action callback to NULL
+        self.fapi.set_policy_action_callback(callback=None)
+
+        with pytest.raises(TSS2_Exception):
+            self.fapi.sign(path=key_path, digest=b"\x11" * 32)
 
 
 @pytest.mark.usefixtures("init_fapi_ecc")
