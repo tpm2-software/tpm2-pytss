@@ -12,12 +12,12 @@ from tpm2_pytss.encoding import (
     to_yaml,
     from_yaml,
 )
+from tpm2_pytss.internal.utils import TSS2Version
 from binascii import unhexlify, hexlify
 from .TSS2_BaseTest import TSS2_BaseTest
 import shutil
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives import serialization
-from packaging.version import Version
 import subprocess
 import sys
 import os
@@ -733,14 +733,9 @@ class ToolsTest(TSS2_BaseTest):
 
     def _get_tools_version(self):
         out = self.run_tool("--version", no_tcti=True)
-        kvs = out.split()
-        for kv in kvs:
-            k, v = kv.split("=", 1)
-            if k == "version":
-                sv = v.strip('"')
-                version_parts = sv.rsplit("-", 1)
-                return Version(version_parts[0])
-        raise Exception(kv)
+        kvps = out.split()
+        kvp = [x for x in kvps if "version=" in x][0]
+        return TSS2Version(kvp.split("=")[1].replace('"', ""))
 
     def test_tools_tpms_nv_public(self):
         self.maxDiff = None
@@ -1431,7 +1426,7 @@ class ToolsTest(TSS2_BaseTest):
     def test_decode_int_nt(self):
         if not self.has_tools:
             self.skipTest("tools not in path")
-        elif self.tools_version < Version("5.3"):
+        elif self.tools_version < TSS2Version("5.3"):
             self.skipTest("tpm2-tools version 5.3 or later required")
 
         self.run_tool("nvdefine", "0x01000000", "-a", "authwrite|authread|nt=bits")
@@ -1449,7 +1444,7 @@ class ToolsTest(TSS2_BaseTest):
     def test_decode_nt_extend(self):
         if not self.has_tools:
             self.skipTest("tools not in path")
-        elif self.tools_version < Version("5.3"):
+        elif self.tools_version < TSS2Version("5.3"):
             self.skipTest("tpm2-tools version 5.3 or later required")
 
         self.run_tool(
@@ -1475,7 +1470,7 @@ class ToolsTest(TSS2_BaseTest):
     def test_decode_nt_pin(self):
         if not self.has_tools:
             self.skipTest("tools not in path")
-        elif self.tools_version < Version("5.3"):
+        elif self.tools_version < TSS2Version("5.3"):
             self.skipTest("tpm2-tools version 5.3 or later required")
 
         self.run_tool(
