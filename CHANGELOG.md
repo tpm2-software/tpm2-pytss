@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 2.0.0-rc0 - 2022-11-28
+### Fixed
+- Resolution of include directory search paths when building CFFI bindings.
+- Typo in pip package name in README.
+- Missing package pycparser dependency in setup.cfg.
+- Minimum version of tss2-esys as 2.4.0.
+- Reproducible documentation builds using `SOURCE_DATE_EPOCH`. See #376.
+- documentation issues, such as cross linking, indentation and style.
+- test/test_utils.py::TestUtils::test_make_credential_ecc_camellia when CAMELLIA is not supported.
+- Stop leaking tpm simulator references in test harness.
+- Limitation on 10 set policy callbacks, now has no hard limit, see #473
+
+### Added
+- **Experimental** bindings to the policy library tss2-policy. Require version 3.3+ of tpm2-tss to enable.
+- Support for Python 3.11.
+- Testing on CI for built wheel.
+- PyTCTI class for writing Python Native TCTIs.
+- API Breaking: TCTI magic is now byte string eg b"\x1" of up to 8 bytes.
+- API Breaking: TCTI get_poll_handles now returning PollData object instead of ffi.CData.
+
 ## 1.2.0 - 2022-06-14
 ### Added
 - utils function to parse tpm2-tools PCR values as function: unmarshal_tools_pcr_values.
