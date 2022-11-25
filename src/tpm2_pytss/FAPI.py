@@ -9,7 +9,7 @@ import json
 import logging
 import os
 import tempfile
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, List, Optional, Tuple, Union
 
 from ._libtpm2_pytss import ffi, lib
 from .fapi_info import FapiInfo
