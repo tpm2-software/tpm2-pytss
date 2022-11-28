@@ -19,7 +19,7 @@ jobs:
 
     - name: Install Dependencies
       env:
-        TPM2_TSS_VERSION: 3.0.0
+        TPM2_TSS_VERSION: 4.0.0-rc0
       run: |
         python3 -m pip install --user --upgrade pip
         python3 -m pip install --user --upgrade twine
