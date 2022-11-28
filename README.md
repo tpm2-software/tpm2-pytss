@@ -38,9 +38,8 @@ This is known to work with versions 2.4.0 of tpm2-tss or higher.
 ## Help
 
 - Ask a question via an [issue](https://github.com/tpm2-software/tpm2-pytss/issues/new)
-- Send an email to tpm2@lists.01.org
-  - You can subscribe to the users mailing list here
-    https://lists.01.org/postorius/lists/tpm2.lists.01.org/
+- Send an email to the tpm2 list:
+    - https://lists.linuxfoundation.org/mailman/listinfo/tpm2
 
 ## License
 
