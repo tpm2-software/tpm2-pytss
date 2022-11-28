@@ -21,8 +21,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for Python 3.11.
 - Testing on CI for built wheel.
 - PyTCTI class for writing Python Native TCTIs.
-- API Breaking: TCTI magic is now byte string eg b"\x1" of up to 8 bytes.
-- API Breaking: TCTI get_poll_handles now returning PollData object instead of ffi.CData.
+
+### Changed
+- TCTI get\_poll\_handles now returning PollData object instead of ffi.CData.
+- TCTI magic is now byte string eg b"\x1" of up to 8 bytes.
 
 ## 1.2.0 - 2022-06-14
 ### Added
