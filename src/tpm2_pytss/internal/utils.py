@@ -18,7 +18,7 @@ except ImportError as e:
 logger = logging.getLogger(__name__)
 
 # Peek into the loaded modules, if mock is loaded, set __MOCK__ to True, else False
-__MOCK__ = "unittest.mock" in sys.modules
+__MOCK__ = "sphinx" in sys.modules
 
 
 class TSS2Version:
