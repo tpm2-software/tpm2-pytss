@@ -71,6 +71,66 @@ def make_credential(
     return (credblob, secret)
 
 
+def credential_to_tools(
+    id_object: Union[TPM2B_ID_OBJECT, bytes],
+    encrypted_secret: Union[TPM2B_ENCRYPTED_SECRET, bytes],
+) -> bytes:
+    """
+    Converts an encrypted credential and an encrypted secret to a format that TPM2-tools can handle.
+
+    The output can be used in the credential-blob parameter of the tpm2_activatecredential command.
+
+    Args:
+        id_object: The encrypted credential area.
+        encrypted_secret: The encrypted secret.
+
+    Returns:
+        A credential blob in byte form that can be used by TPM2-tools.
+    """
+    data = bytearray()
+
+    # Add the header, consisting of the magic and the version.
+    data.extend(int(0xBADCC0DE).to_bytes(4, "big") + int(1).to_bytes(4, "big"))
+
+    if isinstance(id_object, bytes):
+        id_object = TPM2B_ID_OBJECT(id_object)
+    if isinstance(encrypted_secret, bytes):
+        encrypted_secret = TPM2B_ENCRYPTED_SECRET(encrypted_secret)
+
+    # Add the id object and encrypted secret.
+    data.extend(id_object.marshal())
+    data.extend(encrypted_secret.marshal())
+
+    return bytes(data)
+
+
+def tools_to_credential(
+    credential_blob: bytes,
+) -> Tuple[TPM2B_ID_OBJECT, TPM2B_ENCRYPTED_SECRET]:
+    """
+    Convert a TPM2-tools compatible credential blob.
+
+    Args:
+        credential_blob: A TPM2-tools compatible credential blob.
+
+    Returns:
+        A tuple of (TPM2B_ID_OBJECT, TPM2B_ENCRYPTED_SECRET)
+    """
+    magic = int.from_bytes(credential_blob[0:4], byteorder="big")
+    if magic != 0xBADCC0DE:
+        raise ValueError(f"bad magic, expected 0xBADCC0DE, got 0x{magic:X}")
+    version = int.from_bytes(credential_blob[4:8], byteorder="big")
+    if version != 1:
+        raise ValueError(f"bad version, expected 1, got {version}")
+
+    id_object, id_object_len = TPM2B_ID_OBJECT.unmarshal(credential_blob[8:])
+    encrypted_secret, _ = TPM2B_ENCRYPTED_SECRET.unmarshal(
+        credential_blob[8 + id_object_len :]
+    )
+
+    return id_object, encrypted_secret
+
+
 def wrap(
     newparent: TPMT_PUBLIC,
     public: TPM2B_PUBLIC,
