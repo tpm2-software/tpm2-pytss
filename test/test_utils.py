@@ -5,7 +5,6 @@ import unittest
 from tpm2_pytss import *
 from tpm2_pytss.internal.crypto import (
     _generate_seed,
-    private_to_key,
     public_to_key,
     _get_alg,
     _get_digest,
@@ -108,6 +107,36 @@ AwEHoUQDQgAEojRWBjpOkP4pH2fM5hha7iJj4A9RfDcbJrGTd181UMoYvfM+8VuY
 Qa6C2sTmPHlvWopRgWslXt1JmxbBKwWf2Q==
 -----END EC PRIVATE KEY-----
 """
+
+
+mkcred = b64decode(
+    b"""
+utzA3gAAAAEALQAgu8GEn+x61T9fIjPLo1IDCqcuY8T8RlBfBxDjMsOxcXPhuSJQ
+vSN85wOdCwEASKiqHPf63bvAoM7xKrhfTay8uLsncUDiCLC6FRGvnRPrwPWlZlNi
+rZps3C5E5dGdqLJneewxBYvDk4WBhCGps94oTuuRutU1U48QM8Uu4QWHaqAX7SGm
+ZmsHVC8kJta9i3v6LxtDTx5I7JJEbrbckSqSL3K79S7yW+nAy3GWqxMmeMvinicW
+F1Baf21zl4pov69NaRBmdGAho8D4FcBhZVsBFlsag3Kev0EaiYNzifnuQOXfMkmh
+PgSNwG4oSwDu66TLu2WDhyYf3tAXJKTEmXFIwHWJQM6vy/j6ZO73t04ynVJ/GseV
+jUCgpbZ9Uv6UL/3DUu+VZEJU0YD0os2sZg==
+"""
+)
+
+mkcred_id_object = b64decode(
+    b"""
+ACC7wYSf7HrVP18iM8ujUgMKpy5jxPxGUF8HEOMyw7Fxc+G5IlC9I3znA50L
+"""
+)
+
+mkcred_encrypted_secret = b64decode(
+    b"""
+SKiqHPf63bvAoM7xKrhfTay8uLsncUDiCLC6FRGvnRPrwPWlZlNirZps3C5E5dGd
+qLJneewxBYvDk4WBhCGps94oTuuRutU1U48QM8Uu4QWHaqAX7SGmZmsHVC8kJta9
+i3v6LxtDTx5I7JJEbrbckSqSL3K79S7yW+nAy3GWqxMmeMvinicWF1Baf21zl4po
+v69NaRBmdGAho8D4FcBhZVsBFlsag3Kev0EaiYNzifnuQOXfMkmhPgSNwG4oSwDu
+66TLu2WDhyYf3tAXJKTEmXFIwHWJQM6vy/j6ZO73t04ynVJ/GseVjUCgpbZ9Uv6U
+L/3DUu+VZEJU0YD0os2sZg==
+"""
+)
 
 ek_test_template = TPMT_PUBLIC(
     type=TPM2_ALG.KEYEDHASH,
@@ -710,6 +739,41 @@ class TestUtils(TSS2_EsapiTest):
         self.assertEqual(digs[0], b"\x00" * 20)
         self.assertEqual(digs[1], b"\x00" * 20)
         self.assertEqual(digs[2], b"\xFF" * 32)
+
+    def test_credential_to_tools(self):
+        credential_blob = credential_to_tools(mkcred_id_object, mkcred_encrypted_secret)
+
+        self.assertEqual(credential_blob, mkcred)
+
+    def test_credential_to_tools_bytes(self):
+        id_object = TPM2B_ID_OBJECT(mkcred_id_object)
+        encrypted_secret = TPM2B_ENCRYPTED_SECRET(mkcred_encrypted_secret)
+
+        credential_blob = credential_to_tools(id_object, encrypted_secret)
+
+        self.assertEqual(credential_blob, mkcred)
+
+    def test_tools_to_credential(self):
+        id_object, encrypted_secret = tools_to_credential(mkcred)
+
+        self.assertEqual(len(id_object), 45)
+        self.assertEqual(len(encrypted_secret), 256)
+
+    def test_tools_to_credential_invalid_magic(self):
+        self.assertRaises(
+            ValueError,
+            lambda: tools_to_credential(
+                int(0xBADCC0DF).to_bytes(4, "big") + int(1).to_bytes(4, "big")
+            ),
+        )
+
+    def test_tools_to_credential_invalid_version(self):
+        self.assertRaises(
+            ValueError,
+            lambda: tools_to_credential(
+                int(0xBADCC0DE).to_bytes(4, "big") + int(2).to_bytes(4, "big")
+            ),
+        )
 
 
 if __name__ == "__main__":
