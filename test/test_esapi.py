@@ -326,7 +326,7 @@ class TestEsys(TSS2_EsapiTest):
             bind=ESYS_TR.NONE,
             session_type=TPM2_SE.POLICY,
             symmetric="aes128cfb",
-            auth_hash=TPM2_ALG.SHA256,
+            auth_hash="sha256",
         )
 
         self.ectx.trsess_set_attributes(

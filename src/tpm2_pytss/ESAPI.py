@@ -515,7 +515,7 @@ class ESAPI:
             session_type (TPM2_SE): Indicates the type of the session; simple HMAC or policy (including a trial policy).
             symmetric (TPMT_SYM_DEF, str): The algorithm and key size for parameter encryption. Can use strings understood
                 by TPMT_SYM_DEF.parse().
-            auth_hash (TPM2_ALG): Hash algorithm to use for the session.
+            auth_hash (TPM2_ALG, str): Hash algorithm to use for the session. Can use strings as understood by TPM2_ALG.parse().
             nonce_caller (Union[TPM2B_NONCE, bytes, str, None]): Initial nonceCaller, sets nonceTPM size for the
                 session. Can be None to have ESAPI generate it for the caller. Defaults to None.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -542,6 +542,8 @@ class ESAPI:
         _check_handle_type(session3, "session3")
 
         _check_friendly_int(session_type, "session_type", TPM2_SE)
+        if isinstance(auth_hash, str):
+            auth_hash = TPM2_ALG.parse(auth_hash)
         _check_friendly_int(auth_hash, "auth_hash", TPM2_ALG)
 
         nonce_caller_cdata = _get_cdata(
