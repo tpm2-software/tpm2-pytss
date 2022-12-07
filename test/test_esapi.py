@@ -321,17 +321,11 @@ class TestEsys(TSS2_EsapiTest):
 
         handle, _, _, _, _ = self.ectx.create_primary(inSensitive, "rsa2048:aes128cfb")
 
-        sym = TPMT_SYM_DEF(
-            algorithm=TPM2_ALG.XOR,
-            keyBits=TPMU_SYM_KEY_BITS(exclusiveOr=TPM2_ALG.SHA256),
-            mode=TPMU_SYM_MODE(aes=TPM2_ALG.CFB),
-        )
-
         session = self.ectx.start_auth_session(
             tpm_key=handle,
             bind=ESYS_TR.NONE,
             session_type=TPM2_SE.POLICY,
-            symmetric=sym,
+            symmetric="aes128cfb",
             auth_hash=TPM2_ALG.SHA256,
         )
 
