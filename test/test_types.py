@@ -1931,6 +1931,62 @@ class TypesTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             bytes(bad)
 
+    def test_TPMT_SYM_DEF_parse(self):
+
+        t = TPMT_SYM_DEF.parse("xor")
+        self.assertEqual(t.algorithm, TPM2_ALG.XOR)
+
+        t = TPMT_SYM_DEF.parse("aes")
+        self.assertEqual(t.algorithm, TPM2_ALG.AES)
+        self.assertEqual(t.keyBits.sym, 128)
+        self.assertEqual(t.mode.sym, TPM2_ALG.CFB)
+
+        t = TPMT_SYM_DEF.parse("aes256")
+        self.assertEqual(t.algorithm, TPM2_ALG.AES)
+        self.assertEqual(t.keyBits.sym, 256)
+        self.assertEqual(t.mode.sym, TPM2_ALG.CFB)
+
+        t = TPMT_SYM_DEF.parse("aes256cbc")
+        self.assertEqual(t.algorithm, TPM2_ALG.AES)
+        self.assertEqual(t.keyBits.sym, 256)
+        self.assertEqual(t.mode.sym, TPM2_ALG.CBC)
+
+        with self.assertRaises(ValueError):
+            TPMT_SYM_DEF.parse("aes256bad")
+
+    def test_TPMT_SYM_DEF_OBJECT_parse(self):
+
+        t = TPMT_SYM_DEF_OBJECT.parse("xor")
+        self.assertEqual(t.algorithm, TPM2_ALG.XOR)
+
+        t = TPMT_SYM_DEF_OBJECT.parse("aes")
+        self.assertEqual(t.algorithm, TPM2_ALG.AES)
+        self.assertEqual(t.keyBits.sym, 128)
+        self.assertEqual(t.mode.sym, TPM2_ALG.CFB)
+
+        t = TPMT_SYM_DEF_OBJECT.parse("aes256")
+        self.assertEqual(t.algorithm, TPM2_ALG.AES)
+        self.assertEqual(t.keyBits.sym, 256)
+        self.assertEqual(t.mode.sym, TPM2_ALG.CFB)
+
+        t = TPMT_SYM_DEF_OBJECT.parse("aes256cbc")
+        self.assertEqual(t.algorithm, TPM2_ALG.AES)
+        self.assertEqual(t.keyBits.sym, 256)
+        self.assertEqual(t.mode.sym, TPM2_ALG.CBC)
+
+        with self.assertRaises(ValueError):
+            TPMT_SYM_DEF_OBJECT.parse("aes256bad")
+
+    def test_bad_assigment(self):
+
+        a = TPMT_SYM_DEF.parse("xor")
+        b = TPM2B_PUBLIC()
+        with self.assertRaises(TypeError):
+            a.algorithm = b
+
+        with self.assertRaises(TypeError):
+            b.publicArea = a
+
 
 if __name__ == "__main__":
     unittest.main()
