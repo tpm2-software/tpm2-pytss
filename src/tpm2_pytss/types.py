@@ -139,6 +139,7 @@ class TPM_OBJECT(object):
 
     def __setattr__(self, key, value):
 
+        _value = value
         _cdata = object.__getattribute__(self, "_cdata")
         if isinstance(value, TPM_OBJECT):
             tipe = ffi.typeof(value._cdata)
@@ -161,7 +162,28 @@ class TPM_OBJECT(object):
             except KeyError:
                 raise e
 
-            _bytefield = clazz._get_bytefield()
+            fn = getattr(clazz, "_get_bytefield", None)
+            if fn is None:
+                src = ffi.addressof(value)
+                x = getattr(_cdata, key)
+                dest = ffi.addressof(x)
+                a = ffi.typeof(src)
+                b = ffi.typeof(dest)
+                self_cls = type(getattr(self, key))
+                value_cls = type(_value)
+                if (
+                    a.cname != b.cname
+                    and not issubclass(self_cls, value_cls)
+                    or ffi.sizeof(value) != ffi.sizeof(x)
+                ):
+                    raise TypeError(
+                        f"Cannot assign type {value_cls} to type {self_cls}"
+                    )
+
+                ffi.memmove(dest, src, ffi.sizeof(value))
+                return
+
+            _bytefield = fn()
             data = getattr(data, _bytefield)
             tipe = ffi.typeof(data)
             if tipe.kind != "array" or not issubclass(clazz, TPM2B_SIMPLE_OBJECT):
@@ -527,15 +549,101 @@ class TPMT_PUBLIC_PARMS(TPM_OBJECT):
     pass
 
 
-class TPMT_SYM_DEF_OBJECT(TPM_OBJECT):
-    pass
-
-
 class TPMT_ASYM_SCHEME(TPM_OBJECT):
     pass
 
 
 class TPM2B_NAME(TPM2B_SIMPLE_OBJECT):
+    pass
+
+
+def _handle_sym_common(objstr, default_mode="null"):
+
+    if objstr is None or len(objstr) == 0:
+        objstr = "128"
+
+    bits = objstr[:3]
+    expected = ["128", "192", "256"]
+    if bits not in expected:
+        raise ValueError(f'Expected bits to be one of {expected}, got: "{bits}"')
+
+    bits = int(bits)
+
+    # go past bits
+    objstr = objstr[3:]
+    if len(objstr) == 0:
+        mode = default_mode
+    else:
+        expected = ["cfb", "cbc", "ofb", "ctr", "ecb"]
+        if objstr not in expected:
+            raise ValueError(f'Expected mode to be one of {expected}, got: "{objstr}"')
+        mode = objstr
+
+    mode = TPM2_ALG.parse(mode)
+
+    return (bits, mode)
+
+
+class TPMT_SYM_DEF(TPM_OBJECT):
+    @classmethod
+    def parse(
+        cls, alg: str, is_restricted: bool = False, is_rsapss: bool = False
+    ) -> "TPMT_SYM_DEF":
+        """Builds a TPMT_SYM_DEF from a tpm2-tools like specifier strings.
+
+        TPMT_SYM_DEF can be built from the symmetric algorithm string specifiers that the tpm2-tools
+        project uses, for example, strings like "aes128cbc".
+
+        Args:
+            alg (str): The string specifier for the algorithm type, bitsize, and mode. Note strings
+            "aes" and "aes128" are shorthand for "aes128cfb".
+
+        Returns:
+            A populated TPMT_SYM_DEF for use.
+
+        Raises:
+            ValueError: If a string value is not of an expected format.
+
+        Examples:
+            .. code-block:: python
+
+                TPMT_SYM_DEF.parse("aes256cfb")
+                TPMT_SYM_DEF.parse("aes")
+                TPMT_SYM_DEF.parse("aes128cbc")
+        """
+        t = cls()
+
+        if alg is None or alg == "":
+            alg = "aes128cfb" if is_restricted or is_rsapss else "null"
+
+        if alg == "null":
+            t.algorithm = TPM2_ALG.NULL
+            return t
+
+        if alg.startswith("aes"):
+            t.algorithm = TPM2_ALG.AES
+            alg = alg[3:]
+        elif alg.startswith("camellia"):
+            t.algorithm = TPM2_ALG.CAMELLIA
+            alg = alg[8:]
+        elif alg.startswith("sm4"):
+            t.algorithm = TPM2_ALG.SM4
+            alg = alg[3:]
+        elif alg == "xor":
+            t.algorithm = TPM2_ALG.XOR
+            return t
+        else:
+            raise ValueError(
+                f'Expected symmetric alg to be null, xor or start with one of aes, camellia, sm4, got: "{alg}"'
+            )
+
+        bits, mode = _handle_sym_common(alg, default_mode="cfb")
+        t.keyBits.sym = bits
+        t.mode.sym = mode
+        return t
+
+
+class TPMT_SYM_DEF_OBJECT(TPMT_SYM_DEF):
     pass
 
 
@@ -575,40 +683,11 @@ class TPMT_PUBLIC(TPM_OBJECT):
         return True
 
     @staticmethod
-    def _handle_sym_common(objstr):
-
-        if objstr is None or len(objstr) == 0:
-            objstr = "128"
-
-        bits = objstr[:3]
-        expected = ["128", "192", "256"]
-        if bits not in expected:
-            raise ValueError(f'Expected bits to be one of {expected}, got: "{bits}"')
-
-        bits = int(bits)
-
-        # go past bits
-        objstr = objstr[3:]
-        if len(objstr) == 0:
-            mode = "null"
-        else:
-            expected = ["cfb", "cbc", "ofb", "ctr", "ecb"]
-            if objstr not in expected:
-                raise ValueError(
-                    f'Expected mode to be one of {expected}, got: "{objstr}"'
-                )
-            mode = objstr
-
-        mode = TPM2_ALG.parse(mode)
-
-        return (bits, mode)
-
-    @staticmethod
     def _handle_aes(objstr, templ):
         templ.type = TPM2_ALG.SYMCIPHER
         templ.parameters.symDetail.sym.algorithm = TPM2_ALG.AES
 
-        bits, mode = TPMT_PUBLIC._handle_sym_common(objstr)
+        bits, mode = _handle_sym_common(objstr)
         templ.parameters.symDetail.sym.keyBits.sym = bits
         templ.parameters.symDetail.sym.mode.sym = mode
         return False
@@ -618,7 +697,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
         templ.type = TPM2_ALG.SYMCIPHER
         templ.parameters.symDetail.sym.algorithm = TPM2_ALG.CAMELLIA
 
-        bits, mode = TPMT_PUBLIC._handle_sym_common(objstr)
+        bits, mode = _handle_sym_common(objstr)
         templ.parameters.symDetail.sym.keyBits.sym = bits
         templ.parameters.symDetail.sym.mode.sym = mode
 
@@ -629,7 +708,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
         templ.type = TPM2_ALG.SYMCIPHER
         templ.parameters.symDetail.sym.algorithm = TPM2_ALG.SM4
 
-        bits, mode = TPMT_PUBLIC._handle_sym_common(objstr)
+        bits, mode = _handle_sym_common(objstr)
         if bits != 128:
             raise ValueError(f'Expected bits to be 128, got: "{bits}"')
         templ.parameters.symDetail.sym.keyBits.sym = bits
@@ -812,30 +891,8 @@ class TPMT_PUBLIC(TPM_OBJECT):
         is_restricted = bool(templ.objectAttributes & TPMA_OBJECT.RESTRICTED)
         is_rsapss = templ.parameters.asymDetail.scheme.scheme == TPM2_ALG.RSAPSS
 
-        if detail is None or detail == "":
-            detail = "aes128cfb" if is_restricted or is_rsapss else "null"
-
-        if detail == "null":
-            templ.parameters.symDetail.sym.algorithm = TPM2_ALG.NULL
-            return
-
-        if detail.startswith("aes"):
-            templ.parameters.symDetail.sym.algorithm = TPM2_ALG.AES
-            detail = detail[3:]
-        elif detail.startswith("camellia"):
-            templ.parameters.symDetail.sym.algorithm = TPM2_ALG.CAMELLIA
-            detail = detail[8:]
-        elif detail.startswith("sm4"):
-            templ.parameters.symDetail.sym.algorithm = TPM2_ALG.SM4
-            detail = detail[3:]
-        else:
-            raise ValueError(
-                f'Expected symmetric detail to be null or start with one of aes, camellia, sm4, got: "{detail}"'
-            )
-
-        bits, mode = TPMT_PUBLIC._handle_sym_common(detail)
-        templ.parameters.symDetail.sym.keyBits.sym = bits
-        templ.parameters.symDetail.sym.mode.sym = mode
+        t = TPMT_SYM_DEF.parse(detail, is_restricted, is_rsapss)
+        templ.parameters.symDetail.sym = t
 
     @classmethod
     def parse(
@@ -2020,10 +2077,6 @@ class TPMU_SYM_KEY_BITS(TPM_OBJECT):
 
 
 class TPMU_SYM_MODE(TPM_OBJECT):
-    pass
-
-
-class TPMT_SYM_DEF(TPM_OBJECT):
     pass
 
 
