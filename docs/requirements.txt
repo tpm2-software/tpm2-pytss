@@ -5,7 +5,7 @@ attrs==21.2.0
 Babel==2.9.1
 black==19.10b0
 bleach==4.1.0
-certifi==2021.10.8
+certifi==2022.12.7
 cffi==1.15.0
 charset-normalizer==2.0.9
 click==8.0.3
