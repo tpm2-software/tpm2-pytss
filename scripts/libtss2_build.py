@@ -31,6 +31,10 @@ build_policy = pkgconfig.exists("tss2-policy")
 if build_policy:
     libraries.append("tss2-policy")
 
+build_tcti_spi_helper = pkgconfig.exists("tss2-tcti-spi-helper")
+if build_tcti_spi_helper:
+    libraries.append("tss2-tcti-spi-helper")
+
 # Set up the search path so we find prepare_header and other modules
 PATH = os.path.dirname(__file__) if len(os.path.dirname(__file__)) > 0 else os.getcwd()
 if not os.path.isabs(PATH):
@@ -54,7 +58,13 @@ if found_dir is None:
     sys.exit("Could not find esys headers in {}".format(paths["include_dirs"]))
 
 # strip tss2 prefix
-prepare(found_dir, "libesys.h", build_fapi=build_fapi, build_policy=build_policy)
+prepare(
+    found_dir,
+    "libesys.h",
+    build_fapi=build_fapi,
+    build_policy=build_policy,
+    build_tcti_spi_helper=build_tcti_spi_helper,
+)
 
 ffibuilder.cdef(open("libesys.h").read())
 
@@ -83,6 +93,8 @@ if build_fapi:
     source += "    #include <tss2/tss2_fapi.h>\n"
 if build_policy:
     source += "    #include <tss2/tss2_policy.h>\n"
+if build_tcti_spi_helper:
+    source += "    #include <tss2/tss2_tcti_spi_helper.h>"
 # so it is often just the "#include".
 ffibuilder.set_source(
     "tpm2_pytss._libtpm2_pytss",

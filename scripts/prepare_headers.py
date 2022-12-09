@@ -153,6 +153,41 @@ def prepare_tcti(dirpath):
 def prepare_tcti_ldr(dirpath):
 
     s = pathlib.Path(dirpath, "tss2_tctildr.h").read_text(encoding="utf-8")
+    return remove_common_guards(s)
+
+
+def prepare_tcti_spi_helper(dirpath):
+
+    s = pathlib.Path(dirpath, "tss2_tcti_spi_helper.h").read_text(encoding="utf-8")
+
+    # Add the callbacks for a TCTI
+    s += """
+    extern "Python" TSS2_RC _tcti_spi_helper_sleep_ms (
+        void *userdata,
+        int milliseconds);
+
+    extern "Python" TSS2_RC _tcti_spi_helper_start_timeout (
+        void *userdata,
+        int milliseconds);
+
+    extern "Python" TSS2_RC _tcti_spi_helper_timeout_expired (
+        void *userdata, bool *is_timeout_expired);
+
+    extern "Python" TSS2_RC _tcti_spi_helper_spi_acquire (
+        void *userdata);
+
+    extern "Python" TSS2_RC _tcti_spi_helper_spi_release (
+    void *userdata);
+
+    extern "Python" TSS2_RC _tcti_spi_helper_spi_transfer (
+        void *userdata,
+        const void *data_out,
+        void *data_in,
+        size_t cnt);
+
+    extern "Python" void _tcti_spi_helper_finalize (
+        void *userdata);
+    """
 
     return remove_common_guards(s)
 
@@ -321,7 +356,9 @@ def prepare_policy(dirpath):
     return s
 
 
-def prepare(indir, outfile, build_fapi=True, build_policy=True):
+def prepare(
+    indir, outfile, build_fapi=True, build_policy=True, build_tcti_spi_helper=True
+):
     indir = os.path.join(indir, "tss2")
 
     common = prepare_common(indir)
@@ -331,6 +368,9 @@ def prepare(indir, outfile, build_fapi=True, build_policy=True):
     tcti = prepare_tcti(indir)
 
     tcti_ldr = prepare_tcti_ldr(indir)
+
+    if build_tcti_spi_helper:
+        tcti_spi_helper = prepare_tcti_spi_helper(indir)
 
     sapi = prepare_sapi()
 
@@ -363,6 +403,8 @@ def prepare(indir, outfile, build_fapi=True, build_policy=True):
         f.write(types)
         f.write(tcti)
         f.write(tcti_ldr)
+        if build_tcti_spi_helper:
+            f.write(tcti_spi_helper)
         f.write(sapi)
         f.write(esapi)
         if build_fapi:
@@ -379,5 +421,10 @@ if __name__ == "__main__":
         exit(1)
 
     build_fapi = pkgconfig.installed("tss2-fapi", ">=3.0.0")
-
-    prepare(sys.argv[1], sys.argv[2], build_fapi=build_fapi)
+    build_tcti_spi_helper = pkgconfig.exists("tss2-tcti-spi-helper")
+    prepare(
+        sys.argv[1],
+        sys.argv[2],
+        build_fapi=build_fapi,
+        build_tcti_spi_helper=build_tcti_spi_helper,
+    )

@@ -84,7 +84,7 @@ class type_generator(build_ext):
     }}
     """
 
-    version_libs = ("tss2-esys", "tss2-fapi", "tss2-policy")
+    version_libs = ("tss2-esys", "tss2-fapi", "tss2-policy", "tss2-tcti-spi-helper")
 
     def get_types(self, ast):
         tm = dict()
