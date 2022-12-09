@@ -28,6 +28,7 @@ class FakeVersions:
         "tss2-esys": "255.255.255",
         "tss2-fapi": "255.255.255",
         "tss2-policy": "255.255.255",
+        "tss2-tcti-spi-helper": "255.255.255",
     }
 
 
