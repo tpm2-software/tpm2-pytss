@@ -1,10 +1,8 @@
 # SPDX-License-Identifier: BSD-2
 from .internal.utils import _lib_version_atleast, _chkrc
 
-if not _lib_version_atleast("tss2-policy", "3.2.0-63-gdcdc8412"):
-    raise NotImplementedError(
-        "tss2-policy not installed or version is less then 3.2.0-63-gdcdc8412"
-    )
+if not _lib_version_atleast("tss2-policy", "4.0.0"):
+    raise NotImplementedError("tss2-policy not installed or version is less then 4.0.0")
 
 from .types import (
     TPM2B_DIGEST,

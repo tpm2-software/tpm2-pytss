@@ -12,10 +12,8 @@ from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.hazmat.primitives.asymmetric.utils import decode_dss_signature
 from .TSS2_BaseTest import TSS2_EsapiTest
 
-if not _lib_version_atleast("tss2-policy", "3.2.0-63-gdcdc8412"):
-    raise unittest.SkipTest(
-        "tss2-policy not installed or version is less then 3.2.0-63-gdcdc8412"
-    )
+if not _lib_version_atleast("tss2-policy", "4.0.0"):
+    raise unittest.SkipTest("tss2-policy not installed or version is less then 4.0.0")
 
 
 def lowercase_dict(src):
