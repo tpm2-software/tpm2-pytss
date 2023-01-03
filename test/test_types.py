@@ -1851,14 +1851,14 @@ class TypesTest(unittest.TestCase):
             str(x)
 
     def test_TSS2_OBJECT(self):
-        if not _lib_version_atleast("tss2-policy", "3.2.0-63-gdcdc8412"):
+        if not _lib_version_atleast("tss2-policy", "4.0.0"):
             self.skipTest("tss2-policy required")
         o = TSS2_OBJECT(handle=ESYS_TR.OWNER)
         self.assertEqual(o.handle, ESYS_TR.OWNER)
         self.assertIsInstance(o.handle, ESYS_TR)
 
     def test_TSS2_POLICY_PCR_SELECTIONS(self):
-        if not _lib_version_atleast("tss2-policy", "3.2.0-63-gdcdc8412"):
+        if not _lib_version_atleast("tss2-policy", "4.0.0"):
             self.skipTest("tss2-policy required")
         select = TSS2_POLICY_PCR_SELECTIONS(
             pcr_select=TPMS_PCR_SELECT(sizeofSelect=1, pcrSelect=b"\xAA",),
@@ -1890,7 +1890,7 @@ class TypesTest(unittest.TestCase):
         )
 
     def test_TSS2_POLICY_PCR_SELECTION(self):
-        if not _lib_version_atleast("tss2-policy", "3.2.0-63-gdcdc8412"):
+        if not _lib_version_atleast("tss2-policy", "4.0.0"):
             self.skipTest("tss2-policy required")
         s = TSS2_POLICY_PCR_SELECTION(
             type=TSS2_POLICY_PCR_SELECTOR.PCR_SELECT,

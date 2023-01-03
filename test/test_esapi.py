@@ -1432,7 +1432,7 @@ class TestEsys(TSS2_EsapiTest):
             self.ectx.hmac(primaryHandle, inData, TPM2_ALG.SHA256, session3=45.6)
 
     @pytest.mark.skipif(
-        not _lib_version_atleast("tss2-esapi", "3.2.0-167-gc17e3989"),
+        not _lib_version_atleast("tss2-esapi", "4.0.0"),
         reason="Attached Components not supported prior to tss v4",
     )
     def test_mac(self):
@@ -1450,7 +1450,7 @@ class TestEsys(TSS2_EsapiTest):
         primaryHandle = self.ectx.create_primary(inSensitive, inPublic)[0]
 
         # Test for tss v < 3.2.0-167-gc17e3989
-        if not _lib_version_atleast("tss2-esapi", "3.2.0-167-gc17e3989"):
+        if not _lib_version_atleast("tss2-esapi", "4.0.0"):
             with self.assertRaises(NotImplementedError):
                 self.ectx.mac(primaryHandle, b"1234", TPM2_ALG.SHA256)
             return
@@ -1823,7 +1823,7 @@ class TestEsys(TSS2_EsapiTest):
             )
 
     @pytest.mark.skipif(
-        not _lib_version_atleast("tss2-esapi", "3.2.0-167-gc17e3989"),
+        not _lib_version_atleast("tss2-esapi", "4.0.0"),
         reason="Attached Components not supported prior to tss v4",
     )
     def test_ac_get_capability(self):
@@ -1831,7 +1831,7 @@ class TestEsys(TSS2_EsapiTest):
             self.ectx.ac_get_capability(ESYS_TR.NONE, TPM_AT.ANY, 0)
 
     @pytest.mark.skipif(
-        not _lib_version_atleast("tss2-esapi", "3.2.0-167-gc17e3989"),
+        not _lib_version_atleast("tss2-esapi", "4.0.0"),
         reason="Attached Components not supported prior to tss v4",
     )
     def test_ac_send(self):
@@ -1840,7 +1840,7 @@ class TestEsys(TSS2_EsapiTest):
             self.ectx.ac_send(ESYS_TR.NONE, ESYS_TR.NONE, ESYS_TR.NONE, inData)
 
     @pytest.mark.skipif(
-        not _lib_version_atleast("tss2-esapi", "3.2.0-167-gc17e3989"),
+        not _lib_version_atleast("tss2-esapi", "4.0.0"),
         reason="Attached Components not supported prior to tss v4",
     )
     def test_policy_ac_send_select(self):

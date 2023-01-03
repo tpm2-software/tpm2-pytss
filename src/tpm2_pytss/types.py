@@ -2356,7 +2356,7 @@ class TPM2B_OPERAND(TPM2B_SIMPLE_OBJECT):
     pass
 
 
-if _lib_version_atleast("tss2-policy", "3.2.0-63-gdcdc8412"):
+if _lib_version_atleast("tss2-policy", "4.0.0"):
 
     class TSS2_OBJECT(TPM_OBJECT):
         pass

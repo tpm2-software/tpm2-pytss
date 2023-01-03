@@ -2221,7 +2221,7 @@ class ESAPI:
 
         TPM Command: TPM2_MAC
         """
-        if not _lib_version_atleast("tss2-esys", "3.2.0-167-gc17e3989"):
+        if not _lib_version_atleast("tss2-esys", "4.0.0"):
             raise NotImplementedError("MAC api not supported below ESAPI v4")
 
         _check_handle_type(handle, "handle")
@@ -2436,7 +2436,7 @@ class ESAPI:
         TPM Command: TPM2_MAC_Start
         """
 
-        if not _lib_version_atleast("tss2-esys", "3.2.0-167-gc17e3989"):
+        if not _lib_version_atleast("tss2-esys", "4.0.0"):
             raise NotImplementedError("MAC api not supported below ESAPI v4")
 
         _check_handle_type(handle, "handle")
@@ -6132,7 +6132,7 @@ class ESAPI:
 
         TPM Command: TPM2_AC_GetCapability
         """
-        if not _lib_version_atleast("tss2-esys", "3.2.0-167-gc17e3989"):
+        if not _lib_version_atleast("tss2-esys", "4.0.0"):
             raise NotImplementedError("MAC api not supported below ESAPI v4")
 
         _check_friendly_int(capability, "capability", TPM_AT)
@@ -6203,7 +6203,7 @@ class ESAPI:
         TPM Command: TPM2_AC_Send
         """
 
-        if not _lib_version_atleast("tss2-esys", "3.2.0-167-gc17e3989"):
+        if not _lib_version_atleast("tss2-esys", "4.0.0"):
             raise NotImplementedError("MAC api not supported below ESAPI v4")
 
         _check_handle_type(ac, "ac")
@@ -6272,7 +6272,7 @@ class ESAPI:
         TPM Command: TPM2_Policy_AC_SendSelect
         """
 
-        if not _lib_version_atleast("tss2-esys", "3.2.0-167-gc17e3989"):
+        if not _lib_version_atleast("tss2-esys", "4.0.0"):
             raise NotImplementedError("MAC api not supported below ESAPI v4")
 
         object_name_cdata = _get_cdata(object_name, TPM2B_NAME, "object_name")
