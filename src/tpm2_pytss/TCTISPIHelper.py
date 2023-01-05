@@ -228,10 +228,13 @@ class TCTISPIHelper(TCTI):
         """Sleeps for a specified amount of time in millisecons.
 
         This callback is REQUIRED.
-        No errors may occur across this boundary.
 
         Args:
             milliseconds(int): The time to sleep.
+
+        Raises:
+            Exception: Implementations are free to raise any Exception. Exceptions are retained
+            across the native boundary.
         """
         pass
 
@@ -239,10 +242,13 @@ class TCTISPIHelper(TCTI):
         """Called when a timeout is occurring with the sleep duration in millisecons.
 
         This callback is REQUIRED.
-        No errors may occur across this boundary.
 
         Args:
             milliseconds(int): The time to sleep.
+
+        Raises:
+            Exception: Implementations are free to raise any Exception. Exceptions are retained
+            across the native boundary.
         """
         pass
 
@@ -258,7 +264,6 @@ class TCTISPIHelper(TCTI):
         """Called to transfer data across the SPI bus.
 
         This callback is REQUIRED.
-        No errors may occur across this boundary.
 
         Args:
             data_in(bytes): The data to send.
@@ -267,15 +272,18 @@ class TCTISPIHelper(TCTI):
             The bytes to send.
 
         Raises:
-            TSS2_Exception: if an error occurs and the RC is returned to the
-                native TCTI.
+            Exception: Implementations are free to raise any Exception. Exceptions are retained
+            across the native boundary.
         """
 
     def on_finalize(self) -> None:
         """Called when the TCTI is finalized.
 
         This callback is OPTIONAL.
-        No errors may occur across this boundary.
+
+        Raises:
+            Exception: Implementations are free to raise any Exception. Exceptions are retained
+            across the native boundary.
         """
         pass
 
@@ -291,6 +299,9 @@ class TCTISPIHelper(TCTI):
         """Called when the SPI bus needs to be released for wait states.
 
         This callback is REQUIRED for WAIT STATES.
-        No errors may occur across this boundary.
+
+        Raises:
+            Exception: Implementations are free to raise any Exception. Exceptions are retained
+            across the native boundary.
         """
         pass
