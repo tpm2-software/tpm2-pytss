@@ -40,6 +40,7 @@ This is known to work with versions 2.4.0 of tpm2-tss or higher.
 - Ask a question via an [issue](https://github.com/tpm2-software/tpm2-pytss/issues/new)
 - Send an email to the tpm2 list:
     - https://lists.linuxfoundation.org/mailman/listinfo/tpm2
+- File a Security Bug by following the instructions in [docs/SECURITY.md](docs/SECURITY.md)
 
 ## License
 
