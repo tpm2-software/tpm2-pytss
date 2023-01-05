@@ -275,6 +275,7 @@ class TCTISPIHelper(TCTI):
             Exception: Implementations are free to raise any Exception. Exceptions are retained
             across the native boundary.
         """
+        pass
 
     def on_finalize(self) -> None:
         """Called when the TCTI is finalized.
