@@ -12,7 +12,7 @@ click==8.0.3
 codecov==2.1.12
 colorama==0.4.4
 coverage==6.2
-cryptography==36.0.1
+cryptography==39.0.1
 docutils==0.16
 execnet==1.9.0
 gitdb==4.0.9
