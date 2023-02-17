@@ -53,7 +53,7 @@ if ! pkg-config tss2-sys; then
     tpm2_tss2_extra_git_flags="--depth 1"
   fi
   git -C /tmp clone ${tpm2_tss2_extra_git_flags} \
-    --branch "${TPM2_TSS_VERSION}" https://github.com/tpm2-software/tpm2-tss.git
+    --branch "${TPM2_TSS_VERSION}" https://github.com/whooo/tpm2-tss.git
   pushd /tmp/tpm2-tss
 
   if [ "${TPM2_TSS_FAPI}" != "true" ]; then
