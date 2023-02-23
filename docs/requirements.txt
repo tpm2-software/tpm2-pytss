@@ -24,7 +24,7 @@ iniconfig==1.1.1
 jeepney==0.7.1
 Jinja2==3.0.3
 keyring==23.4.0
-markdown-it-py==2.0.0
+markdown-it-py==2.2.0
 MarkupSafe==2.0.1
 mdit-py-plugins==0.3.0
 mdurl==0.1.0
