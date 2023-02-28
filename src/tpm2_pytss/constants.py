@@ -436,6 +436,28 @@ class ESYS_TR(TPM_FRIENDLY_INT):
         """
         return ectx.tr_close(self)
 
+    @staticmethod
+    def parts_to_blob(handle: "TPM2_HANDLE", public: "TPM2B_PUBLIC") -> bytes:
+        """Converts a persistent handle and public to a serialized ESYS_TR.
+
+        Args:
+            handle(TPM2_HANDLE): The PERSISTENT handle to convert.
+            public(TPM2B_PUBLIC): The corresponding public for the handle.
+
+        Returns:
+            A SERIALIZED ESYS_TR that can be used with ESYS_TR.deserialize later.
+        """
+
+        if (handle >> TPM2_HR.SHIFT) != TPM2_HT.PERSISTENT:
+            raise ValueError("Expected a persistent handle, got: {handle:#x}")
+
+        b = bytearray()
+        b.extend(handle.to_bytes(4, byteorder="big"))
+        b.extend(public.get_name().marshal())
+        b.extend(int(1).to_bytes(4, byteorder="big"))
+        b.extend(public.marshal())
+        return bytes(b)
+
 
 @TPM_FRIENDLY_INT._fix_const_type
 class TPM2_RH(TPM_FRIENDLY_INT):
