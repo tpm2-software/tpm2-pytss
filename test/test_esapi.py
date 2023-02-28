@@ -4864,6 +4864,21 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.tr_get_tpm_handle(42)
 
+    def test_tr_parts_to_blob(self):
+
+        esys_handle, public = self.ectx.create_primary(TPM2B_SENSITIVE_CREATE())[0:2]
+        new_handle = self.ectx.evict_control(ESYS_TR.OWNER, esys_handle, 0x81000001)
+        golden = new_handle.serialize(self.ectx)
+
+        tpm_handle = self.ectx.tr_get_tpm_handle(new_handle)
+        self.assertEqual(tpm_handle, 0x81000001)
+
+        blob = ESYS_TR.parts_to_blob(tpm_handle, public)
+        self.assertEqual(golden, blob)
+
+        with self.assertRaises(ValueError):
+            ESYS_TR.parts_to_blob(0x80000000, public)
+
 
 if __name__ == "__main__":
     unittest.main()
