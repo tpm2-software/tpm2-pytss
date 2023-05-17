@@ -3988,7 +3988,7 @@ class ESAPI:
                 f"expected expiration to be type int, got {type(expiration)}"
             )
 
-        _check_friendly_int(auth_handle, "auth_handle", ESYS_TR)
+        _check_handle_type(auth_handle, "auth_handle")
 
         _check_handle_type(session1, "session1")
         _check_handle_type(session2, "session2")
