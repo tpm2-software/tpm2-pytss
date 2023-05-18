@@ -1987,6 +1987,40 @@ class TypesTest(unittest.TestCase):
         with self.assertRaises(TypeError):
             b.publicArea = a
 
+    def test_constants_marshal(self):
+
+        a = TPM2_CC.PolicySecret.marshal()
+        b = TPM2_CC.PolicySecret.to_bytes(4, byteorder="big")
+        self.assertEqual(a, b)
+
+        a = TPM2_RH.OWNER.marshal()
+        b = TPM2_RH.OWNER.to_bytes(4, byteorder="big")
+        self.assertEqual(a, b)
+
+        a = TPM2_ALG.SHA256.marshal()
+        b = TPM2_ALG.SHA256.to_bytes(2, byteorder="big")
+        self.assertEqual(a, b)
+
+        with self.assertRaises(RuntimeError):
+            ESYS_TR.PCR9.marshal()
+
+    def test_constants_unmarshal(self):
+
+        a = TPM2_CC.PolicySecret
+        b = TPM2_CC.unmarshal(a.to_bytes(4, byteorder="big"))[0]
+        self.assertEqual(a, b)
+
+        a = TPM2_RH.SRK
+        b = TPM2_RH.SRK.unmarshal(a.to_bytes(4, byteorder="big"))[0]
+        self.assertEqual(a, b)
+
+        a = TPM2_ALG.SHA256
+        b = TPM2_ALG.SHA256.unmarshal(a.to_bytes(2, byteorder="big"))[0]
+        self.assertEqual(a, b)
+
+        with self.assertRaises(RuntimeError):
+            ESYS_TR.PCR9.unmarshal(b"")
+
 
 if __name__ == "__main__":
     unittest.main()
