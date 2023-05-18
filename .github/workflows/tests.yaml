@@ -10,7 +10,7 @@ jobs:
         python-version: ['3.8', '3.9', '3.10', '3.11']
         tss-version: ['master', '2.4.0', '3.0.0', '3.0.3', '3.2.0', '4.0.0']
         with-fapi: [true]
-        tools-version: ['master']
+        tools-version: ['5.5']
         include:
           - python-version: '3.9'
             tss-version: '3.1.0'
@@ -52,7 +52,7 @@ jobs:
 
       - name: Install dependencies
         env:
-          TPM2_TSS_VERSION: 3.2.0
+          TPM2_TSS_VERSION: 4.0.1
         run: ./.ci/install-deps.sh
 
       - name: Check

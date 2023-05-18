@@ -5,7 +5,7 @@ set -exo pipefail
 
 export TPM2_TSS_VERSION=${TPM2_TSS_VERSION:-"3.0.3"}
 export TPM2_TSS_FAPI=${TPM2_TSS_FAPI:-"true"}
-export TPM2_TOOLS_VERSION=${TPM2_TOOLS_VERSION:-"5.3"}
+export TPM2_TOOLS_VERSION=${TPM2_TOOLS_VERSION:-"5.5"}
 
 #
 # Get dependencies for building and install tpm2-tss and abrmd projects
