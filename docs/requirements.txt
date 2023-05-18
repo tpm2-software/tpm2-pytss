@@ -9,7 +9,6 @@ certifi==2022.12.7
 cffi==1.15.0
 charset-normalizer==2.0.9
 click==8.0.3
-codecov==2.1.12
 colorama==0.4.4
 coverage==6.2
 cryptography==39.0.1

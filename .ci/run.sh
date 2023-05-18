@@ -52,7 +52,7 @@ function run_test() {
   python3 -m pytest -n $(nproc) --cov=tpm2_pytss -v
 
   if [ -n "${ENABLE_COVERAGE}" ]; then
-    python3 -m codecov
+    python3 -m coverage xml -o /tmp/coverage.xml
   fi
 
   # verify that package is sane on a user install that is not editable
