@@ -7,7 +7,11 @@
 Along with helpers to go from string values to constants and constant values to string values.
 """
 from ._libtpm2_pytss import lib, ffi
-from tpm2_pytss.internal.utils import _CLASS_INT_ATTRS_from_string, _lib_version_atleast
+from tpm2_pytss.internal.utils import (
+    _CLASS_INT_ATTRS_from_string,
+    _lib_version_atleast,
+    _chkrc,
+)
 
 
 class TPM_FRIENDLY_INT(int):
@@ -229,6 +233,56 @@ class TPM_FRIENDLY_INT(int):
             TPM_FRIENDLY_INT._copy_and_set(cls, sc)
         return cls
 
+    def marshal(self):
+        """Marshal instance into bytes.
+
+        Returns:
+            Returns the marshaled type as bytes.
+        """
+
+        # use an alias name if set over the classname
+        name = getattr(self, "_alias_name", self.__class__.__name__)
+        mfunc = getattr(lib, f"Tss2_MU_{name}_Marshal", None)
+        if mfunc is None:
+            # default to scalar routines
+            size = ffi.sizeof(f"{name}") * 8
+            mfunc = getattr(lib, f"Tss2_MU_UINT{size}_Marshal", None)
+            if mfunc is None:
+                raise RuntimeError(
+                    f"No marshal function found for {self.__class__.__name__}"
+                )
+        size = ffi.sizeof(f"{name}")
+        offset = ffi.new("size_t *")
+        buf = ffi.new(f"uint8_t[{size}]")
+        _chkrc(mfunc(int(self), buf, size, offset))
+        return bytes(buf[0 : offset[0]])
+
+    @classmethod
+    def unmarshal(cls, buf):
+        """Unmarshal bytes into type instance.
+
+        Args:
+            buf (bytes): The bytes to be unmarshaled.
+
+        Returns:
+            Returns an instance of the current type and the number of bytes consumed.
+        """
+
+        # use an alias name if set over the classname
+        name = getattr(cls, "_alias_name", cls.__name__)
+        umfunc = getattr(lib, f"Tss2_MU_{name}_Unmarshal", None)
+        if umfunc is None:
+            # default to scalar routines
+            size = ffi.sizeof(f"{name}") * 8
+            umfunc = getattr(lib, f"Tss2_MU_UINT{size}_Unmarshal", None)
+            if umfunc is None:
+                raise RuntimeError(f"No unmarshal function found for {cls.__name__}")
+
+        cdata = ffi.new(f"{name} *")
+        offset = ffi.new("size_t *")
+        _chkrc(umfunc(buf, len(buf), offset, cdata))
+        return (cls(cdata[0]), offset[0])
+
 
 class TPMA_FRIENDLY_INTLIST(TPM_FRIENDLY_INT):
     _MASKS = tuple()
@@ -392,6 +446,13 @@ class ESYS_TR(TPM_FRIENDLY_INT):
     RH_PLATFORM = lib.ESYS_TR_RH_PLATFORM
     RH_PLATFORM_NV = lib.ESYS_TR_RH_PLATFORM_NV
 
+    def marshal(self):
+        raise NotImplementedError("Use serialize() instead")
+
+    @classmethod
+    def unmarshal(cls, buf):
+        raise NotImplementedError("Use deserialize() instead")
+
     def serialize(self, ectx: "ESAPI") -> bytes:
         """Same as see tpm2_pytss.ESAPI.tr_serialize
 
@@ -482,6 +543,7 @@ class TPM2_RH(TPM_FRIENDLY_INT):
 
 @TPM_FRIENDLY_INT._fix_const_type
 class TPM2_ALG(TPM_FRIENDLY_INT):
+    _alias_name = "TPM2_ALG_ID"
     ERROR = lib.TPM2_ALG_ERROR
     RSA = lib.TPM2_ALG_RSA
     TDES = lib.TPM2_ALG_TDES
