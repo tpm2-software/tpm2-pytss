@@ -61,6 +61,12 @@ jobs:
           ENABLE_COVERAGE: true
         run: ./.ci/run.sh
 
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: /tmp/coverage.xml
+
   whitespace-check:
     runs-on: ubuntu-latest
     steps:
