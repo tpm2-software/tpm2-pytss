@@ -8,10 +8,11 @@ class TSS2_Exception(RuntimeError):
     # prevent cirular dependency and don't use the types directly here.
     def __init__(self, rc: Union["TSS2_RC", "TPM2_RC", int]):
         if isinstance(rc, int):
+            pass
             # defer this to avoid circular dep.
-            from .constants import TSS2_RC
+            #from .constants import TSS2_RC
 
-            rc = TSS2_RC(rc)
+            #rc = TSS2_RC(rc)
         errmsg = ffi.string(lib.Tss2_RC_Decode(rc)).decode()
         super(TSS2_Exception, self).__init__(f"{errmsg}")
 
