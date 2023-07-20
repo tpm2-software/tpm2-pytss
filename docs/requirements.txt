@@ -35,7 +35,7 @@ pkginfo==1.8.2
 pluggy==1.0.0
 py==1.11.0
 pycparser==2.21
-Pygments==2.10.0
+Pygments==2.15.0
 pyparsing==3.0.6
 pytest==6.2.5
 pytest-cov==3.0.0
