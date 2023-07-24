@@ -208,6 +208,7 @@ class type_generator(build_ext):
                         "-D__extension__=",
                         "-D__attribute__(x)=",
                         "-D__float128=long double",
+                        "-D_FORTIFY_SOURCE=0",
                     ],
                 )
                 parser = c_parser.CParser()
