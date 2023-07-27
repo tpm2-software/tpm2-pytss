@@ -223,6 +223,10 @@ class TestTCTI(TSS2_EsapiTest):
         with self.assertRaises(RuntimeError, msg="Bills Error 2"):
             t.finalize()
 
+    def test_is_available(self):
+        self.assertTrue(TCTILdr.is_available())
+        self.assertFalse(TCTILdr.is_available("this-tcti-doesnt-exist"))
+
 
 if __name__ == "__main__":
     unittest.main()

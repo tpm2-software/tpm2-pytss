@@ -67,3 +67,24 @@ class TCTILdr(TCTI):
 
     def __str__(self):
         return self.name_conf
+
+    @staticmethod
+    def is_available(name=None) -> bool:
+        """Lookup the TCTI and return its availability
+
+        Returns:
+           True if the interface is available
+        """
+        ctx_pp = ffi.new("TSS2_TCTI_INFO **")
+
+        if name is None:
+            name = ffi.NULL
+        elif isinstance(name, str):
+            name = name.encode()
+
+        ret = lib.Tss2_TctiLdr_GetInfo(name, ctx_pp)
+        if ret != lib.TPM2_RC_SUCCESS:
+            return False
+
+        lib.Tss2_TctiLdr_FreeInfo(ctx_pp)
+        return True

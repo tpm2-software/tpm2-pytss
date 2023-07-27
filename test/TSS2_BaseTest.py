@@ -10,8 +10,6 @@ import sys
 import tempfile
 import time
 import unittest
-from ctypes import cdll
-
 
 from tpm2_pytss import *
 
@@ -167,13 +165,7 @@ class TpmSimulator(object):
             if not exe:
                 print(f'Could not find executable: "{sim.exe}"', file=sys.stderr)
                 continue
-            try:
-                cdll.LoadLibrary(sim.libname)
-            except OSError as e:
-                print(
-                    f'Could not load libraries: "{sim.exe}", error: {e}',
-                    file=sys.stderr,
-                )
+            if not TCTILdr.is_available(sim.libname):
                 continue
 
             return sim()
