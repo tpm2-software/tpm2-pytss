@@ -82,6 +82,14 @@ def prepare_types(dirpath):
 
     s = remove_INTERNALBUILD(s)
 
+    s = re.sub(
+        "typedef struct TPMS_ALGORITHM_DESCRIPTION TPMS_ALGORITHM_DESCRIPTION ;", "", s
+    )
+
+    s = re.sub(
+        r"struct TPMS_ALGORITHM_DESCRIPTION {\n.*\n.*\n} ;", "", s, flags=re.MULTILINE
+    )
+
     return remove_common_guards(s)
 
 
@@ -277,6 +285,22 @@ def prepare_mu(dirpath):
             1,
             re.DOTALL | re.MULTILINE,
         )
+
+    s = re.sub(
+        r"TSS2_RC\s+Tss2_MU_TPMS_ALGORITHM_DESCRIPTION_Marshal\(.+?\)\s+;",
+        "",
+        s,
+        1,
+        re.DOTALL | re.MULTILINE,
+    )
+
+    s = re.sub(
+        r"TSS2_RC\s+Tss2_MU_TPMS_ALGORITHM_DESCRIPTION_Unmarshal\(.+?\)\s+;",
+        "",
+        s,
+        1,
+        re.DOTALL | re.MULTILINE,
+    )
 
     return s
 
