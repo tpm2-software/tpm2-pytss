@@ -43,6 +43,14 @@ def lowercase_dict(src):
 
 
 class TestPolicy(TSS2_EsapiTest):
+    def setUp(self):
+        super().setUp()
+        self._has_secp192r1 = True
+        try:
+            ec.generate_private_key(ec.SECP192R1)
+        except Exception:
+            self._has_secp192r1 = False
+
     def test_password_policy(self):
         pol = {
             "description": "this is a policy",
@@ -522,6 +530,8 @@ class TestPolicy(TSS2_EsapiTest):
         self.assertEqual(str(e.exception), "callback exception")
 
     def test_exec_sign_callback(self):
+        if not self._has_secp192r1:
+            self.skipTest("cryptography doesn't have secp129r1")
         private_key = textwrap.dedent(
             """
             -----BEGIN PRIVATE KEY-----
@@ -594,6 +604,8 @@ class TestPolicy(TSS2_EsapiTest):
         self.assertEqual(str(e.exception), "callback exception")
 
     def test_exec_polauth_callback(self):
+        if not self._has_secp192r1:
+            self.skipTest("cryptography doesn't have secp129r1")
         private_key = textwrap.dedent(
             """
             -----BEGIN PRIVATE KEY-----
