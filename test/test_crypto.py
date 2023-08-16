@@ -7,6 +7,7 @@ from tpm2_pytss.internal import *
 from .TSS2_BaseTest import TSS2_EsapiTest
 from base64 import b64decode
 from hashlib import sha256, sha384
+from cryptography.hazmat.primitives.serialization import load_pem_public_key
 
 rsa_private_key = b"""
 -----BEGIN RSA PRIVATE KEY-----
@@ -200,6 +201,14 @@ I8/rxsxXVofKhAfCeJ4gP6LOlr6uLQKdf0wYxzcYEZI=
 
 
 class CryptoTest(TSS2_EsapiTest):
+    def setUp(self):
+        super().setUp()
+        self._has_sect163r2 = True
+        try:
+            load_pem_public_key(ecc_bad_curve)
+        except ValueError:
+            self._has_sect163r2 = False
+
     def test_public_from_pem_rsa(self):
         pub = TPM2B_PUBLIC()
         crypto._public_from_encoding(rsa_public_key, pub.publicArea)
@@ -579,6 +588,8 @@ class CryptoTest(TSS2_EsapiTest):
         self.assertEqual(nums.e, 3)
 
     def test_ecc_bad_curves(self):
+        if not self._has_sect163r2:
+            self.skipTest("cryptography doesn't support sect163r2")
         with self.assertRaises(ValueError) as e:
             TPMT_PUBLIC.from_pem(ecc_bad_curve)
         self.assertEqual(str(e.exception), "unsupported curve: sect163r2")
