@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 2.2.0-rc0 - 2023-08-26
+### Fixed
+- Fix pycparse error for __float128.
+- Fix check on ESYS_TR in policy_secret.
+
+### Added
+- Add routine for making ESYS_TR from parts.
+- Support unmarshal and marshal routines for constants.
+- Provide a better error message for missing symbols.
+
+### Removed
+- Drop support for python 3.7.
+- Remove references to TPMS_ALGORITHM_DESCRIPTION.
+
 ## 2.1.0 - 2022-01-09
 ### Fixed
 - using tpm2-pytss in unit tests within a mocked environment see #481.
