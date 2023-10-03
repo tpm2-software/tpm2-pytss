@@ -3,10 +3,10 @@
 
 version: 2
 
-# stable is ubuntu-18.04 image
-#   - https://hub.docker.com/r/readthedocs/build/
 build:
-  image: stable
+  os: ubuntu-22.04
+  tools:
+    python: "3"
 
 sphinx:
   builder: html
