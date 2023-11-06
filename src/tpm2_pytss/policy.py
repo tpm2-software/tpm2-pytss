@@ -565,8 +565,10 @@ class policy(object):
         Raises:
             TSS2_Exception
         """
-        size = ffi.new("size_t *", 8096)
-        cjson = ffi.new("uint8_t[]", 8096)
+        size = ffi.new("size_t *")
+        _chkrc(lib.Tss2_PolicyGetCalculatedJSON(self._ctx, ffi.NULL, size))
+
+        cjson = ffi.new("uint8_t[]", size[0])
         _chkrc(lib.Tss2_PolicyGetCalculatedJSON(self._ctx, cjson, size))
         return ffi.string(cjson, size[0])
 
