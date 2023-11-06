@@ -570,13 +570,16 @@ class policy(object):
 
         cjson = ffi.new("uint8_t[]", size[0])
         _chkrc(lib.Tss2_PolicyGetCalculatedJSON(self._ctx, cjson, size))
+
         return ffi.string(cjson, size[0])
 
     @property
     def description(self) -> bytes:
         """bytes: The policy description."""
-        size = ffi.new("size_t *", 8096)
-        desc = ffi.new("uint8_t[]", 8096)
+        size = ffi.new("size_t *")
+        _chkrc(lib.Tss2_PolicyGetDescription(self._ctx, ffi.NULL, size))
+
+        desc = ffi.new("uint8_t[]", size[0])
         _chkrc(lib.Tss2_PolicyGetDescription(self._ctx, desc, size))
         return ffi.string(desc, size[0])
 
