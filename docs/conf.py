@@ -157,7 +157,7 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 def builder_finished_handler(app, exception):
     if exception is None:
-        os.environ["SPHINX_OUTDIR"] = app.outdir
+        os.environ["SPHINX_OUTDIR"] = str(app.outdir)
         script = os.path.join(app.confdir, "sphinx-finished.sh")
         subprocess.check_call(script, shell=True)
 
