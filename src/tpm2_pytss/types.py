@@ -560,7 +560,7 @@ class TPML_OBJECT(TPM_OBJECT):
 
 
 class TPMU_PUBLIC_PARMS(TPM_OBJECT):
-    pass
+    rsaDetail: "TPMS_RSA_PARMS"
 
 
 class TPMT_PUBLIC_PARMS(TPM_OBJECT):
@@ -667,6 +667,7 @@ class TPMT_SYM_DEF_OBJECT(TPMT_SYM_DEF):
 
 class TPMT_PUBLIC(TPM_OBJECT):
     nameAlg: TPM2_ALG
+    parameters: TPMU_PUBLIC_PARMS
 
     @staticmethod
     def _handle_rsa(objstr: str, templ: "TPMT_PUBLIC") -> bool:
@@ -2031,7 +2032,7 @@ class TPMS_QUOTE_INFO(TPM_OBJECT):
 
 
 class TPMS_RSA_PARMS(TPM_OBJECT):
-    pass
+    keyBits: int
 
 
 class TPMS_SCHEME_ECDAA(TPM_OBJECT):
