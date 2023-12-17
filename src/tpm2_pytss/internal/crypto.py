@@ -84,6 +84,13 @@ def _get_digest(digestid):
     return None
 
 
+def _get_pyca_digest(digest_type):
+    for (algid, d) in _digesttable:
+        if issubclass(digest_type, d):
+            return algid
+    return None
+
+
 def _get_alg(alg):
     for (algid, a) in _algtable:
         if algid == alg:
@@ -644,3 +651,60 @@ def _decrypt(
     decr = ciph.decryptor()
     plaintextdata = decr.update(data) + decr.finalize()
     return plaintextdata
+
+
+def _rsa_decrypt_padding_to_scheme(
+    decrypt_padding: padding.AsymmetricPadding, scheme: "TPMT_RSA_DECRYPT"
+):
+    if isinstance(decrypt_padding, padding.OAEP):
+        if hasattr(decrypt_padding, "algorithm"):
+            alg = decrypt_padding.algorithm
+        elif hasattr(decrypt_padding, "_algorithm"):
+            # This is an ugly hack, but until cryptography 42 is released it's needed.
+            alg = type(decrypt_padding._algorithm)
+        else:
+            raise ValueError("unable to get hash algorithm from OAEP padding")
+        scheme.scheme = TPM2_ALG.OAEP
+        halg = _get_pyca_digest(alg)
+        if halg is None:
+            raise ValueError(f"unsupported digest algorithm {alg}")
+        scheme.details.oaep.hashAlg = halg
+    elif isinstance(decrypt_padding, padding.PKCS1v15):
+        scheme.scheme = TPM2_ALG.RSAES
+    else:
+        raise ValueError(f"unsupported RSA decryption scheme: {decrypt_padding}")
+    return
+
+
+def _rsa_sign_padding_to_scheme(
+    sign_padding: padding.AsymmetricPadding,
+    algorithm: hashes.HashAlgorithm,
+    scheme: "TPMT_SIG_SCHEME",
+):
+    if isinstance(sign_padding, padding.PSS):
+        scheme.scheme = TPM2_ALG.RSAPSS
+
+    elif isinstance(sign_padding, padding.PKCS1v15):
+        scheme.scheme = TPM2_ALG.RSASSA
+    else:
+        raise ValueError(f"unsupported RSA signature scheme: {sign_padding}")
+    halg = _get_pyca_digest(algorithm)
+    if halg is None:
+        raise ValueError(f"unsupported digest algorithm {algorithm}")
+    scheme.details.any.hashAlg = halg
+    return
+
+
+def _ecc_sign_algorithm_to_scheme(
+    sign_alg: ec.EllipticCurveSignatureAlgorithm, scheme: "TPMT_SIG_SCHEME"
+):
+    if isinstance(sign_alg, ec.ECDSA):
+        scheme.scheme = TPM2_ALG.ECDSA
+        algorithm = sign_alg.algorithm
+    else:
+        raise ValueError(f"unsupported ECC signature scheme: {sign_alg}")
+    halg = _get_pyca_digest(type(algorithm))
+    if halg is None:
+        raise ValueError(f"unsupported digest algorithm {algorithm}")
+    scheme.details.any.hashAlg = halg
+    return
