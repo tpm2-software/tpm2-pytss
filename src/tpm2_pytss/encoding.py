@@ -80,6 +80,7 @@ from .types import (
 )
 import yaml
 import collections.abc
+import warnings
 
 
 class base_encdec(object):
@@ -824,6 +825,14 @@ class json_encdec(base_encdec):
 class tools_encdec(base_encdec):
     """Encode TPM types in the same format as tpm2-tools
     """
+
+    def __init__(self):
+        warnings.warn(
+            "The tools_encdec class will be deprecated in the future, "
+            "see https://github.com/tpm2-software/tpm2-pytss/issues/557",
+            category=PendingDeprecationWarning,
+        )
+        super().__init__()
 
     def encode_friendly_int_nv(self, val: TPM_FRIENDLY_INT) -> Dict[str, str]:
         d = {
