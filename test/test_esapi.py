@@ -3585,6 +3585,8 @@ class TestEsys(TSS2_EsapiTest):
             self.ectx.pcr_allocate(pcrsels, session3=object())
 
     def test_pcr_set_auth_policy(self):
+        if getattr(self.tcti, "name", "") == "swtpm":
+            self.skipTest("pcr_set_auth_policy not supported by swtpm")
 
         policy = b"0123456789ABCDEF0123456789ABCDEF"
         self.ectx.pcr_set_auth_policy(policy, TPM2_ALG.SHA256, ESYS_TR.PCR20)
@@ -3630,6 +3632,8 @@ class TestEsys(TSS2_EsapiTest):
             )
 
     def test_pcr_set_auth_value(self):
+        if getattr(self.tcti, "name", "") == "swtpm":
+            self.skipTest("pcr_set_auth_value not supported by swtpm")
 
         self.ectx.pcr_set_auth_value(ESYS_TR.PCR20, b"password")
         self.ectx.tr_set_auth(ESYS_TR.PCR20, b"password")
