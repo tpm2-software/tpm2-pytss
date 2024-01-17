@@ -67,6 +67,28 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: /tmp/coverage.xml
 
+  mypy:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+
+      - name: Install dependencies
+        env:
+          TPM2_TSS_VERSION: 4.0.1
+        run: ./.ci/install-deps.sh
+
+      - name: Check
+        env:
+          MYPY: 1
+        run: ./.ci/run.sh
+
   whitespace-check:
     runs-on: ubuntu-latest
     steps:

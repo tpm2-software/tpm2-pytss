@@ -5,13 +5,14 @@ from ._libtpm2_pytss import ffi, lib
 from .constants import TSS2_RC, TPM2_RC
 from .TSS2_Exception import TSS2_Exception
 from .TCTI import TCTI
+from typing import Optional
 
 if not _lib_version_atleast("tss2-tcti-spi-helper", "0.0.0"):
     raise NotImplementedError("Package tss2-tcti-spi-helper not present")
 
 
 @ffi.def_extern()
-def _tcti_spi_helper_sleep_ms(userdata, milliseconds):
+def _tcti_spi_helper_sleep_ms(userdata: ffi.CData, milliseconds: int) -> int:
     thiz = TCTISPIHelper._cffi_cast(userdata)
     if not hasattr(thiz, "on_sleep_ms"):
         return TSS2_RC.TCTI_RC_NOT_IMPLEMENTED
@@ -26,7 +27,7 @@ def _tcti_spi_helper_sleep_ms(userdata, milliseconds):
 
 
 @ffi.def_extern()
-def _tcti_spi_helper_start_timeout(userdata, milliseconds):
+def _tcti_spi_helper_start_timeout(userdata: ffi.CData, milliseconds: int) -> int:
     thiz = TCTISPIHelper._cffi_cast(userdata)
     if not hasattr(thiz, "on_start_timeout"):
         return TSS2_RC.TCTI_RC_NOT_IMPLEMENTED
@@ -41,7 +42,9 @@ def _tcti_spi_helper_start_timeout(userdata, milliseconds):
 
 
 @ffi.def_extern()
-def _tcti_spi_helper_timeout_expired(userdata, is_time_expired) -> bool:
+def _tcti_spi_helper_timeout_expired(
+    userdata: ffi.CData, is_time_expired: ffi.CData
+) -> int:
 
     thiz = TCTISPIHelper._cffi_cast(userdata)
     if not hasattr(thiz, "on_timeout_expired"):
@@ -58,7 +61,7 @@ def _tcti_spi_helper_timeout_expired(userdata, is_time_expired) -> bool:
 
 
 @ffi.def_extern()
-def _tcti_spi_helper_spi_acquire(userdata):
+def _tcti_spi_helper_spi_acquire(userdata: ffi.CData) -> int:
     thiz = TCTISPIHelper._cffi_cast(userdata)
     if not hasattr(thiz, "on_start_timeout"):
         return TSS2_RC.TCTI_RC_NOT_IMPLEMENTED
@@ -73,7 +76,7 @@ def _tcti_spi_helper_spi_acquire(userdata):
 
 
 @ffi.def_extern()
-def _tcti_spi_helper_spi_release(userdata):
+def _tcti_spi_helper_spi_release(userdata: ffi.CData) -> int:
     thiz = TCTISPIHelper._cffi_cast(userdata)
     if not hasattr(thiz, "on_spi_release"):
         return TSS2_RC.TCTI_RC_NOT_IMPLEMENTED
@@ -88,7 +91,9 @@ def _tcti_spi_helper_spi_release(userdata):
 
 
 @ffi.def_extern()
-def _tcti_spi_helper_spi_transfer(userdata, data_out, data_in, cnt):
+def _tcti_spi_helper_spi_transfer(
+    userdata: ffi.CData, data_out: ffi.CData, data_in: ffi.CData, cnt: int
+) -> int:
     thiz = TCTISPIHelper._cffi_cast(userdata)
     if not hasattr(thiz, "on_spi_transfer"):
         return TSS2_RC.TCTI_RC_NOT_IMPLEMENTED
@@ -125,10 +130,10 @@ def _tcti_spi_helper_spi_transfer(userdata, data_out, data_in, cnt):
 
 
 @ffi.def_extern()
-def _tcti_spi_helper_finalize(userdata):
+def _tcti_spi_helper_finalize(userdata: ffi.CData) -> None:
     thiz = TCTISPIHelper._cffi_cast(userdata)
     if hasattr(thiz, "on_finalize"):
-        thiz.on_finalize(thiz)
+        thiz.on_finalize()
 
 
 class TCTISPIHelper(TCTI):
@@ -153,7 +158,7 @@ class TCTISPIHelper(TCTI):
         with_wait_state (bool): True if you intend to use wait states. Defaults to False.
     """
 
-    def __init__(self, with_wait_state=False):
+    def __init__(self, with_wait_state: bool = False):
         self._with_wait_state = with_wait_state
 
         size = ffi.new("size_t *")
@@ -212,7 +217,7 @@ class TCTISPIHelper(TCTI):
         super().__init__(self._opaque_tcti_ctx)
 
     @property
-    def waitstate(self):
+    def waitstate(self) -> bool:
         """Gets the wait state property.
 
         Returns(bool):
@@ -221,8 +226,13 @@ class TCTISPIHelper(TCTI):
         return self._with_wait_state
 
     @staticmethod
-    def _cffi_cast(userdata):
-        return ffi.from_handle(userdata)
+    def _cffi_cast(userdata: ffi.CData) -> "TCTISPIHelper":
+        helper = ffi.from_handle(userdata)
+        if not isinstance(helper, TCTISPIHelper):
+            raise ValueError(
+                f"expected an instance of TCTISPIHelper, got {type(helper)}"
+            )
+        return helper
 
     def on_sleep_ms(self, milliseconds: int) -> None:
         """Sleeps for a specified amount of time in millisecons.
@@ -258,9 +268,9 @@ class TCTISPIHelper(TCTI):
         This callback is REQUIRED.
         No errors may occur across this boundary.
         """
-        pass
+        raise NotImplementedError
 
-    def on_spi_transfer(self, data_in: bytes) -> bytes:
+    def on_spi_transfer(self, data_in: Optional[bytes]) -> bytes:
         """Called to transfer data across the SPI bus.
 
         This callback is REQUIRED.
@@ -275,7 +285,7 @@ class TCTISPIHelper(TCTI):
             Exception: Implementations are free to raise any Exception. Exceptions are retained
             across the native boundary.
         """
-        pass
+        raise NotImplementedError
 
     def on_finalize(self) -> None:
         """Called when the TCTI is finalized.

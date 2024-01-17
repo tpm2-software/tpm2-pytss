@@ -12,20 +12,41 @@ from .internal.utils import (
     _lib_version_atleast,
     _chkrc,
 )
+from typing import (
+    Dict,
+    Iterable,
+    Tuple,
+    Optional,
+    Type,
+    TYPE_CHECKING,
+    Any,
+    SupportsIndex,
+)
+
+try:
+    from typing import Self
+except ImportError:
+    # assume mypy is running on python 3.11+
+    pass
+
+
+if TYPE_CHECKING:
+    from .ESAPI import ESAPI
+    from .types import TPM2B_NAME, TPM2_HANDLE, TPM2B_PUBLIC
 
 
 class TPM_FRIENDLY_INT(int):
-    _FIXUP_MAP = {}
+    _FIXUP_MAP: Dict[str, str] = {}
 
     @classmethod
-    def parse(cls, value: str) -> int:
+    def parse(cls, value: str) -> "Self":
         # If it's a string initializer value, see if it matches anything in the list
         if isinstance(value, str):
             try:
                 x = _CLASS_INT_ATTRS_from_string(cls, value, cls._FIXUP_MAP)
                 if not isinstance(x, int):
                     raise KeyError(f'Expected int got: "{type(x)}"')
-                return x
+                return cls(x)
             except KeyError:
                 raise ValueError(
                     f'Could not convert friendly name to value, got: "{value}"'
@@ -34,7 +55,7 @@ class TPM_FRIENDLY_INT(int):
             raise TypeError(f'Expected value to be a str object, got: "{type(value)}"')
 
     @classmethod
-    def iterator(cls) -> filter:
+    def iterator(cls) -> Iterable[int]:
         """ Returns the constants in the class.
 
         Returns:
@@ -102,109 +123,111 @@ class TPM_FRIENDLY_INT(int):
                 return k.lower()
         return str(int(self))
 
-    def __abs__(self):
+    def __abs__(self) -> "Self":
         return self.__class__(int(self).__abs__())
 
-    def __add__(self, value):
+    def __add__(self, value: int) -> "Self":
         return self.__class__(int(self).__add__(value))
 
-    def __and__(self, value):
+    def __and__(self, value: int) -> "Self":
         return self.__class__(int(self).__and__(value))
 
-    def __ceil__(self):
+    def __ceil__(self) -> "Self":
         return self.__class__(int(self).__ceil__())
 
-    def __divmod__(self, value):
+    def __divmod__(self, value: int) -> Tuple["Self", "Self"]:
         a, b = int(self).__divmod__(value)
         return self.__class__(a), self.__class__(b)
 
-    def __floor__(self):
+    def __floor__(self) -> "Self":
         return self.__class__(int(self).__floor__())
 
-    def __floordiv__(self, value):
+    def __floordiv__(self, value: int) -> "Self":
         return self.__class__(int(self).__floordiv__(value))
 
-    def __invert__(self):
+    def __invert__(self) -> "Self":
         return self.__class__(int(self).__invert__())
 
-    def __lshift__(self, value):
+    def __lshift__(self, value: int) -> "Self":
         return self.__class__(int(self).__lshift__(value))
 
-    def __mod__(self, value):
+    def __mod__(self, value: int) -> "Self":
         return self.__class__(int(self).__mod__(value))
 
-    def __mul__(self, value):
+    def __mul__(self, value: int) -> "Self":
         return self.__class__(int(self).__mul__(value))
 
-    def __neg__(self):
+    def __neg__(self) -> "Self":
         return self.__class__(int(self).__neg__())
 
-    def __or__(self, value):
+    def __or__(self, value: int) -> "Self":
         return self.__class__(int(self).__or__(value))
 
-    def __pos__(self):
+    def __pos__(self) -> "Self":
         return self.__class__(int(self).__pos__())
 
-    def __pow__(self, value, mod=None):
+    def __pow__(self, value: int, mod: Optional[int] = None) -> Any:
         return self.__class__(int(self).__pow__(value, mod))
 
-    def __radd__(self, value):
+    def __radd__(self, value: int) -> "Self":
         return self.__class__(int(self).__radd__(value))
 
-    def __rand__(self, value):
+    def __rand__(self, value: int) -> "Self":
         return self.__class__(int(self).__rand__(value))
 
-    def __rdivmod__(self, value):
+    def __rdivmod__(self, value: int) -> Tuple["Self", "Self"]:
         a, b = int(self).__rdivmod__(value)
         return self.__class__(a), self.__class__(b)
 
-    def __rfloordiv__(self, value):
+    def __rfloordiv__(self, value: int) -> "Self":
         return self.__class__(int(self).__rfloordiv__(value))
 
-    def __rlshift__(self, value):
+    def __rlshift__(self, value: int) -> "Self":
         return self.__class__(int(self).__rlshift__(value))
 
-    def __rmod__(self, value):
+    def __rmod__(self, value: int) -> "Self":
         return self.__class__(int(self).__rmod__(value))
 
-    def __rmul__(self, value):
+    def __rmul__(self, value: int) -> "Self":
         return self.__class__(int(self).__rmul__(value))
 
-    def __ror__(self, value):
+    def __ror__(self, value: int) -> "Self":
         return self.__class__(int(self).__ror__(value))
 
-    def __round__(self):
-        return self.__class__(int(self).__round__())
+    def __round__(self, ndigits: SupportsIndex = False) -> "Self":
+        return self.__class__(int(self).__round__(ndigits))
 
-    def __rpow__(self, value, mod=None):
+    def __rpow__(self, value: int, mod: Optional[int] = None) -> Any:
         return self.__class__(int(self).__rpow__(value, mod))
 
-    def __rrshift__(self, value):
+    def __rrshift__(self, value: int) -> "Self":
         return self.__class__(int(self).__rrshift__(value))
 
-    def __rshift__(self, value):
+    def __rshift__(self, value: int) -> "Self":
         return self.__class__(int(self).__rshift__(value))
 
-    def __rsub__(self, value):
+    def __rsub__(self, value: int) -> "Self":
         return self.__class__(int(self).__rsub__(value))
 
-    def __rtruediv__(self, value):
+    def __rtruediv__(self, value: int) -> Any:
         return self.__class__(int(self).__rtruediv__(value))
 
-    def __rxor__(self, value):
+    def __rxor__(self, value: int) -> "Self":
         return self.__class__(int(self).__rxor__(value))
 
-    def __sub__(self, value):
+    def __sub__(self, value: int) -> "Self":
         return self.__class__(int(self).__sub__(value))
 
-    def __truediv__(self, value):
+    def __truediv__(self, value: int) -> "Self":
         return self.__class__(int(self).__truediv__(value))
 
-    def __xor__(self, value):
+    def __xor__(self, value: int) -> "Self":
         return self.__class__(int(self).__xor__(value))
 
     @staticmethod
-    def _copy_and_set(dstcls, srccls):
+    def _copy_and_set(
+        dstcls: Type["TPM_FRIENDLY_INT"], srccls: Type["TPM_FRIENDLY_INT"]
+    ) -> None:
         """Copy class variables from srccls to dstcls
 
         srccls must be a subclass on TPM_FRIENDLY_INT.
@@ -222,7 +245,7 @@ class TPM_FRIENDLY_INT(int):
             setattr(dstcls, k, fv)
 
     @staticmethod
-    def _fix_const_type(cls):
+    def _fix_const_type(cls: Type["TPM_FRIENDLY_INT"]) -> Type["TPM_FRIENDLY_INT"]:
         """Ensure constants in a TPM2 constant class have the correct type
 
         We also copy constants from a superclass in case it's of the correct type.
@@ -233,7 +256,7 @@ class TPM_FRIENDLY_INT(int):
             TPM_FRIENDLY_INT._copy_and_set(cls, sc)
         return cls
 
-    def marshal(self):
+    def marshal(self) -> bytes:
         """Marshal instance into bytes.
 
         Returns:
@@ -258,7 +281,7 @@ class TPM_FRIENDLY_INT(int):
         return bytes(buf[0 : offset[0]])
 
     @classmethod
-    def unmarshal(cls, buf):
+    def unmarshal(cls, buf: bytes) -> Tuple["Self", int]:
         """Unmarshal bytes into type instance.
 
         Args:
@@ -285,10 +308,10 @@ class TPM_FRIENDLY_INT(int):
 
 
 class TPMA_FRIENDLY_INTLIST(TPM_FRIENDLY_INT):
-    _MASKS = tuple()
+    _MASKS: Tuple[Tuple[int, int, str], ...] = tuple()
 
     @classmethod
-    def parse(cls, value: str) -> int:
+    def parse(cls, value: str) -> "Self":
         """ Converts a string of | separated constant values into it's integer value.
 
         Given a pipe "|" separated list of string constant values that represent the
@@ -344,9 +367,9 @@ class TPMA_FRIENDLY_INTLIST(TPM_FRIENDLY_INT):
                     f'Could not convert friendly name to value, got: "{k}"'
                 )
 
-        return intvalue
+        return cls(intvalue)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Given a constant, return the string bitwise representation.
 
         Each constant is seperated by the "|" (pipe) character.
@@ -446,11 +469,11 @@ class ESYS_TR(TPM_FRIENDLY_INT):
     RH_PLATFORM = lib.ESYS_TR_RH_PLATFORM
     RH_PLATFORM_NV = lib.ESYS_TR_RH_PLATFORM_NV
 
-    def marshal(self):
+    def marshal(self) -> bytes:
         raise NotImplementedError("Use serialize() instead")
 
     @classmethod
-    def unmarshal(cls, buf):
+    def unmarshal(cls, buf: bytes) -> Tuple["Self", int]:
         raise NotImplementedError("Use deserialize() instead")
 
     def serialize(self, ectx: "ESAPI") -> bytes:
@@ -489,7 +512,7 @@ class ESYS_TR(TPM_FRIENDLY_INT):
         """
         return ectx.tr_get_name(self)
 
-    def close(self, ectx: "ESAPI"):
+    def close(self, ectx: "ESAPI") -> None:
         """Same as see tpm2_pytss.ESAPI.tr_close
 
         Args:
@@ -757,7 +780,7 @@ class TPM2_GENERATED(TPM_FRIENDLY_INT):
 
 
 class TPM_BASE_RC(TPM_FRIENDLY_INT):
-    def decode(self):
+    def decode(self) -> str:
         return ffi.string(lib.Tss2_RC_Decode(self)).decode()
 
 
@@ -1326,14 +1349,14 @@ class TPMA_LOCALITY(TPMA_FRIENDLY_INTLIST):
     EXTENDED_SHIFT = lib.TPMA_LOCALITY_EXTENDED_SHIFT
 
     @classmethod
-    def create_extended(cls, value):
+    def create_extended(cls, value: int) -> "Self":
         x = (1 << cls.EXTENDED_SHIFT) + value
         if x > 255:
             raise ValueError("Extended Localities must be less than 256")
-        return x
+        return cls(x)
 
     @classmethod
-    def parse(cls, value: str) -> "TPMA_LOCALITY":
+    def parse(cls, value: str) -> "Self":
         """Converts a string of | separated localities or an extended locality into a TPMA_LOCALITY instance
 
         Args:
@@ -1354,7 +1377,7 @@ class TPMA_LOCALITY(TPMA_FRIENDLY_INTLIST):
             return cls(value, base=0)
         except ValueError:
             pass
-        return super().parse(value)
+        return cls(super().parse(value))
 
     def __str__(self) -> str:
         """Given a set of localities or an extended locality, return the string representation

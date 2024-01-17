@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=44", "wheel", "setuptools_scm[toml]>=3.4.3", "pycparser", "pkgconfig"]
+requires = ["setuptools>=44", "wheel", "setuptools_scm[toml]>=3.4.3", "pycparser", "pkgconfig", "cffi"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
@@ -19,6 +19,13 @@ exclude = '''
     | build
     | dist
     | esys_binding.py
+    | .*\.pyi$
   )
 )
 '''
+
+[tool.mypy]
+mypy_path = "mypy_stubs"
+exclude = [
+  'src/tpm2_pytss/encoding.py',
+]

@@ -4,13 +4,13 @@ import _cffi_backend
 # if we can't, provide a better message.
 try:
     from ._libtpm2_pytss import lib
-except ImportError as e:
-    parts = e.msg.split(": ", 2)
+except ImportError as ie:
+    parts = ie.msg.split(": ", 2)
     if len(parts) != 3:
-        raise e
+        raise ie
     path, error, symbol = parts
     if error != "undefined symbol":
-        raise e
+        raise ie
     raise ImportError(
         f"failed to load tpm2-tss bindigs in {path} due to missing symbol {symbol}, "
         + "ensure that you are using the same libraries the python module was built against."

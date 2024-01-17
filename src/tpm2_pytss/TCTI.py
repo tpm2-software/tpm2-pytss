@@ -7,7 +7,8 @@ from .constants import TSS2_RC, TPM2_RC
 from .TSS2_Exception import TSS2_Exception
 
 import os
-from typing import Optional, Tuple, Union
+from typing import Optional, Tuple, Union, Callable, Any, Iterable, Dict, Type
+from types import TracebackType
 
 
 class PollData(object):
@@ -67,10 +68,10 @@ class PollData(object):
         return self._events
 
 
-def common_checks(version=1, null_ok=False):
-    def decorator(func):
-        def wrapper(self, *args, **kwargs):
-            def camel_case(s):
+def common_checks(version: int = 1, null_ok: bool = False) -> Callable[..., Any]:
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
+        def wrapper(self: Any, *args: Iterable[Any], **kwargs: Dict[str, Any]) -> Any:
+            def camel_case(s: str) -> str:
                 from re import sub
 
                 s = sub(r"(_|-)+", " ", s).title().replace(" ", "")
@@ -117,7 +118,8 @@ class TCTI:
 
     def __init__(self, ctx: ffi.CData):
         self._v1 = ffi.cast("TSS2_TCTI_CONTEXT_COMMON_V1 *", ctx)
-        if self._v1.version == 2:
+        self._v2: Optional[ffi.CData]
+        if int(self._v1.version) == 2:
             self._v2 = ffi.cast("TSS2_TCTI_CONTEXT_COMMON_V2 *", ctx)
         else:
             self._v2 = None
@@ -127,13 +129,13 @@ class TCTI:
         # Normal TCTIs cannot make use of this, by Python TCTIs can. Add it to the base class
         # for subordinate TCTIs to use. This way the TCTI fn calls return the most helpful
         # error.
-        self._last_exception = None
+        self._last_exception: Optional[Exception] = None
 
-    def _set_last_exception(self, exc):
+    def _set_last_exception(self, exc: Exception) -> None:
         self._last_exception = exc
 
     @property
-    def _tcti_context(self):
+    def _tcti_context(self) -> ffi.CData:
         return self._ctx
 
     @property
@@ -146,7 +148,7 @@ class TCTI:
 
         # uint64_t in C land by default or let subclass control it
         magic_len = getattr(self, "_magic_len", 8)
-        return self._v1.magic.to_bytes(magic_len, "big")
+        return int(self._v1.magic).to_bytes(magic_len, "big")
 
     @property
     def version(self) -> int:
@@ -160,12 +162,12 @@ class TCTI:
             The TCTI version number.
         """
 
-        return self._v1.version
+        return int(self._v1.version)
 
-    def _clear_exceptions(self):
+    def _clear_exceptions(self) -> None:
         self._last_exception = None
 
-    def _get_current_exception(self, e: Exception):
+    def _get_current_exception(self, e: Exception) -> Exception:
         x = self._last_exception
         return x if x is not None else e
 
@@ -216,7 +218,7 @@ class TCTI:
         return bytes(ffi.buffer(resp, rsize[0]))
 
     @common_checks(null_ok=True)
-    def finalize(self):
+    def finalize(self) -> None:
         """Cleans up a TCTI's state and resources."""
 
         if self._v1.finalize != ffi.NULL:
@@ -241,7 +243,7 @@ class TCTI:
         _chkrc(self._v1.cancel(self._ctx))
 
     @common_checks()
-    def get_poll_handles(self) -> Tuple[PollData]:
+    def get_poll_handles(self) -> Tuple[PollData, ...]:
         """Gets the poll handles from the TPM.
 
         Returns:
@@ -300,19 +302,22 @@ class TCTI:
         """
 
         hptr = ffi.new("TPM2_HANDLE *", handle)
+        if self._v2 is None:
+            raise ValueError(f"TCTI module does not have make_sticky")
         _chkrc(self._v2.makeSticky(self._ctx, hptr, sticky))
-        return hptr[0]
 
-    def __enter__(self):
+    def __enter__(self) -> "TCTI":
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(
+        self, exc_type: Type[Exception], exc_value: Exception, traceback: TracebackType
+    ) -> None:
         self.finalize()
 
 
 # Global callbacks
 @ffi.def_extern()
-def _tcti_transmit_wrapper(ctx, size, command):
+def _tcti_transmit_wrapper(ctx: ffi.CData, size: int, command: ffi.CData) -> int:
     pi = PyTCTI._cffi_cast(ctx)
     if not hasattr(pi, "do_transmit"):
         return TSS2_RC.TCTI_RC_NOT_IMPLEMENTED
@@ -327,7 +332,9 @@ def _tcti_transmit_wrapper(ctx, size, command):
 
 
 @ffi.def_extern()
-def _tcti_receive_wrapper(ctx, size, response, timeout):
+def _tcti_receive_wrapper(
+    ctx: ffi.CData, size: ffi.CData, response: ffi.CData, timeout: int
+) -> int:
 
     # Let the allocator know how much we need.
     pi = PyTCTI._cffi_cast(ctx)
@@ -354,7 +361,7 @@ def _tcti_receive_wrapper(ctx, size, response, timeout):
 
 
 @ffi.def_extern()
-def _tcti_cancel_wrapper(ctx):
+def _tcti_cancel_wrapper(ctx: ffi.CData) -> int:
     pi = PyTCTI._cffi_cast(ctx)
     if not hasattr(pi, "do_cancel"):
         return TSS2_RC.TCTI_RC_NOT_IMPLEMENTED
@@ -369,7 +376,9 @@ def _tcti_cancel_wrapper(ctx):
 
 
 @ffi.def_extern()
-def _tcti_get_pollfds_wrapper(ctx, handles, cnt):
+def _tcti_get_pollfds_wrapper(
+    ctx: ffi.CData, handles: ffi.CData, cnt: ffi.CData
+) -> int:
     pi = PyTCTI._cffi_cast(ctx)
     if not hasattr(pi, "do_get_poll_handles"):
         return TSS2_RC.TCTI_RC_NOT_IMPLEMENTED
@@ -386,7 +395,7 @@ def _tcti_get_pollfds_wrapper(ctx, handles, cnt):
         if handles == ffi.NULL:
             cnt[0] = len(pi._poll_handle_cache)
         elif cnt[0] < len(pi._poll_handle_cache):
-            raise TSS2_RC.TCTI_RC_INSUFFICIENT_BUFFER
+            return TSS2_RC.TCTI_RC_INSUFFICIENT_BUFFER
         else:
             cnt[0] = len(pi._poll_handle_cache)
             # Enumerate didn't work here
@@ -407,7 +416,7 @@ def _tcti_get_pollfds_wrapper(ctx, handles, cnt):
 
 
 @ffi.def_extern()
-def _tcti_set_locality_wrapper(ctx, locality):
+def _tcti_set_locality_wrapper(ctx: ffi.CData, locality: int) -> int:
     pi = PyTCTI._cffi_cast(ctx)
     if not hasattr(pi, "do_set_locality"):
         return TSS2_RC.TCTI_RC_NOT_IMPLEMENTED
@@ -422,7 +431,7 @@ def _tcti_set_locality_wrapper(ctx, locality):
 
 
 @ffi.def_extern()
-def _tcti_make_sticky_wrapper(ctx, handle, sticky):
+def _tcti_make_sticky_wrapper(ctx: ffi.CData, handle: int, sticky: int) -> int:
     pi = PyTCTI._cffi_cast(ctx)
     if not hasattr(pi, "do_make_sticky"):
         return TSS2_RC.TCTI_RC_NOT_IMPLEMENTED
@@ -437,7 +446,7 @@ def _tcti_make_sticky_wrapper(ctx, handle, sticky):
 
 
 @ffi.def_extern()
-def _tcti_finalize_wrapper(ctx):
+def _tcti_finalize_wrapper(ctx: ffi.CData) -> None:
     pi = PyTCTI._cffi_cast(ctx)
     if not hasattr(pi, "do_finalize"):
         return
@@ -492,7 +501,7 @@ class PyTCTI(TCTI):
 
         cdata = self._cdata = ffi.new("PYTCTI_CONTEXT *")
         self._max_size = max_size
-        self._poll_handle_cache = None
+        self._poll_handle_cache: Optional[Tuple[PollData, ...]] = None
         self._magic_len = len(magic)
         cdata.common.v1.version = 2
         cdata.common.v1.magic = int.from_bytes(magic, "big")
@@ -514,9 +523,12 @@ class PyTCTI(TCTI):
         super().__init__(opaque)
 
     @staticmethod
-    def _cffi_cast(ctx):
+    def _cffi_cast(ctx: ffi.CData) -> "PyTCTI":
         ctx = ffi.cast("PYTCTI_CONTEXT *", ctx)
-        return ffi.from_handle(ctx.thiz)
+        thiz = ffi.from_handle(ctx.thiz)
+        if not isinstance(thiz, PyTCTI):
+            raise ValueError(f"expected an instance of PyTCTI, got {type(thiz)}")
+        return thiz
 
     def do_transmit(self, command: bytes) -> None:
         """This method transmits a command buffer to the TPM. This method IS REQUIRED.
@@ -556,7 +568,7 @@ class PyTCTI(TCTI):
         """
         pass
 
-    def do_get_poll_handles(self) -> Optional[Tuple[PollData]]:
+    def do_get_poll_handles(self) -> Optional[Tuple[PollData, ...]]:
         """Retrieves PollData objects from the TCTI used for async I/O. This method is OPTIONAL.
 
         Returns:

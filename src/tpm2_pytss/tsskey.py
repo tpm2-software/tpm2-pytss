@@ -3,9 +3,11 @@
 import warnings
 from ._libtpm2_pytss import lib
 from .types import *
-from .constants import TPM2_ECC, TPM2_CAP, ESYS_TR
+from .constants import TPM2_ECC, TPM2_CAP, ESYS_TR, TPM2_ALG, TPMA_OBJECT, TPM2_RH
+from .ESAPI import ESAPI
 from asn1crypto.core import ObjectIdentifier, Sequence, Boolean, OctetString, Integer
 from asn1crypto import pem
+from typing import Optional, Union
 
 
 _parent_rsa_template = TPMT_PUBLIC(
@@ -100,7 +102,7 @@ _loadablekey_oid = ObjectIdentifier("2.23.133.10.1.3")
 
 # _BooleanOne is used to encode True in the same way as tpm2-tss-engine
 class _BooleanOne(Boolean):
-    def set(self, value):
+    def set(self, value: bool) -> None:
         self._native = bool(value)
         self.contents = b"\x00" if not value else b"\x01"
         self._header = None
@@ -124,7 +126,13 @@ class TSSPrivKey(object):
             ("private", OctetString),
         ]
 
-    def __init__(self, private, public, empty_auth=True, parent=lib.TPM2_RH_OWNER):
+    def __init__(
+        self,
+        private: TPM2B_PRIVATE,
+        public: TPM2B_PUBLIC,
+        empty_auth: bool = True,
+        parent: Union[TPM2_RH, TPM2_HANDLE] = TPM2_RH.OWNER,
+    ):
         """Initialize TSSPrivKey using raw values.
 
         Args:
@@ -139,26 +147,26 @@ class TSSPrivKey(object):
         self._parent = parent
 
     @property
-    def private(self):
+    def private(self) -> TPM2B_PRIVATE:
         """TPM2B_PRIVATE: The private part of the TPM key."""
         return self._private
 
     @property
-    def public(self):
+    def public(self) -> TPM2B_PUBLIC:
         """TPM2B_PUBLIC: The public part of the TPM key."""
         return self._public
 
     @property
-    def empty_auth(self):
+    def empty_auth(self) -> bool:
         """bool: Defines if the authorization is a empty password."""
         return self._empty_auth
 
     @property
-    def parent(self):
+    def parent(self) -> Union[TPM2_RH, TPM2_HANDLE]:
         """int: Handle of the parent key."""
         return self._parent
 
-    def to_der(self):
+    def to_der(self) -> bytes:
         """Encode the TSSPrivKey as DER encoded ASN.1.
 
         Returns:
@@ -174,7 +182,7 @@ class TSSPrivKey(object):
         seq["private"] = priv
         return seq.dump()
 
-    def to_pem(self):
+    def to_pem(self) -> bytes:
         """Encode the TSSPrivKey as PEM encoded ASN.1.
 
         Returns:
@@ -184,11 +192,13 @@ class TSSPrivKey(object):
         return pem.armor("TSS2 PRIVATE KEY", der)
 
     @staticmethod
-    def _getparenttemplate(ectx):
+    def _getparenttemplate(ectx: ESAPI) -> Optional[TPMT_PUBLIC]:
         more = True
         al = list()
         while more:
-            more, data = ectx.get_capability(TPM2_CAP.ALGS, 0, lib.TPM2_MAX_CAP_ALGS)
+            more, data = ectx.get_capability(
+                TPM2_CAP(TPM2_CAP.ALGS), 0, lib.TPM2_MAX_CAP_ALGS
+            )
             algs = data.data.algorithms
             for i in range(0, algs.count):
                 al.append(algs.algProperties[i].alg)
@@ -199,11 +209,13 @@ class TSSPrivKey(object):
         return None
 
     @staticmethod
-    def _getparent(ectx, keytype, parent):
-        if parent == lib.TPM2_RH_OWNER:
+    def _getparent(
+        ectx: ESAPI, keytype: bool, parent: Union[TPM2_RH, TPM2_HANDLE]
+    ) -> ESYS_TR:
+        if parent == TPM2_RH.OWNER:
             template = TSSPrivKey._getparenttemplate(ectx)
         else:
-            return ectx.tr_from_tpmpublic(parent)
+            return ectx.tr_from_tpmpublic(TPM2_HANDLE(parent))
         if template is None:
             raise RuntimeError("Unable to find supported parent key type")
         inpub = TPM2B_PUBLIC(publicArea=template)
@@ -213,11 +225,11 @@ class TSSPrivKey(object):
             in_public=inpub,
             outside_info=TPM2B_DATA(),
             creation_pcr=TPML_PCR_SELECTION(),
-            session1=ESYS_TR.PASSWORD,
+            session1=ESYS_TR(ESYS_TR.PASSWORD),
         )
         return phandle
 
-    def load(self, ectx, password=None):
+    def load(self, ectx: ESAPI, password: Optional[bytes] = None) -> ESYS_TR:
         """Load the TSSPrivKey.
 
         Args:
@@ -237,7 +249,13 @@ class TSSPrivKey(object):
         return handle
 
     @classmethod
-    def create(cls, ectx, template, parent=lib.TPM2_RH_OWNER, password=None):
+    def create(
+        cls,
+        ectx: ESAPI,
+        template: TPMT_PUBLIC,
+        parent: Union[TPM2_RH, TPM2_HANDLE] = TPM2_RH.OWNER,
+        password: Optional[bytes] = None,
+    ) -> "TSSPrivKey":
         """Create a TssPrivKey using a template.
 
         Note:
@@ -245,7 +263,7 @@ class TSSPrivKey(object):
 
         Args:
             ectx (ESAPI): The ESAPI instance to use for creating the key.
-            template (TPM2B_PUBLIC): The key template.
+            template (TPMT_PUBLIC): The key template.
             parent (int): The parent of the key, default is TPM2_RH_OWNER.
             password (bytes): The password to set for the key, default is None.
 
@@ -269,8 +287,13 @@ class TSSPrivKey(object):
 
     @classmethod
     def create_rsa(
-        cls, ectx, keyBits=2048, exponent=0, parent=lib.TPM2_RH_OWNER, password=None
-    ):
+        cls,
+        ectx: ESAPI,
+        keyBits: int = 2048,
+        exponent: int = 0,
+        parent: Union[TPM2_RH, TPM2_HANDLE] = TPM2_RH.OWNER,
+        password: Optional[bytes] = None,
+    ) -> "TSSPrivKey":
         """Create a RSA TssPrivKey using a standard RSA key template.
 
         Args:
@@ -290,8 +313,12 @@ class TSSPrivKey(object):
 
     @classmethod
     def create_ecc(
-        cls, ectx, curveID=TPM2_ECC.NIST_P256, parent=lib.TPM2_RH_OWNER, password=None
-    ):
+        cls,
+        ectx: ESAPI,
+        curveID: TPM2_ECC = TPM2_ECC.NIST_P256,
+        parent: Union[TPM2_RH, TPM2_HANDLE] = TPM2_RH.OWNER,
+        password: Optional[bytes] = None,
+    ) -> "TSSPrivKey":
         """Create an ECC TssPrivKey using a standard ECC key template.
 
         Args:
@@ -308,7 +335,7 @@ class TSSPrivKey(object):
         return cls.create(ectx, template, parent, password)
 
     @classmethod
-    def from_der(cls, data):
+    def from_der(cls, data: bytes) -> "TSSPrivKey":
         """Load a TSSPrivKey from DER ASN.1.
 
         Args:
@@ -327,7 +354,7 @@ class TSSPrivKey(object):
         return cls(private, public, empty_auth, parent)
 
     @classmethod
-    def from_pem(cls, data):
+    def from_pem(cls, data: bytes) -> "TSSPrivKey":
         """Load a TSSPrivKey from PEM ASN.1.
 
         Args:
