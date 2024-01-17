@@ -6,7 +6,7 @@ from tpm2_pytss import *
 from tpm2_pytss.internal.crypto import (
     _generate_seed,
     public_to_key,
-    _get_alg,
+    _get_symmetric,
     _get_digest,
 )
 from tpm2_pytss.utils import *
@@ -231,7 +231,7 @@ class TestUtils(TSS2_EsapiTest):
         self.assertEqual(b"credential data", bytes(certinfo))
 
     def test_make_credential_ecc_sm4(self):
-        if _get_alg(TPM2_ALG.SM4) is None:
+        if _get_symmetric(TPM2_ALG.SM4) is None:
             self.skipTest("SM4 is not supported by the cryptography module")
         elif _get_digest(TPM2_ALG.SM3_256) is None:
             self.skipTest("SM3 is not supported by the cryptography module")

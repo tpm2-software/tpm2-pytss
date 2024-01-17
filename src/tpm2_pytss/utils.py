@@ -19,19 +19,22 @@ from .constants import (
     TPM2_ECC,
     TPM2_PT,
     TPM2_RH,
+    TPM2_ALG,
 )
 from .internal.templates import _ek
 from .TSS2_Exception import TSS2_Exception
 from cryptography.hazmat.primitives import constant_time as ct
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
-from typing import Optional, Tuple, Callable, List
+from typing import Optional, Tuple, Callable, List, Union
 
 import secrets
 
 
 def make_credential(
-    public: TPM2B_PUBLIC, credential: bytes, name: TPM2B_NAME
+    public: Union[TPM2B_PUBLIC, TPMT_PUBLIC],
+    credential: Union[bytes, TPM2B_DIGEST],
+    name: Union[TPM2B_NAME, bytes],
 ) -> Tuple[TPM2B_ID_OBJECT, TPM2B_ENCRYPTED_SECRET]:
     """Encrypts credential for use with activate_credential
 
@@ -62,7 +65,11 @@ def make_credential(
     enc_cred = _encrypt(cipher, symmode, symkey, credential.marshal())
 
     halg = _get_digest(public.nameAlg)
-    hmackey = _kdfa(public.nameAlg, seed, b"INTEGRITY", b"", b"", halg.digest_size * 8)
+    if halg is None:
+        raise ValueError(f"unsupported digest algorithm {public.nameAlg}")
+    hmackey = _kdfa(
+        public.nameAlg, seed, b"INTEGRITY", b"", b"", halg().digest_size * 8
+    )
     outerhmac = _hmac(halg, hmackey, enc_cred, name)
     hmacdata = TPM2B_DIGEST(buffer=outerhmac).marshal()
 
@@ -183,6 +190,8 @@ def wrap(
             klen = int(bits / 8)
             symkey = secrets.token_bytes(klen)
         halg = _get_digest(public.publicArea.nameAlg)
+        if halg is None:
+            raise ValueError(f"unsupported digest algorithm {public.nameAlg}")
         h = hashes.Hash(halg(), backend=default_backend())
         h.update(sensb)
         h.update(name)
@@ -198,8 +207,10 @@ def wrap(
     dupsens = _encrypt(cipher, mode, outerkey, encsens)
 
     halg = _get_digest(newparent.nameAlg)
+    if halg is None:
+        raise ValueError(f"unsupported digest algorithm {public.nameAlg}")
     hmackey = _kdfa(
-        newparent.nameAlg, seed, b"INTEGRITY", b"", b"", halg.digest_size * 8
+        newparent.nameAlg, seed, b"INTEGRITY", b"", b"", halg().digest_size * 8
     )
     outerhmac = _hmac(halg, hmackey, dupsens, name)
     hmacdata = TPM2B_DIGEST(buffer=outerhmac).marshal()
@@ -252,10 +263,12 @@ def unwrap(
         ValueError: If the public key type or symmetric algorithm are not supported
     """
     halg = _get_digest(newparentpub.nameAlg)
+    if halg is None:
+        raise ValueError(f"unsupported digest algorithm {public.nameAlg}")
 
     seed = _secret_to_seed(newparentpriv, newparentpub, b"DUPLICATE\x00", outsymseed)
     hmackey = _kdfa(
-        newparentpub.nameAlg, seed, b"INTEGRITY", b"", b"", halg.digest_size * 8
+        newparentpub.nameAlg, seed, b"INTEGRITY", b"", b"", halg().digest_size * 8
     )
 
     buffer = bytes(duplicate)
@@ -280,11 +293,13 @@ def unwrap(
 
         cipher, mode, bits = _symdef_to_crypt(symdef)
         halg = _get_digest(public.publicArea.nameAlg)
+        if halg is None:
+            raise ValueError(f"unsupported digest algorithm {public.nameAlg}")
 
         # unwrap the inner encryption which is the integrity + TPM2B_SENSITIVE
         innerint_and_decsens = _decrypt(cipher, mode, symkey, sensb)
-        innerint, offset = TPM2B_DIGEST.unmarshal(innerint_and_decsens)
-        innerint = bytes(innerint)
+        innerint2b, offset = TPM2B_DIGEST.unmarshal(innerint_and_decsens)
+        innerint = bytes(innerint2b)
         decsensb = innerint_and_decsens[offset:]
 
         h = hashes.Hash(halg(), backend=default_backend())
@@ -315,11 +330,11 @@ class NoSuchIndex(Exception):
         index (int): The NV index requested
     """
 
-    def __init__(self, index):
+    def __init__(self, index: int):
         self.index = index
 
-    def __str__(self):
-        return f"NV index 0x{index:08x} does not exist"
+    def __str__(self) -> str:
+        return f"NV index 0x{self.index:08x} does not exist"
 
 
 class NVReadEK:
@@ -336,10 +351,10 @@ class NVReadEK:
     def __init__(
         self,
         ectx: ESAPI,
-        auth_handle: ESYS_TR = None,
-        session1: ESYS_TR = ESYS_TR.PASSWORD,
-        session2: ESYS_TR = ESYS_TR.NONE,
-        session3: ESYS_TR = ESYS_TR.NONE,
+        auth_handle: Optional[ESYS_TR] = None,
+        session1: ESYS_TR = ESYS_TR(ESYS_TR.PASSWORD),
+        session2: ESYS_TR = ESYS_TR(ESYS_TR.NONE),
+        session3: ESYS_TR = ESYS_TR(ESYS_TR.NONE),
     ):
         self._ectx = ectx
         self._auth_handle = auth_handle
@@ -351,7 +366,7 @@ class NVReadEK:
         more = True
         while more:
             more, data = self._ectx.get_capability(
-                TPM2_CAP.TPM_PROPERTIES,
+                TPM2_CAP(TPM2_CAP.TPM_PROPERTIES),
                 TPM2_PT.FIXED,
                 4096,
                 session1=session2,
@@ -367,7 +382,7 @@ class NVReadEK:
     def __call__(self, index: Union[int, TPM2_RH]) -> bytes:
         try:
             nvh = self._ectx.tr_from_tpmpublic(
-                index, session1=self._session2, session2=self._session3
+                TPM2_HANDLE(index), session1=self._session2, session2=self._session3
             )
         except TSS2_Exception as e:
             if e.rc == 0x18B:
@@ -399,7 +414,7 @@ class NVReadEK:
 
 def create_ek_template(
     ektype: str, nv_read_cb: Callable[[Union[int, TPM2_RH]], bytes]
-) -> Tuple[bytes, TPM2B_PUBLIC]:
+) -> Tuple[Optional[bytes], TPM2B_PUBLIC]:
     """Creates an Endorsenment Key template which when created matches the EK certificate
 
     The template is created according to TCG EK Credential Profile For TPM Family 2.0:

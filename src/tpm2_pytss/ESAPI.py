@@ -10,15 +10,30 @@ from .internal.utils import (
 )
 from .TCTI import TCTI
 from .TCTILdr import TCTILdr
+from ._libtpm2_pytss import ffi, lib
 
-from typing import List, Optional, Tuple, Union
+from typing import Optional, Tuple, Union, Any, Type, Callable, Sequence
+
+try:
+    from typing import Self
+except ImportError:
+    # assume mypy is running on python 3.11+
+    pass
+from types import TracebackType
 
 # Work around this FAPI dependency if FAPI is not present with the constant value
 _fapi_installed_ = _lib_version_atleast("tss2-fapi", "3.0.0")
 _DEFAULT_LOAD_BLOB_SELECTOR = FAPI_ESYSBLOB.CONTEXTLOAD if _fapi_installed_ else 1
 
 
-def _get_cdata(value, expected, varname, allow_none=False, *args, **kwargs):
+def _get_cdata(
+    value: Any,
+    expected: Type["TPM_OBJECT"],
+    varname: str,
+    allow_none: bool = False,
+    *args: Any,
+    **kwargs: Any,
+) -> ffi.CData:
     tname = expected.__name__
 
     if value is None and allow_none:
@@ -36,12 +51,12 @@ def _get_cdata(value, expected, varname, allow_none=False, *args, **kwargs):
         return value
 
     vname = type(value).__name__
-    parse_method = getattr(expected, "parse", None)
+    parse_method: Optional[Callable[..., ffi.CData]] = getattr(expected, "parse", None)
     if isinstance(value, (bytes, str)) and issubclass(expected, TPM2B_SIMPLE_OBJECT):
         bo = expected(value)
         return bo._cdata
     elif isinstance(value, str) and parse_method and callable(parse_method):
-        return expected.parse(value, *args, **kwargs)._cdata
+        return parse_method(value, *args, **kwargs)._cdata
     elif issubclass(expected, TPML_OBJECT) and isinstance(value, list):
         return expected(value)._cdata
     elif not isinstance(value, expected):
@@ -50,7 +65,9 @@ def _get_cdata(value, expected, varname, allow_none=False, *args, **kwargs):
     return value._cdata
 
 
-def _check_handle_type(handle, varname, expected=None):
+def _check_handle_type(
+    handle: ESYS_TR, varname: str, expected: Optional[Sequence[ESYS_TR]] = None
+) -> None:
     if not isinstance(handle, ESYS_TR):
         raise TypeError(f"expected {varname} to be type ESYS_TR, got {type(handle)}")
 
@@ -129,10 +146,12 @@ class ESAPI:
         _chkrc(lib.Esys_Initialize(self._ctx_pp, tctx, ffi.NULL))
         self._ctx = self._ctx_pp[0]
 
-    def __enter__(self):
+    def __enter__(self) -> "Self":
         return self
 
-    def __exit__(self, _type, value, traceback) -> None:
+    def __exit__(
+        self, _type: Type[Exception], value: Exception, traceback: TracebackType
+    ) -> None:
         self.close()
 
     #
@@ -154,7 +173,7 @@ class ESAPI:
             self._ctx = ffi.NULL
             self._ctx_pp = ffi.NULL
         if self._did_load_tcti and self._tcti is not None:
-            self._tcti.close()
+            self._tcti.finalize()
         self._tcti = None
 
     def get_tcti(self) -> Optional[TCTI]:
@@ -856,7 +875,7 @@ class ESAPI:
     def load_external(
         self,
         in_public: TPM2B_PUBLIC,
-        in_private: TPM2B_SENSITIVE = None,
+        in_private: Optional[TPM2B_SENSITIVE] = None,
         hierarchy: ESYS_TR = ESYS_TR.NULL,
         session1: ESYS_TR = ESYS_TR.NONE,
         session2: ESYS_TR = ESYS_TR.NONE,
@@ -901,7 +920,7 @@ class ESAPI:
 
         in_public_cdata = _get_cdata(in_public, TPM2B_PUBLIC, "in_public")
 
-        hierarchy = ESAPI._fixup_hierarchy(hierarchy)
+        fixed_hierarchy = ESAPI._fixup_hierarchy(hierarchy)
 
         object_handle = ffi.new("ESYS_TR *")
         _chkrc(
@@ -912,7 +931,7 @@ class ESAPI:
                 session3,
                 in_private_cdata,
                 in_public_cdata,
-                hierarchy,
+                fixed_hierarchy,
                 object_handle,
             )
         )
@@ -2103,7 +2122,7 @@ class ESAPI:
         _check_friendly_int(hash_alg, "hash_alg", TPM2_ALG)
 
         _check_friendly_int(hierarchy, "hierarchy", ESYS_TR)
-        hierarchy = ESAPI._fixup_hierarchy(hierarchy)
+        fixed_hierarchy = ESAPI._fixup_hierarchy(hierarchy)
 
         data_cdata = _get_cdata(data, TPM2B_MAX_BUFFER, "data")
 
@@ -2117,7 +2136,7 @@ class ESAPI:
                 session3,
                 data_cdata,
                 hash_alg,
-                hierarchy,
+                fixed_hierarchy,
                 out_hash,
                 validation,
             )
@@ -2616,7 +2635,7 @@ class ESAPI:
         _check_handle_type(session3, "session3")
 
         _check_friendly_int(hierarchy, "hierarchy", ESYS_TR)
-        hierarchy = ESAPI._fixup_hierarchy(hierarchy)
+        fixed_hierarchy = ESAPI._fixup_hierarchy(hierarchy)
 
         buffer_cdata = _get_cdata(buffer, TPM2B_MAX_BUFFER, "buffer", allow_none=True)
 
@@ -2630,7 +2649,7 @@ class ESAPI:
                 session2,
                 session3,
                 buffer_cdata,
-                hierarchy,
+                fixed_hierarchy,
                 result,
                 validation,
             )
@@ -5107,7 +5126,7 @@ class ESAPI:
             "enable",
             expected=(ESYS_TR.ENDORSEMENT, ESYS_TR.OWNER, ESYS_TR.PLATFORM),
         )
-        enable = ESAPI._fixup_hierarchy(enable)
+        fixed_enable = ESAPI._fixup_hierarchy(enable)
 
         if not isinstance(state, bool):
             raise TypeError(f"Expected state to be a bool, got {type(state)}")
@@ -5118,7 +5137,13 @@ class ESAPI:
 
         _chkrc(
             lib.Esys_HierarchyControl(
-                self._ctx, auth_handle, session1, session2, session3, enable, state
+                self._ctx,
+                auth_handle,
+                session1,
+                session2,
+                session3,
+                fixed_enable,
+                state,
             )
         )
 
@@ -5554,7 +5579,7 @@ class ESAPI:
 
     def set_algorithm_set(
         self,
-        algorithm_set: Union[List[int], int],
+        algorithm_set: int,
         auth_handle: ESYS_TR = ESYS_TR.PLATFORM,
         session1: ESYS_TR = ESYS_TR.PASSWORD,
         session2: ESYS_TR = ESYS_TR.NONE,
@@ -5567,7 +5592,7 @@ class ESAPI:
         available.
 
         Args:
-            algorithm_set (Union[List[int], int]): A TPM vendor-dependent value indicating the
+            algorithm_set (int): A TPM vendor-dependent value indicating the
                 algorithm set selection.
             auth_handle (ESYS_TR): ESYS_TR.PLATFORM. Defaults to ESYS_TR.PLATFORM.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.PASSWORD.
@@ -6138,7 +6163,7 @@ class ESAPI:
         _check_friendly_int(capability, "capability", TPM_AT)
 
         if not isinstance(count, int):
-            raise TypeError(f"Expected count to be an int, got {type(prop)}")
+            raise TypeError(f"Expected count to be an int, got {type(count)}")
 
         _check_handle_type(ac, "ac")
         _check_handle_type(session1, "session1")
@@ -6228,7 +6253,7 @@ class ESAPI:
                 ac_data_out,
             )
         )
-        return TPMS_AC_OUTPUT(_get_dptr(acDataOut, lib.Esys_Free))
+        return TPMS_AC_OUTPUT(_get_dptr(ac_data_out, lib.Esys_Free))
 
     def policy_ac_send_select(
         self,
@@ -7169,7 +7194,7 @@ class ESAPI:
         _chkrc(lib.Esys_TR_Serialize(self._ctx, esys_handle, buffer, buffer_size))
         buffer_size = buffer_size[0]
         buffer = _get_dptr(buffer, lib.Esys_Free)
-        return bytes(ffi.buffer(buffer, buffer_size))
+        return bytes(ffi.buffer(buffer, int(buffer_size)))
 
     def tr_deserialize(self, buffer: bytes) -> ESYS_TR:
         """Deserialization of an ESYS_TR from a byte buffer.
@@ -7235,6 +7260,6 @@ class ESAPI:
                     "Expected hierarchy to be one of ESYS_TR.NULL, ESYS_TR.PLATFORM, ESYS_TR.OWNER, ESYS_TR.ENDORSMENT"
                 )
 
-            hierarchy = fixup_map[hierarchy]
-
-        return hierarchy
+            return fixup_map[hierarchy]
+        else:
+            return hierarchy

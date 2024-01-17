@@ -5,20 +5,21 @@
 """Interface to make TPM info dict structure more accessible via dot notation."""
 
 from collections import defaultdict
+from typing import Any, Iterable, Dict, List
 
 
 class Traversable:
     """Attributes are traversable recursively."""
 
-    def __init__(self, data):
+    def __init__(self, data: Dict[Any, Any]):
         self.data = data
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.data)
 
-    def attrs_recursive(self, parent=""):
+    def attrs_recursive(self, parent: str = "") -> Iterable[Any]:
         """Return a generator to all attributes."""
-        attrs_rec = []
+        attrs_rec: List[str] = []
         sep = "." if parent else ""
 
         for attr in dir(self):
@@ -35,10 +36,10 @@ class Traversable:
 class BasicDict(Traversable):
     """Takes a dict and makes values accessible via dot notation."""
 
-    def __getattr__(self, attr):
+    def __getattr__(self, attr: str) -> Any:
         return self.data[attr]
 
-    def __dir__(self):
+    def __dir__(self) -> Iterable[str]:
         return self.data.keys()
 
 
@@ -60,13 +61,19 @@ class NamedKVPList(Traversable):
     instance of that class is returned (passing the value to __init__()).
     """
 
-    def __init__(self, data, key_name, value_name, value_class=None):
+    def __init__(
+        self,
+        data: Dict[Any, Any],
+        key_name: str,
+        value_name: str,
+        value_class: Any = None,
+    ):
         super().__init__(data)
         self.key_name = key_name
         self.value_name = value_name
         self.value_class = value_class
 
-    def __getattr__(self, attr):
+    def __getattr__(self, attr: str) -> Any:
         value = next(
             item[self.value_name]
             for item in self.data
@@ -78,19 +85,19 @@ class NamedKVPList(Traversable):
 
         return value
 
-    def __dir__(self):
+    def __dir__(self) -> Iterable[str]:
         return [item[self.key_name].lower() for item in self.data]
 
 
 class Capabilities(Traversable):
     """Takes a list of capability dicts and makes them accessible via dot notation."""
 
-    def _get_cap_data(self, description):
+    def _get_cap_data(self, description: str) -> Any:
         return next(cap for cap in self.data if cap["description"] == description)[
             "info"
         ]["data"]
 
-    def __getattr__(self, attr):
+    def __getattr__(self, attr: str) -> Any:
         # some caps are accessed via '_' but their names contain '-'
         attr = attr.replace("_", "-")
         cap_data = self._get_cap_data(attr)
@@ -111,11 +118,11 @@ class Capabilities(Traversable):
 
         return cap
 
-    def __dir__(self):
+    def __dir__(self) -> Iterable[str]:
         return [item["description"] for item in self.data]
 
 
-def str_from_int_list(int_list):
+def str_from_int_list(int_list: Iterable[int]) -> str:
     """Cast integers to bytes and decode as string."""
     string = b"".join(
         integer.to_bytes(4, byteorder="big") for integer in int_list
@@ -133,7 +140,7 @@ def str_from_int_list(int_list):
 class FapiInfo(Traversable):
     """Takes a FAPI info dict and and makes its values accessible via dot notation."""
 
-    def __getattr__(self, attr):
+    def __getattr__(self, attr: str) -> Any:
         item_data = self.data[attr]
 
         return defaultdict(
@@ -145,7 +152,7 @@ class FapiInfo(Traversable):
         )[attr]
 
     @property
-    def vendor_string(self):
+    def vendor_string(self) -> str:
         """Get the TPM Vendor String."""
         return str_from_int_list(
             [
@@ -157,12 +164,12 @@ class FapiInfo(Traversable):
         )
 
     @property
-    def manufacturer(self):
+    def manufacturer(self) -> str:
         """Get the TPM Manufacturer."""
         return str_from_int_list([self.capabilities.properties_fixed.manufacturer])
 
     @property
-    def firmware_version(self):
+    def firmware_version(self) -> str:
         """Get the TPM Firmware Version (formatted according to vendor conventions)."""
         key = f"{self.manufacturer}.{self.vendor_string}"
         ver1 = self.capabilities.properties_fixed.firmware_version_1
@@ -173,13 +180,13 @@ class FapiInfo(Traversable):
         )[key]
 
     @property
-    def spec_revision(self):
+    def spec_revision(self) -> str:
         """Get the TPM Specification Revision."""
         rev = self.capabilities.properties_fixed.ps_revision
         # Add '.' after first digit
-        rev = f"{rev // 100}.{rev % 100}"
+        revstr = f"{rev // 100}.{rev % 100}"
 
-        return rev
+        return revstr
 
-    def __dir__(self):
+    def __dir__(self) -> Iterable[str]:
         return self.data.keys()

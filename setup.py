@@ -15,6 +15,7 @@ from pycparser.c_ast import (
     Enum,
 )
 from textwrap import dedent
+from cffi import cparser
 
 # workaround bug https://github.com/pypa/pip/issues/7953
 site.ENABLE_USER_SITE = "--user" in sys.argv[1:]
@@ -282,8 +283,220 @@ class type_generator(build_ext):
             self.copy_file(vp, svp)
 
 
+class type_hints_generator(type_generator):
+    is_int = set(("int",))
+    callbacks = dict()
+    functions = dict()
+
+    macro_types = (
+        ("TPM2_ALG_", "TPM2_ALG"),
+        ("ESYS_TR_", "ESYS_TR"),
+        ("TPM2_ECC_", "TPM2_ECC"),
+        ("TPM2_RH_", "TPM2_RH"),
+        ("TPM2_SU_", "TPM2_SU"),
+        ("TPMA_OBJECT_", "TPMA_OBJECT"),
+        ("TPM2_CC_", "TPM2_CC"),
+        ("TPM2_SPEC_", "TPM2_SPEC"),
+        ("TPM2_GENERATED_", "TPM2_GENERATED"),
+        ("TPM2_RC_", "TPM2_RC"),
+        ("TSS2_RC_", "TSS2_RC"),
+        ("TPM2_EO_", "TPM2_EO"),
+        ("TPM2_ST_", "TPM2_ST"),
+        ("TPM2_SE_", "TPM2_SE"),
+        ("TPM2_CAP_", "TPM2_CAP"),
+        ("TPM_AT_", "TPM_AT"),
+        ("TPM2_PT_", "TPM2_PT"),
+        ("TPM2_PT_VENDOR_", "TPM2_PT_VENDOR"),
+        ("TPM2_PT_FIRMWARE_", "TPM2_PT_FIRMWARE"),
+        ("TPM2_PT_HR_", "TPM2_PT_HR"),
+        ("TPM2_PT_NV_", "TPM2_PT_NV"),
+        ("TPM2_PT_CONTEXT_", "TPM2_PT_CONTEXT"),
+        ("TPM2_PT_PS_", "TPM2_PT_PS"),
+        ("TPM2_PT_AUDIT_", "TPM2_PT_AUDIT"),
+        ("TPM2_PT_PCR_", "TPM2_PT_PCR"),
+        ("TPM2_PS_", "TPM2_PS"),
+        ("TPM2_HT_", "TPM2_HT"),
+        ("TPMA_SESSION_", "TPMA_SESSION"),
+        ("TPMA_LOCALITY_", "TPMA_LOCALITY"),
+        ("TPM2_NT_", "TPM2_NT"),
+        ("TPM2_HR_", "TPM2_HR"),
+        ("TPM2_HC_", "TPM2_HC"),
+        ("TPM2_CLOCK_", "TPM2_CLOCK"),
+        ("TPMA_NV_", "TPMA_NV"),
+        ("TPMA_CC_", "TPMA_CC"),
+        ("TPMA_ALGORITHM_", "TPMA_ALGORITHM"),
+        ("TPMA_PERMANENT_", "TPMA_PERMANENT"),
+        ("TPMA_STARTUP_", "TPMA_STARTUP"),
+        ("TPMA_MEMORY_", "TPMA_MEMORY"),
+        ("TPM2_MAX_", "TPM2_MAX"),
+        ("TPMA_MODES_", "TPMA_MODES"),
+    )
+
+    def macro_to_type(self, macro):
+        mt = "int"
+        ml = 0
+        for prefix, tn in self.macro_types:
+            pl = len(prefix)
+            if macro.startswith(prefix) and pl > ml:
+                mt = tn
+                ml = pl
+        return mt
+
+    def _make_callback_output(self, cname):
+        callback = self.callbacks[cname]
+        rt, args = callback
+        paramtypes = list()
+        for _, at in args:
+            paramtypes.append(at)
+        cbdef = f"Callable[[{', '.join(paramtypes)}], {rt}]"
+        return cbdef
+
+    def build_function(self, d):
+        args = list()
+        for param in d.args.params:
+            pn = param.name
+            if pn is None:
+                # if the param doesn't have a name, ignore
+                continue
+            elif isinstance(
+                param.type,
+                (cparser.pycparser.c_ast.PtrDecl, cparser.pycparser.c_ast.ArrayDecl),
+            ):
+                ft = "CData"
+                if isinstance(
+                    param.type.type, cparser.pycparser.c_ast.TypeDecl
+                ) and isinstance(
+                    param.type.type.type, cparser.pycparser.c_ast.IdentifierType
+                ):
+                    tn = (
+                        param.type.type.type.names[0]
+                        if param.type.type.type.names
+                        else None
+                    )
+                    if tn in ("char", "uint8_t"):
+                        ft = "CData | bytes"
+            elif isinstance(
+                param.type, cparser.pycparser.c_ast.TypeDecl
+            ) and isinstance(param.type.type, cparser.pycparser.c_ast.IdentifierType):
+                tn = param.type.type.names[0]
+                if tn in self.is_int:
+                    ft = "int"
+                elif tn in self.callbacks:
+                    ft = self._make_callback_output(tn)
+            else:
+                raise ValueError(f"unable to handle C type {param.type}")
+            args.append((pn, ft))
+        rt = "CData"
+        if isinstance(d.type, cparser.pycparser.c_ast.TypeDecl) and isinstance(
+            d.type.type, cparser.pycparser.c_ast.IdentifierType
+        ):
+            tn = d.type.type.names[0]
+            if tn in self.is_int:
+                rt = "int"
+            elif tn == "void":
+                rt = "None"
+            else:
+                rt = "CData"
+
+        return (rt, tuple(args))
+
+    def write_type_hints(self, macros):
+        output = dedent(
+            """
+            # SPDX-License-Identifier: BSD-2
+            # This file is generated during the build process.
+            from typing import Callable
+            from .ffi import CData
+
+            # Defines
+            """
+        )
+
+        mtl = [x for _, x in self.macro_types]
+        output += f"from ..constants import {', '.join(mtl)}\n"
+
+        for m in macros:
+            mt = self.macro_to_type(m)
+            output += f'{m}: "{mt}"\n'
+
+        output += "\n# Callback definitions\n"
+        for cname in self.callbacks:
+            cbdef = self._make_callback_output(cname)
+            output += f"{cname}: {cbdef}\n"
+
+        output += "\n# Function definitions\n"
+        for fname, function in self.functions.items():
+            rt, args = function
+            params = list()
+            for an, at in args:
+                if an == "in":
+                    an = "in_"
+                params.append(f"{an}: {at}")
+            output += f"def {fname}({', '.join(params)}) -> {rt}:...\n"
+
+        p = os.path.join(self.build_lib, "tpm2_pytss/_libtpm2_pytss/lib.pyi")
+        sp = os.path.join(
+            os.path.dirname(__file__), "src/tpm2_pytss/_libtpm2_pytss/lib.pyi"
+        )
+
+        if not self.dry_run:
+            self.mkpath(os.path.dirname(p))
+            with open(p, "wt") as tf:
+                tf.seek(0)
+                tf.truncate(0)
+                tf.write(output)
+
+        if self.inplace:
+            self.copy_file(p, sp)
+
+    def run(self):
+        super().run()
+
+        with open("libesys.h", "r") as sf:
+            cdata = sf.read()
+
+        parser = cparser.Parser()
+        ast, macros, _ = parser._parse(cdata)
+
+        for d in ast:
+            name = d.name
+            if isinstance(name, str) and name.startswith("__cffi_"):
+                # internal cffi stuff, ignore
+                continue
+            if isinstance(d, cparser.pycparser.c_ast.Typedef):
+                d = d.type
+            if isinstance(
+                d.type,
+                (
+                    cparser.pycparser.c_ast.Struct,
+                    cparser.pycparser.c_ast.Union,
+                    cparser.pycparser.c_ast.Enum,
+                ),
+            ):
+                # ignore unions, structs and enums
+                pass
+            elif isinstance(d.type, cparser.pycparser.c_ast.IdentifierType):
+                # check if type is int, otherwise ignore
+                if len(d.type.names) == 0:
+                    break
+                tn = d.type.names[0]
+                if tn in self.is_int:
+                    self.is_int.add(name)
+            elif isinstance(d, cparser.pycparser.c_ast.PtrDecl) and isinstance(
+                d.type, cparser.pycparser.c_ast.FuncDecl
+            ):
+                rt, args = self.build_function(d.type)
+                self.callbacks[name] = (rt, args)
+            elif isinstance(d, cparser.pycparser.c_ast.Decl) and isinstance(
+                d.type, cparser.pycparser.c_ast.FuncDecl
+            ):
+                rt, args = self.build_function(d.type)
+                self.functions[name] = (rt, args)
+        self.write_type_hints(macros)
+
+
 setup(
     use_scm_version=True,
     cffi_modules=["scripts/libtss2_build.py:ffibuilder"],
-    cmdclass={"build_ext": type_generator},
+    cmdclass={"build_ext": type_hints_generator},
 )

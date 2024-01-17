@@ -522,11 +522,11 @@ class CryptoTest(TSS2_EsapiTest):
             str(e.exception), f"unsupported digest algorithm: {TPM2_ALG.LAST + 1}"
         )
 
-    def test_get_alg(self):
-        alg = crypto._get_alg(TPM2_ALG.AES)
+    def test_get_symmetric(self):
+        alg = crypto._get_symmetric(TPM2_ALG.AES)
         self.assertEqual(alg, crypto.AES)
 
-        nalg = crypto._get_alg(TPM2_ALG.LAST + 1)
+        nalg = crypto._get_symmetric(TPM2_ALG.LAST + 1)
         self.assertEqual(nalg, None)
 
     def test_symdef_to_crypt(self):

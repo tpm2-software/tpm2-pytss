@@ -40,7 +40,13 @@ from tpm2_pytss.constants import (
     TPM2_SE,
     TPM2_HR,
 )
-from typing import Union, Tuple, Optional
+from typing import Union, Tuple, Optional, Any, Iterable, List
+
+try:
+    from typing import Self
+except ImportError:
+    # assume mypy is running on python 3.11+
+    pass
 import sys
 
 try:
@@ -71,7 +77,9 @@ class TPM2_HANDLE(int):
 class TPM_OBJECT(object):
     """ Abstract Base class for all TPM Objects. Not suitable for direct instantiation."""
 
-    def __init__(self, _cdata=None, **kwargs):
+    _cdata: ffi.CData
+
+    def __init__(self, _cdata: Optional[Any] = None, **kwargs: Any):
 
         # Rather than trying to mock the FFI interface, just avoid it and return
         # the base object. This is really only needed for documentation, and it
@@ -114,7 +122,7 @@ class TPM_OBJECT(object):
                     v = subobj
             TPM_OBJECT.__setattr__(self, k, v)
 
-    def __getattribute__(self, key):
+    def __getattribute__(self, key: str) -> Any:
         try:
             # go through object to avoid invoking THIS objects __getattribute__ call
             # and thus infinite recursion
@@ -137,7 +145,7 @@ class TPM_OBJECT(object):
                 obj = _convert_to_python_native(globals(), x, parent=self._cdata)
             return obj
 
-    def __setattr__(self, key, value):
+    def __setattr__(self, key: str, value: Any) -> None:
 
         _value = value
         _cdata = object.__getattribute__(self, "_cdata")
@@ -199,10 +207,10 @@ class TPM_OBJECT(object):
             # recurse so we can get handling of setattr with Python wrapped data
             setattr(self, key, value)
 
-    def __dir__(self):
-        return object.__dir__(self) + dir(self._cdata)
+    def __dir__(self) -> Iterable[str]:
+        return list(object.__dir__(self)) + dir(self._cdata)
 
-    def marshal(self):
+    def marshal(self) -> bytes:
         """Marshal instance into bytes.
 
         Returns:
@@ -223,7 +231,7 @@ class TPM_OBJECT(object):
         return bytes(buf[0 : offset[0]])
 
     @classmethod
-    def unmarshal(cls, buf):
+    def unmarshal(cls, buf: bytes) -> Tuple["Self", int]:
         """Unmarshal bytes into type instance.
 
         Args:
@@ -247,7 +255,9 @@ class TPM2B_SIMPLE_OBJECT(TPM_OBJECT):
     """ Abstract Base class for all TPM2B Simple Objects. A Simple object contains only
     a size and byte buffer fields. This is not suitable for direct instantiation."""
 
-    def __init__(self, _cdata=None, **kwargs):
+    def __init__(
+        self, _cdata: Optional[Union[ffi.CData, bytes, str]] = None, **kwargs: Any
+    ):
 
         _cdata, kwargs = _fixup_cdata_kwargs(self, _cdata, kwargs)
         _bytefield = type(self)._get_bytefield()
@@ -267,14 +277,14 @@ class TPM2B_SIMPLE_OBJECT(TPM_OBJECT):
         super().__init__(_cdata=_cdata)
 
     @classmethod
-    def _get_bytefield(cls):
+    def _get_bytefield(cls) -> Optional[str]:
         tipe = ffi.typeof(f"{cls.__name__}")
         for f in tipe.fields:
             if f[0] != "size":
                 return f[0]
         return None
 
-    def __setattr__(self, key, value):
+    def __setattr__(self, key: str, value: Any) -> None:
 
         if key == "size":
             raise AttributeError(f"{key} is read only")
@@ -288,19 +298,21 @@ class TPM2B_SIMPLE_OBJECT(TPM_OBJECT):
         else:
             super().__setattr__(key, value)
 
-    def __getattribute__(self, key):
+    def __getattribute__(self, key: str) -> Any:
         _bytefield = type(self)._get_bytefield()
         if key == _bytefield:
             b = getattr(self._cdata, _bytefield)
             rb = _ref_parent(b, self._cdata)
-            return memoryview(ffi.buffer(rb, self._cdata.size))
+            return memoryview(ffi.buffer(rb, int(self._cdata.size)))
         return super().__getattribute__(key)
 
-    def __len__(self):
-        return self._cdata.size
+    def __len__(self) -> int:
+        return int(self._cdata.size)
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: slice) -> Any:
         _bytefield = type(self)._get_bytefield()
+        if _bytefield is None:
+            raise RuntimeError("unable to find byte field")
         buf = getattr(self, _bytefield)
         if isinstance(index, int):
             if index >= self._cdata.size:
@@ -311,8 +323,10 @@ class TPM2B_SIMPLE_OBJECT(TPM_OBJECT):
         else:
             raise TypeError("index must an int or a slice")
 
-    def __bytes__(self):
+    def __bytes__(self) -> bytes:
         _bytefield = type(self)._get_bytefield()
+        if _bytefield is None:
+            raise RuntimeError("unable to find byte field")
         buf = getattr(self, _bytefield)
         return bytes(buf)
 
@@ -331,7 +345,7 @@ class TPM2B_SIMPLE_OBJECT(TPM_OBJECT):
         b = self.__bytes__()
         return binascii.hexlify(b).decode()
 
-    def __eq__(self, value):
+    def __eq__(self, value: object) -> bool:
         b = self.__bytes__()
         return b == value
 
@@ -346,14 +360,14 @@ class TPML_Iterator(object):
        do_something(alg)
     """
 
-    def __init__(self, tpml):
+    def __init__(self, tpml: "TPML_OBJECT"):
         self._tpml = tpml
         self._index = 0
 
-    def __iter__(self):
+    def __iter__(self) -> "Self":
         return self
 
-    def __next__(self):
+    def __next__(self) -> Any:
 
         if self._index > self._tpml.count - 1:
             raise StopIteration
@@ -367,7 +381,7 @@ class TPML_OBJECT(TPM_OBJECT):
     """ Abstract Base class for all TPML Objects. A TPML object is an object that
     contains a list of objects. This is not suitable for direct instantiation."""
 
-    def __init__(self, _cdata=None, **kwargs):
+    def __init__(self, _cdata: Optional[Any] = None, **kwargs: Any):
 
         _cdata, kwargs = _fixup_cdata_kwargs(self, _cdata, kwargs)
         super().__init__(_cdata=_cdata)
@@ -411,7 +425,7 @@ class TPML_OBJECT(TPM_OBJECT):
 
         self._cdata.count = len(kwargs[key])
 
-    def __getattribute__(self, key):
+    def __getattribute__(self, key: str) -> Any:
 
         try:
             # Can the parent handle it?
@@ -449,10 +463,10 @@ class TPML_OBJECT(TPM_OBJECT):
 
         return l
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: Union[int, slice]) -> Any:
         item_was_int = isinstance(item, int)
         try:
-            return object.__getitem__(self, item)
+            return getattr(object, "__getitem__")(self, item)
         except AttributeError:
             pass
 
@@ -467,6 +481,8 @@ class TPML_OBJECT(TPM_OBJECT):
             tipe = tipe.item
 
         field_name = next((v[0] for v in tipe.fields if v[0] != "count"), None)
+        if field_name is None:
+            raise AttributeError("No non count field found")
 
         if isinstance(item, int):
             item = slice(item, item + 1)
@@ -496,11 +512,11 @@ class TPML_OBJECT(TPM_OBJECT):
 
         return objects[0] if item_was_int else objects
 
-    def __len__(self):
+    def __len__(self) -> int:
 
-        return self._cdata.count
+        return int(self._cdata.count)
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: Union[int, slice], value: Any) -> None:
 
         if not isinstance(key, (int, slice)):
             raise TypeError(f"list indices must be integers or slices, not {type(key)}")
@@ -515,6 +531,8 @@ class TPML_OBJECT(TPM_OBJECT):
             tipe = tipe.item
 
         field_name = next((v[0] for v in tipe.fields if v[0] != "count"), None)
+        if field_name is None:
+            raise AttributeError("No non count field found")
 
         cdata_list = self._cdata.__getattribute__(field_name)
 
@@ -537,7 +555,7 @@ class TPML_OBJECT(TPM_OBJECT):
         if key.stop > self._cdata.count:
             self._cdata.count = key.stop
 
-    def __iter__(self):
+    def __iter__(self) -> TPML_Iterator:
         return TPML_Iterator(self)
 
 
@@ -557,29 +575,29 @@ class TPM2B_NAME(TPM2B_SIMPLE_OBJECT):
     pass
 
 
-def _handle_sym_common(objstr, default_mode="null"):
+def _handle_sym_common(objstr: str, default_mode: str = "null") -> Tuple[int, TPM2_ALG]:
 
     if objstr is None or len(objstr) == 0:
         objstr = "128"
 
-    bits = objstr[:3]
+    bitstr = objstr[:3]
     expected = ["128", "192", "256"]
-    if bits not in expected:
-        raise ValueError(f'Expected bits to be one of {expected}, got: "{bits}"')
+    if bitstr not in expected:
+        raise ValueError(f'Expected bits to be one of {expected}, got: "{bitstr}"')
 
-    bits = int(bits)
+    bits = int(bitstr)
 
     # go past bits
     objstr = objstr[3:]
     if len(objstr) == 0:
-        mode = default_mode
+        modestr = default_mode
     else:
         expected = ["cfb", "cbc", "ofb", "ctr", "ecb"]
         if objstr not in expected:
             raise ValueError(f'Expected mode to be one of {expected}, got: "{objstr}"')
-        mode = objstr
+        modestr = objstr
 
-    mode = TPM2_ALG.parse(mode)
+    mode = TPM2_ALG.parse(modestr)
 
     return (bits, mode)
 
@@ -587,7 +605,7 @@ def _handle_sym_common(objstr, default_mode="null"):
 class TPMT_SYM_DEF(TPM_OBJECT):
     @classmethod
     def parse(
-        cls, alg: str, is_restricted: bool = False, is_rsapss: bool = False
+        cls, alg: Optional[str], is_restricted: bool = False, is_rsapss: bool = False
     ) -> "TPMT_SYM_DEF":
         """Builds a TPMT_SYM_DEF from a tpm2-tools like specifier strings.
 
@@ -648,8 +666,10 @@ class TPMT_SYM_DEF_OBJECT(TPMT_SYM_DEF):
 
 
 class TPMT_PUBLIC(TPM_OBJECT):
+    nameAlg: TPM2_ALG
+
     @staticmethod
-    def _handle_rsa(objstr, templ):
+    def _handle_rsa(objstr: str, templ: "TPMT_PUBLIC") -> bool:
         templ.type = TPM2_ALG.RSA
 
         if objstr is None or objstr == "":
@@ -667,7 +687,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
         return True
 
     @staticmethod
-    def _handle_ecc(objstr, templ):
+    def _handle_ecc(objstr: str, templ: "TPMT_PUBLIC") -> bool:
         templ.type = TPM2_ALG.ECC
 
         if objstr is None or objstr == "":
@@ -683,7 +703,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
         return True
 
     @staticmethod
-    def _handle_aes(objstr, templ):
+    def _handle_aes(objstr: str, templ: "TPMT_PUBLIC") -> bool:
         templ.type = TPM2_ALG.SYMCIPHER
         templ.parameters.symDetail.sym.algorithm = TPM2_ALG.AES
 
@@ -693,7 +713,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
         return False
 
     @staticmethod
-    def _handle_camellia(objstr, templ):
+    def _handle_camellia(objstr: str, templ: "TPMT_PUBLIC") -> bool:
         templ.type = TPM2_ALG.SYMCIPHER
         templ.parameters.symDetail.sym.algorithm = TPM2_ALG.CAMELLIA
 
@@ -704,7 +724,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
         return False
 
     @staticmethod
-    def _handle_sm4(objstr, templ):
+    def _handle_sm4(objstr: str, templ: "TPMT_PUBLIC") -> bool:
         templ.type = TPM2_ALG.SYMCIPHER
         templ.parameters.symDetail.sym.algorithm = TPM2_ALG.SM4
 
@@ -717,28 +737,28 @@ class TPMT_PUBLIC(TPM_OBJECT):
         return False
 
     @staticmethod
-    def _handle_xor(_, templ):
+    def _handle_xor(_: Any, templ: "TPMT_PUBLIC") -> bool:
         templ.type = TPM2_ALG.KEYEDHASH
         templ.parameters.keyedHashDetail.scheme.scheme = TPM2_ALG.XOR
 
         return True
 
     @staticmethod
-    def _handle_hmac(_, templ):
+    def _handle_hmac(_: Any, templ: "TPMT_PUBLIC") -> bool:
         templ.type = TPM2_ALG.KEYEDHASH
         templ.parameters.keyedHashDetail.scheme.scheme = TPM2_ALG.HMAC
 
         return True
 
     @staticmethod
-    def _handle_keyedhash(_, templ):
+    def _handle_keyedhash(_: Any, templ: "TPMT_PUBLIC") -> bool:
         templ.type = TPM2_ALG.KEYEDHASH
         templ.parameters.keyedHashDetail.scheme.scheme = TPM2_ALG.NULL
 
         return False
 
     @staticmethod
-    def _error_on_conflicting_sign_attrs(templ):
+    def _error_on_conflicting_sign_attrs(templ: "TPMT_PUBLIC") -> None:
         """
         If the scheme is set, both the encrypt and decrypt attributes cannot be set,
         check to see if this is the case, and turn down:
@@ -764,7 +784,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
             )
 
     @staticmethod
-    def _handle_scheme_rsa(scheme, templ):
+    def _handle_scheme_rsa(scheme: Optional[str], templ: "TPMT_PUBLIC") -> bool:
 
         if scheme is None or len(scheme) == 0:
             scheme = "null"
@@ -801,7 +821,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
         return True
 
     @staticmethod
-    def _handle_scheme_ecc(scheme, templ):
+    def _handle_scheme_ecc(scheme: Optional[str], templ: "TPMT_PUBLIC") -> bool:
 
         if scheme is None or len(scheme) == 0:
             scheme = "null"
@@ -841,7 +861,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
         return True
 
     @staticmethod
-    def _handle_scheme_keyedhash(scheme, templ):
+    def _handle_scheme_keyedhash(scheme: Optional[str], templ: "TPMT_PUBLIC") -> None:
 
         if scheme is None or scheme == "":
             scheme = "sha256"
@@ -860,7 +880,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
             )
 
     @staticmethod
-    def _handle_scheme(scheme, templ):
+    def _handle_scheme(scheme: Optional[str], templ: "TPMT_PUBLIC") -> None:
         if templ.type == TPM2_ALG.RSA:
             TPMT_PUBLIC._handle_scheme_rsa(scheme, templ)
         elif templ.type == TPM2_ALG.ECC:
@@ -874,7 +894,7 @@ class TPMT_PUBLIC(TPM_OBJECT):
             )
 
     @staticmethod
-    def _handle_asymdetail(detail, templ):
+    def _handle_asymdetail(detail: Optional[str], templ: "TPMT_PUBLIC") -> None:
 
         if templ.type == TPM2_ALG.KEYEDHASH:
             if detail is not None:
@@ -901,8 +921,8 @@ class TPMT_PUBLIC(TPM_OBJECT):
         objectAttributes: Union[
             TPMA_OBJECT, int, str
         ] = TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS,
-        nameAlg: Union[TPM2_ALG, int, str] = "sha256",
-        authPolicy: bytes = None,
+        nameAlg: Union[TPM2_ALG, str] = "sha256",
+        authPolicy: Optional[bytes] = None,
     ) -> "TPMT_PUBLIC":
         """Builds a TPMT_PUBLIC from a tpm2-tools like specifier strings.
 
@@ -969,9 +989,9 @@ class TPMT_PUBLIC(TPM_OBJECT):
         keep_processing = False
         prefix = tuple(filter(lambda x: objstr.startswith(x), expected))
         if len(prefix) == 1:
-            prefix = prefix[0]
-            keep_processing = getattr(TPMT_PUBLIC, f"_handle_{prefix}")(
-                objstr[len(prefix) :], templ
+            prefixstr = prefix[0]
+            keep_processing = getattr(TPMT_PUBLIC, f"_handle_{prefixstr}")(
+                objstr[len(prefixstr) :], templ
             )
         else:
             raise ValueError(
@@ -1000,13 +1020,13 @@ class TPMT_PUBLIC(TPM_OBJECT):
     def from_pem(
         cls,
         data: bytes,
-        nameAlg: Union[TPM2_ALG, int] = TPM2_ALG.SHA256,
-        objectAttributes: Union[TPMA_OBJECT, int] = (
+        nameAlg: TPM2_ALG = TPM2_ALG.SHA256,
+        objectAttributes: TPMA_OBJECT = (
             TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH
         ),
-        symmetric: TPMT_SYM_DEF_OBJECT = None,
-        scheme: TPMT_ASYM_SCHEME = None,
-        password: bytes = None,
+        symmetric: Optional[TPMT_SYM_DEF_OBJECT] = None,
+        scheme: Optional[TPMT_ASYM_SCHEME] = None,
+        password: Optional[bytes] = None,
     ) -> "TPMT_PUBLIC":
         """Decode the public part from standard key encodings.
 
@@ -1187,6 +1207,8 @@ class TPM2B_MAX_NV_BUFFER(TPM2B_SIMPLE_OBJECT):
 
 
 class TPM2B_NV_PUBLIC(TPM_OBJECT):
+    nvPublic: "TPMS_NV_PUBLIC"
+
     def get_name(self) -> TPM2B_NAME:
         """Get the TPM name of the NV public area.
 
@@ -1215,17 +1237,19 @@ class TPM2B_PRIVATE_VENDOR_SPECIFIC(TPM2B_SIMPLE_OBJECT):
 
 
 class TPM2B_PUBLIC(TPM_OBJECT):
+    publicArea: TPMT_PUBLIC
+
     @classmethod
     def from_pem(
         cls,
         data: bytes,
-        nameAlg: Union[TPM2_ALG, int] = TPM2_ALG.SHA256,
-        objectAttributes: Union[TPMA_OBJECT, int] = (
+        nameAlg: TPM2_ALG = TPM2_ALG.SHA256,
+        objectAttributes: TPMA_OBJECT = (
             TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH
         ),
-        symmetric: TPMT_SYM_DEF_OBJECT = None,
-        scheme: TPMT_ASYM_SCHEME = None,
-        password: bytes = None,
+        symmetric: Optional[TPMT_SYM_DEF_OBJECT] = None,
+        scheme: Optional[TPMT_ASYM_SCHEME] = None,
+        password: Optional[bytes] = None,
     ) -> "TPM2B_PUBLIC":
         """Decode the public part from standard key encodings.
 
@@ -1335,10 +1359,10 @@ class TPM2B_PUBLIC(TPM_OBJECT):
     @classmethod
     def parse(
         cls,
-        alg="rsa",
-        objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS,
-        nameAlg="sha256",
-        authPolicy=None,
+        alg: str = "rsa",
+        objectAttributes: TPMA_OBJECT = TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS,
+        nameAlg: Union[TPM2_ALG, str] = "sha256",
+        authPolicy: Optional[bytes] = None,
     ) -> "TPM2B_PUBLIC":
         """Builds a TPM2B_PUBLIC from a tpm2-tools like specifier strings.
 
@@ -1393,6 +1417,8 @@ class TPMT_KEYEDHASH_SCHEME(TPM_OBJECT):
 
 
 class TPM2B_SENSITIVE(TPM_OBJECT):
+    sensitiveArea: "TPMT_SENSITIVE"
+
     @classmethod
     def from_pem(
         cls, data: bytes, password: Optional[bytes] = None
@@ -1424,12 +1450,12 @@ class TPM2B_SENSITIVE(TPM_OBJECT):
     def keyedhash_from_secret(
         cls,
         secret: bytes,
-        nameAlg: Union[TPM2_ALG, int] = TPM2_ALG.SHA256,
-        objectAttributes: Union[TPMA_OBJECT, int] = (
+        nameAlg: TPM2_ALG = TPM2_ALG.SHA256,
+        objectAttributes: TPMA_OBJECT = (
             TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH
         ),
-        scheme: TPMT_KEYEDHASH_SCHEME = None,
-        seed: bytes = None,
+        scheme: Optional[TPMT_KEYEDHASH_SCHEME] = None,
+        seed: Optional[bytes] = None,
     ) -> Tuple["TPM2B_SENSITIVE", TPM2B_PUBLIC]:
         """Generate the private and public part for a keyed hash object from a secret.
 
@@ -1465,13 +1491,13 @@ class TPM2B_SENSITIVE(TPM_OBJECT):
     def symcipher_from_secret(
         cls,
         secret: bytes,
-        algorithm: Union[TPM2_ALG, int] = TPM2_ALG.AES,
-        mode: Union[TPM2_ALG, int] = TPM2_ALG.CFB,
-        nameAlg: Union[TPM2_ALG, int] = TPM2_ALG.SHA256,
-        objectAttributes: Union[TPMA_OBJECT, int] = (
+        algorithm: TPM2_ALG = TPM2_ALG.AES,
+        mode: TPM2_ALG = TPM2_ALG.CFB,
+        nameAlg: TPM2_ALG = TPM2_ALG.SHA256,
+        objectAttributes: TPMA_OBJECT = (
             TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH
         ),
-        seed: bytes = None,
+        seed: Optional[bytes] = None,
     ) -> Tuple["TPM2B_SENSITIVE", TPM2B_PUBLIC]:
         """Generate the private and public part for a symcipher object from a secret.
 
@@ -1499,7 +1525,7 @@ class TPM2B_SENSITIVE(TPM_OBJECT):
         pub = TPM2B_PUBLIC(publicArea=pa)
         return (priv, pub)
 
-    def to_pem(self, public: TPMT_PUBLIC, password=None) -> bytes:
+    def to_pem(self, public: TPMT_PUBLIC, password: Optional[bytes] = None) -> bytes:
         """Encode the key as PEM encoded ASN.1.
 
         Args:
@@ -1544,7 +1570,7 @@ class TPM2B_SENSITIVE(TPM_OBJECT):
 
         return self.sensitiveArea.to_der(public)
 
-    def to_ssh(self, public: TPMT_PUBLIC, password: bytes = None) -> bytes:
+    def to_ssh(self, public: TPMT_PUBLIC, password: Optional[bytes] = None) -> bytes:
         """Encode the key as OPENSSH PEM format.
 
         Args:
@@ -1717,9 +1743,9 @@ class TPML_PCR_SELECTION(TPML_OBJECT):
                 f"got {len(selectors)}"
             )
 
-        selections = [TPMS_PCR_SELECTION.parse(x) for x in selectors]
+        parsed_selections = [TPMS_PCR_SELECTION.parse(x) for x in selectors]
 
-        return TPML_PCR_SELECTION(selections)
+        return TPML_PCR_SELECTION(parsed_selections)
 
 
 class TPML_TAGGED_PCR_PROPERTY(TPML_OBJECT):
@@ -1818,7 +1844,11 @@ class TPMS_CONTEXT(TPM_OBJECT):
         ctx.contextBlob, _ = TPM2B_CONTEXT_DATA.unmarshal(data[24:])
         return ctx
 
-    def to_tools(self, session_type: TPM2_SE = None, auth_hash: TPM2_ALG = None):
+    def to_tools(
+        self,
+        session_type: Optional[TPM2_SE] = None,
+        auth_hash: Optional[TPM2_ALG] = None,
+    ) -> bytes:
         """Marshal the context into a tpm2-tools context blob.
 
         Args:
@@ -1844,12 +1874,11 @@ class TPMS_CONTEXT(TPM_OBJECT):
             )
 
         version = 1
-        if session_type is not None:
-            version = 2
 
         data = b""
 
-        if version == 2:
+        if isinstance(session_type, TPM2_SE) and isinstance(auth_hash, TPM2_ALG):
+            version = 2
             data = int(0xBADCC0DE).to_bytes(4, "big") + version.to_bytes(4, "big")
             data = data + session_type.to_bytes(1, "big")
             data = data + auth_hash.to_bytes(2, "big")
@@ -1919,7 +1948,9 @@ class TPMS_PCR_SELECT(TPM_OBJECT):
 
 
 class TPMS_PCR_SELECTION(TPM_OBJECT):
-    def __init__(self, pcrs=None, **kwargs):
+    def __init__(
+        self, pcrs: Optional[Union[str, List[str], List[int]]] = None, **kwargs: Any
+    ):
         super().__init__(**kwargs)
 
         if not pcrs:
@@ -1937,6 +1968,8 @@ class TPMS_PCR_SELECTION(TPM_OBJECT):
             return
 
         for pcr in pcrs:
+            if isinstance(pcr, str):
+                pcr = int(pcr)
             if pcr < 0 or pcr > lib.TPM2_PCR_LAST:
                 raise ValueError(f"PCR Index out of range, got {pcr}")
             self._cdata.pcrSelect[pcr // 8] |= 1 << (pcr % 8)
@@ -1981,6 +2014,7 @@ class TPMS_PCR_SELECTION(TPM_OBJECT):
         except ValueError:
             halg = TPM2_ALG.parse(hunks[0])
 
+        pcrs: Union[Iterable[int], str]
         if hunks[1] != "all":
             try:
                 pcrs = [int(x.strip(), 0) for x in hunks[1].split(",")]
@@ -2094,7 +2128,7 @@ class TPMU_PUBLIC_ID(TPM_OBJECT):
 
 class TPMT_SENSITIVE(TPM_OBJECT):
     @classmethod
-    def from_pem(cls, data, password: Optional[bytes] = None):
+    def from_pem(cls, data: bytes, password: Optional[bytes] = None) -> "Self":
         """Decode the private part from standard key encodings.
 
         Currently supports PEM, DER and SSH encoded private keys.
@@ -2113,14 +2147,14 @@ class TPMT_SENSITIVE(TPM_OBJECT):
     @classmethod
     def keyedhash_from_secret(
         cls,
-        secret,
-        nameAlg=TPM2_ALG.SHA256,
-        objectAttributes=(
+        secret: bytes,
+        nameAlg: TPM2_ALG = TPM2_ALG.SHA256,
+        objectAttributes: TPMA_OBJECT = (
             TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH
         ),
         scheme: Optional[TPMT_KEYEDHASH_SCHEME] = None,
         seed: Optional[bytes] = None,
-    ):
+    ) -> Tuple["TPMT_SENSITIVE", TPMT_PUBLIC]:
         """Generate the private and public part for a keyed hash object from a secret.
 
         Args:
@@ -2156,15 +2190,15 @@ class TPMT_SENSITIVE(TPM_OBJECT):
     @classmethod
     def symcipher_from_secret(
         cls,
-        secret,
-        algorithm=TPM2_ALG.AES,
-        mode=TPM2_ALG.CFB,
-        nameAlg=TPM2_ALG.SHA256,
-        objectAttributes=(
+        secret: bytes,
+        algorithm: TPM2_ALG = TPM2_ALG.AES,
+        mode: TPM2_ALG = TPM2_ALG.CFB,
+        nameAlg: TPM2_ALG = TPM2_ALG.SHA256,
+        objectAttributes: TPMA_OBJECT = (
             TPMA_OBJECT.DECRYPT | TPMA_OBJECT.SIGN_ENCRYPT | TPMA_OBJECT.USERWITHAUTH
         ),
         seed: Optional[bytes] = None,
-    ):
+    ) -> Tuple["TPMT_SENSITIVE", TPMT_PUBLIC]:
         """
         Generate the private and public part for a symcipher object from a secret.
 
@@ -2207,11 +2241,11 @@ class TPMT_SENSITIVE(TPM_OBJECT):
 
     def _serialize(
         self,
-        encoding: str,
+        encoding: serialization.Encoding,
         public: TPMT_PUBLIC,
-        format: str = serialization.PrivateFormat.TraditionalOpenSSL,
-        password: bytes = None,
-    ):
+        format: serialization.PrivateFormat = serialization.PrivateFormat.TraditionalOpenSSL,
+        password: Optional[bytes] = None,
+    ) -> bytes:
         k = private_to_key(self, public)
 
         enc_alg = (
@@ -2226,7 +2260,7 @@ class TPMT_SENSITIVE(TPM_OBJECT):
 
         return data
 
-    def to_pem(self, public: TPMT_PUBLIC, password: bytes = None):
+    def to_pem(self, public: TPMT_PUBLIC, password: Optional[bytes] = None) -> bytes:
         """Encode the key as PEM encoded ASN.1.
 
         public(TPMT_PUBLIC): The corresponding public key.
@@ -2238,7 +2272,7 @@ class TPMT_SENSITIVE(TPM_OBJECT):
 
         return self._serialize(serialization.Encoding.PEM, public, password=password)
 
-    def to_der(self, public: TPMT_PUBLIC):
+    def to_der(self, public: TPMT_PUBLIC) -> bytes:
         """Encode the key as DER encoded ASN.1.
 
         public(TPMT_PUBLIC): The corresponding public key.
@@ -2249,7 +2283,7 @@ class TPMT_SENSITIVE(TPM_OBJECT):
 
         return self._serialize(serialization.Encoding.DER, public)
 
-    def to_ssh(self, public: TPMT_PUBLIC, password: bytes = None):
+    def to_ssh(self, public: TPMT_PUBLIC, password: Optional[bytes] = None) -> bytes:
         """Encode the key as SSH format.
 
         public(TPMT_PUBLIC): The corresponding public key.
@@ -2312,7 +2346,9 @@ class TPMU_SIGNATURE(TPM_OBJECT):
 
 
 class TPMT_SIGNATURE(TPM_OBJECT):
-    def verify_signature(self, key, data):
+    def verify_signature(
+        self, key: Union[TPMT_PUBLIC, TPM2B_PUBLIC], data: bytes
+    ) -> None:
         """
         Verify a TPM generated signature against a key.
 
@@ -2325,7 +2361,7 @@ class TPMT_SIGNATURE(TPM_OBJECT):
         """
         _verify_signature(self, key, data)
 
-    def __bytes__(self):
+    def __bytes__(self) -> bytes:
         """Return the underlying bytes for the signature.
 
         For RSA and HMAC signatures return the signature bytes, for ECDSA return a ASN.1 encoded signature.
