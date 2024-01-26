@@ -23,7 +23,7 @@ from cryptography.hazmat.primitives.ciphers.algorithms import AES, Camellia
 from cryptography.hazmat.primitives.ciphers import modes, Cipher, CipherAlgorithm
 from cryptography.hazmat.backends import default_backend
 from cryptography.exceptions import UnsupportedAlgorithm, InvalidSignature
-from typing import Tuple, Type
+from typing import Tuple, Type, Any
 import secrets
 import sys
 
@@ -220,7 +220,7 @@ def public_to_key(obj):
     return key
 
 
-class _MyRSAPrivateNumbers(rsa.RSAPrivateNumbers):
+class _MyRSAPrivateNumbers:
     def __init__(self, p: int, n: int, e: int, pubnums: rsa.RSAPublicNumbers):
 
         q = n // p
@@ -231,7 +231,12 @@ class _MyRSAPrivateNumbers(rsa.RSAPrivateNumbers):
         dmq1 = rsa.rsa_crt_dmq1(d, q)
         iqmp = rsa.rsa_crt_iqmp(p, q)
 
-        super().__init__(p, q, d, dmp1, dmq1, iqmp, pubnums)
+        self._private_numbers = rsa.RSAPrivateNumbers(
+            p, q, d, dmp1, dmq1, iqmp, pubnums
+        )
+
+    def private_key(self, *args: Any, **kwargs: Any) -> rsa.RSAPrivateKey:
+        return self._private_numbers.private_key(*args, **kwargs)
 
     @staticmethod
     def _xgcd(a: int, b: int) -> Tuple[int, int, int]:
@@ -251,15 +256,7 @@ class _MyRSAPrivateNumbers(rsa.RSAPrivateNumbers):
     #
     @staticmethod
     def _modinv(a, m):
-
-        if sys.version_info < (3, 8):
-            g, x, y = _MyRSAPrivateNumbers._xgcd(a, m)
-            if g != 1:
-                raise Exception("modular inverse does not exist")
-            else:
-                return x % m
-        else:
-            return pow(a, -1, m)
+        return pow(a, -1, m)
 
     @staticmethod
     def _generate_d(p, q, e, n):
