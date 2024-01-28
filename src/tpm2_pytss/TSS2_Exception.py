@@ -1,5 +1,9 @@
 from ._libtpm2_pytss import lib, ffi
-from typing import Union
+from typing import Union, TYPE_CHECKING
+
+
+if TYPE_CHECKING:
+    from .constants import TSS2_RC, TPM2_RC
 
 
 class TSS2_Exception(RuntimeError):
@@ -25,7 +29,7 @@ class TSS2_Exception(RuntimeError):
         else:
             self._error = self._rc
 
-    def _parse_fmt1(self):
+    def _parse_fmt1(self) -> None:
         self._error = lib.TPM2_RC_FMT1 + (self.rc & 0x3F)
 
         if self.rc & lib.TPM2_RC_P:
@@ -36,31 +40,31 @@ class TSS2_Exception(RuntimeError):
             self._handle = (self.rc & lib.TPM2_RC_N_MASK) >> 8
 
     @property
-    def rc(self):
+    def rc(self) -> int:
         """int: The return code from the API call."""
         return self._rc
 
     @property
-    def handle(self):
+    def handle(self) -> int:
         """int: The handle related to the error, 0 if not related to any handle."""
         return self._handle
 
     @property
-    def parameter(self):
+    def parameter(self) -> int:
         """int: The parameter related to the error, 0 if not related to any parameter."""
         return self._parameter
 
     @property
-    def session(self):
+    def session(self) -> int:
         """int: The session related to the error, 0 if not related to any session."""
         return self._session
 
     @property
-    def error(self):
+    def error(self) -> int:
         """int: The error with handle, parameter and session stripped."""
         return self._error
 
     @property
-    def fmt1(self):
+    def fmt1(self) -> bool:
         """bool: True if the error is related to a handle, parameter or session """
         return bool(self._rc & lib.TPM2_RC_FMT1)

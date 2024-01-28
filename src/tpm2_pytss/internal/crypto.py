@@ -20,12 +20,25 @@ from cryptography.x509 import load_pem_x509_certificate, load_der_x509_certifica
 from cryptography.hazmat.primitives.kdf.kbkdf import CounterLocation, KBKDFHMAC, Mode
 from cryptography.hazmat.primitives.kdf.concatkdf import ConcatKDFHash
 from cryptography.hazmat.primitives.ciphers.algorithms import AES, Camellia
-from cryptography.hazmat.primitives.ciphers import modes, Cipher, CipherAlgorithm
+from cryptography.hazmat.primitives.ciphers import modes, Cipher
 from cryptography.hazmat.backends import default_backend
 from cryptography.exceptions import UnsupportedAlgorithm, InvalidSignature
-from typing import Tuple, Type
+from typing import Tuple, Type, Any, Union, Optional, TYPE_CHECKING
 import secrets
 import sys
+
+
+if TYPE_CHECKING:
+    from ..types import (
+        TPMT_PUBLIC,
+        TPMT_SIGNATURE,
+        TPMT_SYM_DEF,
+        TPMT_SENSITIVE,
+        TPMS_NV_PUBLIC,
+        TPM2B_PUBLIC,
+        TPM2B_SIMPLE_OBJECT,
+    )
+
 
 _curvetable = (
     (TPM2_ECC.NIST_P192, ec.SECP192R1),
@@ -35,7 +48,7 @@ _curvetable = (
     (TPM2_ECC.NIST_P521, ec.SECP521R1),
 )
 
-_digesttable = (
+_digesttable: Tuple[Tuple[TPM2_ALG, Type[hashes.HashAlgorithm]], ...] = (
     (TPM2_ALG.SHA1, hashes.SHA1),
     (TPM2_ALG.SHA256, hashes.SHA256),
     (TPM2_ALG.SHA384, hashes.SHA384),
@@ -48,55 +61,68 @@ _digesttable = (
 if hasattr(hashes, "SM3"):
     _digesttable += ((TPM2_ALG.SM3_256, hashes.SM3),)
 
-_algtable = (
+_symtable: Tuple[
+    Tuple[TPM2_ALG, Union[Type[AES], Type[Camellia], Type["SM4"]]], ...
+] = (
     (TPM2_ALG.AES, AES),
     (TPM2_ALG.CAMELLIA, Camellia),
-    (TPM2_ALG.CFB, modes.CFB),
 )
+
+_modetable = ((TPM2_ALG.CFB, modes.CFB),)
 
 try:
     from cryptography.hazmat.primitives.ciphers.algorithms import SM4
 
-    _algtable += ((TPM2_ALG.SM4, SM4),)
+    _symtable += ((TPM2_ALG.SM4, SM4),)
 except ImportError:
     # SM4 not implemented by cryptography package, ignore, no SM4 support.
     pass
 
 
-def _get_curveid(curve):
+def _get_curveid(curve: ec.EllipticCurve) -> Optional[TPM2_ECC]:
     for (algid, c) in _curvetable:
         if isinstance(curve, c):
             return algid
     return None
 
 
-def _get_curve(curveid):
+def _get_curve(curveid: TPM2_ECC) -> Optional[Type[ec.EllipticCurve]]:
     for (algid, c) in _curvetable:
         if algid == curveid:
             return c
     return None
 
 
-def _get_digest(digestid):
+def _get_digest(digestid: TPM2_ALG) -> Optional[Type[hashes.HashAlgorithm]]:
     for (algid, d) in _digesttable:
         if algid == digestid:
             return d
     return None
 
 
-def _get_alg(alg):
-    for (algid, a) in _algtable:
+def _get_symmetric(
+    alg: TPM2_ALG,
+) -> Optional[Union[Type[AES], Type[Camellia], Type["SM4"]]]:
+    for (algid, a) in _symtable:
         if algid == alg:
             return a
     return None
 
 
-def _int_to_buffer(i, b):
+def _get_symmetric_mode(alg: TPM2_ALG) -> Optional[Type[modes.CFB]]:
+    for (algid, a) in _modetable:
+        if algid == alg:
+            return a
+    return None
+
+
+def _int_to_buffer(i: int, b: "TPM2B_SIMPLE_OBJECT") -> None:
     s = ceil(i.bit_length() / 8)
     b.buffer = i.to_bytes(length=s, byteorder="big")
 
 
-def key_from_encoding(data, password=None):
+def key_from_encoding(data: bytes, password: Optional[bytes] = None) -> Any:
+    key: Any
     try:
         cert = load_pem_x509_certificate(data, backend=default_backend())
         key = cert.public_key()
@@ -140,30 +166,33 @@ def key_from_encoding(data, password=None):
     raise ValueError("Unsupported key format")
 
 
-def _public_from_encoding(data, obj, password=None):
+def _public_from_encoding(
+    data: bytes, obj: "TPMT_PUBLIC", password: Optional[bytes] = None
+) -> None:
     key = key_from_encoding(data, password)
-    nums = key.public_numbers()
     if isinstance(key, rsa.RSAPublicKey):
+        rsanums = key.public_numbers()
         obj.type = TPM2_ALG.RSA
         obj.parameters.rsaDetail.keyBits = key.key_size
-        _int_to_buffer(nums.n, obj.unique.rsa)
-        if nums.e != 65537:
-            obj.parameters.rsaDetail.exponent = nums.e
+        _int_to_buffer(rsanums.n, obj.unique.rsa)
+        if rsanums.e != 65537:
+            obj.parameters.rsaDetail.exponent = rsanums.e
         else:
             obj.parameters.rsaDetail.exponent = 0
     elif isinstance(key, ec.EllipticCurvePublicKey):
+        ecnums = key.public_numbers()
         obj.type = TPM2_ALG.ECC
         curveid = _get_curveid(key.curve)
         if curveid is None:
             raise ValueError(f"unsupported curve: {key.curve.name}")
         obj.parameters.eccDetail.curveID = curveid
-        _int_to_buffer(nums.x, obj.unique.ecc.x)
-        _int_to_buffer(nums.y, obj.unique.ecc.y)
+        _int_to_buffer(ecnums.x, obj.unique.ecc.x)
+        _int_to_buffer(ecnums.y, obj.unique.ecc.y)
     else:
         raise ValueError(f"unsupported key type: {key.__class__.__name__}")
 
 
-def private_key_from_encoding(data, password=None):
+def private_key_from_encoding(data: bytes, password: Optional[bytes] = None) -> Any:
     try:
         key = load_pem_private_key(data, password=password, backend=default_backend())
         return key
@@ -183,7 +212,9 @@ def private_key_from_encoding(data, password=None):
     raise ValueError("Unsupported key format")
 
 
-def _private_from_encoding(data, obj, password=None):
+def _private_from_encoding(
+    data: bytes, obj: "TPMT_SENSITIVE", password: Optional[bytes] = None
+) -> None:
     key = private_key_from_encoding(data, password)
     nums = key.private_numbers()
     if isinstance(key, rsa.RSAPrivateKey):
@@ -196,31 +227,32 @@ def _private_from_encoding(data, obj, password=None):
         raise ValueError(f"unsupported key type: {key.__class__.__name__}")
 
 
-def public_to_key(obj):
-    key = None
+def public_to_key(
+    obj: "TPMT_PUBLIC",
+) -> Union[rsa.RSAPublicKey, ec.EllipticCurvePublicKey]:
     if obj.type == TPM2_ALG.RSA:
         b = obj.unique.rsa.buffer
         n = int.from_bytes(b, byteorder="big")
         e = obj.parameters.rsaDetail.exponent
         if e == 0:
             e = 65537
-        nums = rsa.RSAPublicNumbers(e, n)
-        key = nums.public_key(backend=default_backend())
+        rsanums = rsa.RSAPublicNumbers(e, n)
+        rsakey = rsanums.public_key(backend=default_backend())
+        return rsakey
     elif obj.type == TPM2_ALG.ECC:
         curve = _get_curve(obj.parameters.eccDetail.curveID)
         if curve is None:
             raise ValueError(f"unsupported curve: {obj.parameters.eccDetail.curveID}")
         x = int.from_bytes(obj.unique.ecc.x, byteorder="big")
         y = int.from_bytes(obj.unique.ecc.y, byteorder="big")
-        nums = ec.EllipticCurvePublicNumbers(x, y, curve())
-        key = nums.public_key(backend=default_backend())
-    else:
-        raise ValueError(f"unsupported key type: {obj.type}")
+        ecnums = ec.EllipticCurvePublicNumbers(x, y, curve())
+        eckey = ecnums.public_key(backend=default_backend())
+        return eckey
 
-    return key
+    raise ValueError(f"unsupported key type: {obj.type}")
 
 
-class _MyRSAPrivateNumbers(rsa.RSAPrivateNumbers):
+class _MyRSAPrivateNumbers:
     def __init__(self, p: int, n: int, e: int, pubnums: rsa.RSAPublicNumbers):
 
         q = n // p
@@ -231,7 +263,12 @@ class _MyRSAPrivateNumbers(rsa.RSAPrivateNumbers):
         dmq1 = rsa.rsa_crt_dmq1(d, q)
         iqmp = rsa.rsa_crt_iqmp(p, q)
 
-        super().__init__(p, q, d, dmp1, dmq1, iqmp, pubnums)
+        self._private_numbers = rsa.RSAPrivateNumbers(
+            p, q, d, dmp1, dmq1, iqmp, pubnums
+        )
+
+    def private_key(self, *args: Any, **kwargs: Any) -> rsa.RSAPrivateKey:
+        return self._private_numbers.private_key(*args, **kwargs)
 
     @staticmethod
     def _xgcd(a: int, b: int) -> Tuple[int, int, int]:
@@ -250,19 +287,11 @@ class _MyRSAPrivateNumbers(rsa.RSAPrivateNumbers):
     # - https://en.wikibooks.org/wiki/Algorithm_Implementation/Mathematics/Extended_Euclidean_algorithm#Iterative_algorithm_3
     #
     @staticmethod
-    def _modinv(a, m):
-
-        if sys.version_info < (3, 8):
-            g, x, y = _MyRSAPrivateNumbers._xgcd(a, m)
-            if g != 1:
-                raise Exception("modular inverse does not exist")
-            else:
-                return x % m
-        else:
-            return pow(a, -1, m)
+    def _modinv(a: int, m: int) -> int:
+        return pow(a, -1, m)
 
     @staticmethod
-    def _generate_d(p, q, e, n):
+    def _generate_d(p: int, q: int, e: int, n: int) -> int:
 
         # P most always be larger so we don't go negative
         if p < q:
@@ -274,8 +303,9 @@ class _MyRSAPrivateNumbers(rsa.RSAPrivateNumbers):
         return d
 
 
-def private_to_key(private: "types.TPMT_SENSITIVE", public: "types.TPMT_PUBLIC"):
-    key = None
+def private_to_key(
+    private: "TPMT_SENSITIVE", public: "TPMT_PUBLIC"
+) -> Union[rsa.RSAPrivateKey, ec.EllipticCurvePrivateKey]:
     if private.sensitiveType == TPM2_ALG.RSA:
 
         p = int.from_bytes(bytes(private.sensitive.rsa), byteorder="big")
@@ -286,9 +316,10 @@ def private_to_key(private: "types.TPMT_SENSITIVE", public: "types.TPMT_PUBLIC")
             else 65537
         )
 
-        key = _MyRSAPrivateNumbers(p, n, e, rsa.RSAPublicNumbers(e, n)).private_key(
+        rsakey = _MyRSAPrivateNumbers(p, n, e, rsa.RSAPublicNumbers(e, n)).private_key(
             backend=default_backend()
         )
+        return rsakey
     elif private.sensitiveType == TPM2_ALG.ECC:
 
         curve = _get_curve(public.parameters.eccDetail.curveID)
@@ -301,16 +332,15 @@ def private_to_key(private: "types.TPMT_SENSITIVE", public: "types.TPMT_PUBLIC")
         x = int.from_bytes(bytes(public.unique.ecc.x), byteorder="big")
         y = int.from_bytes(bytes(public.unique.ecc.y), byteorder="big")
 
-        key = ec.EllipticCurvePrivateNumbers(
+        eckey = ec.EllipticCurvePrivateNumbers(
             p, ec.EllipticCurvePublicNumbers(x, y, curve())
         ).private_key(backend=default_backend())
-    else:
-        raise ValueError(f"unsupported key type: {private.sensitiveType}")
+        return eckey
 
-    return key
+    raise ValueError(f"unsupported key type: {private.sensitiveType}")
 
 
-def _public_to_pem(obj, encoding="pem"):
+def _public_to_pem(obj: "TPMT_PUBLIC", encoding: str = "pem") -> bytes:
     encoding = encoding.lower()
     key = public_to_key(obj)
     if encoding == "pem":
@@ -323,7 +353,7 @@ def _public_to_pem(obj, encoding="pem"):
         raise ValueError(f"unsupported encoding: {encoding}")
 
 
-def _getname(obj):
+def _getname(obj: Union["TPMT_PUBLIC", "TPMS_NV_PUBLIC"]) -> bytes:
     dt = _get_digest(obj.nameAlg)
     if dt is None:
         raise ValueError(f"unsupported digest algorithm: {obj.nameAlg}")
@@ -336,7 +366,14 @@ def _getname(obj):
     return name
 
 
-def _kdfa(hashAlg, key, label, contextU, contextV, bits):
+def _kdfa(
+    hashAlg: "TPM2_ALG",
+    key: bytes,
+    label: bytes,
+    contextU: bytes,
+    contextV: bytes,
+    bits: int,
+) -> bytes:
     halg = _get_digest(hashAlg)
     if halg is None:
         raise ValueError(f"unsupported digest algorithm: {hashAlg}")
@@ -359,7 +396,14 @@ def _kdfa(hashAlg, key, label, contextU, contextV, bits):
     return kdf.derive(key)
 
 
-def kdfe(hashAlg, z, use, partyuinfo, partyvinfo, bits):
+def kdfe(
+    hashAlg: TPM2_ALG,
+    z: bytes,
+    use: bytes,
+    partyuinfo: bytes,
+    partyvinfo: bytes,
+    bits: int,
+) -> bytes:
     halg = _get_digest(hashAlg)
     if halg is None:
         raise ValueError(f"unsupported digest algorithm: {hashAlg}")
@@ -373,18 +417,20 @@ def kdfe(hashAlg, z, use, partyuinfo, partyvinfo, bits):
     return kdf.derive(z)
 
 
-def _symdef_to_crypt(symdef):
-    alg = _get_alg(symdef.algorithm)
+def _symdef_to_crypt(
+    symdef: "TPMT_SYM_DEF",
+) -> Tuple[Union[Type[AES], Type[Camellia], Type["SM4"]], Type[modes.CFB], int]:
+    alg = _get_symmetric(symdef.algorithm)
     if alg is None:
         raise ValueError(f"unsupported symmetric algorithm {symdef.algorithm}")
-    mode = _get_alg(symdef.mode.sym)
+    mode = _get_symmetric_mode(symdef.mode.sym)
     if mode is None:
         raise ValueError(f"unsupported symmetric mode {symdef.mode.sym}")
     bits = symdef.keyBits.sym
     return (alg, mode, bits)
 
 
-def _calculate_sym_unique(nameAlg, secret, seed):
+def _calculate_sym_unique(nameAlg: TPM2_ALG, secret: bytes, seed: bytes) -> bytes:
     dt = _get_digest(nameAlg)
     if dt is None:
         raise ValueError(f"unsupported digest algorithm: {nameAlg}")
@@ -394,15 +440,15 @@ def _calculate_sym_unique(nameAlg, secret, seed):
     return d.finalize()
 
 
-def _get_digest_size(alg):
+def _get_digest_size(alg: TPM2_ALG) -> int:
     dt = _get_digest(alg)
     if dt is None:
         raise ValueError(f"unsupported digest algorithm: {alg}")
 
-    return dt.digest_size
+    return dt().digest_size
 
 
-def _get_signature_bytes(sig):
+def _get_signature_bytes(sig: "TPMT_SIGNATURE") -> bytes:
     if sig.sigAlg in (TPM2_ALG.RSAPSS, TPM2_ALG.RSASSA):
         rb = bytes(sig.signature.rsapss.sig)
     elif sig.sigAlg == TPM2_ALG.ECDSA:
@@ -417,17 +463,20 @@ def _get_signature_bytes(sig):
     return rb
 
 
-def verify_signature_rsa(signature, key, data):
+def verify_signature_rsa(
+    signature: "TPMT_SIGNATURE", key: rsa.RSAPublicKey, data: bytes
+) -> None:
     dt = _get_digest(signature.signature.any.hashAlg)
     if dt is None:
         raise ValueError(
             f"unsupported digest algorithm: {signature.signature.rsapss.hash}"
         )
     mpad = None
+    pad: Union[padding.PKCS1v15, padding.PSS]
     if signature.sigAlg == TPM2_ALG.RSASSA:
         pad = padding.PKCS1v15()
     elif signature.sigAlg == TPM2_ALG.RSAPSS:
-        pad = padding.PSS(mgf=padding.MGF1(dt()), salt_length=dt.digest_size)
+        pad = padding.PSS(mgf=padding.MGF1(dt()), salt_length=dt().digest_size)
         mpad = padding.PSS(mgf=padding.MGF1(dt()), salt_length=padding.PSS.MAX_LENGTH)
     else:
         raise ValueError(f"unsupported RSA signature algorithm: {signature.sigAlg}")
@@ -442,7 +491,9 @@ def verify_signature_rsa(signature, key, data):
             raise
 
 
-def verify_signature_ecc(signature, key, data):
+def verify_signature_ecc(
+    signature: "TPMT_SIGNATURE", key: ec.EllipticCurvePublicKey, data: bytes
+) -> None:
     dt = _get_digest(signature.signature.any.hashAlg)
     if dt is None:
         raise ValueError(
@@ -454,7 +505,7 @@ def verify_signature_ecc(signature, key, data):
     key.verify(sig, data, ec.ECDSA(dt()))
 
 
-def verify_signature_hmac(signature, key, data):
+def verify_signature_hmac(signature: "TPMT_SIGNATURE", key: bytes, data: bytes) -> None:
     dt = _get_digest(signature.signature.hmac.hashAlg)
     if dt is None:
         raise ValueError(
@@ -469,24 +520,31 @@ def verify_signature_hmac(signature, key, data):
     h.verify(sig)
 
 
-def _verify_signature(signature, key, data):
+def _verify_signature(
+    signature: "TPMT_SIGNATURE",
+    key: Union["TPMT_PUBLIC", "TPM2B_PUBLIC", bytes],
+    data: bytes,
+) -> None:
     if hasattr(key, "publicArea"):
-        key = key.publicArea
-    kt = getattr(key, "type", None)
+        pa = key.publicArea
+    else:
+        pa = key
+    kt = getattr(pa, "type", None)
+    pkey: Any = key
     if kt in (TPM2_ALG.RSA, TPM2_ALG.ECC):
-        key = public_to_key(key)
+        pkey = public_to_key(pa)
     if signature.sigAlg in (TPM2_ALG.RSASSA, TPM2_ALG.RSAPSS):
-        if not isinstance(key, rsa.RSAPublicKey):
+        if not isinstance(pkey, rsa.RSAPublicKey):
             raise ValueError(
-                f"bad key type for {signature.sigAlg}, expected RSA public key, got {key.__class__.__name__}"
+                f"bad key type for {signature.sigAlg}, expected RSA public key, got {pkey.__class__.__name__}"
             )
-        verify_signature_rsa(signature, key, data)
+        verify_signature_rsa(signature, pkey, data)
     elif signature.sigAlg == TPM2_ALG.ECDSA:
-        if not isinstance(key, ec.EllipticCurvePublicKey):
+        if not isinstance(pkey, ec.EllipticCurvePublicKey):
             raise ValueError(
-                f"bad key type for {signature.sigAlg}, expected ECC public key, got {key.__class__.__name__}"
+                f"bad key type for {signature.sigAlg}, expected ECC public key, got {pkey.__class__.__name__}"
             )
-        verify_signature_ecc(signature, key, data)
+        verify_signature_ecc(signature, pkey, data)
     elif signature.sigAlg == TPM2_ALG.HMAC:
         if not isinstance(key, bytes):
             raise ValueError(
@@ -498,12 +556,12 @@ def _verify_signature(signature, key, data):
 
 
 def _generate_rsa_seed(
-    key: rsa.RSAPublicKey, hashAlg: int, label: bytes
+    key: rsa.RSAPublicKey, hashAlg: TPM2_ALG, label: bytes
 ) -> Tuple[bytes, bytes]:
     halg = _get_digest(hashAlg)
     if halg is None:
         raise ValueError(f"unsupported digest algorithm {hashAlg}")
-    seed = secrets.token_bytes(halg.digest_size)
+    seed = secrets.token_bytes(halg().digest_size)
     mgf = padding.MGF1(halg())
     padd = padding.OAEP(mgf, halg(), label)
     enc_seed = key.encrypt(seed, padd)
@@ -511,7 +569,7 @@ def _generate_rsa_seed(
 
 
 def _generate_ecc_seed(
-    key: ec.EllipticCurvePublicKey, hashAlg: int, label: bytes
+    key: ec.EllipticCurvePublicKey, hashAlg: TPM2_ALG, label: bytes
 ) -> Tuple[bytes, bytes]:
     halg = _get_digest(hashAlg)
     if halg is None:
@@ -531,21 +589,22 @@ def _generate_ecc_seed(
     shared_key = ekey.exchange(ec.ECDH(), key)
     pubnum = key.public_numbers()
     xbytes = pubnum.x.to_bytes(plength, "big")
-    seed = kdfe(hashAlg, shared_key, label, exbytes, xbytes, halg.digest_size * 8)
+    seed = kdfe(hashAlg, shared_key, label, exbytes, xbytes, halg().digest_size * 8)
     return (seed, secret)
 
 
-def _generate_seed(public: "types.TPMT_PUBLIC", label: bytes) -> Tuple[bytes, bytes]:
+def _generate_seed(public: "TPMT_PUBLIC", label: bytes) -> Tuple[bytes, bytes]:
     key = public_to_key(public)
-    if public.type == TPM2_ALG.RSA:
+    if isinstance(key, rsa.RSAPublicKey):
         return _generate_rsa_seed(key, public.nameAlg, label)
-    elif public.type == TPM2_ALG.ECC:
+    elif isinstance(key, ec.EllipticCurvePublicKey):
         return _generate_ecc_seed(key, public.nameAlg, label)
-    else:
-        raise ValueError(f"unsupported seed algorithm {public.type}")
+    raise ValueError(f"unsupported seed algorithm {public.type}")
 
 
-def __rsa_secret_to_seed(key, hashAlg: int, label: bytes, outsymseed: bytes):
+def __rsa_secret_to_seed(
+    key: rsa.RSAPrivateKey, hashAlg: TPM2_ALG, label: bytes, outsymseed: bytes
+) -> bytes:
     halg = _get_digest(hashAlg)
     if halg is None:
         raise ValueError(f"unsupported digest algorithm {hashAlg}")
@@ -556,8 +615,8 @@ def __rsa_secret_to_seed(key, hashAlg: int, label: bytes, outsymseed: bytes):
 
 
 def __ecc_secret_to_seed(
-    key: ec.EllipticCurvePrivateKey, hashAlg: int, label: bytes, outsymseed: bytes
-) -> Tuple[bytes, bytes]:
+    key: ec.EllipticCurvePrivateKey, hashAlg: TPM2_ALG, label: bytes, outsymseed: bytes
+) -> bytes:
     halg = _get_digest(hashAlg)
     if halg is None:
         raise ValueError(f"unsupported digest algorithm {hashAlg}")
@@ -583,16 +642,17 @@ def __ecc_secret_to_seed(
 
     pubnum = key.public_key().public_numbers()
     xbytes = pubnum.x.to_bytes(key.key_size // 8, "big")
-    seed = kdfe(hashAlg, shared_key, label, exbytes, xbytes, halg.digest_size * 8)
+    seed = kdfe(hashAlg, shared_key, label, exbytes, xbytes, halg().digest_size * 8)
     return seed
 
 
 def _secret_to_seed(
-    private: "types.TPMT_SENSITIVE",
-    public: "types.TPMT_PUBLIC",
+    private: "TPMT_SENSITIVE",
+    public: "TPMT_PUBLIC",
     label: bytes,
-    outsymseed: bytes,
-):
+    outsymseed: Union[bytes, "TPM2B_SIMPLE_OBJECT"],
+) -> bytes:
+    outsymseed = bytes(outsymseed)
     key = private_to_key(private, public)
     if isinstance(key, rsa.RSAPrivateKey):
         return __rsa_secret_to_seed(key, public.nameAlg, label, outsymseed)
@@ -603,7 +663,7 @@ def _secret_to_seed(
 
 
 def _hmac(
-    halg: hashes.HashAlgorithm, hmackey: bytes, enc_cred: bytes, name: bytes
+    halg: Type[hashes.HashAlgorithm], hmackey: bytes, enc_cred: bytes, name: bytes
 ) -> bytes:
     h = HMAC(hmackey, halg(), backend=default_backend())
     h.update(enc_cred)
@@ -612,12 +672,12 @@ def _hmac(
 
 
 def _check_hmac(
-    halg: hashes.HashAlgorithm,
+    halg: Type[hashes.HashAlgorithm],
     hmackey: bytes,
     enc_cred: bytes,
     name: bytes,
     expected: bytes,
-):
+) -> None:
     h = HMAC(hmackey, halg(), backend=default_backend())
     h.update(enc_cred)
     h.update(name)
@@ -625,7 +685,10 @@ def _check_hmac(
 
 
 def _encrypt(
-    cipher: Type[CipherAlgorithm], mode: Type[modes.Mode], key: bytes, data: bytes
+    cipher: Union[Type[AES], Type[Camellia], Type["SM4"]],
+    mode: Type[modes.CFB],
+    key: bytes,
+    data: bytes,
 ) -> bytes:
     iv = len(key) * b"\x00"
     ci = cipher(key)
@@ -636,7 +699,10 @@ def _encrypt(
 
 
 def _decrypt(
-    cipher: Type[CipherAlgorithm], mode: Type[modes.Mode], key: bytes, data: bytes
+    cipher: Union[Type[AES], Type[Camellia], Type["SM4"]],
+    mode: Type[modes.CFB],
+    key: bytes,
+    data: bytes,
 ) -> bytes:
     iv = len(key) * b"\x00"
     ci = cipher(key)

@@ -3,10 +3,16 @@
 from ._libtpm2_pytss import lib, ffi
 from .TCTI import TCTI
 from .internal.utils import _chkrc
+from typing import Optional, Union, Type
+from types import TracebackType
 
 
 class TCTILdr(TCTI):
-    def __init__(self, name=None, conf=None):
+    def __init__(
+        self,
+        name: Optional[Union[bytes, ffi.CData, str]] = None,
+        conf: Optional[Union[bytes, ffi.CData, str]] = None,
+    ):
 
         self._ctx_pp = ffi.new("TSS2_TCTI_CONTEXT **")
 
@@ -29,21 +35,23 @@ class TCTILdr(TCTI):
         _chkrc(lib.Tss2_TctiLdr_Initialize_Ex(name, conf, self._ctx_pp))
         super().__init__(self._ctx_pp[0])
 
-        self._name = name.decode() if name else ""
-        self._conf = conf.decode() if conf else ""
+        self._name = name.decode() if isinstance(name, bytes) else ""
+        self._conf = conf.decode() if isinstance(conf, bytes) else ""
 
-    def __enter__(self):
+    def __enter__(self) -> "TCTILdr":
         return self
 
-    def __exit__(self, _type, value, traceback):
+    def __exit__(
+        self, _type: Type[Exception], value: Exception, traceback: TracebackType
+    ) -> None:
         self.close()
 
-    def close(self):
+    def close(self) -> None:
         lib.Tss2_TctiLdr_Finalize(self._ctx_pp)
         self._ctx = ffi.NULL
 
     @classmethod
-    def parse(cls, tcti_name_conf: str):
+    def parse(cls, tcti_name_conf: str) -> "TCTILdr":
 
         chunks = tcti_name_conf.split(":", 1)
         if len(chunks) > 2:
@@ -54,22 +62,22 @@ class TCTILdr(TCTI):
         return cls(name, conf)
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     @property
-    def conf(self):
+    def conf(self) -> str:
         return self._conf
 
     @property
-    def name_conf(self):
+    def name_conf(self) -> str:
         return f"{self.name}:{self.conf}" if self.conf else self.name
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name_conf
 
     @staticmethod
-    def is_available(name=None) -> bool:
+    def is_available(name: Optional[Union[ffi.CData, str, bytes]] = None) -> bool:
         """Lookup the TCTI and return its availability
 
         Returns:

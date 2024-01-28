@@ -1,10 +1,23 @@
 # SPDX-License-Identifier: BSD-2
 import logging
 import sys
-from typing import List
+from typing import (
+    List,
+    Optional,
+    Union,
+    TYPE_CHECKING,
+    Callable,
+    Any,
+    Dict,
+    Type,
+    Tuple,
+)
 
 from .._libtpm2_pytss import ffi, lib
 from ..TSS2_Exception import TSS2_Exception
+
+if TYPE_CHECKING:
+    from ..constants import TPM_FRIENDLY_INT
 
 try:
     from .versions import _versions
@@ -53,7 +66,7 @@ class TSS2Version:
         hunks = version.split(".")
         extra_data = version.split("-")[1:]
 
-        def handle_extra():
+        def handle_extra() -> None:
             nonlocal extra_data
             nonlocal commits
             nonlocal rc
@@ -93,7 +106,7 @@ class TSS2Version:
             else:
                 raise ValueError(f'Invalid version string, got: "{version}"')
 
-        def cleanse(xstr):
+        def cleanse(xstr: str) -> str:
             if "-" in xstr:
                 return xstr[: xstr.find("-")]
 
@@ -124,49 +137,60 @@ class TSS2Version:
             raise ValueError(f'Invalid version string, got: "{version}"')
 
         # Convert to int
-        major = int(major, 0).to_bytes(4, byteorder="big")
-        minor = int(minor, 0).to_bytes(4, byteorder="big")
-        patch = int(patch, 0).to_bytes(4, byteorder="big")
-        rc = int(rc, 0).to_bytes(4, byteorder="big")
-        commits = int(commits, 0).to_bytes(4, byteorder="big")
-        dirty = int(is_dirty).to_bytes(1, byteorder="big")
+        major_bytes = int(major, 0).to_bytes(4, byteorder="big")
+        minor_bytes = int(minor, 0).to_bytes(4, byteorder="big")
+        patch_bytes = int(patch, 0).to_bytes(4, byteorder="big")
+        rc_bytes = int(rc, 0).to_bytes(4, byteorder="big")
+        commits_bytes = int(commits, 0).to_bytes(4, byteorder="big")
+        dirty_bytes = int(is_dirty).to_bytes(1, byteorder="big")
 
         # TO make reasoning easy we lay out a big int where each field
         # can hold 4 bytes of data, except for dirty which is a byte
         # MAJOR : MINOR : PATCH : RC : COMMITS : DIRTY
-        concatenated = major + minor + patch + rc + commits + dirty
+        concatenated = (
+            major_bytes
+            + minor_bytes
+            + patch_bytes
+            + rc_bytes
+            + commits_bytes
+            + dirty_bytes
+        )
         v = int.from_bytes(concatenated, byteorder="big")
         self._value = v
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self._version
 
-    def __lt__(self, other):
+    def __lt__(self, other: Union["TSS2Version", int]) -> bool:
         x = other if isinstance(other, int) else other._value
         return self._value < x
 
-    def __lte__(self, other):
+    def __lte__(self, other: Union["TSS2Version", int]) -> bool:
         x = other if isinstance(other, int) else other._value
         return self._value <= x
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, (int, self.__class__)):
+            return False
         x = other if isinstance(other, int) else other._value
         return self._value == x
 
-    def __ne__(self, other):
+    def __ne__(self, other: object) -> bool:
+        if not isinstance(other, (int, self.__class__)):
+            return False
         x = other if isinstance(other, int) else other._value
         return self._value != x
 
-    def __ge__(self, other):
+    def __ge__(self, other: Union["TSS2Version", int]) -> bool:
         x = other if isinstance(other, int) else other._value
         return self._value >= x
 
-    def __gt__(self, other):
+    def __gt__(self, other: Union["TSS2Version", int]) -> bool:
         x = other if isinstance(other, int) else other._value
         return self._value > x
 
 
-def _chkrc(rc, acceptable=None):
+def _chkrc(rc: int, acceptable: Optional[Union[List[int], int]] = None) -> None:
     if acceptable is None:
         acceptable = []
     elif isinstance(acceptable, int):
@@ -176,7 +200,9 @@ def _chkrc(rc, acceptable=None):
         raise TSS2_Exception(rc)
 
 
-def _to_bytes_or_null(value, allow_null=True, encoding=None):
+def _to_bytes_or_null(
+    value: Union[None, bytes, str], allow_null: bool = True, encoding: str = "utf-8"
+) -> Union[bytes, ffi.CData]:
     """Convert to cdata input.
 
     None:  ffi.NULL (if allow_null == True)
@@ -199,7 +225,9 @@ def _to_bytes_or_null(value, allow_null=True, encoding=None):
 #### Utilities ####
 
 
-def _CLASS_INT_ATTRS_from_string(cls, str_value, fixup_map=None):
+def _CLASS_INT_ATTRS_from_string(
+    cls: object, str_value: str, fixup_map: Optional[Dict[str, str]] = None
+) -> int:
     """
     Given a class, lookup int attributes by name and return that attribute value.
     :param cls: The class to search.
@@ -218,18 +246,20 @@ def _CLASS_INT_ATTRS_from_string(cls, str_value, fixup_map=None):
     return friendly[str_value.upper()]
 
 
-def _cpointer_to_ctype(x):
+def _cpointer_to_ctype(x: ffi.CData) -> ffi.CType:
     tipe = ffi.typeof(x)
     if tipe.kind == "pointer":
         tipe = tipe.item
     return tipe
 
 
-def _fixup_cdata_kwargs(this, _cdata, kwargs):
+def _fixup_cdata_kwargs(
+    this: Any, _cdata: Any, kwargs: Dict[str, Any]
+) -> Tuple[ffi.CData, Dict[str, Any]]:
 
     # folks may call this routine without a keyword argument which means it may
     # end up in _cdata, so we want to try and work this out
-    unknown = None
+    unknown: Optional[ffi.CData] = None
     try:
         # is _cdata actual ffi data?
         ffi.typeof(_cdata)
@@ -254,6 +284,8 @@ def _fixup_cdata_kwargs(this, _cdata, kwargs):
         # ignore the field that is size or count, and get the one for the data
         size_field_name = "size" if "TPM2B_" in tipe.cname else "count"
         field_name = next((v[0] for v in tipe.fields if v[0] != size_field_name), None)
+        if field_name is None:
+            raise AttributeError("No non size/could field found")
 
         if len(kwargs) != 0:
             raise RuntimeError(
@@ -277,18 +309,20 @@ def _fixup_cdata_kwargs(this, _cdata, kwargs):
     return (_cdata, kwargs)
 
 
-def _ref_parent(data, parent):
+def _ref_parent(data: ffi.CData, parent: ffi.CData) -> ffi.CData:
     tipe = ffi.typeof(parent)
     if tipe.kind != "pointer":
         return data
 
-    def deconstructor(ptr):
+    def deconstructor(ptr: ffi.CData) -> None:
         parent
 
     return ffi.gc(data, deconstructor)
 
 
-def _convert_to_python_native(global_map, data, parent=None):
+def _convert_to_python_native(
+    global_map: Dict[str, Any], data: ffi.CData, parent: Optional[ffi.CData] = None
+) -> Any:
 
     if not isinstance(data, ffi.CData):
         return data
@@ -314,7 +348,7 @@ def _convert_to_python_native(global_map, data, parent=None):
     return obj
 
 
-def _fixup_classname(tipe):
+def _fixup_classname(tipe: ffi.CType) -> str:
     # Some versions of tpm2-tss had anonymous structs, so the kind will be struct
     # but the name will not contain it
     if tipe.cname.startswith(tipe.kind):
@@ -323,15 +357,17 @@ def _fixup_classname(tipe):
     return tipe.cname
 
 
-def _mock_bail():
+def _mock_bail() -> bool:
     return __MOCK__
 
 
-def _get_dptr(dptr, free_func):
+def _get_dptr(dptr: ffi.CData, free_func: Callable[[ffi.CData], None]) -> ffi.CData:
     return ffi.gc(dptr[0], free_func)
 
 
-def _check_friendly_int(friendly, varname, clazz):
+def _check_friendly_int(
+    friendly: int, varname: str, clazz: Type["TPM_FRIENDLY_INT"]
+) -> None:
 
     if not isinstance(friendly, int):
         raise TypeError(f"expected {varname} to be type int, got {type(friendly)}")
@@ -343,7 +379,9 @@ def _check_friendly_int(friendly, varname, clazz):
 
 
 def is_bug_fixed(
-    fixed_in=None, backports: List[str] = None, lib: str = "tss2-fapi"
+    fixed_in: Optional[str] = None,
+    backports: Optional[List[str]] = None,
+    lib: str = "tss2-fapi",
 ) -> bool:
     """Use pkg-config to determine if a bug was fixed in the currently installed tpm2-tss version."""
     if fixed_in and _lib_version_atleast(lib, fixed_in):
@@ -368,9 +406,9 @@ def is_bug_fixed(
 
 
 def _check_bug_fixed(
-    details,
-    fixed_in=None,
-    backports: List[str] = None,
+    details: str,
+    fixed_in: Optional[str] = None,
+    backports: Optional[List[str]] = None,
     lib: str = "tss2-fapi",
     error: bool = False,
 ) -> None:
@@ -385,7 +423,7 @@ def _check_bug_fixed(
         logger.warning(message)
 
 
-def _lib_version_atleast(tss2_lib, version):
+def _lib_version_atleast(tss2_lib: str, version: str) -> bool:
     if tss2_lib not in _versions:
         return False
 
