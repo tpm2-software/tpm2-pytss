@@ -13,7 +13,7 @@ from cryptography.hazmat.primitives.asymmetric.padding import PSS
 
 from tpm2_pytss import *
 
-from tpm2_pytss.internal.utils import is_bug_fixed
+from tpm2_pytss.internal.utils import is_bug_fixed, _lib_version_atleast
 
 from .TSS2_BaseTest import TpmSimulator
 from tpm2_pytss.TSS2_Exception import TSS2_Exception
@@ -614,7 +614,8 @@ class Common:
         self.fapi.sign(key_path, b"\x22" * 32)
 
     @pytest.mark.skipif(
-        not is_bug_fixed(fixed_in="3.2", backports=["2.4.7", "3.0.5", "3.1.1"]),
+        _lib_version_atleast("tss2-fapi", "4.0.1-170")
+        or not is_bug_fixed(fixed_in="3.2", backports=["2.4.7", "3.0.5", "3.1.1"]),
         reason="tpm2-tss bug, see #2084",
     )
     def test_write_authorize_nv(self, esys):
@@ -661,7 +662,8 @@ class Common:
             self.fapi.quote(path=key_path, pcrs=[7, 9])
 
     @pytest.mark.skipif(
-        not is_bug_fixed(fixed_in="3.2", backports=["2.4.7", "3.0.5", "3.1.1"]),
+        _lib_version_atleast("tss2-fapi", "4.0.1-170")
+        or not is_bug_fixed(fixed_in="3.2", backports=["2.4.7", "3.0.5", "3.1.1"]),
         reason="tpm2-tss bug, see #2084",
     )
     def test_authorize_policy(self, sign_key):
@@ -726,7 +728,9 @@ class Common:
             self.fapi.quote(path=key_path, pcrs=[7, 9])
 
     @pytest.mark.skipif(
-        not is_bug_fixed(fixed_in="3.2"), reason="tpm2-tss bug, see #2080"
+        _lib_version_atleast("tss2-fapi", "4.0.1-170")
+        or not is_bug_fixed(fixed_in="3.2"),
+        reason="tpm2-tss bug, see #2080",
     )
     def test_policy_signed(self, cryptography_key):
         # create external signing key used by the signing authority external to the TPM
@@ -788,6 +792,10 @@ class Common:
         with pytest.raises(TSS2_Exception):
             self.fapi.sign(path=key_path, digest=b"\x11" * 32)
 
+    @pytest.mark.skipif(
+        _lib_version_atleast("tss2-fapi", "4.0.1-170"),
+        reason="issue on master branch.",
+    )
     def test_policy_branched(self):
         pcr_index = 15
         pcr_data = b"ABCDEF"
@@ -905,7 +913,8 @@ class Common:
         self.fapi.delete(path=nv_path)
 
     @pytest.mark.skipif(
-        not is_bug_fixed(fixed_in="3.2", backports=["2.4.7", "3.0.5", "3.1.1"]),
+        _lib_version_atleast("tss2-fapi", "4.0.1-170")
+        or not is_bug_fixed(fixed_in="3.2", backports=["2.4.7", "3.0.5", "3.1.1"]),
         reason="tpm2-tss bug, see #2089",
     )
     def test_policy_action(self):
