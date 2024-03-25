@@ -7,7 +7,7 @@ Project details on release processes and contributing.
     :maxdepth: 1
 
     Release Process <release>
-	Contributing <contributing>
+    Contributing <contributing>
     Maintainers <maintainers>
     Code of Conduct <CODE_OF_CONDUCT>
     Security Practices <SECURITY>
