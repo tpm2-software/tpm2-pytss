@@ -1406,7 +1406,7 @@ class ToolsTest(TSS2_BaseTest):
     def test_tools_decode_tpm2b_name(self):
         if not self.has_tools:
             self.skipTest("tools not in path")
-        key = ec.generate_private_key(ec.SECP256R1).public_key()
+        key = ec.generate_private_key(ec.SECP256R1()).public_key()
         kb = key.public_bytes(
             serialization.Encoding.PEM, serialization.PublicFormat.SubjectPublicKeyInfo
         )

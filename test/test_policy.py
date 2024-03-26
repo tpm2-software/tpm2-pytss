@@ -47,7 +47,7 @@ class TestPolicy(TSS2_EsapiTest):
         super().setUp()
         self._has_secp192r1 = True
         try:
-            ec.generate_private_key(ec.SECP192R1)
+            ec.generate_private_key(ec.SECP192R1())
         except Exception:
             self._has_secp192r1 = False
 
