@@ -25,6 +25,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.exceptions import UnsupportedAlgorithm, InvalidSignature
 from typing import Tuple, Type, Any
 import secrets
+import inspect
 import sys
 
 _curvetable = (
@@ -86,7 +87,9 @@ def _get_digest(digestid):
 
 def _get_pyca_digest(digest_type):
     for (algid, d) in _digesttable:
-        if issubclass(digest_type, d):
+        if inspect.isclass(digest_type) and issubclass(digest_type, d):
+            return algid
+        elif isinstance(digest_type, d):
             return algid
     return None
 
