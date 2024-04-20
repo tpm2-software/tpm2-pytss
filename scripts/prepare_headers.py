@@ -32,6 +32,7 @@ def remove_common_guards(s):
 
     # Restructure #defines with ...
     s = re.sub("(#define [A-Za-z0-9_]+) +\(\(.*?\) \(.*?\)\)", "\g<1>...", s)
+    s = re.sub("(#define [A-Za-z0-9_]+) +\(\(\(.*?\) .*\)", "\g<1>...", s)
     s = re.sub("(#define [A-Za-z0-9_]+) +\(\(.*?\).*?\) ", "\g<1>...", s)
     s = re.sub(
         "(#define [A-Za-z0-9_]+) .*\n.*?.*\)\)", "\g<1>...", s, flags=re.MULTILINE
