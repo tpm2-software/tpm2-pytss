@@ -8,6 +8,7 @@ from .TSS2_BaseTest import TSS2_EsapiTest
 from base64 import b64decode
 from hashlib import sha256, sha384
 from cryptography.hazmat.primitives.serialization import load_pem_public_key
+from cryptography.exceptions import UnsupportedAlgorithm
 
 rsa_private_key = b"""
 -----BEGIN RSA PRIVATE KEY-----
@@ -206,7 +207,7 @@ class CryptoTest(TSS2_EsapiTest):
         self._has_sect163r2 = True
         try:
             load_pem_public_key(ecc_bad_curve)
-        except ValueError:
+        except (ValueError, UnsupportedAlgorithm):
             self._has_sect163r2 = False
 
     def test_public_from_pem_rsa(self):
