@@ -1295,7 +1295,7 @@ class TypesTest(unittest.TestCase):
 
         x = TPMS_SENSITIVE_CREATE(userAuth="password")
         p = str(x.userAuth)
-        self.assertEqual(p, binascii.hexlify("password".encode()).decode())
+        self.assertEqual(p, binascii.hexlify(b"password").decode())
 
     def test_TPM2B_SIMPLE_OBJECT(self):
         bob = b"bunchofbytes"

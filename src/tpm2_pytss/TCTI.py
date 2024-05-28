@@ -10,7 +10,7 @@ import os
 from typing import Optional, Tuple, Union
 
 
-class PollData(object):
+class PollData:
     """Initialize a PollData object with OS specific details.
 
     Initialize a PollData object that holds all OS specific state and metadata information

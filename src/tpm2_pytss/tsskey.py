@@ -108,7 +108,7 @@ class _BooleanOne(Boolean):
             self._trailer = b""
 
 
-class TSSPrivKey(object):
+class TSSPrivKey:
     """TSSPrivKey is class to create/load keys for/from tpm2-tss-engine / tpm2-openssl.
 
     Note:
