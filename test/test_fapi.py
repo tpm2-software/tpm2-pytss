@@ -961,6 +961,22 @@ class Common:
         with pytest.raises(TSS2_Exception):
             self.fapi.sign(path=key_path, digest=b"\x11" * 32)
 
+    def test_nv_create_double_ok(self):
+        nv_path = f"/nv/Owner/nv_{random_uid()}"
+        created = self.fapi.create_nv(path=nv_path, size=10)
+        assert created == True
+
+        created = self.fapi.create_nv(path=nv_path, size=10, exists_ok=True)
+        assert created == False
+
+    def test_nv_create_double_fail(self):
+        nv_path = f"/nv/Owner/nv_{random_uid()}"
+        created = self.fapi.create_nv(path=nv_path, size=10)
+        assert created == True
+
+        with pytest.raises(TSS2_Exception):
+            self.fapi.create_nv(path=nv_path, size=10)
+
 
 @pytest.mark.usefixtures("init_fapi_ecc")
 class TestFapiECC(Common):
