@@ -1110,7 +1110,8 @@ class FAPI:
         type_: Optional[Union[bytes, str]] = None,
         policy_path: Optional[Union[bytes, str]] = None,
         auth_value: Optional[Union[bytes, str]] = None,
-    ) -> None:
+        exists_ok: bool = False,
+    ) -> bool:
         """Create non-volatile (NV) storage on the TPM.
 
         Args:
@@ -1119,16 +1120,23 @@ class FAPI:
             type_ (bytes or str): Type of the storage area. A combination of `bitfield`, `counter`, `pcr`, `system`, `noda`. Defaults to None.
             policy_path (bytes or str): The path to the policy which will be associated with the storage area. Defaults to None.
             auth_value (bytes or str): Password to protect the new storage area. Defaults to None.
+            exists_ok (bool): Do not throw a TSS2_Exception if a storage area with the given path already exists. Defaults to False.
 
         Raises:
             TSS2_Exception: If Fapi returned an error code.
+
+        Returns:
+            bool: True if the storage area was created. False otherwise.
         """
         path = _to_bytes_or_null(path)
         type_ = _to_bytes_or_null(type_)
         policy_path = _to_bytes_or_null(policy_path)
         auth_value = _to_bytes_or_null(auth_value)
         ret = lib.Fapi_CreateNv(self._ctx, path, type_, size, policy_path, auth_value)
-        _chkrc(ret)
+        _chkrc(
+            ret, acceptable=lib.TSS2_FAPI_RC_PATH_ALREADY_EXISTS if exists_ok else None
+        )
+        return ret == lib.TPM2_RC_SUCCESS
 
     def nv_read(self, path: Union[bytes, str]) -> Tuple[bytes, str]:
         """Read from non-volatile (NV) TPM storage.
