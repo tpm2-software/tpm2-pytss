@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 2.3.0-rc0 - 2024-06-07
+### Fixed
+- Fix builds for tpm2-tss > 4.0.1.
+- Support newer releases of the cryptography package.
+
+### Added
+- Add module to use TPM keys with the cryptography package.
+- Support for exists_ok for FAPI.create_nv, behaves the same as for FAPI.create_key.
+
+### Changed
+- Support for the tpm2-tools encoder/decoder will be removed in the future and a warning has been added.
+
 ## 2.2.1 - 2024-01-07
 ### Fixed
 - Fix tests `pcr_set_auth_value` and `pcr_set_auth_policy` tests when running against libtpms-based simulators.
