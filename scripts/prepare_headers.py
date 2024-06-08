@@ -24,23 +24,23 @@ def remove_common_guards(s):
     # Remove certain macros
     s = re.sub("#define TSS2_API_VERSION.*", "", s)
     s = re.sub("#define TSS2_ABI_VERSION.*", "", s)
-    s = re.sub("#define TSS2_RC_LAYER\(level\).*", "", s)
-    s = re.sub("(#define.*)TSS2_RC_LAYER\(0xff\)", "\g<1>0xff0000", s)
+    s = re.sub(r"#define TSS2_RC_LAYER\(level\).*", "", s)
+    s = re.sub(r"(#define.*)TSS2_RC_LAYER\(0xff\)", r"\g<1>0xff0000", s)
 
     # Remove comments
-    s = re.sub("/\*.*?\*/", "", s, flags=re.MULTILINE)
+    s = re.sub(r"/\*.*?\*/", "", s, flags=re.MULTILINE)
 
     # Restructure #defines with ...
-    s = re.sub("(#define [A-Za-z0-9_]+) +\(\(.*?\) \(.*?\)\)", "\g<1>...", s)
-    s = re.sub("(#define [A-Za-z0-9_]+) +\(\(\(.*?\) .*\)", "\g<1>...", s)
-    s = re.sub("(#define [A-Za-z0-9_]+) +\(\(.*?\).*?\) ", "\g<1>...", s)
+    s = re.sub(r"(#define [A-Za-z0-9_]+) +\(\(.*?\) \(.*?\)\)", r"\g<1>...", s)
+    s = re.sub(r"(#define [A-Za-z0-9_]+) +\(\(\(.*?\) .*\)", r"\g<1>...", s)
+    s = re.sub(r"(#define [A-Za-z0-9_]+) +\(\(.*?\).*?\) ", r"\g<1>...", s)
     s = re.sub(
-        "(#define [A-Za-z0-9_]+) .*\n.*?.*\)\)", "\g<1>...", s, flags=re.MULTILINE
+        "(#define [A-Za-z0-9_]+) .*\n.*?.*\\)\\)", r"\g<1>...", s, flags=re.MULTILINE
     )
-    s = re.sub("(#define [A-Za-z0-9_]+) .*", "\g<1>...", s)
+    s = re.sub("(#define [A-Za-z0-9_]+) .*", r"\g<1>...", s)
 
     # Restructure structs and untions with ...
-    s = re.sub("\[.+?\]", "[...]", s)
+    s = re.sub(r"\[.+?\]", "[...]", s)
 
     return s
 
@@ -75,7 +75,7 @@ def prepare_types(dirpath):
 
     # Remove false define (workaround)
     s = re.sub(
-        "#define TPM2_MAX_TAGGED_POLICIES.*\n.*TPMS_TAGGED_POLICY\)\)",
+        "#define TPM2_MAX_TAGGED_POLICIES.*\n.*TPMS_TAGGED_POLICY\\)\\)",
         "",
         s,
         flags=re.MULTILINE,
@@ -268,19 +268,19 @@ def prepare_mu(dirpath):
     # At least tpm2-tss 3.0.3 have duplicated BYTE (un)marshal functions which break cffi
     # So removing them is needed until 3.1.x has reached most distributions
     n = re.findall(
-        "TSS2_RC\s+Tss2_MU_BYTE_Marshal\(.+?\);", s, re.DOTALL | re.MULTILINE
+        r"TSS2_RC\s+Tss2_MU_BYTE_Marshal\(.+?\);", s, re.DOTALL | re.MULTILINE
     )
     if len(n) > 1:
         s = re.sub(
-            "TSS2_RC\s+Tss2_MU_BYTE_Marshal\(.+?\);", "", s, 1, re.DOTALL | re.MULTILINE
+            r"TSS2_RC\s+Tss2_MU_BYTE_Marshal\(.+?\);", "", s, 1, re.DOTALL | re.MULTILINE
         )
 
     n = re.findall(
-        "TSS2_RC\s+Tss2_MU_BYTE_Unmarshal\(.+?\);", s, re.DOTALL | re.MULTILINE
+        r"TSS2_RC\s+Tss2_MU_BYTE_Unmarshal\(.+?\);", s, re.DOTALL | re.MULTILINE
     )
     if len(n) > 1:
         s = re.sub(
-            "TSS2_RC\s+Tss2_MU_BYTE_Unmarshal\(.+?\);",
+            r"TSS2_RC\s+Tss2_MU_BYTE_Unmarshal\(.+?\);",
             "",
             s,
             1,
@@ -442,7 +442,7 @@ def prepare(
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print("Usage: {0} <tss2-header-dir> <output-file>".format(sys.argv[0]))
+        print(f"Usage: {sys.argv[0]} <tss2-header-dir> <output-file>")
         exit(1)
 
     build_fapi = pkgconfig.installed("tss2-fapi", ">=3.0.0")

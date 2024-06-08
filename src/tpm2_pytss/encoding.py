@@ -83,7 +83,7 @@ import collections.abc
 import warnings
 
 
-class base_encdec(object):
+class base_encdec:
     """Base encoder/decoder for TPM types
 
     Args:
@@ -1580,7 +1580,7 @@ class tools_encdec(base_encdec):
     def decode_tpms_tagged_property(
         self, dst: TPMS_TAGGED_PROPERTY, src: Dict[str, Any]
     ) -> TPMS_TAGGED_PROPERTY:
-        pmap = dict([(v, k) for k, v in self._build_pt_map().items()])
+        pmap = {v: k for k, v in self._build_pt_map().items()}
         ps, v = src.popitem()
         dst.property = pmap[ps]
         if dst.property == TPM2_PT.PERMANENT:

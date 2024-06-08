@@ -68,7 +68,7 @@ class TPM2_HANDLE(int):
     pass
 
 
-class TPM_OBJECT(object):
+class TPM_OBJECT:
     """ Abstract Base class for all TPM Objects. Not suitable for direct instantiation."""
 
     def __init__(self, _cdata=None, **kwargs):
@@ -336,7 +336,7 @@ class TPM2B_SIMPLE_OBJECT(TPM_OBJECT):
         return b == value
 
 
-class TPML_Iterator(object):
+class TPML_Iterator:
     """ Iterator class for iterating over TPML data types.
 
     This class is used in enumerated for loops, such as:

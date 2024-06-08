@@ -874,7 +874,7 @@ class CryptoTest(TSS2_EsapiTest):
 
         hsig = TPMT_SIGNATURE(sigAlg=TPM2_ALG.HMAC)
         with self.assertRaises(ValueError) as e:
-            crypto._verify_signature(hsig, str("not bytes"), b"1234")
+            crypto._verify_signature(hsig, "not bytes", b"1234")
         self.assertEqual(
             str(e.exception),
             f"bad key type for {TPM2_ALG.HMAC}, expected bytes, got str",
@@ -889,7 +889,7 @@ class CryptoTest(TSS2_EsapiTest):
 
         badecc = TPMT_SIGNATURE(sigAlg=TPM2_ALG.ECDSA)
         with self.assertRaises(ValueError) as e:
-            crypto._verify_signature(badecc, str("bad"), b"1234")
+            crypto._verify_signature(badecc, "bad", b"1234")
         self.assertEqual(
             str(e.exception),
             f"bad key type for {TPM2_ALG.ECDSA}, expected ECC public key, got str",
@@ -905,7 +905,7 @@ class CryptoTest(TSS2_EsapiTest):
 
         badrsa = TPMT_SIGNATURE(sigAlg=TPM2_ALG.RSAPSS)
         with self.assertRaises(ValueError) as e:
-            crypto._verify_signature(badrsa, str("bad"), b"1234")
+            crypto._verify_signature(badrsa, "bad", b"1234")
         self.assertEqual(
             str(e.exception),
             f"bad key type for {TPM2_ALG.RSAPSS}, expected RSA public key, got str",

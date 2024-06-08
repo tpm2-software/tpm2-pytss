@@ -387,7 +387,7 @@ def _policy_cb_exec_polaction(action, userdata):
     return TPM2_RC.SUCCESS
 
 
-class policy(object):
+class policy:
     """Initialize policy object.
 
     Args:

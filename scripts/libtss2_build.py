@@ -40,7 +40,7 @@ PATH = os.path.dirname(__file__) if len(os.path.dirname(__file__)) > 0 else os.g
 if not os.path.isabs(PATH):
     PATH = os.path.join(os.getcwd(), PATH)
 
-print("adding path: {}".format(PATH))
+print(f"adding path: {PATH}")
 sys.path.insert(0, PATH)
 from prepare_headers import prepare
 
