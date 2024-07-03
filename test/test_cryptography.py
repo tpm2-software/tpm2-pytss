@@ -297,14 +297,14 @@ class TestCryptography(TSS2_EsapiTest):
         )
         privkey = tpm_ecc_private_key(self.ectx, handle)
 
-        peer_key = ec.generate_private_key(ec.SECP192R1())
+        peer_key = ec.generate_private_key(ec.SECP384R1())
         peer_public_key = peer_key.public_key()
 
         with self.assertRaises(ValueError) as e:
             privkey.exchange(ec.ECDH(), peer_public_key)
         self.assertEqual(
             str(e.exception),
-            "curve mismatch for peer key, got secp192r1, expected secp256r1",
+            "curve mismatch for peer key, got secp384r1, expected secp256r1",
         )
 
     def test_ecc_no_sign(self):
