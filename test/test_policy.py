@@ -531,7 +531,7 @@ class TestPolicy(TSS2_EsapiTest):
 
     def test_exec_sign_callback(self):
         if not self._has_secp192r1:
-            self.skipTest("cryptography doesn't have secp129r1")
+            self.skipTest("cryptography doesn't have secp192r1")
         private_key = textwrap.dedent(
             """
             -----BEGIN PRIVATE KEY-----
@@ -605,7 +605,7 @@ class TestPolicy(TSS2_EsapiTest):
 
     def test_exec_polauth_callback(self):
         if not self._has_secp192r1:
-            self.skipTest("cryptography doesn't have secp129r1")
+            self.skipTest("cryptography doesn't have secp192r1")
         private_key = textwrap.dedent(
             """
             -----BEGIN PRIVATE KEY-----
