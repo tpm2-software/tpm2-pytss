@@ -21,8 +21,7 @@ site.ENABLE_USER_SITE = "--user" in sys.argv[1:]
 
 
 class type_generator(build_ext):
-    cares = set(
-        (
+    cares = {
             "TPM2_ALG_ID",
             "TPM2_ST",
             "TPM2_ECC_CURVE",
@@ -40,8 +39,7 @@ class type_generator(build_ext):
             "TPM2_GENERATED",
             "ESYS_TR",
             "TSS2_POLICY_PCR_SELECTOR",
-        )
-    )
+    }
 
     type_mapping = {
         "TPM2_ALG_ID": "TPM2_ALG",
@@ -268,11 +266,11 @@ class type_generator(build_ext):
 
         if not self.dry_run:
             self.mkpath(os.path.dirname(p))
-            with open(p, "wt") as tf:
+            with open(p, "w") as tf:
                 tf.seek(0)
                 tf.truncate(0)
                 tf.write(mout)
-            with open(vp, "wt") as vf:
+            with open(vp, "w") as vf:
                 vf.seek(0)
                 vf.truncate(0)
                 vf.write(vout)

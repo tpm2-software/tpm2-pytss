@@ -13,7 +13,7 @@ class TSS2_Exception(RuntimeError):
 
             rc = TSS2_RC(rc)
         errmsg = ffi.string(lib.Tss2_RC_Decode(rc)).decode()
-        super(TSS2_Exception, self).__init__(f"{errmsg}")
+        super().__init__(f"{errmsg}")
 
         self._rc = rc
         self._handle = 0

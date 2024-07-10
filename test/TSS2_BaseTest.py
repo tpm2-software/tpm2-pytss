@@ -14,7 +14,7 @@ import unittest
 from tpm2_pytss import *
 
 
-class BaseTpmSimulator(object):
+class BaseTpmSimulator:
     def __init__(self):
         self.tpm = None
         self._port = None
@@ -26,7 +26,7 @@ class BaseTpmSimulator(object):
 
     def start(self):
         logger = logging.getLogger("DEBUG")
-        logger.debug('Setting up simulator: "{}"'.format(self.exe))
+        logger.debug(f'Setting up simulator: "{self.exe}"')
 
         tpm = None
         for _ in range(0, 20):
@@ -89,13 +89,13 @@ class SwtpmSimulator(BaseTpmSimulator):
             "socket",
             "--tpm2",
             "--server",
-            "port={}".format(port),
+            f"port={port}",
             "--ctrl",
-            "type=tcp,port={}".format(port + 1),
+            f"type=tcp,port={port + 1}",
             "--flags",
             "not-need-init",
             "--tpmstate",
-            "dir={}".format(self.working_dir.name),
+            f"dir={self.working_dir.name}",
         ]
 
         tpm = subprocess.Popen(cmd)
@@ -129,7 +129,7 @@ class IBMSimulator(BaseTpmSimulator):
         cwd = os.getcwd()
         os.chdir(self.working_dir.name)
         try:
-            cmd = ["tpm_server", "-rm", "-port", "{}".format(port)]
+            cmd = ["tpm_server", "-rm", "-port", f"{port}"]
             tpm = subprocess.Popen(cmd)
             return tpm
 
@@ -150,7 +150,7 @@ class IBMSimulator(BaseTpmSimulator):
         return TCTILdr("mssim", f"port={self._port}")
 
 
-class TpmSimulator(object):
+class TpmSimulator:
 
     SIMULATORS = [
         SwtpmSimulator,
