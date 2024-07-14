@@ -1,0 +1,28 @@
+name: Daily Test
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+
+      - name: Install dependencies
+        env:
+          TPM2_TSS_VERSION: "master"
+          TPM2_TSS_FAPI: true
+        run: ./.ci/install-deps.sh
+
+      - name: Check
+        env:
+          TEST: 1
+        run: ./.ci/run.sh

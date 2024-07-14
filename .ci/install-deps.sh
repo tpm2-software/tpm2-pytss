@@ -110,7 +110,7 @@ fi
 #
 # Install tpm2-tools
 #
-if ! command -v tpm2; then
+if ! command -v tpm2 && [ -n "${TPM2_TOOLS_VERSION}" ]; then
   # for git describe to work, one needs either a tag or a deep clone of master.
   if [ "${TPM2_TOOLS_VERSION}" != "master" ]; then
     tpm2_tools_extra_git_flags="--depth 1"
