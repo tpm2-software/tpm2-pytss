@@ -1,6 +1,7 @@
 import site
 import sys
 import os
+import platform
 from setuptools import setup
 from setuptools.command.build_ext import build_ext
 from pkgconfig import pkgconfig
@@ -183,9 +184,20 @@ class type_generator(build_ext):
             raise RuntimeError(
                 f"unable to find tss2_tpm2_types.h in {pk['include_dirs']}"
             )
-        pdata = preprocess_file(
-            header_path, cpp_args=["-D__extension__=", "-D__attribute__(x)="]
-        )
+
+        if platform.system() == "FreeBSD":
+            pdata = preprocess_file(
+                header_path,
+                cpp_args=[
+                    "-D__builtin_va_list=char*",
+                    "-D__extension__=",
+                    "-D__attribute__(x)=",
+                ],
+            )
+        else:
+            pdata = preprocess_file(
+                header_path, cpp_args=["-D__extension__=", "-D__attribute__(x)="]
+            )
         parser = c_parser.CParser()
         ast = parser.parse(pdata, "tss2_tpm2_types.h")
         tm = self.get_types(ast)
@@ -202,15 +214,27 @@ class type_generator(build_ext):
                     policy_header_path = hp
                     break
             if policy_header_path:
-                pdata = preprocess_file(
-                    policy_header_path,
-                    cpp_args=[
-                        "-D__extension__=",
-                        "-D__attribute__(x)=",
-                        "-D__float128=long double",
-                        "-D_FORTIFY_SOURCE=0",
-                    ],
-                )
+                if platform.system() == "FreeBSD":
+                    pdata = preprocess_file(
+                        policy_header_path,
+                        cpp_args=[
+                            "-D__builtin_va_list=char*",
+                            "-D__extension__=",
+                            "-D__attribute__(x)=",
+                            "-D__float128=long double",
+                            "-D_FORTIFY_SOURCE=0",
+                        ],
+                    )
+                else:
+                    pdata = preprocess_file(
+                        policy_header_path,
+                        cpp_args=[
+                            "-D__extension__=",
+                            "-D__attribute__(x)=",
+                            "-D__float128=long double",
+                            "-D_FORTIFY_SOURCE=0",
+                        ],
+                    )
                 parser = c_parser.CParser()
                 past = parser.parse(pdata, "tss2_policy.h")
                 ptm = self.get_types(past)
