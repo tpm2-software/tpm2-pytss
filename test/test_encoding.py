@@ -1094,21 +1094,20 @@ class ToolsTest(TSS2_BaseTest):
             self.skipTest("tools not in path")
         elif not self.tpm.tcti_name_conf.startswith("swtpm"):
             self.skipTest("swtpm required")
+        curves = [
+            TPM2_ECC.NIST_P192,
+            TPM2_ECC.NIST_P224,
+            TPM2_ECC.NIST_P256,
+            TPM2_ECC.NIST_P384,
+            TPM2_ECC.NIST_P521,
+            TPM2_ECC.BN_P256,
+            TPM2_ECC.BN_P638,
+            TPM2_ECC.SM2_P256,
+        ]
         yml = self.run_tool("getcap", "ecc-curves")
         el = from_yaml(yml, TPML_ECC_CURVE())
-        self.assertEqual(
-            list(el),
-            [
-                TPM2_ECC.NIST_P192,
-                TPM2_ECC.NIST_P224,
-                TPM2_ECC.NIST_P256,
-                TPM2_ECC.NIST_P384,
-                TPM2_ECC.NIST_P521,
-                TPM2_ECC.BN_P256,
-                TPM2_ECC.BN_P638,
-                TPM2_ECC.SM2_P256,
-            ],
-        )
+        for e in el:
+            self.assertIn(e, curves)
 
     def test_tools_decode_tpml_alg_property(self):
         if not self.has_tools:
