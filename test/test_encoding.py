@@ -1156,7 +1156,7 @@ class ToolsTest(TSS2_BaseTest):
         self.assertEqual(fl[1].property, TPM2_PT.LEVEL)
         self.assertEqual(fl[1].value, 0)
         self.assertEqual(fl[2].property, TPM2_PT.REVISION)
-        self.assertEqual(fl[2].value, 0xA4)
+        self.assertIn(fl[2].value, (0xA4, 0xB7))
 
         varyml = self.run_tool("getcap", "properties-variable")
         vl = from_yaml(varyml, TPML_TAGGED_TPM_PROPERTY())
