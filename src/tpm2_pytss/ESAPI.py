@@ -1,4 +1,6 @@
 # SPDX-License-Identifier: BSD-2
+
+import contextlib
 from .types import *
 from .constants import *
 from .internal.utils import (
@@ -7203,6 +7205,28 @@ class ESAPI:
         _chkrc(lib.Esys_TR_Deserialize(self._ctx, buffer, len(buffer), esys_handle))
 
         return ESYS_TR(esys_handle[0])
+
+    @contextlib.contextmanager
+    def flush_handle(self, handle: ESYS_TR) -> ESYS_TR:
+        """Context manager which flushes handle.
+
+        Makes flushing of an handle explicit after use, regardless of any raised exceptions.
+        Useful for scenarios where there is no resource manager available.
+
+        Args:
+            handle (ESYS_TR): The ESYS_TR handle to flush.
+
+        Returns:
+            handle (ESYS_TR): the handle passed to this method.
+        """
+
+        tpm_handle = self.tr_get_tpm_handle(handle)
+        is_transient = (tpm_handle & 0xFF000000) == TPM2_HT.TRANSIENT
+        try:
+            yield handle
+        finally:
+            if is_transient:
+                self.flush_context(handle)
 
     @staticmethod
     def _fixup_hierarchy(hierarchy: ESYS_TR) -> Union[TPM2_RH, ESYS_TR]:
