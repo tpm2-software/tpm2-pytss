@@ -5,7 +5,6 @@ set -exo pipefail
 
 export TPM2_TSS_VERSION=${TPM2_TSS_VERSION:-"3.0.3"}
 export TPM2_TSS_FAPI=${TPM2_TSS_FAPI:-"true"}
-export TPM2_TOOLS_VERSION=${TPM2_TOOLS_VERSION:-"5.5"}
 
 #
 # Get dependencies for building and install tpm2-tss and abrmd projects
@@ -106,25 +105,6 @@ else
   popd
   rm -fr /tmp/ibmswtpm2
 fi
-
-#
-# Install tpm2-tools
-#
-if ! command -v tpm2 && [ -n "${TPM2_TOOLS_VERSION}" ]; then
-  # for git describe to work, one needs either a tag or a deep clone of master.
-  if [ "${TPM2_TOOLS_VERSION}" != "master" ]; then
-    tpm2_tools_extra_git_flags="--depth 1"
-  fi
-  git -C /tmp clone ${tpm2_tools_extra_git_flags} \
-    --branch "${TPM2_TOOLS_VERSION}" https://github.com/tpm2-software/tpm2-tools.git
-  pushd /tmp/tpm2-tools
-  ./bootstrap
-  ./configure CFLAGS=-g --disable-fapi
-  make -j$(nproc)
-  sudo make install
-  popd
-fi
-
 
 #
 # Pip version 21.3 was broken with in-pace (-e) installs. Thus use something
