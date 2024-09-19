@@ -19,7 +19,7 @@ from cryptography.hazmat.primitives.serialization import (
 from cryptography.x509 import load_pem_x509_certificate, load_der_x509_certificate
 from cryptography.hazmat.primitives.kdf.kbkdf import CounterLocation, KBKDFHMAC, Mode
 from cryptography.hazmat.primitives.kdf.concatkdf import ConcatKDFHash
-from cryptography.hazmat.primitives.ciphers.algorithms import AES, Camellia
+from cryptography.hazmat.primitives.ciphers.algorithms import AES, Camellia, SM4
 from cryptography.hazmat.primitives.ciphers import modes, Cipher, CipherAlgorithm
 from cryptography.hazmat.backends import default_backend
 from cryptography.exceptions import UnsupportedAlgorithm, InvalidSignature
@@ -43,24 +43,15 @@ _digesttable = (
     (TPM2_ALG.SHA3_256, hashes.SHA3_256),
     (TPM2_ALG.SHA3_384, hashes.SHA3_384),
     (TPM2_ALG.SHA3_512, hashes.SHA3_512),
+    (TPM2_ALG.SM3_256, hashes.SM3),
 )
-
-if hasattr(hashes, "SM3"):
-    _digesttable += ((TPM2_ALG.SM3_256, hashes.SM3),)
 
 _algtable = (
     (TPM2_ALG.AES, AES),
     (TPM2_ALG.CAMELLIA, Camellia),
     (TPM2_ALG.CFB, modes.CFB),
+    (TPM2_ALG.SM4, SM4),
 )
-
-try:
-    from cryptography.hazmat.primitives.ciphers.algorithms import SM4
-
-    _algtable += ((TPM2_ALG.SM4, SM4),)
-except ImportError:
-    # SM4 not implemented by cryptography package, ignore, no SM4 support.
-    pass
 
 
 def _get_curveid(curve):
@@ -524,7 +515,7 @@ def _generate_ecc_seed(
         raise ValueError(f"unsupported digest algorithm {hashAlg}")
     ekey = ec.generate_private_key(key.curve, default_backend())
     epubnum = ekey.public_key().public_numbers()
-    plength = int(key.curve.key_size / 8)  # FIXME ceiling here
+    plength = ceil(key.curve.key_size / 8)
     exbytes = epubnum.x.to_bytes(plength, "big")
     eybytes = epubnum.y.to_bytes(plength, "big")
     # workaround marshal of TPMS_ECC_POINT
@@ -658,9 +649,6 @@ def _rsa_decrypt_padding_to_scheme(
     if isinstance(decrypt_padding, padding.OAEP):
         if hasattr(decrypt_padding, "algorithm"):
             alg = decrypt_padding.algorithm
-        elif hasattr(decrypt_padding, "_algorithm"):
-            # This is an ugly hack, but until cryptography 42 is released it's needed.
-            alg = type(decrypt_padding._algorithm)
         else:
             raise ValueError("unable to get hash algorithm from OAEP padding")
         scheme.scheme = TPM2_ALG.OAEP
