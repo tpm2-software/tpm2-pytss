@@ -26,7 +26,6 @@ from cryptography.exceptions import UnsupportedAlgorithm, InvalidSignature
 from typing import Tuple, Type, Any
 import secrets
 import inspect
-import sys
 
 _curvetable = (
     (TPM2_ECC.NIST_P192, ec.SECP192R1),

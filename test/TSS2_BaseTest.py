@@ -78,7 +78,6 @@ class SwtpmSimulator(BaseTpmSimulator):
     libname = "libtss2-tcti-swtpm.so"
 
     def __init__(self):
-        self._port = None
         super().__init__()
         self.working_dir = tempfile.TemporaryDirectory()
 
@@ -120,7 +119,6 @@ class IBMSimulator(BaseTpmSimulator):
     libname = "libtss2-tcti-mssim.so"
 
     def __init__(self):
-        self._port = None
         super().__init__()
         self.working_dir = tempfile.TemporaryDirectory()
 
