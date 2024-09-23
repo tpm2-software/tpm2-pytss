@@ -145,7 +145,7 @@ class TSS2Version:
         x = other if isinstance(other, int) else other._value
         return self._value < x
 
-    def __lte__(self, other):
+    def __le__(self, other):
         x = other if isinstance(other, int) else other._value
         return self._value <= x
 
