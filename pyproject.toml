@@ -22,3 +22,6 @@ exclude = '''
   )
 )
 '''
+
+[tool.ruff.lint]
+select = ["F401"]
