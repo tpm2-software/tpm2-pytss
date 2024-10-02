@@ -1,9 +1,9 @@
-import _cffi_backend
+import _cffi_backend  # noqa: F401
 
 # check that we can load the C bindings,
 # if we can't, provide a better message.
 try:
-    from ._libtpm2_pytss import lib
+    from ._libtpm2_pytss import lib  # noqa: F401
 except ImportError as e:
     parts = e.msg.split(": ", 2)
     if len(parts) != 3:
@@ -16,7 +16,7 @@ except ImportError as e:
         + "ensure that you are using the same libraries the python module was built against."
     )
 
-from .ESAPI import ESAPI
+from .ESAPI import ESAPI  # noqa: F401
 
 try:
     from .FAPI import *
@@ -29,7 +29,7 @@ except NotImplementedError:
     # Built on a system lacking libpolicy, ignore
     pass
 from .TCTILdr import *
-from .TCTI import TCTI, PyTCTI, PollData
+from .TCTI import TCTI, PyTCTI, PollData  # noqa: F401
 from .types import *
 from .constants import *
-from .TSS2_Exception import TSS2_Exception
+from .TSS2_Exception import TSS2_Exception  # noqa: F401

@@ -1,7 +1,6 @@
 from binascii import hexlify, unhexlify
-from typing import Any, Union, List, Dict, Tuple
+from typing import Any, Union, List, Dict
 from ._libtpm2_pytss import ffi
-from .internal.crypto import _get_digest_size
 from .constants import (
     TPM_FRIENDLY_INT,
     TPMA_FRIENDLY_INTLIST,
@@ -12,24 +11,6 @@ from .constants import (
     TPMA_CC,
     TPM2_NT,
     TPMA_LOCALITY,
-    TPMA_ALGORITHM,
-    TPM2_CC,
-    TPM2_PT,
-    TPM2_PT_VENDOR,
-    TPMA_MODES,
-    TPM2_PT_FIRMWARE,
-    TPM2_PT_HR,
-    TPM2_PT_NV,
-    TPM2_PT_CONTEXT,
-    TPM2_PT_PS,
-    TPM2_PT_AUDIT,
-    TPM2_PT_PCR,
-    TPMA_PERMANENT,
-    TPMA_STARTUP,
-    TPM2_ECC,
-    TPM2_RH,
-    TPMA_OBJECT,
-    TPMA_SESSION,
 )
 from .types import (
     TPM_OBJECT,
@@ -57,30 +38,7 @@ from .types import (
     TPMT_SIG_SCHEME,
     TPMT_RSA_DECRYPT,
     TPMT_PUBLIC_PARMS,
-    TPMS_NV_PUBLIC,
-    TPMS_ALG_PROPERTY,
-    TPML_PCR_SELECTION,
-    TPMS_PCR_SELECTION,
-    TPML_TAGGED_TPM_PROPERTY,
-    TPML_ALG_PROPERTY,
-    TPML_CCA,
-    TPMS_TAGGED_PROPERTY,
-    TPML_ECC_CURVE,
-    TPML_HANDLE,
-    TPMS_CLOCK_INFO,
-    TPMS_CONTEXT,
-    TPM2_HANDLE,
-    TPM2B_DIGEST,
-    TPML_DIGEST,
-    TPML_DIGEST_VALUES,
-    TPMU_HA,
-    TPML_ALG,
-    TPM2B_NAME,
-    TPMS_NV_PIN_COUNTER_PARAMETERS,
 )
-import yaml
-import collections.abc
-import warnings
 
 
 class base_encdec(object):
