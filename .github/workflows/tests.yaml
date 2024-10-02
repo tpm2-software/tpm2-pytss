@@ -92,3 +92,19 @@ jobs:
       env:
         STYLE: 1
       run: ./.ci/run.sh
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Install Dependencies
+      run: |
+        python3 -m pip install --user --break-system-packages --upgrade pip
+        python3 -m pip install --user --break-system-packages --upgrade ruff
+
+    - name: Check
+      env:
+        LINT: 1
+      run: ./.ci/run.sh

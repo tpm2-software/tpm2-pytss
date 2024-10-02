@@ -8,6 +8,7 @@ To contribute, please publish a PR and:
 
   - If possible prefix your commit with the affected subsystem and colon. For instance, if modifying docs do ``docs: my commit message``.
 
+- Run ``ruff check`` and fix any issues.
 - Sign off your commit with git option ``-s`` or ``--sign-off``
 - Optionally, sign your commit with ``-S`` or ``--gpg-sign``.
 - Write a test.

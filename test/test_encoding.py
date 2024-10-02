@@ -9,15 +9,6 @@ from tpm2_pytss.encoding import (
     base_encdec,
     json_encdec,
 )
-from tpm2_pytss.internal.utils import TSS2Version
-from binascii import unhexlify, hexlify
-from .TSS2_BaseTest import TSS2_BaseTest
-import shutil
-from cryptography.hazmat.primitives.asymmetric import ec
-from cryptography.hazmat.primitives import serialization
-import subprocess
-import sys
-import os
 
 
 class SerializationTest(unittest.TestCase):
