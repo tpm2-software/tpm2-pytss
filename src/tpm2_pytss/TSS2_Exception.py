@@ -62,5 +62,5 @@ class TSS2_Exception(RuntimeError):
 
     @property
     def fmt1(self):
-        """bool: True if the error is related to a handle, parameter or session """
+        """bool: True if the error is related to a handle, parameter or session."""
         return bool(self._rc & lib.TPM2_RC_FMT1)

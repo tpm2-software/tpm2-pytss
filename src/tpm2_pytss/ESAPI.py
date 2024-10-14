@@ -222,7 +222,7 @@ class ESAPI:
         obj = ffi.new("ESYS_TR *")
         _chkrc(
             lib.Esys_TR_FromTPMPublic(
-                self._ctx, handle, session1, session2, session3, obj,
+                self._ctx, handle, session1, session2, session3, obj
             )
         )
         return ESYS_TR(obj[0])
@@ -5390,7 +5390,7 @@ class ESAPI:
 
         _chkrc(
             lib.Esys_HierarchyChangeAuth(
-                self._ctx, auth_handle, session1, session2, session3, new_auth_cdata,
+                self._ctx, auth_handle, session1, session2, session3, new_auth_cdata
             )
         )
 

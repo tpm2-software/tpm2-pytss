@@ -436,10 +436,10 @@ class TestCryptography(TSS2_EsapiTest):
 
         builder = x509.CertificateBuilder()
         builder = builder.subject_name(
-            x509.Name([x509.NameAttribute(x509.oid.NameOID.COMMON_NAME, "falafel"),])
+            x509.Name([x509.NameAttribute(x509.oid.NameOID.COMMON_NAME, "falafel")])
         )
         builder = builder.issuer_name(
-            x509.Name([x509.NameAttribute(x509.oid.NameOID.COMMON_NAME, "falafel"),])
+            x509.Name([x509.NameAttribute(x509.oid.NameOID.COMMON_NAME, "falafel")])
         )
         builder = builder.serial_number(x509.random_serial_number())
         one_day = datetime.timedelta(1, 0, 0)
@@ -459,7 +459,7 @@ class TestCryptography(TSS2_EsapiTest):
 
         builder = x509.CertificateSigningRequestBuilder()
         builder = builder.subject_name(
-            x509.Name([x509.NameAttribute(x509.oid.NameOID.COMMON_NAME, "falafel"),])
+            x509.Name([x509.NameAttribute(x509.oid.NameOID.COMMON_NAME, "falafel")])
         )
         halg = privkey.get_digest_algorithm()
         csr = builder.sign(privkey, algorithm=halg())
@@ -474,10 +474,10 @@ class TestCryptography(TSS2_EsapiTest):
 
         builder = x509.CertificateBuilder()
         builder = builder.subject_name(
-            x509.Name([x509.NameAttribute(x509.oid.NameOID.COMMON_NAME, "falafel"),])
+            x509.Name([x509.NameAttribute(x509.oid.NameOID.COMMON_NAME, "falafel")])
         )
         builder = builder.issuer_name(
-            x509.Name([x509.NameAttribute(x509.oid.NameOID.COMMON_NAME, "falafel"),])
+            x509.Name([x509.NameAttribute(x509.oid.NameOID.COMMON_NAME, "falafel")])
         )
         builder = builder.serial_number(x509.random_serial_number())
         one_day = datetime.timedelta(1, 0, 0)
@@ -497,7 +497,7 @@ class TestCryptography(TSS2_EsapiTest):
 
         builder = x509.CertificateSigningRequestBuilder()
         builder = builder.subject_name(
-            x509.Name([x509.NameAttribute(x509.oid.NameOID.COMMON_NAME, "falafel"),])
+            x509.Name([x509.NameAttribute(x509.oid.NameOID.COMMON_NAME, "falafel")])
         )
         halg = privkey.get_digest_algorithm()
         csr = builder.sign(privkey, algorithm=halg())

@@ -485,7 +485,7 @@ class TestPolicy(TSS2_EsapiTest):
                         {
                             "name": "branch2",
                             "description": "branch2 description",
-                            "policy": [{"type": "locality", "locality": ["zero",]}],
+                            "policy": [{"type": "locality", "locality": ["zero"]}],
                         },
                     ],
                 },
@@ -663,7 +663,7 @@ class TestPolicy(TSS2_EsapiTest):
                 sigAlg=TPM2_ALG.ECDSA,
                 signature=TPMU_SIGNATURE(
                     ecdsa=TPMS_SIGNATURE_ECC(
-                        hash=TPM2_ALG.SHA256, signatureR=rb, signatureS=sb,
+                        hash=TPM2_ALG.SHA256, signatureR=rb, signatureS=sb
                     )
                 ),
             )

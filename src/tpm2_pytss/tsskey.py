@@ -98,6 +98,7 @@ _ecc_template = TPMT_PUBLIC(
 
 _loadablekey_oid = ObjectIdentifier("2.23.133.10.1.3")
 
+
 # _BooleanOne is used to encode True in the same way as tpm2-tss-engine
 class _BooleanOne(Boolean):
     def set(self, value):

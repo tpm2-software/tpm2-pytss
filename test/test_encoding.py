@@ -68,23 +68,23 @@ class SerializationTest(unittest.TestCase):
         handles = TPMS_CAPABILITY_DATA(capability=TPM2_CAP.HANDLES)
         handles.data.handles = TPML_HANDLE((1,))
         ev = enc.encode(handles)
-        self.assertEqual(ev, {"capability": 1, "data": [1,]})
+        self.assertEqual(ev, {"capability": 1, "data": [1]})
 
         commands = TPMS_CAPABILITY_DATA(capability=TPM2_CAP.COMMANDS)
         cmd = TPM2_CC.NV_Write & TPMA_CC.NV & (2 << TPMA_CC.CHANDLES_SHIFT)
         commands.data.command = TPML_CCA((cmd,))
         ev = enc.encode(commands)
-        self.assertEqual(ev, {"capability": 2, "data": [cmd,]})
+        self.assertEqual(ev, {"capability": 2, "data": [cmd]})
 
         ppcommands = TPMS_CAPABILITY_DATA(capability=TPM2_CAP.PP_COMMANDS)
         ppcommands.data.ppCommands = TPML_CC((3,))
         ev = enc.encode(ppcommands)
-        self.assertEqual(ev, {"capability": 3, "data": [3,]})
+        self.assertEqual(ev, {"capability": 3, "data": [3]})
 
         auditcommands = TPMS_CAPABILITY_DATA(capability=TPM2_CAP.AUDIT_COMMANDS)
         auditcommands.data.auditCommands = TPML_CC((4,))
         ev = enc.encode(auditcommands)
-        self.assertEqual(ev, {"capability": 4, "data": [4,]})
+        self.assertEqual(ev, {"capability": 4, "data": [4]})
 
         pcrs = TPMS_CAPABILITY_DATA(capability=TPM2_CAP.PCRS)
         pcrsel = TPMS_PCR_SELECTION(
@@ -121,7 +121,7 @@ class SerializationTest(unittest.TestCase):
         curves = TPMS_CAPABILITY_DATA(capability=TPM2_CAP.ECC_CURVES)
         curves.data.eccCurves = TPML_ECC_CURVE((TPM2_ECC.SM2_P256,))
         ev = enc.encode(curves)
-        self.assertEqual(ev, {"capability": 8, "data": [0x20,]})
+        self.assertEqual(ev, {"capability": 8, "data": [0x20]})
 
     def test_base_TPMS_ATTEST(self):
         enc = base_encdec()
@@ -190,7 +190,7 @@ class SerializationTest(unittest.TestCase):
             time=TPMS_TIME_INFO(
                 time=1234,
                 clockInfo=TPMS_CLOCK_INFO(
-                    clock=1024, resetCount=2, restartCount=3, safe=False,
+                    clock=1024, resetCount=2, restartCount=3, safe=False
                 ),
             ),
             firmwareVersion=1337,

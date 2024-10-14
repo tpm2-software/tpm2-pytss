@@ -53,7 +53,7 @@ class TestEsys(TSS2_EsapiTest):
         inPublic.publicArea.parameters.eccDetail.curveID = TPM2_ECC.NIST_P256
 
         handle, public, creation_data, digest, ticket = self.ectx.create_primary(
-            inSensitive, inPublic, ESYS_TR.OWNER, outsideInfo, creationPCR,
+            inSensitive, inPublic, ESYS_TR.OWNER, outsideInfo, creationPCR
         )
         self.assertNotEqual(handle, 0)
         self.assertEqual(type(public), TPM2B_PUBLIC)
@@ -62,7 +62,7 @@ class TestEsys(TSS2_EsapiTest):
         self.assertEqual(type(ticket), TPMT_TK_CREATION)
         self.ectx.flush_context(handle)
 
-        handle, _, _, _, _ = self.ectx.create_primary(inSensitive,)
+        handle, _, _, _, _ = self.ectx.create_primary(inSensitive)
         self.assertNotEqual(handle, 0)
         self.ectx.flush_context(handle)
 
@@ -82,7 +82,7 @@ class TestEsys(TSS2_EsapiTest):
 
         with self.assertRaises(TypeError):
             self.ectx.create_primary(
-                TPM2B_DATA, inPublic, ESYS_TR.OWNER, outsideInfo, creationPCR,
+                TPM2B_DATA, inPublic, ESYS_TR.OWNER, outsideInfo, creationPCR
             )
 
         with self.assertRaises(TypeError):
@@ -96,17 +96,17 @@ class TestEsys(TSS2_EsapiTest):
 
         with self.assertRaises(TypeError):
             self.ectx.create_primary(
-                inSensitive, inPublic, object(), outsideInfo, creationPCR,
+                inSensitive, inPublic, object(), outsideInfo, creationPCR
             )
 
         with self.assertRaises(TypeError):
             self.ectx.create_primary(
-                inSensitive, inPublic, ESYS_TR.OWNER, object(), creationPCR,
+                inSensitive, inPublic, ESYS_TR.OWNER, object(), creationPCR
             )
 
         with self.assertRaises(TypeError):
             self.ectx.create_primary(
-                inSensitive, inPublic, ESYS_TR.OWNER, outsideInfo, TPM2B_SENSITIVE(),
+                inSensitive, inPublic, ESYS_TR.OWNER, outsideInfo, TPM2B_SENSITIVE()
             )
 
         with self.assertRaises(TypeError):
@@ -131,7 +131,7 @@ class TestEsys(TSS2_EsapiTest):
     def test_pcr_read(self):
 
         pcrsels = TPML_PCR_SELECTION.parse("sha1:3+sha256:all")
-        _, _, digests, = self.ectx.pcr_read(pcrsels)
+        _, _, digests = self.ectx.pcr_read(pcrsels)
 
         self.assertEqual(len(digests[0]), 20)
 
@@ -1146,7 +1146,7 @@ class TestEsys(TSS2_EsapiTest):
             self.ectx.zgen_2_phase(eccHandle, inQsB, inQeB, TPM2_ALG.ECDH, "baz")
 
         with self.assertRaises(ValueError):
-            self.ectx.zgen_2_phase(eccHandle, inQsB, inQeB, TPM2_ALG.ECDH, 2 ** 18)
+            self.ectx.zgen_2_phase(eccHandle, inQsB, inQeB, TPM2_ALG.ECDH, 2**18)
 
         with self.assertRaises(TypeError):
             self.ectx.zgen_2_phase(
@@ -2497,7 +2497,7 @@ class TestEsys(TSS2_EsapiTest):
 
         with self.assertRaises(TSS2_Exception) as e:
             self.ectx.field_upgrade_start(
-                keyhandle, b"", TPMT_SIGNATURE(sigAlg=TPM2_ALG.NULL),
+                keyhandle, b"", TPMT_SIGNATURE(sigAlg=TPM2_ALG.NULL)
             )
         self.assertEqual(e.exception.error, TPM2_RC.COMMAND_CODE)
 
@@ -2602,7 +2602,7 @@ class TestEsys(TSS2_EsapiTest):
 
         inSensitive = TPM2B_SENSITIVE_CREATE()
 
-        primary1, _, _, _, _ = self.ectx.create_primary(inSensitive, inPublic,)
+        primary1, _, _, _, _ = self.ectx.create_primary(inSensitive, inPublic)
 
         primary2, _, _, _, _ = self.ectx.create_primary(inSensitive, inPublic)
 
@@ -2938,7 +2938,7 @@ class TestEsys(TSS2_EsapiTest):
         self.ectx.policy_auth_value(session)
         self.ectx.policy_command_code(session, TPM2_CC.Duplicate)
 
-        sym = TPMT_SYM_DEF_OBJECT(algorithm=TPM2_ALG.NULL,)
+        sym = TPMT_SYM_DEF_OBJECT(algorithm=TPM2_ALG.NULL)
 
         encryptionKey, duplicate, symSeed = self.ectx.duplicate(
             childHandle, primary2, None, sym, session1=session
@@ -3063,7 +3063,7 @@ class TestEsys(TSS2_EsapiTest):
 
         signHandle = self.ectx.create_primary(inSensitive, inPublic)[0]
 
-        sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL,)
+        sym = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL)
 
         session = self.ectx.start_auth_session(
             tpm_key=ESYS_TR.NONE,
