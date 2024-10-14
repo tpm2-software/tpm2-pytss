@@ -920,7 +920,7 @@ class Common:
                         }}
                     ]
                 }}
-                """
+                """  # noqa: F541 ruff is wrong here
         policy_path = f"/policy/policy_{random_uid()}"
         self.fapi.import_object(path=policy_path, import_data=policy)
 
