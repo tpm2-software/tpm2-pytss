@@ -41,7 +41,8 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
     libtasn1-6-dev \
     socat \
     libseccomp-dev \
-    libjson-glib-dev
+    libjson-glib-dev \
+    libltdl-dev
 
 #
 # Install tpm2-tss
