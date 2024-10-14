@@ -1840,7 +1840,7 @@ class TPMS_CONTEXT(TPM_OBJECT):
             session_type is None or auth_hash is None
         ):
             raise TypeError(
-                f"session_type and auth_hash most be defined for session contexts"
+                "session_type and auth_hash most be defined for session contexts"
             )
 
         version = 1

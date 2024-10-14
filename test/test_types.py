@@ -812,7 +812,7 @@ class TypesTest(unittest.TestCase):
 
         # scheme is set, so we need to be smarter about the attributes we use
         templ = TPMT_PUBLIC.parse(
-            f"ecc:ecdaa4-sha256",
+            "ecc:ecdaa4-sha256",
             objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS,
         )
         self.assertEqual(templ.nameAlg, TPM2_ALG.SHA256)
@@ -840,7 +840,7 @@ class TypesTest(unittest.TestCase):
 
         # scheme is set, so we need to be smarter about the attributes we use
         templ = TPMT_PUBLIC.parse(
-            f"ecc:ecdaa4",
+            "ecc:ecdaa4",
             objectAttributes=TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATEPRIMARY_ATTRS,
         )
         self.assertEqual(templ.nameAlg, TPM2_ALG.SHA256)

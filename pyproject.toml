@@ -24,4 +24,4 @@ exclude = '''
 '''
 
 [tool.ruff.lint]
-select = ["F401"]
+select = ["F401", "F541"]
