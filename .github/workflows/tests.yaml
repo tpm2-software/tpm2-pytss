@@ -38,7 +38,7 @@ jobs:
         run: ./.ci/run.sh
 
   coverage:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
@@ -85,8 +85,8 @@ jobs:
 
     - name: Install Dependencies
       run: |
-        python3 -m pip install --user --upgrade pip
-        python3 -m pip install --user --upgrade black~=24.0
+        python3 -m pip install --user --break-system-packages --upgrade pip
+        python3 -m pip install --user --break-system-packages --upgrade black~=24.0
 
     - name: Check
       env:
