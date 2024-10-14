@@ -741,7 +741,7 @@ class TypesTest(unittest.TestCase):
         keysizes = [128, 192, 256]
         modes = ["cfb", "cbc", "ofb", "ctr", "ecb"]
 
-        for rsasize, keysize, mode, in list(
+        for rsasize, keysize, mode in list(
             itertools.product(rsasizes, keysizes, modes)
         ):
             templ = TPMT_PUBLIC.parse(
@@ -1630,7 +1630,7 @@ class TypesTest(unittest.TestCase):
         pos = +TPM2_ALG.RSA
         self.assertIsInstance(pos, TPM2_ALG)
 
-        p = TPM2_ALG.RSA ** 1
+        p = TPM2_ALG.RSA**1
         self.assertIsInstance(p, TPM2_ALG)
 
         radd = 1 + TPM2_ALG.NULL
@@ -1655,7 +1655,7 @@ class TypesTest(unittest.TestCase):
         r = round(TPM2_ALG.RSA)
         self.assertIsInstance(r, TPM2_ALG)
 
-        rp = 2 ** TPM2_ALG.RSA
+        rp = 2**TPM2_ALG.RSA
         self.assertIsInstance(rp, TPM2_ALG)
 
         rrs = 1 >> TPM2_ALG.RSA
@@ -1861,7 +1861,7 @@ class TypesTest(unittest.TestCase):
         if not _lib_version_atleast("tss2-policy", "4.0.0"):
             self.skipTest("tss2-policy required")
         select = TSS2_POLICY_PCR_SELECTIONS(
-            pcr_select=TPMS_PCR_SELECT(sizeofSelect=1, pcrSelect=b"\xAA",),
+            pcr_select=TPMS_PCR_SELECT(sizeofSelect=1, pcrSelect=b"\xAA")
         )
         self.assertEqual(select.pcr_select.sizeofSelect, 1)
         self.assertEqual(bytes(select.pcr_select.pcrSelect), b"\xAA\x00\x00\x00")
@@ -1895,7 +1895,7 @@ class TypesTest(unittest.TestCase):
         s = TSS2_POLICY_PCR_SELECTION(
             type=TSS2_POLICY_PCR_SELECTOR.PCR_SELECT,
             selections=TSS2_POLICY_PCR_SELECTIONS(
-                pcr_select=TPMS_PCR_SELECT(sizeofSelect=3, pcrSelect=b"\xFF\xFF\xFF",),
+                pcr_select=TPMS_PCR_SELECT(sizeofSelect=3, pcrSelect=b"\xFF\xFF\xFF")
             ),
         )
         self.assertEqual(s.type, TSS2_POLICY_PCR_SELECTOR.PCR_SELECT)

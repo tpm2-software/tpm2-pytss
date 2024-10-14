@@ -55,28 +55,28 @@ _algtable = (
 
 
 def _get_curveid(curve):
-    for (algid, c) in _curvetable:
+    for algid, c in _curvetable:
         if isinstance(curve, c):
             return algid
     return None
 
 
 def _get_curve(curveid):
-    for (algid, c) in _curvetable:
+    for algid, c in _curvetable:
         if algid == curveid:
             return c
     return None
 
 
 def _get_digest(digestid):
-    for (algid, d) in _digesttable:
+    for algid, d in _digesttable:
         if algid == digestid:
             return d
     return None
 
 
 def _get_pyca_digest(digest_type):
-    for (algid, d) in _digesttable:
+    for algid, d in _digesttable:
         if inspect.isclass(digest_type) and issubclass(digest_type, d):
             return algid
         elif isinstance(digest_type, d):
@@ -85,7 +85,7 @@ def _get_pyca_digest(digest_type):
 
 
 def _get_alg(alg):
-    for (algid, a) in _algtable:
+    for algid, a in _algtable:
         if algid == alg:
             return a
     return None

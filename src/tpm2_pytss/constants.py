@@ -35,7 +35,7 @@ class TPM_FRIENDLY_INT(int):
 
     @classmethod
     def iterator(cls) -> filter:
-        """ Returns the constants in the class.
+        """Returns the constants in the class.
 
         Returns:
             (int): The int values of the constants in the class.
@@ -47,7 +47,7 @@ class TPM_FRIENDLY_INT(int):
 
     @classmethod
     def contains(cls, value: int) -> bool:
-        """ Indicates if a class contains a numeric constant.
+        """Indicates if a class contains a numeric constant.
 
         Args:
             value (int): The raw numerical number to test for.
@@ -62,7 +62,7 @@ class TPM_FRIENDLY_INT(int):
 
     @classmethod
     def to_string(cls, value: int) -> str:
-        """ Converts an integer value into it's friendly string name for that class.
+        """Converts an integer value into it's friendly string name for that class.
 
         Args:
             value (int): The raw numerical number to try and convert to a name.
@@ -289,7 +289,7 @@ class TPMA_FRIENDLY_INTLIST(TPM_FRIENDLY_INT):
 
     @classmethod
     def parse(cls, value: str) -> int:
-        """ Converts a string of | separated constant values into it's integer value.
+        """Converts a string of | separated constant values into it's integer value.
 
         Given a pipe "|" separated list of string constant values that represent the
         bitwise values returns the value itself. The value "" (empty string) returns

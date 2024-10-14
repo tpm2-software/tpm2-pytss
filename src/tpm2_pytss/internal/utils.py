@@ -22,7 +22,7 @@ __MOCK__ = "sphinx" in sys.modules
 
 
 class TSS2Version:
-    """ Class for comparing git describe output
+    """Class for comparing git describe output
 
     Motivation:
     python's packaging version class follows pep-440, however

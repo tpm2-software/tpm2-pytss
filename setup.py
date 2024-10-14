@@ -261,14 +261,17 @@ class type_generator(build_ext):
         for k, v in type_map.items():
             (t, f) = k
             mstr = mstr + f'    ("{t}", "{f}"): "{v}",\n'
+        mstr = mstr.rstrip()
         estr = ""
         for k, v in element_type_map.items():
             estr = estr + f'    "{k}": "{v}",\n'
+        estr = estr.rstrip()
 
         versions = self.get_versions()
         vstr = ""
         for k, v in versions.items():
             vstr = vstr + f'    "{k}": "{v}",\n'
+        vstr = vstr.rstrip()
 
         p = os.path.join(self.build_lib, "tpm2_pytss/internal/type_mapping.py")
         sp = os.path.join(
@@ -285,10 +288,10 @@ class type_generator(build_ext):
         print(f"generated _versions with {len(versions)} versions")
 
         stempl = dedent(self.map_template)
-        mout = stempl.format(mstr=mstr, estr=estr)
+        mout = stempl.format(mstr=mstr, estr=estr).lstrip()
 
         vtempl = dedent(self.version_template)
-        vout = vtempl.format(vstr=vstr)
+        vout = vtempl.format(vstr=vstr).lstrip()
 
         if not self.dry_run:
             self.mkpath(os.path.dirname(p))

@@ -57,19 +57,19 @@ from cryptography.hazmat.primitives import serialization
 
 
 class ParserAttributeError(Exception):
-    """ Exception ocurred when when parsing."""
+    """Exception ocurred when when parsing."""
 
     pass
 
 
 class TPM2_HANDLE(int):
-    """"A handle to a TPM address"""
+    """A handle to a TPM address"""
 
     pass
 
 
 class TPM_OBJECT(object):
-    """ Abstract Base class for all TPM Objects. Not suitable for direct instantiation."""
+    """Abstract Base class for all TPM Objects. Not suitable for direct instantiation."""
 
     def __init__(self, _cdata=None, **kwargs):
 
@@ -244,7 +244,7 @@ class TPM_OBJECT(object):
 
 
 class TPM2B_SIMPLE_OBJECT(TPM_OBJECT):
-    """ Abstract Base class for all TPM2B Simple Objects. A Simple object contains only
+    """Abstract Base class for all TPM2B Simple Objects. A Simple object contains only
     a size and byte buffer fields. This is not suitable for direct instantiation."""
 
     def __init__(self, _cdata=None, **kwargs):
@@ -337,7 +337,7 @@ class TPM2B_SIMPLE_OBJECT(TPM_OBJECT):
 
 
 class TPML_Iterator(object):
-    """ Iterator class for iterating over TPML data types.
+    """Iterator class for iterating over TPML data types.
 
     This class is used in enumerated for loops, such as:
     .. code-block:: python
@@ -364,7 +364,7 @@ class TPML_Iterator(object):
 
 
 class TPML_OBJECT(TPM_OBJECT):
-    """ Abstract Base class for all TPML Objects. A TPML object is an object that
+    """Abstract Base class for all TPML Objects. A TPML object is an object that
     contains a list of objects. This is not suitable for direct instantiation."""
 
     def __init__(self, _cdata=None, **kwargs):
@@ -2221,7 +2221,7 @@ class TPMT_SENSITIVE(TPM_OBJECT):
         )
 
         data = k.private_bytes(
-            encoding=encoding, format=format, encryption_algorithm=enc_alg,
+            encoding=encoding, format=format, encryption_algorithm=enc_alg
         )
 
         return data

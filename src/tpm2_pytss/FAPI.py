@@ -320,9 +320,9 @@ class FAPI:
         )
         _chkrc(
             ret,
-            acceptable=[lib.TSS2_FAPI_RC_ALREADY_PROVISIONED]
-            if is_provisioned_ok
-            else None,
+            acceptable=(
+                [lib.TSS2_FAPI_RC_ALREADY_PROVISIONED] if is_provisioned_ok else None
+            ),
         )
         return ret == lib.TPM2_RC_SUCCESS
 
