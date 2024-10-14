@@ -16,11 +16,11 @@ Under the hood, bindings are provided via `CFFI <https://cffi.readthedocs.io/en/
 
 Supported versions of Python are:
 
-- 3.8
 - 3.9
 - 3.10
 - 3.11
 - 3.12
+- 3.13
 
 .. toctree::
     :hidden:
