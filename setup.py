@@ -189,6 +189,7 @@ class type_generator(build_ext):
             pdata = preprocess_file(
                 header_path,
                 cpp_args=[
+                    "-std=c99",
                     "-D__builtin_va_list=char*",
                     "-D__extension__=",
                     "-D__attribute__(x)=",
@@ -196,7 +197,8 @@ class type_generator(build_ext):
             )
         else:
             pdata = preprocess_file(
-                header_path, cpp_args=["-D__extension__=", "-D__attribute__(x)="]
+                header_path,
+                cpp_args=["-std=c99", "-D__extension__=", "-D__attribute__(x)="],
             )
         parser = c_parser.CParser()
         ast = parser.parse(pdata, "tss2_tpm2_types.h")
@@ -218,6 +220,7 @@ class type_generator(build_ext):
                     pdata = preprocess_file(
                         policy_header_path,
                         cpp_args=[
+                            "-std=c99",
                             "-D__builtin_va_list=char*",
                             "-D__extension__=",
                             "-D__attribute__(x)=",
@@ -229,6 +232,7 @@ class type_generator(build_ext):
                     pdata = preprocess_file(
                         policy_header_path,
                         cpp_args=[
+                            "-std=c99",
                             "-D__extension__=",
                             "-D__attribute__(x)=",
                             "-D__float128=long double",
