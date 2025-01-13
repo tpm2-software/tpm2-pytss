@@ -396,6 +396,7 @@ class FAPI:
         Args:
             path (bytes or str): Path to the new key object, e.g. `/HS/SRK/new_signing_key`.
             type_ (bytes or str): Comma separated list. Possible values: system, sign, decrypt, restricted, exportable, noda, 0x81000000. Defaults to None.
+            policy_path (bytes or str): The path to the policy which will be associated with the key. Defaults to None.
             auth_value (bytes or str): Password to key. Defaults to None.
             exists_ok (bool): Do not throw a TSS2_Exception if an object with the given path already exists. Defaults to False.
 
