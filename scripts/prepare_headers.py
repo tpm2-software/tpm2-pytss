@@ -48,7 +48,7 @@ def remove_common_guards(s):
 
 def remove_poll_stuff(s, poll_handle_type):
 
-    r = r"#if defined\(__linux__\) \|\| defined\(__unix__\) \|\| defined\(__APPLE__\) \|\| defined \(__QNXNTO__\) \|\| defined \(__VXWORKS__\)(\n.*)+#endif\n#endif"
+    r = r"#if defined\(__linux__\).*(\n.*)+#endif\n#endif"
 
     s = re.sub(r, f"typedef struct pollfd {poll_handle_type};", s)
     return s
