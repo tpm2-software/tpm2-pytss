@@ -634,7 +634,7 @@ class json_encdec(base_encdec):
         Returns:
             A str if the val matches a constant, otherwise an encoded int
         """
-        if isinstance(val, TPM_FRIENDLY_INT) and type(val).contains(val):
+        if isinstance(val, TPM_FRIENDLY_INT) and val in type(val):
             return str(val)
         return self.encode_int(val)
 
@@ -650,7 +650,7 @@ class json_encdec(base_encdec):
         attrs = dict()
         for i in range(0, 32):
             c = val & (1 << i)
-            if type(val).contains(c) and c != 0:
+            if c in type(val) and c != 0:
                 k = str(c)
                 attrs[k] = 1
         if isinstance(val, TPMA_NV) and val.nt:
