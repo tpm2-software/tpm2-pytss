@@ -336,7 +336,7 @@ def _check_friendly_int(friendly, varname, clazz):
     if not isinstance(friendly, int):
         raise TypeError(f"expected {varname} to be type int, got {type(friendly)}")
 
-    if not clazz.contains(friendly):
+    if not friendly in clazz:
         raise ValueError(
             f"expected {varname} value of {friendly} in class {str(clazz)}, however it's not found."
         )

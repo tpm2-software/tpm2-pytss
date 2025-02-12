@@ -14,12 +14,52 @@ from .internal.utils import (
 )
 
 
-class TPM_FRIENDLY_INT(int):
+class TPM_FRIENDLY_ITER(type):
+    """Metaclass to make constants classes iterable"""
+
+    def __iter__(cls):
+        """Returns an iteratore over the constants in the class.
+
+        Returns:
+            (int): The int values of the constants in the class.
+
+        Example:
+            list(ESYS_TR) -> [4095, 255, 0, 1, 2, 3, ... ]
+        """
+        for value in cls._members_.values():
+            yield value
+
+
+class TPM_FRIENDLY_INT(int, metaclass=TPM_FRIENDLY_ITER):
     _FIXUP_MAP = {}
+
+    @staticmethod
+    def _get_members(cls) -> dict:
+        """Finds all constants defined at class level."""
+        members = dict()
+        # Inherit constants from parent classes
+        for sc in cls.__mro__[1:]:
+            if not issubclass(sc, TPM_FRIENDLY_INT):
+                break
+            super_members = sc._get_members(sc)
+            members.update(super_members)
+        # Any class attribute that is an int and is not marked as private is a member
+        for name, value in vars(cls).items():
+            if not isinstance(value, int) or name.startswith("_"):
+                continue
+            members[name] = value
+        return members
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
-        TPM_FRIENDLY_INT._fix_const_type(cls)
+        members = TPM_FRIENDLY_INT._get_members(cls)
+        # Ensure that the members of the constant class have the class as the type
+        for name, value in members.items():
+            fixed_value = cls(value)
+            members[name] = fixed_value
+            setattr(cls, name, fixed_value)
+        # Save the members so they can be used later
+        cls._members_ = members
 
     @classmethod
     def parse(cls, value: str) -> int:
@@ -38,19 +78,7 @@ class TPM_FRIENDLY_INT(int):
             raise TypeError(f'Expected value to be a str object, got: "{type(value)}"')
 
     @classmethod
-    def iterator(cls) -> filter:
-        """Returns the constants in the class.
-
-        Returns:
-            (int): The int values of the constants in the class.
-
-        Example:
-            list(ESYS_TR.iterator()) -> [4095, 255, 0, 1, 2, 3, ... ]
-        """
-        return filter(lambda x: isinstance(x, int), vars(cls).values())
-
-    @classmethod
-    def contains(cls, value: int) -> bool:
+    def __contains__(cls, value: int) -> bool:
         """Indicates if a class contains a numeric constant.
 
         Args:
@@ -60,9 +88,9 @@ class TPM_FRIENDLY_INT(int):
             (bool): True if the class contains the constant, False otherwise.
 
         Example:
-            ESYS_TR.contains(7) -> True
+            7 in ESYS_TR -> True
         """
-        return value in cls.iterator()
+        return value in cls._members_.values()
 
     @classmethod
     def to_string(cls, value: int) -> str:
@@ -206,36 +234,6 @@ class TPM_FRIENDLY_INT(int):
 
     def __xor__(self, value):
         return self.__class__(int(self).__xor__(value))
-
-    @staticmethod
-    def _copy_and_set(dstcls, srccls):
-        """Copy class variables from srccls to dstcls
-
-        srccls must be a subclass on TPM_FRIENDLY_INT.
-        Sets the the variable type to dstcls when copying.
-        dstcls and srccls can be the same.
-        Skip setting destination if the dstcls variable already have the correct type.
-        """
-        if not issubclass(srccls, TPM_FRIENDLY_INT):
-            return
-        for k, v in vars(srccls).items():
-            dv = getattr(dstcls, k, None)
-            if not isinstance(v, int) or k.startswith("_") or type(dv) == type(dstcls):
-                continue
-            fv = dstcls(v)
-            setattr(dstcls, k, fv)
-
-    @staticmethod
-    def _fix_const_type(cls):
-        """Ensure constants in a TPM2 constant class have the correct type
-
-        We also copy constants from a superclass in case it's of the correct type.
-        """
-        for sc in cls.__mro__:
-            if sc == TPM_FRIENDLY_INT:
-                break
-            TPM_FRIENDLY_INT._copy_and_set(cls, sc)
-        return cls
 
     def marshal(self):
         """Marshal instance into bytes.
