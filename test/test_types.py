@@ -1415,10 +1415,10 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(templ2.type, TPM2_ALG.KEYEDHASH)
 
     def test_TPM_FRIENDLY_INT_iterator(self):
-        self.assertNotEqual(len(list(TPM2_CC.iterator())), 0)
+        self.assertNotEqual(len(list(TPM2_CC)), 0)
 
     def test_TPM_FRIENDLY_INT_contains(self):
-        self.assertTrue(TPM2_CC.contains(TPM2_CC.AC_Send))
+        self.assertIn(TPM2_CC.AC_Send, TPM2_CC)
 
     def test_TPM2B_PUBLIC_parse(self):
 
