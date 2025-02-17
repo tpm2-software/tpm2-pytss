@@ -1,13 +1,14 @@
-name: Publish PyPI Package
+name: Publish gemfury Package
 
-on:
-  push:
-    tags:
-      - '*'
+on: [push]
 
 jobs:
   publish:
-    runs-on: ubuntu-20.04
+    if: startsWith(github.event.ref, 'refs/tags')
+    
+    name: Deploy Python package
+    runs-on: ubuntu-latest
+    
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v2
@@ -16,13 +17,16 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.8
+    
+    - name: Check tag against package version
+      run: grep '__version__' src/tpm2_pytss/internal/__init__.py | grep -q "'${GITHUB_REF#refs/tags/}'"
 
     - name: Install Dependencies
       env:
         TPM2_TSS_VERSION: 3.0.0
       run: |
         python3 -m pip install --user --upgrade pip
-        python3 -m pip install --user --upgrade twine
+        python3 -m pip install --user --upgrade setuptools twine wheel pkgconfig
         ./.ci/install-deps.sh
 
     - name: Test
@@ -30,9 +34,12 @@ jobs:
         TEST: 1
       run: ./.ci/run.sh
 
-    - name: Publish to PyPi
+    - name: Build distribution
+      run: python setup.py sdist bdist_wheel
+
+    - name: Publish artefacts
+      run: twine upload dist/*
       env:
-        PUBLISH_PKG: 1
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PYPI_TPM2_PYTSS }}
-      run: ./.ci/run.sh
+        TWINE_REPOSITORY_URL: https://pypi.fury.io/aruba-uxi/
+        TWINE_USERNAME: ${{ secrets.FURY_AUTH }}
+        TWINE_PASSWORD:
