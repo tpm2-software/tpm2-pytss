@@ -4883,6 +4883,69 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(ValueError):
             ESYS_TR.parts_to_blob(0x80000000, public)
 
+    def test_certify_x509(self):
+        if not _lib_version_atleast("tss2-esys", "3.1.0"):
+            self.skipTest("certify_x509 not supported by tss2-esys")
+
+        object_template = TPM2B_PUBLIC.parse(
+            "rsa2048:rsapss:null",
+            TPMA_OBJECT.DEFAULT_TPM2_TOOLS_CREATE_ATTRS ^ TPMA_OBJECT.DECRYPT,
+        )
+        object_handle, object_public, _, _, _ = self.ectx.create_primary(
+            TPM2B_SENSITIVE_CREATE(),
+            object_template,
+        )
+        sign_handle, sign_public, _, _, _ = self.ectx.create_primary(
+            TPM2B_SENSITIVE_CREATE(),
+            object_template,
+        )
+
+        partial_certificate = TPM2B_MAX_BUFFER(
+            b"0\x81\xbc0B1\x0b0\t\x06\x03U\x04\x06\x13\x02US1\x0f0\r\x06\x03U\x04\n\x0c\x06"
+            + b"CA org1\x100\x0e\x06\x03U\x04\x0b\x0c\x07CA unit1\x100\x0e\x06\x03U\x04\x03\x0c\x07"
+            + b"example0\x1e\x17\r250223183942Z\x17\r341123183942Z0B1\x0b0\t\x06\x03U\x04\x06\x13\x02"
+            + b"US1\x0f0\r\x06\x03U\x04\n\x0c\x06CA org1\x100\x0e\x06\x03U\x04\x0b\x0c\x07CA unit1\x100"
+            + b"\x0e\x06\x03U\x04\x03\x0c\x07example\xa3\x120\x100\x0e\x06\x03"
+            + b"U\x1d\x0f\x01\x01\xff\x04\x04\x03\x02\x01\x86"
+        )
+
+        added_to_certificate, tbs_digest, signature = self.ectx.certify_x509(
+            object_handle, sign_handle, partial_certificate
+        )
+
+        self.assertGreater(len(added_to_certificate), 0)
+        self.assertGreater(len(tbs_digest), 0)
+        self.assertEqual(signature.sigAlg, TPM2_ALG.RSAPSS)
+        self.assertEqual(signature.signature.rsapss.hash, TPM2_ALG.SHA256)
+
+        with self.assertRaises(TypeError):
+            self.ectx.certify_x509("not a handle", sign_handle, partial_certificate)
+
+        with self.assertRaises(TypeError):
+            self.ectx.certify_x509(object_handle, "not a handle", partial_certificate)
+
+        with self.assertRaises(TypeError):
+            self.ectx.certify_x509(
+                object_handle,
+                sign_handle,
+                partial_certificate,
+                session1="not a session",
+            )
+        with self.assertRaises(TypeError):
+            self.ectx.certify_x509(
+                object_handle,
+                sign_handle,
+                partial_certificate,
+                session2="not a session",
+            )
+        with self.assertRaises(TypeError):
+            self.ectx.certify_x509(
+                object_handle,
+                sign_handle,
+                partial_certificate,
+                session3="not a session",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
