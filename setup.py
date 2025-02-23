@@ -37,10 +37,12 @@ class type_generator(build_ext):
             "TPMA_CC",
             "TPMA_OBJECT",
             "TPMA_ALGORITHM",
+            "TPMA_ACT",
             "TPM2_HANDLE",
             "TPM2_GENERATED",
             "ESYS_TR",
             "TSS2_POLICY_PCR_SELECTOR",
+            "TPM_AT",
         )
     )
 
