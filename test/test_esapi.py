@@ -4946,6 +4946,23 @@ class TestEsys(TSS2_EsapiTest):
                 session3="not a session",
             )
 
+    def test_act_set_timeout(self):
+        if not _lib_version_atleast("tss2-esys", "3.1.0"):
+            self.skipTest("act_set_timeout not supported by tss2-esys")
+        self.skipIfCommandNotSupported(TPM2_CC.ACT_SetTimeout)
+
+        self.ectx.act_set_timeout(ESYS_TR.RH_ACT_0, 1337)
+
+        with self.assertRaises(TypeError):
+            self.ectx.act_set_timeout("not a handle", 1337)
+
+        with self.assertRaises(TypeError):
+            self.ectx.act_set_timeout(ESYS_TR.RH_ACT_0, 1337, session1="not a handle")
+        with self.assertRaises(TypeError):
+            self.ectx.act_set_timeout(ESYS_TR.RH_ACT_0, 1337, session2="not a handle")
+        with self.assertRaises(TypeError):
+            self.ectx.act_set_timeout(ESYS_TR.RH_ACT_0, 1337, session3="not a handle")
+
 
 if __name__ == "__main__":
     unittest.main()

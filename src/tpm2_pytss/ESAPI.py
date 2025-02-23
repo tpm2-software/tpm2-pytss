@@ -7138,6 +7138,52 @@ class ESAPI:
             TPMT_SIGNATURE(_get_dptr(signature, lib.Esys_Free)),
         )
 
+    def act_set_timeout(
+        self,
+        act_handle: ESYS_TR,
+        start_timeout: int,
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.NONE,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ):
+        """Invoke the TPM2_ACT_SetTimeout command.
+
+        This function invokes the TPM2_ACT_SetTimeout command in a one-call
+        variant. This means the function will block until the TPM response is
+        available.
+
+        Args:
+            act_handle (ESYS_TR): ACT handle to set the timeout on.
+            start_timeout (int): The start timeout value for the ACT in seconds.
+            session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.PASSWORD.
+            session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
+            session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
+
+        Raises:
+            TypeError: If a parameter is not of an expected type.
+            ValueError: If a parameter is not of an expected value.
+            TSS2_Exception: Any of the various TSS2_RC's the lower layers can return.
+
+        C Function: Esys_ACT_SetTimeout
+
+        TPM Command: TPM2_ACT_SetTimeout
+        """
+        if not _lib_version_atleast("tss2-esys", "3.1.0"):
+            raise NotImplementedError(
+                "act_set_timeout requires tss2-esys 3.1.0 or higher"
+            )
+
+        _check_handle_type(act_handle, "act_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
+
+        _chkrc(
+            lib.Esys_ACT_SetTimeout(
+                self._ctx, act_handle, session1, session2, session3, start_timeout
+            )
+        )
+
     def vendor_tcg_test(
         self,
         input_data: Union[TPM2B_DATA, bytes, str],
