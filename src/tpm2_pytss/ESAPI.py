@@ -3167,6 +3167,85 @@ class ESAPI:
             TPMT_SIGNATURE(_get_dptr(signature, lib.Esys_Free)),
         )
 
+    def certify_x509(
+        self,
+        object_handle: ESYS_TR,
+        sign_handle: ESYS_TR,
+        partial_certificate: TPM2B_MAX_BUFFER,
+        in_scheme: TPMT_SIG_SCHEME = TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL),
+        session1: ESYS_TR = ESYS_TR.PASSWORD,
+        session2: ESYS_TR = ESYS_TR.PASSWORD,
+        session3: ESYS_TR = ESYS_TR.NONE,
+    ) -> Tuple[TPM2B_MAX_BUFFER, TPM2B_DIGEST, TPMT_SIGNATURE]:
+        """Invoke the TPM2_CertifyX509 command.
+
+        This function invokes the TPM2_CertifyX509 command in a one-call
+        variant. This means the function will block until the TPM response is
+        available.
+
+        Args:
+            object_handle (ESYS_TR): Handle of the object to be certified.
+            sign_handle (ESYS_TR): Handle of the key used to sign the attestation structure.
+            partial_certificate (TPM2B_MAX_BUFFER): A DER encoded partial certificate.
+            in_scheme: (TPMT_SIG_SCHEME): The signing scheme to be used (optional), Defaults to a TPM2_ALG.NULL scheme.
+            session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.PASSWORD.
+            session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.PASSWORD.
+            session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
+
+        Raises:
+            TypeError: If a parameter is not of an expected type.
+            ValueError: If a parameter is not of an expected value.
+            TSS2_Exception: Any of the various TSS2_RC's the lower layers can return.
+
+        Returns:
+            A Tuple[TPM2B_MAX_BUFFER, TPM2B_DIGEST, TPMT_SIGNATURE] which contains the DER encoded data,
+            the signed digest and the signature.
+
+        C Function: Esys_CertifyX509
+
+        TPM Command: TPM2_CertifyX509
+        """
+        if not _lib_version_atleast("tss2-esys", "3.1.0"):
+            raise NotImplementedError("certify_x509 requires tss2-esys 3.1.0 or higher")
+
+        _check_handle_type(object_handle, "object_handle")
+        _check_handle_type(sign_handle, "sign_handle")
+        _check_handle_type(session1, "session1")
+        _check_handle_type(session2, "session2")
+        _check_handle_type(session3, "session3")
+
+        reserved = TPM2B_DATA()
+        reserved_cdata = _get_cdata(reserved, TPM2B_DATA, "reserved")
+        in_scheme_cdata = _get_cdata(in_scheme, TPMT_SIG_SCHEME, "in_scheme")
+        partial_certificate_cdata = _get_cdata(
+            partial_certificate, TPM2B_MAX_BUFFER, "partial_certificate"
+        )
+
+        added_to_certificate = ffi.new("TPM2B_MAX_BUFFER **")
+        tbs_digest = ffi.new("TPM2B_DIGEST **")
+        signature = ffi.new("TPMT_SIGNATURE **")
+        _chkrc(
+            lib.Esys_CertifyX509(
+                self._ctx,
+                object_handle,
+                sign_handle,
+                session1,
+                session2,
+                session3,
+                reserved_cdata,
+                in_scheme_cdata,
+                partial_certificate_cdata,
+                added_to_certificate,
+                tbs_digest,
+                signature,
+            )
+        )
+        return (
+            TPM2B_MAX_BUFFER(_get_dptr(added_to_certificate, lib.Esys_Free)),
+            TPM2B_DIGEST(_get_dptr(tbs_digest, lib.Esys_Free)),
+            TPMT_SIGNATURE(_get_dptr(signature, lib.Esys_Free)),
+        )
+
     def commit(
         self,
         sign_handle: ESYS_TR,
