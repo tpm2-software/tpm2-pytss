@@ -1568,11 +1568,11 @@ class TypesTest(unittest.TestCase):
             TPMA_OBJECT.DECRYPT
             | TPMA_OBJECT.NODA
             | TPMA_OBJECT.SIGN_ENCRYPT
-            | 0x00090000
+            | 0x00900000
         )
         with self.assertRaises(ValueError) as e:
             str(badattrs)
-        self.assertEqual(str(e.exception), "unnmatched values left: 0x80000")
+        self.assertEqual(str(e.exception), "unnmatched values left: 0x900000")
 
         aw = TPMA_NV.AUTHWRITE | TPMA_NV.AUTHREAD
         self.assertEqual(str(aw), "authwrite|authread")

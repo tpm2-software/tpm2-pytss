@@ -193,6 +193,9 @@ class TSS2_EsapiTest(TSS2_BaseTest):
     def skipIfAlgNotSupported(self, alg: TPM2_ALG):
         self.skipTest(f'Algorithm "{alg}" not supported by simulator')
 
+    def skipIfCommandNotSupported(self, cc: TPM2_CC):
+        self.skipTest(f'Command "{cc}" not supported by simulator')
+
     def setUp(self):
         super().setUp()
         try:
@@ -214,6 +217,12 @@ class TSS2_EsapiTest(TSS2_BaseTest):
                 TPM2_CAP.ALGS, 0, lib.TPM2_MAX_CAP_ALGS
             )
             self._supported_algs += [x.alg for x in data.data.algorithms]
+
+        self._supported_commands = []
+        more = True
+        while more:
+            more, data = self.ectx.get_capability(TPM2_CAP.ALGS, 0, lib.TPM2_MAX_CAP_CC)
+            self._supported_commands += list(data.data.command)
 
     def tearDown(self):
         self.ectx.close()
