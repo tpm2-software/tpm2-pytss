@@ -463,6 +463,22 @@ class ESYS_TR(TPM_FRIENDLY_INT):
     RH_SVN_ENDORSEMENT_BASE = 0x1020000
     RH_SVN_PLATFORM_BASE = 0x1030000
     RH_SVN_NULL_BASE = 0x1040000
+    RH_ACT_0 = 0x120
+    RH_ACT_1 = 0x121
+    RH_ACT_2 = 0x122
+    RH_ACT_3 = 0x123
+    RH_ACT_4 = 0x124
+    RH_ACT_5 = 0x125
+    RH_ACT_6 = 0x126
+    RH_ACT_7 = 0x127
+    RH_ACT_8 = 0x128
+    RH_ACT_9 = 0x129
+    RH_ACT_A = 0x12A
+    RH_ACT_B = 0x12B
+    RH_ACT_C = 0x12C
+    RH_ACT_D = 0x12D
+    RH_ACT_E = 0x12E
+    RH_ACT_F = 0x12F
 
     def marshal(self):
         raise NotImplementedError("Use serialize() instead")
