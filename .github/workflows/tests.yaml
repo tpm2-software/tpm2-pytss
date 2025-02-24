@@ -62,9 +62,12 @@ jobs:
 
       - name: Upload coverage report
         uses: codecov/codecov-action@v5
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: /tmp/coverage.xml
+        if: env.CODECOV_TOKEN != null
 
   whitespace-check:
     runs-on: ubuntu-latest

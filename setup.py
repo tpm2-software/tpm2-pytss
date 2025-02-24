@@ -19,6 +19,7 @@ from textwrap import dedent
 
 # workaround bug https://github.com/pypa/pip/issues/7953
 site.ENABLE_USER_SITE = "--user" in sys.argv[1:]
+FALAFEL = True
 
 
 class type_generator(build_ext):
