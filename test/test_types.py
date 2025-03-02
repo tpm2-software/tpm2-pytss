@@ -2021,6 +2021,15 @@ class TypesTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             ESYS_TR.PCR9.unmarshal(b"")
 
+    def test_tpm2_handle_marshal(self):
+        handle_bytes = TPM2_HANDLE(0xFFFFFFFF).marshal()
+        self.assertEqual(handle_bytes, b"\xFF\xFF\xFF\xFF")
+
+    def test_tpm2_handle_unmarshal(self):
+        handle, off = TPM2_HANDLE.unmarshal(b"\xFF\xFF\xFF\xFF")
+        self.assertEqual(handle, 0xFFFFFFFF)
+        self.assertEqual(off, 4)
+
 
 if __name__ == "__main__":
     unittest.main()

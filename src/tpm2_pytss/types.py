@@ -65,7 +65,39 @@ class ParserAttributeError(Exception):
 class TPM2_HANDLE(int):
     """A handle to a TPM address"""
 
-    pass
+    def marshal(self) -> bytes:
+        """Marshal instance into bytes.
+
+        Returns:
+            Returns the marshaled TPM2_HANDLE as bytes.
+        """
+        mfunc = getattr(lib, f"Tss2_MU_{self.__class__.__name__}_Marshal", None)
+        if mfunc is None:
+            raise RuntimeError(
+                f"No marshal function found for {self.__class__.__name__}"
+            )
+        offset = ffi.new("size_t *")
+        buf = ffi.new("uint8_t[4096]")
+        _chkrc(mfunc(int(self), buf, 4096, offset))
+        return bytes(buf[0 : offset[0]])
+
+    @classmethod
+    def unmarshal(cls, buf) -> tuple["TPM2_HANDLE", int]:
+        """Unmarshal bytes into TPM2_HANDLE.
+
+        Args:
+            buf (bytes): The bytes to be unmarshaled.
+
+        Returns:
+            Returns an instance of TPM2_HANDLE and the number of bytes consumed.
+        """
+        umfunc = getattr(lib, f"Tss2_MU_{cls.__name__}_Unmarshal", None)
+        if umfunc is None:
+            raise RuntimeError(f"No unmarshal function found for {cls.__name__}")
+        cdata = ffi.new("TPM2_HANDLE *")
+        offset = ffi.new("size_t *")
+        _chkrc(umfunc(buf, len(buf), offset, cdata))
+        return cls(cdata[0]), offset[0]
 
 
 class TPM_OBJECT(object):
