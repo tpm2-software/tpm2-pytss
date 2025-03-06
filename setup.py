@@ -21,6 +21,14 @@ from textwrap import dedent
 site.ENABLE_USER_SITE = "--user" in sys.argv[1:]
 
 
+def cpp_path():
+    return os.environ.get("CC", "cc")
+
+
+def cpp_args(args=[]):
+    return ["-E"] + args
+
+
 class type_generator(build_ext):
     cares = set(
         (
@@ -190,17 +198,23 @@ class type_generator(build_ext):
         if platform.system() == "FreeBSD":
             pdata = preprocess_file(
                 header_path,
-                cpp_args=[
-                    "-std=c99",
-                    "-D__builtin_va_list=char*",
-                    "-D__extension__=",
-                    "-D__attribute__(x)=",
-                ],
+                cpp_path=cpp_path(),
+                cpp_args=cpp_args(
+                    [
+                        "-std=c99",
+                        "-D__builtin_va_list=char*",
+                        "-D__extension__=",
+                        "-D__attribute__(x)=",
+                    ]
+                ),
             )
         else:
             pdata = preprocess_file(
                 header_path,
-                cpp_args=["-std=c99", "-D__extension__=", "-D__attribute__(x)="],
+                cpp_path=cpp_path(),
+                cpp_args=cpp_args(
+                    ["-std=c99", "-D__extension__=", "-D__attribute__(x)="]
+                ),
             )
         parser = c_parser.CParser()
         ast = parser.parse(pdata, "tss2_tpm2_types.h")
@@ -221,6 +235,7 @@ class type_generator(build_ext):
                 if platform.system() == "FreeBSD":
                     pdata = preprocess_file(
                         policy_header_path,
+                        cpp_path=cpp_path(),
                         cpp_args=[
                             "-std=c99",
                             "-D__builtin_va_list=char*",
@@ -233,13 +248,16 @@ class type_generator(build_ext):
                 else:
                     pdata = preprocess_file(
                         policy_header_path,
-                        cpp_args=[
-                            "-std=c99",
-                            "-D__extension__=",
-                            "-D__attribute__(x)=",
-                            "-D__float128=long double",
-                            "-D_FORTIFY_SOURCE=0",
-                        ],
+                        cpp_path=cpp_path(),
+                        cpp_args=cpp_args(
+                            [
+                                "-std=c99",
+                                "-D__extension__=",
+                                "-D__attribute__(x)=",
+                                "-D__float128=long double",
+                                "-D_FORTIFY_SOURCE=0",
+                            ]
+                        ),
                     )
                 parser = c_parser.CParser()
                 past = parser.parse(pdata, "tss2_policy.h")
