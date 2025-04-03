@@ -7346,7 +7346,7 @@ class ESAPI:
         """
 
         tpm_handle = self.tr_get_tpm_handle(handle)
-        is_transient = (tpm_handle & 0xFF000000) == TPM2_HT.TRANSIENT
+        is_transient = (tpm_handle & 0xFF000000) == TPM2_HR.TRANSIENT
         try:
             yield handle
         finally:
