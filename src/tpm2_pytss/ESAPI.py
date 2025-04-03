@@ -7346,12 +7346,14 @@ class ESAPI:
         """
 
         tpm_handle = self.tr_get_tpm_handle(handle)
-        is_transient = (tpm_handle & 0xFF000000) == TPM2_HT.TRANSIENT
+        handle_type = (tpm_handle & 0xFF000000) >> TPM2_HR.SHIFT
         try:
             yield handle
         finally:
-            if is_transient:
+            if handle_type in {TPM2_HT.TRANSIENT, TPM2_HT.HMAC_SESSION, TPM2_HT.POLICY_SESSION}:
                 self.flush_context(handle)
+            else:
+                self.tr_close(handle)
 
     @staticmethod
     def _fixup_hierarchy(hierarchy: ESYS_TR) -> Union[TPM2_RH, ESYS_TR]:
