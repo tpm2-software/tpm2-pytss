@@ -823,6 +823,8 @@ class FAPI:
         ret = lib.Fapi_GetPlatformCertificates(
             self._ctx, certificate, certificates_size
         )
+        print(ffi.typeof(certificate))
+        print(ffi.typeof(certificates_size), certificates_size[0])
         _chkrc(ret, acceptable=lib.TSS2_FAPI_RC_NO_CERT if no_cert_ok else None)
         if no_cert_ok and ret == lib.TSS2_FAPI_RC_NO_CERT:
             return b""
