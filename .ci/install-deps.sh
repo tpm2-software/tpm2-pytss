@@ -99,7 +99,7 @@ if pkg-config --exists tss2-tcti-swtpm; then
 # Get IBM Simulator (supported for a longer time)
 else
   # pull from fork that has fixes for RC handling not yet in mainline.
-  git -C /tmp clone --depth=1 https://github.com/williamcroberts/ibmswtpm2.git -b fix-rc-exits
+  git -C /tmp clone --depth=1 https://github.com/kgoldman/ibmswtpm2.git
   pushd /tmp/ibmswtpm2/src
   make -j$(nproc)
   sudo cp tpm_server /usr/local/bin
