@@ -213,7 +213,12 @@ class type_generator(build_ext):
                 header_path,
                 cpp_path=cpp_path(),
                 cpp_args=cpp_args(
-                    ["-std=c99", "-D__extension__=", "-D__attribute__(x)="]
+                    [
+                        "-std=c99",
+                        "-D__extension__=",
+                        "-D__attribute__(x)=",
+                        "-D__typeof__(x)=",
+                    ]
                 ),
             )
         parser = c_parser.CParser()
@@ -254,6 +259,7 @@ class type_generator(build_ext):
                                 "-std=c99",
                                 "-D__extension__=",
                                 "-D__attribute__(x)=",
+                                "-D__typeof__(x)=",
                                 "-D__float128=long double",
                                 "-D_FORTIFY_SOURCE=0",
                             ]
