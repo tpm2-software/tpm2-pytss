@@ -11,6 +11,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric.utils import Prehashed
 from cryptography import x509
 import datetime
+import copy
 
 
 rsa_template = TPM2B_PUBLIC.parse(
@@ -502,3 +503,21 @@ class TestCryptography(TSS2_EsapiTest):
         halg = privkey.get_digest_algorithm()
         csr = builder.sign(privkey, algorithm=halg())
         self.assertEqual(csr.is_signature_valid, True)
+
+    def test_rsa_copy(self):
+        handle, _, _, _, _ = self.ectx.create_primary(
+            in_sensitive=None, in_public=rsa_template
+        )
+        privkey = tpm_rsa_private_key(self.ectx, handle)
+        privkey_copy = copy.copy(privkey)
+
+        self.assertEqual(privkey.key_size, privkey_copy.key_size)
+
+    def test_ecc_copy(self):
+        handle, _, _, _, _ = self.ectx.create_primary(
+            in_sensitive=None, in_public=ecc_template
+        )
+        privkey = tpm_ecc_private_key(self.ectx, handle)
+        privkey_copy = copy.copy(privkey)
+
+        self.assertEqual(type(privkey.curve), type(privkey_copy.curve))
