@@ -233,7 +233,7 @@ class TSSPrivKey(object):
         elif password and self.empty_auth:
             warnings.warn("password specified but empty_auth is true")
         phandle = self._getparent(ectx, self.public.publicArea.type, self.parent)
-        with ectx.flush_handle(phandle) as phandle:
+        with phandle as phandle:
             handle = ectx.load(phandle, self.private, self.public)
         ectx.tr_set_auth(handle, password)
         return handle
@@ -260,7 +260,7 @@ class TSSPrivKey(object):
             insens.sensitive.userAuth = password
             emptyauth = False
         phandle = cls._getparent(ectx, template.type, parent)
-        with ectx.flush_handle(phandle) as phandle:
+        with phandle as phandle:
             private, public, _, _, _ = ectx.create(
                 parent_handle=phandle,
                 in_sensitive=insens,
