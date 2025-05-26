@@ -4980,6 +4980,72 @@ class TestEsys(TSS2_EsapiTest):
         attributes = self.ectx.trsess_get_attributes(session)
         self.assertEqual(attributes, TPMA_SESSION.ENCRYPT | TPMA_SESSION.DECRYPT)
 
+    def test_esys_tr_context_manager_hmac_session(self):
+        sym = TPMT_SYM_DEF(
+            algorithm=TPM2_ALG.XOR,
+            keyBits=TPMU_SYM_KEY_BITS(exclusiveOr=TPM2_ALG.SHA256),
+            mode=TPMU_SYM_MODE(aes=TPM2_ALG.CFB),
+        )
+
+        hmac_session = self.ectx.start_auth_session(
+            tpm_key=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            session_type=TPM2_SE.HMAC,
+            symmetric=sym,
+            auth_hash=TPM2_ALG.SHA256,
+        )
+
+        self.ectx.trsess_set_attributes(
+            hmac_session, TPMA_SESSION.ENCRYPT | TPMA_SESSION.CONTINUESESSION
+        )
+
+        with hmac_session as flush_me:
+            self.ectx.get_random(4, session1=flush_me)
+
+        with self.assertRaises(TSS2_Exception) as e:
+            self.ectx.get_random(4, session1=hmac_session)
+
+        self.assertEqual(e.exception.rc, TSS2_RC.ESYS_RC_BAD_TR)
+
+    def test_esys_tr_context_manager_policy_session(self):
+        sym = TPMT_SYM_DEF(
+            algorithm=TPM2_ALG.XOR,
+            keyBits=TPMU_SYM_KEY_BITS(exclusiveOr=TPM2_ALG.SHA256),
+            mode=TPMU_SYM_MODE(aes=TPM2_ALG.CFB),
+        )
+
+        session = self.ectx.start_auth_session(
+            tpm_key=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            session_type=TPM2_SE.TRIAL,
+            symmetric=sym,
+            auth_hash=TPM2_ALG.SHA256,
+        )
+
+        with session as flush_me:
+            self.ectx.policy_auth_value(flush_me)
+
+        with self.assertRaises(TSS2_Exception) as e:
+            self.ectx.policy_get_digest(session)
+
+        self.assertEqual(e.exception.rc, TSS2_RC.ESYS_RC_BAD_TR)
+
+    def test_esys_tr_context_manager_transient(self):
+        handle, _, _, _, _ = self.ectx.create_primary(None)
+
+        with handle as flush_me:
+            self.ectx.create(flush_me, None)
+
+        with self.assertRaises(TSS2_Exception) as e:
+            self.ectx.create(handle, None)
+
+        self.assertEqual(e.exception.rc, TSS2_RC.ESYS_RC_BAD_TR)
+
+    def test_esys_tr_context_manager_owner(self):
+        owner = ESYS_TR(ESYS_TR.OWNER, ectx=self.ectx)
+        with owner as flush_me:
+            pass
+
 
 if __name__ == "__main__":
     unittest.main()

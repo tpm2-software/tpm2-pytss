@@ -159,6 +159,14 @@ class ESAPI:
             self._tcti.close()
         self._tcti = None
 
+    def is_closed(self) -> bool:
+        """Checks if the ESAPI context is finalized.
+
+        Returns:
+            True is the ESAPI context is finalized else False.
+        """
+        return not self._ctx_pp
+
     def get_tcti(self) -> Optional[TCTI]:
         """Return the used TCTI context.
 
@@ -575,7 +583,7 @@ class ESAPI:
             )
         )
 
-        return ESYS_TR(session_handle[0])
+        return ESYS_TR(session_handle[0], ectx=self)
 
     def trsess_set_attributes(
         self, session: ESYS_TR, attributes: Union[TPMA_SESSION, int], mask: int = 0xFF
@@ -880,7 +888,7 @@ class ESAPI:
             )
         )
 
-        return ESYS_TR(object_handle[0])
+        return ESYS_TR(object_handle[0], ectx=self)
 
     def load_external(
         self,
@@ -946,7 +954,7 @@ class ESAPI:
             )
         )
 
-        return ESYS_TR(object_handle[0])
+        return ESYS_TR(object_handle[0], ectx=self)
 
     def read_public(
         self,
@@ -1321,7 +1329,7 @@ class ESAPI:
         )
 
         return (
-            ESYS_TR(object_handle[0]),
+            ESYS_TR(object_handle[0], ectx=self),
             TPM2B_PRIVATE(_get_dptr(out_private, lib.Esys_Free)),
             TPM2B_PUBLIC(_get_dptr(out_public, lib.Esys_Free)),
         )
@@ -2427,7 +2435,7 @@ class ESAPI:
             )
         )
 
-        return ESYS_TR(sequence_handle[0])
+        return ESYS_TR(sequence_handle[0], ectx=self)
 
     def mac_start(
         self,
@@ -2495,7 +2503,7 @@ class ESAPI:
             )
         )
 
-        return ESYS_TR(sequence_handle[0])
+        return ESYS_TR(sequence_handle[0], ectx=self)
 
     def hash_sequence_start(
         self,
@@ -2555,7 +2563,7 @@ class ESAPI:
             )
         )
 
-        return ESYS_TR(sequence_handle[0])
+        return ESYS_TR(sequence_handle[0], ectx=self)
 
     def sequence_update(
         self,
@@ -5166,7 +5174,7 @@ class ESAPI:
         )
 
         return (
-            ESYS_TR(object_handle[0]),
+            ESYS_TR(object_handle[0], ectx=self),
             TPM2B_PUBLIC(_cdata=_get_dptr(out_public, lib.Esys_Free)),
             TPM2B_CREATION_DATA(_cdata=_get_dptr(creation_data, lib.Esys_Free)),
             TPM2B_DIGEST(_cdata=_get_dptr(creation_hash, lib.Esys_Free)),
@@ -5926,7 +5934,7 @@ class ESAPI:
         loaded_handle = ffi.new("ESYS_TR *")
         _chkrc(lib.Esys_ContextLoad(self._ctx, context_cdata, loaded_handle))
 
-        return ESYS_TR(loaded_handle[0])
+        return ESYS_TR(loaded_handle[0], ectx=self)
 
     def flush_context(self, flush_handle: ESYS_TR) -> None:
         """Invoke the TPM2_FlushContext command.
@@ -7288,7 +7296,7 @@ class ESAPI:
                 f"Expected type_ to be FAPI_ESYSBLOB.CONTEXTLOAD or FAPI_ESYSBLOB.DESERIALIZE, got {type_}"
             )
 
-        return ESYS_TR(esys_handle[0])
+        return ESYS_TR(esys_handle[0], ectx=self)
 
     def tr_serialize(self, esys_handle: ESYS_TR) -> bytes:
         """Serialization of an ESYS_TR into a byte buffer.
@@ -7358,7 +7366,7 @@ class ESAPI:
         esys_handle = ffi.new("ESYS_TR *")
         _chkrc(lib.Esys_TR_Deserialize(self._ctx, buffer, len(buffer), esys_handle))
 
-        return ESYS_TR(esys_handle[0])
+        return ESYS_TR(esys_handle[0], ectx=self)
 
     @contextlib.contextmanager
     def flush_handle(self, handle: ESYS_TR) -> ESYS_TR:

@@ -11,6 +11,7 @@ from .internal.utils import (
     _CLASS_INT_ATTRS_from_string,
     _chkrc,
 )
+import weakref
 
 
 class TPM_FRIENDLY_ITER(type):
@@ -407,6 +408,8 @@ class ESYS_TR(TPM_FRIENDLY_INT):
 
     To get the ESYS_TR identifier for a persistent handle, such as a NV area
     or a persistent key use :func:`tpm2_pytss.ESAPI.tr_from_tpmpublic`
+
+    Can be used as a context manager to flush transient and session handles.
     """
 
     NONE = 0xFFF
@@ -479,6 +482,33 @@ class ESYS_TR(TPM_FRIENDLY_INT):
     RH_ACT_D = 0x12D
     RH_ACT_E = 0x12E
     RH_ACT_F = 0x12F
+
+    def __new__(cls, value: int, ectx: "ESAPI" = None):
+        obj = super().__new__(cls, value)
+        if ectx is not None and not ectx.is_closed():
+            obj._ectx_ref = weakref.ref(ectx)
+        else:
+            obj._ectx_ref = None
+        return obj
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> bool:
+        if self._ectx_ref is None:
+            return False
+        ectx = self._ectx_ref()
+        if ectx is None or ectx.is_closed():
+            return False
+        handle = ectx.tr_get_tpm_handle(self)
+        if (handle & TPM2_HR.RANGE_MASK) in (
+            TPM2_HR.TRANSIENT,
+            TPM2_HR.HMAC_SESSION,
+            TPM2_HR.POLICY_SESSION,
+        ):
+            ectx.flush_context(self)
+        self._ectx_ref = None
+        return False
 
     def marshal(self):
         raise NotImplementedError("Use serialize() instead")
