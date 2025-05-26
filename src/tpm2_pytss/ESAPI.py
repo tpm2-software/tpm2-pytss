@@ -4224,7 +4224,7 @@ class ESAPI:
     def policy_pcr(
         self,
         policy_session: ESYS_TR,
-        pcr_digest: Union[TPM2B_DIGEST, bytes, str],
+        pcr_digest: Union[TPM2B_DIGEST, bytes, str, None],
         pcrs: Union[TPML_PCR_SELECTION, str],
         session1: ESYS_TR = ESYS_TR.NONE,
         session2: ESYS_TR = ESYS_TR.NONE,
@@ -4238,8 +4238,8 @@ class ESAPI:
 
         Args:
             policy_session (ESYS_TR): Handle for the policy session being extended.
-            pcr_digest (Union[TPM2B_DIGEST, bytes, str]): Expected digest value of the selected PCR using the
-                hash algorithm of the session; may be zero length.
+            pcr_digest (Union[TPM2B_DIGEST, bytes, str, None]): Expected digest value of the selected PCR
+                using the hash algorithm of the session; may be zero length or None.
             pcrs (Union[TPML_PCR_SELECTION, str]): The PCR to include in the check digest.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -4261,7 +4261,9 @@ class ESAPI:
         _check_handle_type(session2, "session2")
         _check_handle_type(session3, "session3")
 
-        pcr_digest_cdata = _get_cdata(pcr_digest, TPM2B_DIGEST, "pcr_digest")
+        pcr_digest_cdata = _get_cdata(
+            pcr_digest, TPM2B_DIGEST, "pcr_digest", allow_none=True
+        )
         pcrs_cdata = _get_cdata(pcrs, TPML_PCR_SELECTION, "pcrs")
 
         _chkrc(

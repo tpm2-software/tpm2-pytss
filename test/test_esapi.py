@@ -4143,6 +4143,8 @@ class TestEsys(TSS2_EsapiTest):
             TPML_PCR_SELECTION.parse("sha256:1"),
         )
 
+        self.ectx.policy_pcr(session, None, "sha256:1")
+
         with self.assertRaises(TypeError):
             self.ectx.policy_pcr(session, TPM2B_ATTEST(), "sha256:1")
 
