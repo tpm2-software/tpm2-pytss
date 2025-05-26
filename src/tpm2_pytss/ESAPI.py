@@ -498,7 +498,7 @@ class ESAPI:
         tpm_key: ESYS_TR,
         bind: ESYS_TR,
         session_type: TPM2_SE,
-        symmetric: Union[TPMT_SYM_DEF, str],
+        symmetric: Union[TPMT_SYM_DEF, str, None],
         auth_hash: TPM2_ALG,
         nonce_caller: Union[TPM2B_NONCE, bytes, str, None] = None,
         session1: ESYS_TR = ESYS_TR.NONE,
@@ -515,8 +515,8 @@ class ESAPI:
             tpm_key (ESYS_TR): Handle of a loaded decrypt key used to encrypt salt.
             bind (ESYS_TR): Entity providing the authValue.
             session_type (TPM2_SE): Indicates the type of the session; simple HMAC or policy (including a trial policy).
-            symmetric (TPMT_SYM_DEF, str): The algorithm and key size for parameter encryption. Can use strings understood
-                by TPMT_SYM_DEF.parse().
+            symmetric (TPMT_SYM_DEF, str, None): The algorithm and key size for parameter encryption. Can use strings understood
+                by TPMT_SYM_DEF.parse() and None set the algorithm to TPM2_ALG.NULL.
             auth_hash (TPM2_ALG, str): Hash algorithm to use for the session. Can use strings as understood by TPM2_ALG.parse().
             nonce_caller (Union[TPM2B_NONCE, bytes, str, None]): Initial nonceCaller, sets nonceTPM size for the
                 session. Can be None to have ESAPI generate it for the caller. Defaults to None.
@@ -554,7 +554,8 @@ class ESAPI:
 
         if isinstance(symmetric, str):
             symmetric = TPMT_SYM_DEF.parse(symmetric)
-
+        elif symmetric is None:
+            symmetric = TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL)
         symmetric_cdata = _get_cdata(symmetric, TPMT_SYM_DEF, "symmetric")
 
         session_handle = ffi.new("ESYS_TR *")

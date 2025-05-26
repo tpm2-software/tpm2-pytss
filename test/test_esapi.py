@@ -1909,7 +1909,7 @@ class TestEsys(TSS2_EsapiTest):
             ESYS_TR.NONE,
             ESYS_TR.NONE,
             TPM2_SE.POLICY,
-            TPMT_SYM_DEF(algorithm=TPM2_ALG.NULL),
+            None,
             TPM2_ALG.SHA256,
         )
 
