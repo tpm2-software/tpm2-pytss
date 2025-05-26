@@ -609,6 +609,32 @@ class ESAPI:
 
         _chkrc(lib.Esys_TRSess_SetAttributes(self._ctx, session, attributes, mask))
 
+    def trsess_get_attributes(self, session: ESYS_TR) -> TPMA_SESSION:
+        """Get session attributes.
+
+        Get the session attributes.
+        Note: this function only applies to ESYS_TR objects that represent sessions.
+
+        Args:
+            session (ESYS_TR): The session handle.
+
+        Returns:
+            The TPMA_SESSION attributes for the session
+
+        Raises:
+            TypeError: If a parameter is not of an expected type.
+            TSS2_Exception: Any of the various TSS2_RC's the lower layers can return.
+
+        C Function: Esys_TRSess_GetAttributes
+        """
+        _check_handle_type(session, "session")
+
+        attributes = ffi.new("TPMA_SESSION *")
+
+        _chkrc(lib.Esys_TRSess_GetAttributes(self._ctx, session, attributes))
+
+        return TPMA_SESSION(attributes[0])
+
     def trsess_get_nonce_tpm(self, session: ESYS_TR) -> TPM2B_NONCE:
         """Retrieve the TPM nonce of an Esys_TR session object.
 

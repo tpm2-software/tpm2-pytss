@@ -4965,6 +4965,21 @@ class TestEsys(TSS2_EsapiTest):
         with self.assertRaises(TypeError):
             self.ectx.act_set_timeout(ESYS_TR.RH_ACT_0, 1337, session3="not a handle")
 
+    def test_trsess_get_attributes(self):
+        session = self.ectx.start_auth_session(
+            tpm_key=ESYS_TR.NONE,
+            bind=ESYS_TR.NONE,
+            session_type=TPM2_SE.HMAC,
+            symmetric=None,
+            auth_hash=TPM2_ALG.SHA256,
+        )
+
+        self.ectx.trsess_set_attributes(
+            session, TPMA_SESSION.ENCRYPT | TPMA_SESSION.DECRYPT
+        )
+        attributes = self.ectx.trsess_get_attributes(session)
+        self.assertEqual(attributes, TPMA_SESSION.ENCRYPT | TPMA_SESSION.DECRYPT)
+
 
 if __name__ == "__main__":
     unittest.main()
