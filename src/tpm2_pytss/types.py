@@ -544,7 +544,54 @@ class TPML_OBJECT(TPM_OBJECT):
         return TPML_Iterator(self)
 
 
-class TPMU_PUBLIC_PARMS(TPM_OBJECT):
+class TPMU_OBJECT(TPM_BASE_OBJECT):
+    """Base class for union types, not suitable for direct instantiation."""
+
+    def marshal(self, selector: int) -> bytes:
+        """Marshal union instance into bytes.
+
+        Args:
+            selector (int): The union selector.
+        Returns:
+            Returns the marshaled type as bytes.
+        """
+        mfunc = getattr(lib, f"Tss2_MU_{self.__class__.__name__}_Marshal", None)
+        if mfunc is None:
+            raise RuntimeError(
+                f"No marshal function found for {self.__class__.__name__}"
+            )
+        _cdata = self._cdata
+        tipe = ffi.typeof(_cdata)
+        if tipe.kind != "pointer":
+            _cdata = ffi.new(f"{self.__class__.__name__} *", self._cdata)
+        offset = ffi.new("size_t *")
+        buf = ffi.new("uint8_t[4096]")
+        _chkrc(mfunc(_cdata, selector, buf, 4096, offset))
+        return bytes(buf[0 : offset[0]])
+
+    @classmethod
+    def unmarshal(cls, selector: int, buf: bytes):
+        """Unmarshal bytes into type instance.
+
+        Args:
+            selector (int): The union selector.
+            buf (bytes): The bytes to be unmarshaled.
+
+        Returns:
+            Returns an instance of the current type and the number of bytes consumed.
+        """
+        umfunc = getattr(lib, f"Tss2_MU_{cls.__name__}_Unmarshal", None)
+        if umfunc is None:
+            raise RuntimeError(f"No unmarshal function found for {cls.__name__}")
+        if isinstance(buf, TPM2B_SIMPLE_OBJECT):
+            buf = bytes(buf)
+        _cdata = ffi.new(f"{cls.__name__} *")
+        offset = ffi.new("size_t *")
+        _chkrc(umfunc(buf, len(buf), offset, selector, _cdata))
+        return cls(_cdata=_cdata), offset[0]
+
+
+class TPMU_PUBLIC_PARMS(TPMU_OBJECT):
     pass
 
 
@@ -1753,7 +1800,7 @@ class TPMS_ASYM_PARMS(TPM_OBJECT):
     pass
 
 
-class TPMU_ATTEST(TPM_OBJECT):
+class TPMU_ATTEST(TPMU_OBJECT):
     pass
 
 
@@ -1769,7 +1816,7 @@ class TPMS_AUTH_RESPONSE(TPM_OBJECT):
     pass
 
 
-class TPMU_CAPABILITIES(TPM_OBJECT):
+class TPMU_CAPABILITIES(TPMU_OBJECT):
     pass
 
 
@@ -2055,11 +2102,11 @@ class TPMT_ECC_SCHEME(TPM_OBJECT):
     pass
 
 
-class TPMU_ASYM_SCHEME(TPM_OBJECT):
+class TPMU_ASYM_SCHEME(TPMU_OBJECT):
     pass
 
 
-class TPMU_KDF_SCHEME(TPM_OBJECT):
+class TPMU_KDF_SCHEME(TPMU_OBJECT):
     pass
 
 
@@ -2075,11 +2122,11 @@ class TPMT_RSA_SCHEME(TPM_OBJECT):
     pass
 
 
-class TPMU_SYM_KEY_BITS(TPM_OBJECT):
+class TPMU_SYM_KEY_BITS(TPMU_OBJECT):
     pass
 
 
-class TPMU_SYM_MODE(TPM_OBJECT):
+class TPMU_SYM_MODE(TPMU_OBJECT):
     pass
 
 
@@ -2091,7 +2138,7 @@ class TPM2B_NONCE(TPM2B_SIMPLE_OBJECT):
     pass
 
 
-class TPMU_PUBLIC_ID(TPM_OBJECT):
+class TPMU_PUBLIC_ID(TPMU_OBJECT):
     pass
 
 
@@ -2270,11 +2317,11 @@ class TPMT_SENSITIVE(TPM_OBJECT):
         )
 
 
-class TPMU_SENSITIVE_COMPOSITE(TPM_OBJECT):
+class TPMU_SENSITIVE_COMPOSITE(TPMU_OBJECT):
     pass
 
 
-class TPMU_SCHEME_KEYEDHASH(TPM_OBJECT):
+class TPMU_SCHEME_KEYEDHASH(TPMU_OBJECT):
     pass
 
 
@@ -2302,7 +2349,7 @@ class TPMT_HA(TPM_OBJECT):
         return bytes(self.digest.sha512[0:ds])
 
 
-class TPMU_HA(TPM_OBJECT):
+class TPMU_HA(TPMU_OBJECT):
     pass
 
 
@@ -2310,7 +2357,7 @@ class TPMT_SIG_SCHEME(TPM_OBJECT):
     pass
 
 
-class TPMU_SIGNATURE(TPM_OBJECT):
+class TPMU_SIGNATURE(TPMU_OBJECT):
     pass
 
 
@@ -2340,7 +2387,7 @@ class TPMT_SIGNATURE(TPM_OBJECT):
         return _get_signature_bytes(self)
 
 
-class TPMU_SIG_SCHEME(TPM_OBJECT):
+class TPMU_SIG_SCHEME(TPMU_OBJECT):
     pass
 
 

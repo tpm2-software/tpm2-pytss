@@ -38,6 +38,7 @@ from .types import (
     TPMT_SIG_SCHEME,
     TPMT_RSA_DECRYPT,
     TPMT_PUBLIC_PARMS,
+    TPM_BASE_OBJECT,
 )
 
 
@@ -210,7 +211,7 @@ class base_encdec(object):
         Raises:
             TypeError: if val is either a TPM union or if type of val is unsupported.
         """
-        if isinstance(val, TPM_OBJECT) and self._is_union(val):
+        if isinstance(val, TPM_BASE_OBJECT) and self._is_union(val):
             raise TypeError(f"tried to encode union {val.__class__.__name__}")
         if isinstance(val, TPMA_FRIENDLY_INTLIST):
             return self.encode_friendly_intlist(val)
@@ -404,7 +405,7 @@ class base_encdec(object):
         Raises:
             TypeError: if dst is not a supported type or dst is a TPM union
         """
-        if isinstance(dst, TPM_OBJECT) and self._is_union(dst):
+        if isinstance(dst, TPM_BASE_OBJECT) and self._is_union(dst):
             raise TypeError(f"tried to decode union {dst.__class__.__name__}")
         if isinstance(dst, TPMA_FRIENDLY_INTLIST):
             return self.decode_friendly_intlist(dst, src)

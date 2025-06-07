@@ -2030,6 +2030,28 @@ class TypesTest(unittest.TestCase):
         self.assertEqual(handle, 0xFFFFFFFF)
         self.assertEqual(off, 4)
 
+    def test_union_marshal(self):
+        dig = b"A" * 32
+        ha = TPMU_HA(sha256=dig)
+        buf = ha.marshal(TPM2_ALG.SHA256)
+
+        self.assertEqual(buf, dig)
+
+        with self.assertRaises(TSS2_Exception) as e:
+            ha.marshal(TPM2_ALG.LAST + 1)
+        self.assertEqual(e.exception.rc, TSS2_RC.MU_RC_BAD_VALUE)
+
+    def test_union_unmarshal(self):
+        dig = b"A" * 32
+        ha, off = TPMU_HA.unmarshal(TPM2_ALG.SHA256, dig)
+
+        self.assertEqual(bytes(ha.sha256), dig)
+        self.assertEqual(off, len(dig))
+
+        with self.assertRaises(TSS2_Exception) as e:
+            ha.unmarshal(TPM2_ALG.LAST + 1, dig)
+        self.assertEqual(e.exception.rc, TSS2_RC.MU_RC_BAD_VALUE)
+
 
 if __name__ == "__main__":
     unittest.main()
