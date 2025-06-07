@@ -2356,6 +2356,34 @@ class TPM2B_OPERAND(TPM2B_SIMPLE_OBJECT):
     pass
 
 
+class TPMS_SIG_SCHEME_RSASSA(TPM_OBJECT):
+    pass
+
+
+class TPMS_SIG_SCHEME_RSAPSS(TPM_OBJECT):
+    pass
+
+
+class TPMS_SIG_SCHEME_ECDSA(TPM_OBJECT):
+    pass
+
+
+class TPMS_SIG_SCHEME_SM2(TPM_OBJECT):
+    pass
+
+
+class TPMS_SIG_SCHEME_ECSCHNORR(TPM_OBJECT):
+    pass
+
+
+class TPMS_SIG_SCHEME_ECDAA(TPM_OBJECT):
+    pass
+
+
+class TPMS_SCHEME_HMAC(TPM_OBJECT):
+    pass
+
+
 if _lib_version_atleast("tss2-policy", "4.0.0"):
 
     class TSS2_OBJECT(TPM_OBJECT):
