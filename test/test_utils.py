@@ -10,7 +10,7 @@ from tpm2_pytss.internal.crypto import (
     _get_digest,
 )
 from tpm2_pytss.utils import *
-from tpm2_pytss.internal.templates import _ek
+from tpm2_pytss.internal.templates import ek_template
 from .TSS2_BaseTest import TSS2_EsapiTest
 
 from cryptography.hazmat.primitives import hashes
@@ -616,10 +616,10 @@ class TestUtils(TSS2_EsapiTest):
             create_ek_template("EK-HIGH-RSA2048", nv_read)
         self.assertEqual(str(e.exception), "no certificate found for EK-HIGH-RSA2048")
 
-        cert_index, def_template = _ek.EK_HIGH_RSA2048
+        template = ek_template.lookup("h-1")
         nv_cert = TPM2B_NV_PUBLIC(
             nvPublic=TPMS_NV_PUBLIC(
-                nvIndex=cert_index,
+                nvIndex=template.cert_index,
                 nameAlg=TPM2_ALG.SHA256,
                 attributes=TPMA_NV.AUTHWRITE | TPMA_NV.AUTHREAD,
                 dataSize=len(b"I am a certificate"),
@@ -628,14 +628,14 @@ class TestUtils(TSS2_EsapiTest):
         cnh = self.ectx.nv_define_space(b"", nv_cert, ESYS_TR.OWNER)
         self.ectx.nv_write(cnh, b"I am a certificate")
         nv_read = NVReadEK(self.ectx)
-        cert, template = create_ek_template("EK-HIGH-RSA2048", nv_read)
+        cert, key_template = create_ek_template("EK-HIGH-RSA2048", nv_read)
         self.assertEqual(cert, b"I am a certificate")
-        self.assertEqual(template.marshal(), def_template.marshal())
+        self.assertEqual(key_template.marshal(), template.template.marshal())
 
         tb = ek_test_template.marshal()
         nv_template = TPM2B_NV_PUBLIC(
             nvPublic=TPMS_NV_PUBLIC(
-                nvIndex=cert_index + 1,
+                nvIndex=template.cert_index + 1,
                 nameAlg=TPM2_ALG.SHA256,
                 attributes=TPMA_NV.AUTHWRITE | TPMA_NV.AUTHREAD,
                 dataSize=len(tb),
@@ -656,10 +656,10 @@ class TestUtils(TSS2_EsapiTest):
             create_ek_template("EK-HIGH-ECC256", nv_read)
         self.assertEqual(str(e.exception), "no certificate found for EK-HIGH-ECC256")
 
-        cert_index, def_template = _ek.EK_HIGH_ECC256
+        template = ek_template.lookup("H-2")
         nv_cert = TPM2B_NV_PUBLIC(
             nvPublic=TPMS_NV_PUBLIC(
-                nvIndex=cert_index,
+                nvIndex=template.cert_index,
                 nameAlg=TPM2_ALG.SHA256,
                 attributes=TPMA_NV.AUTHWRITE | TPMA_NV.AUTHREAD,
                 dataSize=len(b"I am a certificate"),
@@ -668,14 +668,14 @@ class TestUtils(TSS2_EsapiTest):
         cnh = self.ectx.nv_define_space(b"", nv_cert, ESYS_TR.OWNER)
         self.ectx.nv_write(cnh, b"I am a certificate")
         nv_read = NVReadEK(self.ectx)
-        cert, template = create_ek_template("EK-HIGH-ECC256", nv_read)
+        cert, key_template = create_ek_template("EK-HIGH-ECC256", nv_read)
         self.assertEqual(cert, b"I am a certificate")
-        self.assertEqual(template.marshal(), def_template.marshal())
+        self.assertEqual(key_template.marshal(), template.template.marshal())
 
         tb = ek_test_template.marshal()
         nv_template = TPM2B_NV_PUBLIC(
             nvPublic=TPMS_NV_PUBLIC(
-                nvIndex=cert_index + 1,
+                nvIndex=template.cert_index + 1,
                 nameAlg=TPM2_ALG.SHA256,
                 attributes=TPMA_NV.AUTHWRITE | TPMA_NV.AUTHREAD,
                 dataSize=len(tb),
@@ -684,10 +684,10 @@ class TestUtils(TSS2_EsapiTest):
         tnh = self.ectx.nv_define_space(b"", nv_template, ESYS_TR.OWNER)
         self.ectx.nv_write(tnh, tb)
         nv_read = NVReadEK(self.ectx)
-        cert, template = create_ek_template("EK-HIGH-ECC256", nv_read)
+        cert, key_template = create_ek_template("EK-HIGH-ECC256", nv_read)
         self.assertEqual(cert, b"I am a certificate")
         self.assertEqual(
-            template.marshal(), TPM2B_PUBLIC(publicArea=ek_test_template).marshal()
+            key_template.marshal(), TPM2B_PUBLIC(publicArea=ek_test_template).marshal()
         )
 
     def test_create_ek_high_ecc384(self):
@@ -696,10 +696,10 @@ class TestUtils(TSS2_EsapiTest):
             create_ek_template("EK-HIGH-ECC384", nv_read)
         self.assertEqual(str(e.exception), "no certificate found for EK-HIGH-ECC384")
 
-        cert_index, def_template = _ek.EK_HIGH_ECC384
+        template = ek_template.lookup("EK-HIGH-ECC384")
         nv_cert = TPM2B_NV_PUBLIC(
             nvPublic=TPMS_NV_PUBLIC(
-                nvIndex=cert_index,
+                nvIndex=template.cert_index,
                 nameAlg=TPM2_ALG.SHA256,
                 attributes=TPMA_NV.AUTHWRITE | TPMA_NV.AUTHREAD,
                 dataSize=len(b"I am a certificate"),
@@ -708,14 +708,14 @@ class TestUtils(TSS2_EsapiTest):
         cnh = self.ectx.nv_define_space(b"", nv_cert, ESYS_TR.OWNER)
         self.ectx.nv_write(cnh, b"I am a certificate")
         nv_read = NVReadEK(self.ectx)
-        cert, template = create_ek_template("EK-HIGH-ECC384", nv_read)
+        cert, key_template = create_ek_template("EK-HIGH-ECC384", nv_read)
         self.assertEqual(cert, b"I am a certificate")
-        self.assertEqual(template.marshal(), def_template.marshal())
+        self.assertEqual(key_template.marshal(), template.template.marshal())
 
         tb = ek_test_template.marshal()
         nv_template = TPM2B_NV_PUBLIC(
             nvPublic=TPMS_NV_PUBLIC(
-                nvIndex=cert_index + 1,
+                nvIndex=template.cert_index + 1,
                 nameAlg=TPM2_ALG.SHA256,
                 attributes=TPMA_NV.AUTHWRITE | TPMA_NV.AUTHREAD,
                 dataSize=len(tb),
@@ -724,10 +724,10 @@ class TestUtils(TSS2_EsapiTest):
         tnh = self.ectx.nv_define_space(b"", nv_template, ESYS_TR.OWNER)
         self.ectx.nv_write(tnh, tb)
         nv_read = NVReadEK(self.ectx)
-        cert, template = create_ek_template("EK-HIGH-ECC384", nv_read)
+        cert, key_template = create_ek_template("EK-HIGH-ECC384", nv_read)
         self.assertEqual(cert, b"I am a certificate")
         self.assertEqual(
-            template.marshal(), TPM2B_PUBLIC(publicArea=ek_test_template).marshal()
+            key_template.marshal(), TPM2B_PUBLIC(publicArea=ek_test_template).marshal()
         )
 
     def test_unmarshal_tools_pcr_values(self):

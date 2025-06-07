@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-2
+
 from .internal.crypto import (
     _kdfa,
     _get_digest,
@@ -20,7 +22,7 @@ from .constants import (
     TPM2_PT,
     TPM2_RH,
 )
-from .internal.templates import _ek
+from .internal.templates import ek_template
 from .TSS2_Exception import TSS2_Exception
 from cryptography.hazmat.primitives import constant_time as ct
 from cryptography.hazmat.primitives import hashes
@@ -419,21 +421,19 @@ def create_ek_template(
         ValueError: If ektype is unknown or if a high range certificate is requested but not found.
     """
 
-    en = ektype.replace("-", "_")
-    if not hasattr(_ek, en):
+    template = ek_template.lookup(ektype)
+    if template is None:
         raise ValueError(f"unknown EK type {ektype}")
-    (cert_index, template) = getattr(_ek, en)
+    key_template = TPM2B_PUBLIC(publicArea=template.template.publicArea)
 
-    nonce_index = None
-    if ektype in ("EK-RSA2048", "EK-ECC256"):
-        nonce_index = cert_index + 1
-        template_index = cert_index + 2
+    if template.nonce_index is None:
+        template_index = template.cert_index + 1
     else:
-        template_index = cert_index + 1
+        template_index = template.cert_index + 2
 
     cert = None
     try:
-        cert = nv_read_cb(cert_index)
+        cert = nv_read_cb(template.cert_index)
     except NoSuchIndex:
         if ektype not in ("EK-RSA2048", "EK-ECC256"):
             raise ValueError(f"no certificate found for {ektype}")
@@ -441,7 +441,7 @@ def create_ek_template(
     try:
         templb = nv_read_cb(template_index)
         tt, _ = TPMT_PUBLIC.unmarshal(templb)
-        template = TPM2B_PUBLIC(publicArea=tt)
+        key_template = TPM2B_PUBLIC(publicArea=tt)
     except NoSuchIndex:
         # The TPM is not required to have these Indices, but we must try
         # Avoids a race on checking for NV and then reading if a delete
@@ -449,26 +449,26 @@ def create_ek_template(
         pass
 
     nonce = None
-    if nonce_index:
+    if template.nonce_index is not None:
         try:
-            nonce = nv_read_cb(nonce_index)
+            nonce = nv_read_cb(template.nonce_index)
         except NoSuchIndex:
             # The TPM is not required to have these Indices, but we must try
             # Avoids a race on checking for NV and then reading if a delete
             # comes in
             pass
 
-    if nonce and template.publicArea.type == TPM2_ALG.RSA:
-        template.publicArea.unique.rsa = nonce + ((256 - len(nonce)) * b"\x00")
+    if nonce and key_template.publicArea.type == TPM2_ALG.RSA:
+        key_template.publicArea.unique.rsa = nonce + ((256 - len(nonce)) * b"\x00")
     elif (
         nonce
-        and template.publicArea.type == TPM2_ALG.ECC
-        and template.publicArea.parameters.eccDetail.curveID == TPM2_ECC.NIST_P256
+        and key_template.publicArea.type == TPM2_ALG.ECC
+        and key_template.publicArea.parameters.eccDetail.curveID == TPM2_ECC.NIST_P256
     ):
-        template.publicArea.unique.ecc.x = nonce + ((32 - len(nonce)) * b"\x00")
-        template.publicArea.unique.ecc.y = b"\x00" * 32
+        key_template.publicArea.unique.ecc.x = nonce + ((32 - len(nonce)) * b"\x00")
+        key_template.publicArea.unique.ecc.y = b"\x00" * 32
 
-    return cert, template
+    return cert, key_template
 
 
 def unmarshal_tools_pcr_values(
