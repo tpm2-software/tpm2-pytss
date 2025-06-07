@@ -823,7 +823,11 @@ class TPM2_CC(TPM_FRIENDLY_INT):
     Policy_AC_SendSelect = 0x00000196
     CertifyX509 = 0x00000197
     ACT_SetTimeout = 0x00000198
-    LAST = 0x00000198
+    ECC_Encrypt = 0x00000199
+    ECC_Decrypt = 0x0000019A
+    PolicyCapability = 0x0000019B
+    PolicyParameters = 0x0000019C
+    LAST = 0x0000019C
     Vendor_TCG_Test = 0x20000000
 
 
