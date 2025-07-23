@@ -1,0 +1,110 @@
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
+        tss-version: ['master', '3.2.3', '4.0.2', '4.1.3']
+        with-fapi: [true]
+        include:
+          - python-version: '3.9'
+            tss-version: '3.2.3'
+            with-fapi: false
+
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        env:
+          TPM2_TSS_VERSION: ${{ matrix.tss-version }}
+          TPM2_TSS_FAPI: ${{ matrix.with-fapi }}
+          TPM2_TOOLS_VERSION: ${{ matrix.tools-version }}
+        run: ./.ci/install-deps.sh
+
+      - name: Check
+        env:
+          TEST: 1
+        run: ./.ci/run.sh
+
+  coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+
+      - name: Install dependencies
+        env:
+          TPM2_TSS_VERSION: 4.1.3
+        run: ./.ci/install-deps.sh
+
+      - name: Check
+        env:
+          TEST: 1
+          ENABLE_COVERAGE: true
+        run: ./.ci/run.sh
+
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: /tmp/coverage.xml
+
+  whitespace-check:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Check
+      env:
+        WHITESPACE: 1
+      run: ./.ci/run.sh
+
+  style-check:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Install Dependencies
+      run: |
+        python3 -m pip install --user --break-system-packages --upgrade pip
+        python3 -m pip install --user --break-system-packages --upgrade black~=24.0
+
+    - name: Check
+      env:
+        STYLE: 1
+      run: ./.ci/run.sh
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Install Dependencies
+      run: |
+        python3 -m pip install --user --break-system-packages --upgrade pip
+        python3 -m pip install --user --break-system-packages --upgrade ruff
+
+    - name: Check
+      env:
+        LINT: 1
+      run: ./.ci/run.sh

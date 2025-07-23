@@ -1,0 +1,8 @@
+include README.md
+include LICENSE
+include src/tpm2_pytss/version
+include src/tpm2_pytss/config.json
+recursive-include src/tpm2_pytss/swig *
+recursive-include tests *
+recursive-include examples *
+exclude src/tpm2_pytss/internal/type_mapping.py

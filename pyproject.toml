@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=44", "setuptools_scm[toml]>=3.4.3", "pycparser", "pkgconfig"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+
+[tool.black]
+required-version = 24
+exclude = '''
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+    | esys_binding.py
+  )
+)
+'''
+
+[tool.ruff.lint]
+select = ["F401", "F541"]
