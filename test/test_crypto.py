@@ -777,6 +777,8 @@ class CryptoTest(TSS2_EsapiTest):
         )
         crypto._verify_signature(sig, secret, msg)
 
+        sig.verify_signature(secret, sigdig, prehashed=True)
+
     def test_verify_signature_ecc(self):
         template = TPM2B_PUBLIC.parse(
             "ecc:ecdsa_sha256",
@@ -802,7 +804,9 @@ class CryptoTest(TSS2_EsapiTest):
 
         crypto._verify_signature(sig, public, msg)
 
-    def test_verify_singature_rsapss(self):
+        crypto._verify_signature(sig, public, sigdig, prehashed=True)
+
+    def test_verify_signature_rsapss(self):
         template = TPM2B_PUBLIC.parse(
             "rsa2048:rsapss-sha384:null",
             objectAttributes=(
@@ -826,6 +830,8 @@ class CryptoTest(TSS2_EsapiTest):
         )
 
         crypto._verify_signature(sig, public, msg)
+
+        crypto._verify_signature(sig, public, sigdig, prehashed=True)
 
     def test_verify_singature_rsassa(self):
         template = TPM2B_PUBLIC.parse(
@@ -852,6 +858,8 @@ class CryptoTest(TSS2_EsapiTest):
 
         sig.verify_signature(public, msg)
 
+        sig.verify_signature(public, sigdig, prehashed=True)
+
     def test_verify_signature_bad(self):
         badalg = TPMT_SIGNATURE(sigAlg=TPM2_ALG.NULL)
         with self.assertRaises(ValueError) as e:
@@ -861,6 +869,7 @@ class CryptoTest(TSS2_EsapiTest):
         )
 
         hsig = TPMT_SIGNATURE(sigAlg=TPM2_ALG.HMAC)
+        hsig.signature.any.hashAlg = TPM2_ALG.SHA256
         with self.assertRaises(ValueError) as e:
             crypto._verify_signature(hsig, str("not bytes"), b"1234")
         self.assertEqual(
@@ -876,6 +885,7 @@ class CryptoTest(TSS2_EsapiTest):
         )
 
         badecc = TPMT_SIGNATURE(sigAlg=TPM2_ALG.ECDSA)
+        badecc.signature.any.hashAlg = TPM2_ALG.SHA256
         with self.assertRaises(ValueError) as e:
             crypto._verify_signature(badecc, str("bad"), b"1234")
         self.assertEqual(
@@ -892,6 +902,7 @@ class CryptoTest(TSS2_EsapiTest):
         )
 
         badrsa = TPMT_SIGNATURE(sigAlg=TPM2_ALG.RSAPSS)
+        badrsa.signature.any.hashAlg = TPM2_ALG.SHA256
         with self.assertRaises(ValueError) as e:
             crypto._verify_signature(badrsa, str("bad"), b"1234")
         self.assertEqual(

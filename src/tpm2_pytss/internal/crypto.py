@@ -3,7 +3,10 @@
 from math import ceil
 from ..constants import TPM2_ALG, TPM2_ECC
 from cryptography.hazmat.primitives.asymmetric import rsa, ec, padding
-from cryptography.hazmat.primitives.asymmetric.utils import encode_dss_signature
+from cryptography.hazmat.primitives.asymmetric.utils import (
+    encode_dss_signature,
+    Prehashed,
+)
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.hmac import HMAC
 from cryptography.hazmat.primitives.serialization import (
@@ -414,7 +417,7 @@ def _get_signature_bytes(sig):
     return rb
 
 
-def verify_signature_rsa(signature, key, data):
+def verify_signature_rsa(signature, key, data, prehashed):
     dt = _get_digest(signature.signature.any.hashAlg)
     if dt is None:
         raise ValueError(
@@ -429,44 +432,55 @@ def verify_signature_rsa(signature, key, data):
     else:
         raise ValueError(f"unsupported RSA signature algorithm: {signature.sigAlg}")
 
+    if prehashed:
+        digalg = Prehashed(dt())
+    else:
+        digalg = dt()
     sig = bytes(signature.signature.rsapss.sig)
     try:
-        key.verify(sig, data, pad, dt())
+        key.verify(sig, data, pad, digalg)
     except InvalidSignature:
         if mpad:
-            key.verify(sig, data, mpad, dt())
+            key.verify(sig, data, mpad, digalg)
         else:
             raise
 
 
-def verify_signature_ecc(signature, key, data):
+def verify_signature_ecc(signature, key, data, prehashed):
     dt = _get_digest(signature.signature.any.hashAlg)
     if dt is None:
         raise ValueError(
             f"unsupported digest algorithm: {signature.signature.ecdsa.hash}"
         )
+    if prehashed:
+        digalg = Prehashed(dt())
+    else:
+        digalg = dt()
     r = int.from_bytes(signature.signature.ecdsa.signatureR, byteorder="big")
     s = int.from_bytes(signature.signature.ecdsa.signatureS, byteorder="big")
     sig = encode_dss_signature(r, s)
-    key.verify(sig, data, ec.ECDSA(dt()))
+    key.verify(sig, data, ec.ECDSA(digalg))
 
 
-def verify_signature_hmac(signature, key, data):
+def verify_signature_hmac(signature, key, data, prehashed):
     dt = _get_digest(signature.signature.hmac.hashAlg)
     if dt is None:
         raise ValueError(
             f"unsupported digest algorithm: {signature.signature.hmac.hashAlg}"
         )
-    sh = hashes.Hash(dt(), backend=default_backend())
-    sh.update(data)
-    hdata = sh.finalize()
+    if prehashed:
+        hdata = data
+    else:
+        sh = hashes.Hash(dt(), backend=default_backend())
+        sh.update(data)
+        hdata = sh.finalize()
     sig = bytes(signature.signature.hmac)
     h = HMAC(key, dt(), backend=default_backend())
     h.update(hdata)
     h.verify(sig)
 
 
-def _verify_signature(signature, key, data):
+def _verify_signature(signature, key, data, prehashed=False):
     if hasattr(key, "publicArea"):
         key = key.publicArea
     kt = getattr(key, "type", None)
@@ -477,19 +491,19 @@ def _verify_signature(signature, key, data):
             raise ValueError(
                 f"bad key type for {signature.sigAlg}, expected RSA public key, got {key.__class__.__name__}"
             )
-        verify_signature_rsa(signature, key, data)
+        verify_signature_rsa(signature, key, data, prehashed)
     elif signature.sigAlg == TPM2_ALG.ECDSA:
         if not isinstance(key, ec.EllipticCurvePublicKey):
             raise ValueError(
                 f"bad key type for {signature.sigAlg}, expected ECC public key, got {key.__class__.__name__}"
             )
-        verify_signature_ecc(signature, key, data)
+        verify_signature_ecc(signature, key, data, prehashed)
     elif signature.sigAlg == TPM2_ALG.HMAC:
         if not isinstance(key, bytes):
             raise ValueError(
                 f"bad key type for {signature.sigAlg}, expected bytes, got {key.__class__.__name__}"
             )
-        verify_signature_hmac(signature, key, data)
+        verify_signature_hmac(signature, key, data, prehashed)
     else:
         raise ValueError(f"unsupported signature algorithm: {signature.sigAlg}")
 
