@@ -2344,18 +2344,19 @@ class TPMU_SIGNATURE(TPM_OBJECT):
 
 
 class TPMT_SIGNATURE(TPM_OBJECT):
-    def verify_signature(self, key, data):
+    def verify_signature(self, key, data, prehashed=False):
         """
         Verify a TPM generated signature against a key.
 
         Args:
             key (TPMT_PUBLIC, TPM2B_PUBLIC or bytes): The key to verify against, bytes for HMAC, the public part for asymmetric key.
-            data (bytes): The signed data to verify.
+            data (bytes): The signed data to verify or the digest if prehashed is True.
+            prehashed: (bool): If True the data should be the digest of the signed data, defaults to False.
 
         Raises:
             :py:class:`cryptography.exceptions.InvalidSignature`: when the signature doesn't match the data.
         """
-        _verify_signature(self, key, data)
+        _verify_signature(self, key, data, prehashed)
 
     def __bytes__(self):
         """Return the underlying bytes for the signature.
