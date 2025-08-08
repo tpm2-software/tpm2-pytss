@@ -3466,7 +3466,7 @@ class ESAPI:
         key_handle: ESYS_TR,
         digest: Union[TPM2B_DIGEST, bytes, str],
         in_scheme: TPMT_SIG_SCHEME,
-        validation: TPMT_TK_HASHCHECK,
+        validation: Optional[TPMT_TK_HASHCHECK] = None,
         session1: ESYS_TR = ESYS_TR.PASSWORD,
         session2: ESYS_TR = ESYS_TR.NONE,
         session3: ESYS_TR = ESYS_TR.NONE,
@@ -3481,7 +3481,7 @@ class ESAPI:
             key_handle (ESYS_TR):
             digest (Union[TPM2B_DIGEST, bytes, str]): Digest to be signed.
             in_scheme (TPMT_SIG_SCHEME): TPM2_Signing scheme to use if the scheme for keyHandle is TPM2_ALG_NULL.
-            validation (TPMT_TK_HASHCHECK): Proof that digest was created by the TPM.
+            validation (TPMT_TK_HASHCHECK, optional): Proof that digest was created by the TPM, defaults to NULL ticket.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.PASSWORD.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -3503,6 +3503,11 @@ class ESAPI:
         _check_handle_type(session1, "session1")
         _check_handle_type(session2, "session2")
         _check_handle_type(session3, "session3")
+
+        if validation is None:
+            validation = TPMT_TK_HASHCHECK(
+                tag=TPM2_ST.HASHCHECK, hierarchy=TPM2_RH.NULL
+            )
 
         digest_cdata = _get_cdata(digest, TPM2B_DIGEST, "digest")
         in_scheme_cdata = _get_cdata(in_scheme, TPMT_SIG_SCHEME, "in_scheme")
