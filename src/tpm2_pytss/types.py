@@ -67,7 +67,7 @@ class TPM2_HANDLE(int, TPM_INT_MU):
     """A handle to a TPM address"""
 
 
-class TPM_OBJECT(object):
+class TPM_BASE_OBJECT(object):
     """Abstract Base class for all TPM Objects. Not suitable for direct instantiation."""
 
     def __init__(self, _cdata=None, **kwargs):
@@ -111,7 +111,7 @@ class TPM_OBJECT(object):
                     subobj = clazz(_cdata=None)
                     setattr(subobj, _bytefield, v)
                     v = subobj
-            TPM_OBJECT.__setattr__(self, k, v)
+            TPM_BASE_OBJECT.__setattr__(self, k, v)
 
     def __getattribute__(self, key):
         try:
@@ -140,7 +140,7 @@ class TPM_OBJECT(object):
 
         _value = value
         _cdata = object.__getattribute__(self, "_cdata")
-        if isinstance(value, TPM_OBJECT):
+        if isinstance(value, TPM_BASE_OBJECT):
             tipe = ffi.typeof(value._cdata)
             if tipe.kind in ["struct", "union"]:
                 value = value._cdata
@@ -200,6 +200,10 @@ class TPM_OBJECT(object):
 
     def __dir__(self):
         return object.__dir__(self) + dir(self._cdata)
+
+
+class TPM_OBJECT(TPM_BASE_OBJECT):
+    """Base class struct types, not suitable for direct instantiation."""
 
     def marshal(self):
         """Marshal instance into bytes.
