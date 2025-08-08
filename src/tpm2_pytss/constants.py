@@ -14,6 +14,60 @@ from .internal.utils import (
 import weakref
 
 
+class TPM_INT_MU:
+    """Mixin class for marshaling/unmarshaling int types."""
+
+    def marshal(self):
+        """Marshal instance into bytes.
+
+        Returns:
+            Returns the marshaled type as bytes.
+        """
+
+        # use an alias name if set over the classname
+        name = getattr(self, "_alias_name", self.__class__.__name__)
+        mfunc = getattr(lib, f"Tss2_MU_{name}_Marshal", None)
+        if mfunc is None:
+            # default to scalar routines
+            size = ffi.sizeof(f"{name}") * 8
+            mfunc = getattr(lib, f"Tss2_MU_UINT{size}_Marshal", None)
+            if mfunc is None:
+                raise RuntimeError(
+                    f"No marshal function found for {self.__class__.__name__}"
+                )
+        size = ffi.sizeof(f"{name}")
+        offset = ffi.new("size_t *")
+        buf = ffi.new(f"uint8_t[{size}]")
+        _chkrc(mfunc(int(self), buf, size, offset))
+        return bytes(buf[0 : offset[0]])
+
+    @classmethod
+    def unmarshal(cls, buf):
+        """Unmarshal bytes into type instance.
+
+        Args:
+            buf (bytes): The bytes to be unmarshaled.
+
+        Returns:
+            Returns an instance of the current type and the number of bytes consumed.
+        """
+
+        # use an alias name if set over the classname
+        name = getattr(cls, "_alias_name", cls.__name__)
+        umfunc = getattr(lib, f"Tss2_MU_{name}_Unmarshal", None)
+        if umfunc is None:
+            # default to scalar routines
+            size = ffi.sizeof(f"{name}") * 8
+            umfunc = getattr(lib, f"Tss2_MU_UINT{size}_Unmarshal", None)
+            if umfunc is None:
+                raise RuntimeError(f"No unmarshal function found for {cls.__name__}")
+
+        cdata = ffi.new(f"{name} *")
+        offset = ffi.new("size_t *")
+        _chkrc(umfunc(buf, len(buf), offset, cdata))
+        return (cls(cdata[0]), offset[0])
+
+
 class TPM_FRIENDLY_ITER(type):
     """Metaclass to make constants classes iterable"""
 
@@ -30,7 +84,7 @@ class TPM_FRIENDLY_ITER(type):
             yield value
 
 
-class TPM_FRIENDLY_INT(int, metaclass=TPM_FRIENDLY_ITER):
+class TPM_FRIENDLY_INT(int, TPM_INT_MU, metaclass=TPM_FRIENDLY_ITER):
     _FIXUP_MAP = {}
 
     @staticmethod
@@ -234,56 +288,6 @@ class TPM_FRIENDLY_INT(int, metaclass=TPM_FRIENDLY_ITER):
 
     def __xor__(self, value):
         return self.__class__(int(self).__xor__(value))
-
-    def marshal(self):
-        """Marshal instance into bytes.
-
-        Returns:
-            Returns the marshaled type as bytes.
-        """
-
-        # use an alias name if set over the classname
-        name = getattr(self, "_alias_name", self.__class__.__name__)
-        mfunc = getattr(lib, f"Tss2_MU_{name}_Marshal", None)
-        if mfunc is None:
-            # default to scalar routines
-            size = ffi.sizeof(f"{name}") * 8
-            mfunc = getattr(lib, f"Tss2_MU_UINT{size}_Marshal", None)
-            if mfunc is None:
-                raise RuntimeError(
-                    f"No marshal function found for {self.__class__.__name__}"
-                )
-        size = ffi.sizeof(f"{name}")
-        offset = ffi.new("size_t *")
-        buf = ffi.new(f"uint8_t[{size}]")
-        _chkrc(mfunc(int(self), buf, size, offset))
-        return bytes(buf[0 : offset[0]])
-
-    @classmethod
-    def unmarshal(cls, buf):
-        """Unmarshal bytes into type instance.
-
-        Args:
-            buf (bytes): The bytes to be unmarshaled.
-
-        Returns:
-            Returns an instance of the current type and the number of bytes consumed.
-        """
-
-        # use an alias name if set over the classname
-        name = getattr(cls, "_alias_name", cls.__name__)
-        umfunc = getattr(lib, f"Tss2_MU_{name}_Unmarshal", None)
-        if umfunc is None:
-            # default to scalar routines
-            size = ffi.sizeof(f"{name}") * 8
-            umfunc = getattr(lib, f"Tss2_MU_UINT{size}_Unmarshal", None)
-            if umfunc is None:
-                raise RuntimeError(f"No unmarshal function found for {cls.__name__}")
-
-        cdata = ffi.new(f"{name} *")
-        offset = ffi.new("size_t *")
-        _chkrc(umfunc(buf, len(buf), offset, cdata))
-        return (cls(cdata[0]), offset[0])
 
 
 class TPMA_FRIENDLY_INTLIST(TPM_FRIENDLY_INT):
