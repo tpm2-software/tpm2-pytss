@@ -162,7 +162,7 @@ def wrap(
           what the TPM supports. To set to aes128cfb, do:
           ::
 
-            TPMT_SYM_DEF(
+            TPMT_SYM_DEF_OBJECT(
               algorithm=TPM2_ALG.AES,
               keyBits=TPMU_SYM_KEY_BITS(sym=128),
               mode=TPMU_SYM_MODE(sym=TPM2_ALG.CFB),
@@ -241,7 +241,7 @@ def unwrap(
           the TPM supports. To set to aes128cfb, do:
           ::
 
-            TPMT_SYM_DEF(
+            TPMT_SYM_DEF_OBJECT(
               algorithm=TPM2_ALG.AES,
               keyBits=TPMU_SYM_KEY_BITS(sym=128),
               mode=TPMU_SYM_MODE(sym=TPM2_ALG.CFB),
