@@ -773,7 +773,6 @@ class CryptoTest(TSS2_EsapiTest):
             handle,
             sigdig,
             TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL),
-            TPMT_TK_HASHCHECK(tag=TPM2_ST.HASHCHECK, hierarchy=TPM2_RH.NULL),
         )
         crypto._verify_signature(sig, secret, msg)
 
@@ -799,7 +798,7 @@ class CryptoTest(TSS2_EsapiTest):
             handle,
             sigdig,
             TPMT_SIG_SCHEME(scheme=TPM2_ALG.NULL),
-            TPMT_TK_HASHCHECK(tag=TPM2_ST.HASHCHECK, hierarchy=TPM2_RH.NULL),
+            None,
         )
 
         crypto._verify_signature(sig, public, msg)
