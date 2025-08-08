@@ -31,6 +31,7 @@ from .constants import (
     TPM_AT,
     TSS2_RC,
     TPM_FRIENDLY_INT,
+    TPM_INT_MU,
 )
 from .types import (
     TPM2_HANDLE,
@@ -84,76 +85,29 @@ from .types import (
     TPM2B_SIMPLE_OBJECT,
 )
 from .TSS2_Exception import TSS2_Exception
-from ._libtpm2_pytss import ffi, lib
-from tpm2_pytss.internal.utils import _chkrc
 
 TPM2_HEADER_SIZE = 10
 
 
-class TPM_FIXED_INT(int):
-    """Abstract Base class for all fixed size TPM integer types. Not suitable for direct instantiation."""
-
-    _mfunc = None
-    _umfunc = None
-
-    def __init_subclass__(cls):
-        mfunc = getattr(lib, f"Tss2_MU_{cls.__name__}_Marshal", None)
-        umfunc = getattr(lib, f"Tss2_MU_{cls.__name__}_Unmarshal", None)
-        ctype = f"{cls.__name__} *"
-        cls._mfunc = mfunc
-        cls._umfunc = umfunc
-        cls._ctype = ctype
-
-    def marshal(self) -> bytes:
-        """Marshal instance into bytes.
-
-        Returns:
-            Returns the marshaled type as bytes.
-        """
-        if self._mfunc is None:
-            raise NotImplementedError("no marshal method found")
-        offset = ffi.new("size_t *")
-        buf = ffi.new("uint8_t[4096]")
-        _chkrc(self._mfunc(int(self), buf, 4096, offset))
-        return bytes(buf[0 : offset[0]])
-
-    @classmethod
-    def unmarshal(cls, buf: bytes) -> tuple["TPM_FIXED_INT", int]:
-        """Unmarshal bytes into type instance.
-
-        Args:
-            buf (bytes): The bytes to be unmarshaled.
-
-        Returns:
-            Returns an instance of the current type and the number of bytes consumed.
-        """
-        if cls._umfunc is None:
-            raise NotImplementedError("no unmarshal method found")
-        cdata = ffi.new(cls._ctype)
-        offset = ffi.new("size_t *")
-        _chkrc(cls._umfunc(buf, len(buf), offset, cdata))
-        return cls(cdata[0]), offset[0]
-
-
-class UINT16(TPM_FIXED_INT):
+class UINT16(int, TPM_INT_MU):
     """Represents an unsigned 16-bit integer."""
 
     pass
 
 
-class UINT32(TPM_FIXED_INT):
+class UINT32(int, TPM_INT_MU):
     """Represents an unsigned 32-bit integer."""
 
     pass
 
 
-class INT32(TPM_FIXED_INT):
+class INT32(int, TPM_INT_MU):
     """Represents a signed 32-bit integer."""
 
     pass
 
 
-class UINT64(TPM_FIXED_INT):
+class UINT64(int, TPM_INT_MU):
     """Represents a 64-bit integer."""
 
     pass
@@ -219,7 +173,7 @@ class TPM_ENCRYPTED_PARAMETER(Generic[T]):
 
 
 TPM2_TYPES_ALIAS = Union[
-    TPM_FIXED_INT,
+    TPM_INT_MU,
     TPM_FRIENDLY_INT,
     TPM_OBJECT,
     TPM2_HANDLE,
