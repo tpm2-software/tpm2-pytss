@@ -245,6 +245,13 @@ class TPM_OBJECT(TPM_BASE_OBJECT):
         _chkrc(umfunc(buf, len(buf), offset, _cdata))
         return cls(_cdata=_cdata), offset[0]
 
+    def __eq__(self, other: "TPM_OBJECT") -> bool:
+        if not isinstance(other, self.__class__):
+            return False
+        self_bytes = self.marshal()
+        other_bytes = other.marshal()
+        return self_bytes == other_bytes
+
 
 class TPM2B_SIMPLE_OBJECT(TPM_OBJECT):
     """Abstract Base class for all TPM2B Simple Objects. A Simple object contains only

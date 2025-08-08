@@ -2052,6 +2052,45 @@ class TypesTest(unittest.TestCase):
             ha.unmarshal(TPM2_ALG.LAST + 1, dig)
         self.assertEqual(e.exception.rc, TSS2_RC.MU_RC_BAD_VALUE)
 
+    def test_struct_equal(self):
+        sel_one = TPMS_PCR_SELECTION(
+            hash=TPM2_ALG.SHA1,
+            sizeofSelect=3,
+            pcrSelect=b"\xFF\xFF\xFF",
+        )
+        sel_two = TPMS_PCR_SELECTION(
+            hash=TPM2_ALG.SHA1,
+            sizeofSelect=3,
+            pcrSelect=b"\xFF\xFF\xFF",
+        )
+        self.assertEqual(sel_one, sel_two)
+
+    def test_struct_not_equal(self):
+        sel_one = TPMS_PCR_SELECTION(
+            hash=TPM2_ALG.SHA1,
+            sizeofSelect=3,
+            pcrSelect=b"\xFF\xFF\xFF",
+        )
+        sel_two = TPMS_PCR_SELECTION(
+            hash=TPM2_ALG.SHA1,
+            sizeofSelect=3,
+            pcrSelect=b"\xFF\xAA\xFF",
+        )
+        self.assertNotEqual(sel_one, sel_two)
+
+    def test_struct_not_equal_different_types(self):
+        ticket_one = TPMT_TK_AUTH(
+            tag=TPM2_ST.NULL,
+            hierarchy=TPM2_RH.NULL,
+            digest=b"falafel",
+        )
+        ticket_two = TPMT_TK_VERIFIED(
+            tag=TPM2_ST.NULL,
+            hierarchy=TPM2_RH.NULL,
+            digest=b"falafel",
+        )
+        self.assertNotEqual(ticket_one, ticket_two)
+
 
 if __name__ == "__main__":
     unittest.main()
