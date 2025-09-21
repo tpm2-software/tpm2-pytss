@@ -3722,7 +3722,7 @@ class TestEsys(TSS2_EsapiTest):
         signature = self.ectx.sign(handle, digest, scheme, hash_validation)
 
         timeout, policy_ticket = self.ectx.policy_signed(
-            handle, session, nonce, b"", b"", expiration, signature
+            handle, session, signature, nonce, b"", b"", expiration
         )
 
         self.assertEqual(type(timeout), TPM2B_TIMEOUT)
@@ -3976,6 +3976,8 @@ class TestEsys(TSS2_EsapiTest):
                 ESYS_TR.OWNER, session, nonce, b"", b"", expiration, session3=56.7
             )
 
+        self.ectx.policy_secret(ESYS_TR.OWNER, session)
+
     def test_policy_ticket(self):
         handle = self.ectx.create_primary(
             TPM2B_SENSITIVE_CREATE(),
@@ -4019,7 +4021,11 @@ class TestEsys(TSS2_EsapiTest):
         signature = self.ectx.sign(handle, digest, scheme, hash_validation)
 
         timeout, policy_ticket = self.ectx.policy_signed(
-            handle, session, nonce, b"", b"", expiration, signature
+            auth_object=handle,
+            policy_session=session,
+            auth=signature,
+            nonce_tpm=nonce,
+            expiration=expiration,
         )
 
         self.ectx.flush_context(session)
@@ -4033,7 +4039,7 @@ class TestEsys(TSS2_EsapiTest):
         )
 
         name = self.ectx.tr_get_name(handle)
-        self.ectx.policy_ticket(session, timeout, b"", b"", name, policy_ticket)
+        self.ectx.policy_ticket(session, timeout, name, policy_ticket)
 
         with self.assertRaises(TypeError):
             self.ectx.policy_ticket(
@@ -4534,48 +4540,32 @@ class TestEsys(TSS2_EsapiTest):
         check_ticket = TPMT_TK_VERIFIED(tag=TPM2_ST.VERIFIED, hierarchy=TPM2_RH.OWNER)
         name = self.ectx.tr_get_name(handle)
 
-        self.ectx.policy_authorize(
-            session, TPM2B_DIGEST(), TPM2B_NONCE(), name, check_ticket
-        )
-        self.ectx.policy_authorize(
-            session, TPM2B_DIGEST(), TPM2B_NONCE(), name, check_ticket
-        )
-        self.ectx.policy_authorize(session, b"", TPM2B_NONCE(), name, check_ticket)
-        self.ectx.policy_authorize(session, TPM2B_DIGEST(), b"", name, check_ticket)
-        self.ectx.policy_authorize(
-            session, TPM2B_DIGEST(), TPM2B_NONCE(), bytes(name), check_ticket
-        )
+        self.ectx.policy_authorize(session, TPM2B_DIGEST(), name, check_ticket)
+        self.ectx.policy_authorize(session, b"", name, check_ticket, TPM2B_NONCE())
+        self.ectx.policy_authorize(session, TPM2B_DIGEST(), name, check_ticket, b"")
+        self.ectx.policy_authorize(session, TPM2B_DIGEST(), bytes(name), check_ticket)
+
+        with self.assertRaises(TypeError):
+            self.ectx.policy_authorize(42.5, TPM2B_DIGEST(), name, check_ticket)
+
+        with self.assertRaises(TypeError):
+            self.ectx.policy_authorize(session, TPM2B_ATTEST(), name, check_ticket)
 
         with self.assertRaises(TypeError):
             self.ectx.policy_authorize(
-                42.5, TPM2B_DIGEST(), TPM2B_NONCE(), name, check_ticket
+                session, TPM2B_DIGEST(), name, check_ticket, object()
             )
 
         with self.assertRaises(TypeError):
-            self.ectx.policy_authorize(
-                session, TPM2B_ATTEST(), TPM2B_NONCE(), name, check_ticket
-            )
+            self.ectx.policy_authorize(session, TPM2B_DIGEST(), object(), check_ticket)
 
         with self.assertRaises(TypeError):
-            self.ectx.policy_authorize(
-                session, TPM2B_DIGEST(), object(), name, check_ticket
-            )
-
-        with self.assertRaises(TypeError):
-            self.ectx.policy_authorize(
-                session, TPM2B_DIGEST(), TPM2B_NONCE(), object(), check_ticket
-            )
-
-        with self.assertRaises(TypeError):
-            self.ectx.policy_authorize(
-                session, TPM2B_DIGEST(), TPM2B_NONCE(), name, TPM2B_AUTH()
-            )
+            self.ectx.policy_authorize(session, TPM2B_DIGEST(), name, TPM2B_AUTH())
 
         with self.assertRaises(TypeError):
             self.ectx.policy_authorize(
                 session,
                 TPM2B_DIGEST(),
-                TPM2B_NONCE(),
                 name,
                 check_ticket,
                 session1="foo",
@@ -4585,7 +4575,6 @@ class TestEsys(TSS2_EsapiTest):
             self.ectx.policy_authorize(
                 session,
                 TPM2B_DIGEST(),
-                TPM2B_NONCE(),
                 name,
                 check_ticket,
                 session2=42.4,
@@ -4595,7 +4584,6 @@ class TestEsys(TSS2_EsapiTest):
             self.ectx.policy_authorize(
                 session,
                 TPM2B_DIGEST(),
-                TPM2B_NONCE(),
                 name,
                 check_ticket,
                 session3=object(),

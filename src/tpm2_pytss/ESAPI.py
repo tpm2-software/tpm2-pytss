@@ -3965,11 +3965,11 @@ class ESAPI:
         self,
         auth_object: ESYS_TR,
         policy_session: ESYS_TR,
-        nonce_tpm: Union[TPM2B_NONCE, bytes, str],
-        cp_hash_a: Union[TPM2B_DIGEST, bytes, str],
-        policy_ref: Union[TPM2B_NONCE, bytes, str],
-        expiration: int,
         auth: TPMT_SIGNATURE,
+        nonce_tpm: Union[TPM2B_NONCE, bytes, str] = TPM2B_NONCE(),
+        cp_hash_a: Union[TPM2B_DIGEST, bytes, str] = TPM2B_DIGEST(),
+        policy_ref: Union[TPM2B_NONCE, bytes, str] = TPM2B_NONCE(),
+        expiration: int = TPM2_MAX_EXPIRATION,
         session1: ESYS_TR = ESYS_TR.NONE,
         session2: ESYS_TR = ESYS_TR.NONE,
         session3: ESYS_TR = ESYS_TR.NONE,
@@ -3983,14 +3983,14 @@ class ESAPI:
         Args:
             auth_object (ESYS_TR): Handle for a key that will validate the signature.
             policy_session (ESYS_TR): Handle for the policy session being extended.
-            nonce_tpm (Union[TPM2B_NONCE, bytes, str]): The policy nonce for the session.
-            cp_hash_a (Union[TPM2B_DIGEST, bytes, str]): Digest of the command parameters to which this
-                authorization is limited.
-            policy_ref (Union[TPM2B_NONCE, bytes, str]): policyRef A reference to a policy relating to the authorization
-                - may be the Empty Buffer.
-            expiration (int): Time when authorization will expire, measured in seconds from the time that nonceTPM was
-                generated.
             auth (TPMT_SIGNATURE): Signed authorization (not optional).
+            nonce_tpm (Union[TPM2B_NONCE, bytes, str]): The policy nonce for the session (optional). Defaults to an empty buffer.
+            cp_hash_a (Union[TPM2B_DIGEST, bytes, str]): Digest of the command parameters to which this
+                authorization is limited (optional). Defaults to an empty buffer.
+            policy_ref (Union[TPM2B_NONCE, bytes, str]): policyRef A reference to a policy relating to the authorization
+                - may be the Empty Buffer (optional). Defaults to an empty buffer.
+            expiration (int): Time when authorization will expire, measured in seconds from the time that nonceTPM was
+                generated (optional). Defaults to the max expiration value.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -4024,7 +4024,7 @@ class ESAPI:
         _check_handle_type(session2, "session2")
         _check_handle_type(session3, "session3")
 
-        nonce_tPM_cdata = _get_cdata(nonce_tpm, TPM2B_NONCE, "nonce_tpm")
+        nonce_tpm_cdata = _get_cdata(nonce_tpm, TPM2B_NONCE, "nonce_tpm")
         cp_hash_a_cdata = _get_cdata(cp_hash_a, TPM2B_DIGEST, "cp_hash_a")
         policy_ref_cdata = _get_cdata(policy_ref, TPM2B_NONCE, "policy_ref")
         auth_cdata = _get_cdata(auth, TPMT_SIGNATURE, "auth")
@@ -4039,7 +4039,7 @@ class ESAPI:
                 session1,
                 session2,
                 session3,
-                nonce_tPM_cdata,
+                nonce_tpm_cdata,
                 cp_hash_a_cdata,
                 policy_ref_cdata,
                 expiration,
@@ -4057,10 +4057,10 @@ class ESAPI:
         self,
         auth_handle: ESYS_TR,
         policy_session: ESYS_TR,
-        nonce_tpm: Union[TPM2B_NONCE, bytes, str],
-        cp_hash_a: Union[TPM2B_DIGEST, bytes, str],
-        policy_ref: Union[TPM2B_NONCE, bytes, str],
-        expiration: int,
+        nonce_tpm: Union[TPM2B_NONCE, bytes, str] = TPM2B_NONCE(),
+        cp_hash_a: Union[TPM2B_DIGEST, bytes, str] = TPM2B_DIGEST(),
+        policy_ref: Union[TPM2B_NONCE, bytes, str] = TPM2B_NONCE(),
+        expiration: int = TPM2_MAX_EXPIRATION,
         session1: ESYS_TR = ESYS_TR.PASSWORD,
         session2: ESYS_TR = ESYS_TR.NONE,
         session3: ESYS_TR = ESYS_TR.NONE,
@@ -4074,13 +4074,13 @@ class ESAPI:
         Args:
             auth_handle (ESYS_TR): Handle for an entity providing the authorization.
             policy_session (ESYS_TR): Handle for the policy session being extended.
-            nonce_tpm (Union[TPM2B_NONCE, bytes, str]): The policy nonce for the session.
+            nonce_tpm (Union[TPM2B_NONCE, bytes, str]): The policy nonce for the session (optional). Defaults to an empty buffer.
             cp_hash_a (Union[TPM2B_DIGEST, bytes, str]): Digest of the command parameters to which this
-                authorization is limited.
+                authorization is limited (optional). Defaults to an empty buffer.
             policy_ref (Union[TPM2B_NONCE, bytes, str]): policyRef A reference to a policy relating to the authorization
-                - may be the Empty Buffer.
+                - may be the Empty Buffer (optional). Defaults to an empty buffer.
             expiration (int): Time when authorization will expire, measured in seconds from the time that nonceTPM was
-                generated.
+                generated (optional). Defaults to the max expiration value.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.PASSWORD.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -4145,10 +4145,10 @@ class ESAPI:
         self,
         policy_session: ESYS_TR,
         timeout: TPM2B_TIMEOUT,
-        cp_hash_a: Union[TPM2B_DIGEST, bytes, str],
-        policy_ref: Union[TPM2B_NONCE, bytes, str],
         auth_name: Union[TPM2B_NAME, bytes, str],
         ticket: TPMT_TK_AUTH,
+        cp_hash_a: Union[TPM2B_DIGEST, bytes, str] = TPM2B_DIGEST(),
+        policy_ref: Union[TPM2B_NONCE, bytes, str] = TPM2B_NONCE(),
         session1: ESYS_TR = ESYS_TR.NONE,
         session2: ESYS_TR = ESYS_TR.NONE,
         session3: ESYS_TR = ESYS_TR.NONE,
@@ -4162,13 +4162,13 @@ class ESAPI:
         Args:
             policy_session (ESYS_TR): Handle for the policy session being extended.
             timeout (TPM2B_TIMEOUT): Time when authorization will expire.
-            cp_hash_a (Union[TPM2B_DIGEST, bytes, str]): Digest of the command parameters to which this
-                authorization is limited.
-            policy_ref (Union[TPM2B_NONCE, bytes, str]): policyRef A reference to a policy relating to the authorization
-                - may be the Empty Buffer.
             auth_name (Union[TPM2B_NAME, bytes, str]): Name of the object that provided the authorization.
             ticket (TPMT_TK_AUTH): An authorization ticket returned by the TPM in response to a
                 TPM2_PolicySigned() or TPM2_PolicySecret().
+            cp_hash_a (Union[TPM2B_DIGEST, bytes, str]): Digest of the command parameters to which this
+                authorization is limited (optional). Defaults to an empty buffer.
+            policy_ref (Union[TPM2B_NONCE, bytes, str]): policyRef A reference to a policy relating to the authorization
+                - may be the Empty Buffer (optional). Defaults to an empty buffer.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
@@ -4744,9 +4744,9 @@ class ESAPI:
         self,
         policy_session: ESYS_TR,
         approved_policy: Union[TPM2B_DIGEST, bytes, str],
-        policy_ref: Union[TPM2B_NONCE, bytes, str],
         key_sign: Union[TPM2B_NAME, bytes, str],
         check_ticket: TPMT_TK_VERIFIED,
+        policy_ref: Union[TPM2B_NONCE, bytes, str] = TPM2B_NONCE(),
         session1: ESYS_TR = ESYS_TR.NONE,
         session2: ESYS_TR = ESYS_TR.NONE,
         session3: ESYS_TR = ESYS_TR.NONE,
@@ -4760,10 +4760,10 @@ class ESAPI:
         Args:
             policy_session (ESYS_TR): Handle for the policy session being extended.
             approved_policy (Union[TPM2B_DIGEST, bytes, str]): Digest of the policy being approved.
-            policy_ref (Union[TPM2B_NONCE, bytes, str]): A policy qualifier.
             key_sign (Union[TPM2B_NAME, bytes, str]): Name of a key that can sign a policy addition.
             check_ticket (TPMT_TK_VERIFIED): Ticket validating that approvedPolicy and policyRef
                 were signed by keySign.
+            policy_ref (Union[TPM2B_NONCE, bytes, str]): A policy qualifier (optional). Defaults to an empty buffer.
             session1 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session2 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
             session3 (ESYS_TR): A session for securing the TPM command (optional). Defaults to ESYS_TR.NONE.
