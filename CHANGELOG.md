@@ -4,6 +4,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 3.0.0-rc0 - 2025-09-21
+### Fixed
+- Restore environment when exiting FAPIConfig
+
+### Added
+- Add a context manager for ESYS handles, which flushes the handle at exit.
+- Add SVN, ACT and other missing constants.
+- Add the ESAPI command `certify_x509`.
+- Add the ESAPI command `act_set_timeout`.
+- Add copy dunder for cryptography private keys.
+- Add the ESAPI command `trsess_get_attributes`.
+- Add signature scheme structures.
+- Add marshal/unmarshal structures for `TPM2_HANDLE`.
+- Add the command_parser module, which can decode TPM 2.0 command/response byte streams.
+- Add support for passing prehashed data to `TPMT_SIGNATURE.verify_signature`.
+- Add the marshal/unmarshal methods to union types, as they require a selector.
+- Add the equal dunder to struct types, allowing comparing two different instances of the same type.
+
+### Changed
+- Make the symmetric argument to `start_auth_session` optional.
+- Accept None for the pcr_digest argument for `policy_pcr`.
+- Support looking up EK templates by other names, such as `L-1` or `H-2`.
+- Make the validition ticket for the sign command optional, defaults to a NULL ticket.
+- The argument order for `ESAPI.policy_signed`, `ESAPI.policy_ticket` and `ESAPI.policy_authorize` has changed.
+  This is to make expiration, nonce_tpm, policy_ref and cp_hash_a arguments optional, with expiration being set to the max value and the rest are empty buffers by default.
+
+### Removed
+- Remove support for the tools encoder/decoder.
+
 ## 2.3.0 - 2024-06-26
 ### Fixed
 - Fix builds for tpm2-tss > 4.0.1.
