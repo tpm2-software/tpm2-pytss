@@ -23,7 +23,9 @@ def remove_common_guards(s):
 
     # Remove certain macros
     s = re.sub(r"#define TSS2_API_VERSION.*", r"", s)
-    s = re.sub(r"#define TSS2_ABI_VERSION.*", r"", s)
+    s = re.sub(
+        r"#define TSS2_ABI_VERSION_CURRENT\s+(\\\n)?.*", r"", s, flags=re.MULTILINE
+    )
     s = re.sub(r"#define TSS2_RC_LAYER\(level\).*", r"", s)
     s = re.sub(r"(#define.*)TSS2_RC_LAYER\(0xff\)", r"\g<1>0xff0000", s)
 
@@ -38,7 +40,9 @@ def remove_common_guards(s):
         r"(#define [A-Za-z0-9_]+) .*\n.*?.*\)\)", r"\g<1>...", s, flags=re.MULTILINE
     )
     s = re.sub(r"(#define +[A-Za-z0-9_]+) +\((-?\d+)\)", r"\g<1> \g<2>", s)
-    s = re.sub(r"(#define [A-Za-z0-9_]+) .*", r"\g<1>...", s)
+    s = re.sub(
+        r"(#define [A-Za-z0-9_]+)\s+(\\\n)?([^/][^*])*", r"\g<1>...", s, flags=re.MULTILINE
+    )
 
     # Restructure structs and untions with ...
     s = re.sub(r"\[.+?\]", r"[...]", s)
