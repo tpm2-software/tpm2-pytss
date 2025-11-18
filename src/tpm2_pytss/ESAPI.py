@@ -5227,7 +5227,12 @@ class ESAPI:
         _check_handle_type(
             enable,
             "enable",
-            expected=(ESYS_TR.ENDORSEMENT, ESYS_TR.OWNER, ESYS_TR.PLATFORM),
+            expected=(
+                ESYS_TR.ENDORSEMENT,
+                ESYS_TR.OWNER,
+                ESYS_TR.PLATFORM,
+                ESYS_TR.PLATFORM_NV,
+            ),
         )
         enable = ESAPI._fixup_hierarchy(enable)
 
