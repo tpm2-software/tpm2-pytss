@@ -5,6 +5,7 @@ set -exo pipefail
 
 export TPM2_TSS_VERSION=${TPM2_TSS_VERSION:-"3.0.3"}
 export TPM2_TSS_FAPI=${TPM2_TSS_FAPI:-"true"}
+export LIBTPMS=${LIBTPMS:-"v0.10.2"}
 
 #
 # Get dependencies for building and install tpm2-tss and abrmd projects
@@ -76,7 +77,7 @@ if pkg-config --exists tss2-tcti-swtpm; then
 
   # libtpms
   if ! pkg-config libtpms; then
-    git -C /tmp clone --depth=1 https://github.com/stefanberger/libtpms.git
+    git -C /tmp clone --depth=1 --branch "${LIBTPMS}" https://github.com/stefanberger/libtpms.git
     pushd /tmp/libtpms
     ./autogen.sh --prefix=/usr --with-openssl --with-tpm2 --without-tpm1
     make -j$(nproc)
