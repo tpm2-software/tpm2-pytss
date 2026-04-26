@@ -22,8 +22,10 @@ from cryptography.hazmat.primitives.serialization import (
 from cryptography.x509 import load_pem_x509_certificate, load_der_x509_certificate
 from cryptography.hazmat.primitives.kdf.kbkdf import CounterLocation, KBKDFHMAC, Mode
 from cryptography.hazmat.primitives.kdf.concatkdf import ConcatKDFHash
-from cryptography.hazmat.primitives.ciphers.algorithms import AES, Camellia, SM4
+from cryptography.hazmat.primitives.ciphers.algorithms import AES, SM4
+from cryptography.hazmat.decrepit.ciphers.algorithms import Camellia
 from cryptography.hazmat.primitives.ciphers import modes, Cipher, CipherAlgorithm
+import cryptography.hazmat.decrepit.ciphers.modes as decrepit_modes
 from cryptography.hazmat.backends import default_backend
 from cryptography.exceptions import UnsupportedAlgorithm, InvalidSignature
 from typing import Tuple, Type, Any
@@ -52,7 +54,7 @@ _digesttable = (
 _algtable = (
     (TPM2_ALG.AES, AES),
     (TPM2_ALG.CAMELLIA, Camellia),
-    (TPM2_ALG.CFB, modes.CFB),
+    (TPM2_ALG.CFB, decrepit_modes.CFB),
     (TPM2_ALG.SM4, SM4),
 )
 

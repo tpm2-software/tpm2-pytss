@@ -537,7 +537,7 @@ class CryptoTest(TSS2_EsapiTest):
 
         (alg, mode, bits) = crypto._symdef_to_crypt(symdef)
         self.assertEqual(alg, crypto.AES)
-        self.assertEqual(mode, crypto.modes.CFB)
+        self.assertEqual(mode, crypto.decrepit_modes.CFB)
         self.assertEqual(bits, 128)
 
         symdef.mode.sym = TPM2_ALG.LAST + 1
