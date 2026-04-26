@@ -263,6 +263,14 @@ class tpm_rsa_private_key(rsa.RSAPrivateKey):
             ectx=self._ectx, handle=self._handle, session=self._session
         )
 
+    def __deepcopy__(self, memo: dict) -> "tpm_rsa_private_key":
+        """Retuns a copy of the private key.
+
+        Notes:
+            This behaves as a shallow copy as we don't copy the ESAPI context.
+        """
+        return self.__copy__()
+
 
 class tpm_ecc_private_key(ec.EllipticCurvePrivateKey):
     """Interface to a TPM ECC key for use with the cryptography module.
@@ -440,3 +448,11 @@ class tpm_ecc_private_key(ec.EllipticCurvePrivateKey):
         return tpm_ecc_private_key(
             ectx=self._ectx, handle=self._handle, session=self._session
         )
+
+    def __deepcopy__(self, memo: dict) -> "tpm_ecc_private_key":
+        """Retuns a copy of the private key.
+
+        Notes:
+            This behaves as a shallow copy as we don't copy the ESAPI context.
+        """
+        return self.__copy__()
