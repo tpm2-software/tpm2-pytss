@@ -1,12 +1,13 @@
 # SPDX-License-Identifier: BSD-2
 
 import warnings
+import base64
 from ._libtpm2_pytss import lib
 from .types import *
 from .constants import TPM2_ECC, TPM2_CAP, ESYS_TR
-from asn1crypto.core import ObjectIdentifier, Sequence, Boolean, OctetString, Integer
-from asn1crypto import pem
-
+from cryptography.hazmat import asn1
+from cryptography.x509 import ObjectIdentifier
+from typing import Annotated
 
 _parent_rsa_template = TPMT_PUBLIC(
     type=TPM2_ALG.RSA,
@@ -98,15 +99,35 @@ _ecc_template = TPMT_PUBLIC(
 
 _loadablekey_oid = ObjectIdentifier("2.23.133.10.1.3")
 
+_pem_begin = b"-----BEGIN TSS2 PRIVATE KEY-----\n"
+_pem_end = b"-----END TSS2 PRIVATE KEY-----\n"
 
-# _BooleanOne is used to encode True in the same way as tpm2-tss-engine
-class _BooleanOne(Boolean):
-    def set(self, value):
-        self._native = bool(value)
-        self.contents = b"\x00" if not value else b"\x01"
-        self._header = None
-        if self._trailer != b"":
-            self._trailer = b""
+
+def _tssprivkey_pem_unarmor(data: bytes) -> bytes:
+    begin = data.find(_pem_begin)
+    if begin == -1:
+        raise ValueError("beginning of PEM not found")
+    skip = begin + len(_pem_begin)
+    end = data.find(_pem_end, skip)
+    if end == -1:
+        raise ValueError("end of PEM not found")
+    pem_data = data[skip:end]
+    der_data = base64.b64decode(pem_data)
+    return der_data
+
+
+def _tssprivkey_pem_armor(data: bytes) -> bytes:
+    # base64 encode
+    pem_data = base64.b64encode(data)
+    # split with max length
+    split_data = _pem_begin
+    index = 0
+    while len(pem_data[index:]):
+        split_data += pem_data[index : index + 64] + b"\n"
+        index += 64
+    split_data += _pem_end
+    # append beginning, split data, end
+    return split_data
 
 
 class TSSPrivKey(object):
@@ -116,14 +137,21 @@ class TSSPrivKey(object):
         Most users should use create_rsa/create_ecc together with to_pem and from_pem together with load.
     """
 
-    class _tssprivkey_der(Sequence):
-        _fields = [
-            ("type", ObjectIdentifier),
-            ("empty_auth", _BooleanOne, {"explicit": 0, "optional": True}),
-            ("parent", Integer),
-            ("public", OctetString),
-            ("private", OctetString),
-        ]
+    @asn1.sequence
+    class _tssprivkey_load:
+        object_type: ObjectIdentifier = _loadablekey_oid
+        empty_auth: asn1.TLV
+        parent: int
+        public: bytes
+        private: bytes
+
+    @asn1.sequence
+    class _tssprivkey_save:
+        object_type: ObjectIdentifier = _loadablekey_oid
+        empty_auth: Annotated[bool, asn1.Explicit(0)]
+        parent: int
+        public: bytes
+        private: bytes
 
     def __init__(self, private, public, empty_auth=True, parent=lib.TPM2_RH_OWNER):
         """Initialize TSSPrivKey using raw values.
@@ -165,15 +193,15 @@ class TSSPrivKey(object):
         Returns:
             Returns the DER encoding as bytes.
         """
-        seq = self._tssprivkey_der()
-        seq["type"] = _loadablekey_oid.native
-        seq["empty_auth"] = self.empty_auth
-        seq["parent"] = self.parent
         pub = self.public.marshal()
-        seq["public"] = pub
         priv = self.private.marshal()
-        seq["private"] = priv
-        return seq.dump()
+        seq = self._tssprivkey_save(
+            empty_auth=self.empty_auth,
+            parent=self.parent,
+            public=pub,
+            private=priv,
+        )
+        return asn1.encode_der(seq)
 
     def to_pem(self):
         """Encode the TSSPrivKey as PEM encoded ASN.1.
@@ -182,7 +210,7 @@ class TSSPrivKey(object):
             Returns the PEM encoding as bytes.
         """
         der = self.to_der()
-        return pem.armor("TSS2 PRIVATE KEY", der)
+        return _tssprivkey_pem_armor(der)
 
     @staticmethod
     def _getparenttemplate(ectx):
@@ -310,6 +338,24 @@ class TSSPrivKey(object):
         template.parameters.eccDetail.curveID = curveID
         return cls.create(ectx, template, parent, password)
 
+    @staticmethod
+    def _decode_bad_bool(tlv: asn1.TLV) -> bool:
+        # Some versions of tpm2-tss-engine and tpm2-openssl encode TRUE as 1.
+        # That is an invalid DER encoding, so handle that here.
+        data = bytes(tlv.data)
+        if len(data) != 3:
+            raise ValueError(
+                f"unexpected emptyAuth ASN.1 TLV length, expected 3, got {len(data)}"
+            )
+        tag, length, value = data
+        if tag != 1:
+            raise ValueError(f"unexpected emptyAuth ASN.1 tag, expected 1, got {tag}")
+        elif length != 1:
+            raise ValueError(
+                f"unexpected emptyAuth ASN.1 value length, expected 1, got {length}"
+            )
+        return bool(value)
+
     @classmethod
     def from_der(cls, data):
         """Load a TSSPrivKey from DER ASN.1.
@@ -320,13 +366,13 @@ class TSSPrivKey(object):
         Returns:
             Returns a TSSPrivKey instance.
         """
-        seq = cls._tssprivkey_der.load(data)
-        if seq["type"].native != _loadablekey_oid.native:
+        seq = asn1.decode_der(cls._tssprivkey_load, data)
+        if seq.object_type != _loadablekey_oid:
             raise TypeError("unsupported key type")
-        empty_auth = seq["empty_auth"].native
-        parent = seq["parent"].native
-        public, _ = TPM2B_PUBLIC.unmarshal(bytes(seq["public"]))
-        private, _ = TPM2B_PRIVATE.unmarshal(bytes(seq["private"]))
+        empty_auth = cls._decode_bad_bool(seq.empty_auth)
+        parent = seq.parent
+        public, _ = TPM2B_PUBLIC.unmarshal(seq.public)
+        private, _ = TPM2B_PRIVATE.unmarshal(seq.private)
         return cls(private, public, empty_auth, parent)
 
     @classmethod
@@ -339,6 +385,8 @@ class TSSPrivKey(object):
         Returns:
             Returns a TSSPrivKey instance.
         """
+        der = _tssprivkey_pem_unarmor(data)
+        return cls.from_der(der)
         pem_type, _, der = pem.unarmor(data)
         if pem_type != "TSS2 PRIVATE KEY":
             raise TypeError("unsupported PEM type")
