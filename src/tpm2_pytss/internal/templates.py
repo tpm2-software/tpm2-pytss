@@ -88,6 +88,10 @@ class ek_template:
         template = cls._templates.get(name, None)
         return template
 
+    @classmethod
+    def available_templates(cls) -> list[str]:
+        return cls._templates.keys()
+
 
 class ek_rsa2048(ek_template):
     _names = ("EK-RSA2048", "L-1")

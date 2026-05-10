@@ -27,7 +27,7 @@ from .TSS2_Exception import TSS2_Exception
 from cryptography.hazmat.primitives import constant_time as ct
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend
-from typing import Optional, Tuple, Callable, List
+from typing import Optional, Tuple, Callable, List, Any
 
 import secrets
 
@@ -399,6 +399,44 @@ class NVReadEK:
         return nvdata
 
 
+class ek_templates:
+    """Interface to get available EK templates
+
+    Behaves as a frozen dict.
+    """
+
+    @staticmethod
+    def __getitem__(key: str) -> ek_template:
+        if not isinstance(key, str):
+            raise KeyError(f"invalid key type, expected str got {type(key)}")
+        template = ek_template.lookup(key)
+        if template is None:
+            raise KeyError(f"no template found for {key}")
+        return template
+
+    @staticmethod
+    def __contains__(key: str) -> bool:
+        if not isinstance(key, str):
+            return False
+        template = ek_template.lookup(key)
+        if template is None:
+            return False
+        return True
+
+    @staticmethod
+    def keys() -> list[str]:
+        return ek_template.available_templates()
+
+    @staticmethod
+    def get(key: str, default=None) -> ek_template | Any:
+        if not isinstance(key, str):
+            return default
+        template = ek_template.lookup(key)
+        if template is None:
+            return default
+        return template
+
+
 def create_ek_template(
     ektype: str, nv_read_cb: Callable[[Union[int, TPM2_RH]], bytes]
 ) -> Tuple[bytes, TPM2B_PUBLIC]:
@@ -421,7 +459,7 @@ def create_ek_template(
         ValueError: If ektype is unknown or if a high range certificate is requested but not found.
     """
 
-    template = ek_template.lookup(ektype)
+    template = ek_templates.get(ektype)
     if template is None:
         raise ValueError(f"unknown EK type {ektype}")
     key_template = TPM2B_PUBLIC(publicArea=template.template.publicArea)
