@@ -6,6 +6,7 @@ set -exo pipefail
 export TPM2_TSS_VERSION=${TPM2_TSS_VERSION:-"3.0.3"}
 export TPM2_TSS_FAPI=${TPM2_TSS_FAPI:-"true"}
 export LIBTPMS=${LIBTPMS:-"v0.10.2"}
+export SWTPM=${SWTPM:-"v0.10.1"}
 
 #
 # Get dependencies for building and install tpm2-tss and abrmd projects
@@ -89,7 +90,7 @@ if pkg-config --exists tss2-tcti-swtpm; then
 
   # swtpm
   if ! command -v swtpm; then
-    git -C /tmp clone --depth=1 https://github.com/stefanberger/swtpm.git
+    git -C /tmp clone --depth=1 --branch "${SWTPM}" https://github.com/stefanberger/swtpm.git
     pushd /tmp/swtpm
     ./autogen.sh --prefix=/usr
     make -j$(nproc)
@@ -109,7 +110,7 @@ else
 fi
 
 #
-# Pip version 21.3 was broken with in-pace (-e) installs. Thus use something
+# Pip version 21.3 was broken with in-place (-e) installs. Thus use something
 # after it as it was fixed in 21.3.1
 #
 python3 -m pip install --user --upgrade 'pip>21.3'
