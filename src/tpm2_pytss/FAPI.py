@@ -343,7 +343,7 @@ class FAPI:
         """
         if num_bytes > 1024:
             logger.warning(
-                "Requesting a large number of bytes. This may take a while: {num_bytes}"
+                f"Requesting a large number of bytes. This may take a while: {num_bytes}"
             )
         data = ffi.new("uint8_t **")
         ret = lib.Fapi_GetRandom(self._ctx, num_bytes, data)
