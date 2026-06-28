@@ -108,6 +108,15 @@ Qa6C2sTmPHlvWopRgWslXt1JmxbBKwWf2Q==
 -----END EC PRIVATE KEY-----
 """
 
+p521_parent_key = b"""-----BEGIN EC PRIVATE KEY-----
+MIHcAgEBBEIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOgBwYFK4EEACOhgYkDgYYABAGnPTUk
+Q94pGV3ZHWpktZWUebUqblsSPZq55a16ES16jdGtPxZKOkgyBR2mvRa1n+IbrrSQ
+hiwy6gWlkZ0u3jetfQE+mwO5ffpi3dmXn4bGyrgU8vFVf6gqnQMX0virH6NVzuwu
+LdTPjcV1sC1aztHew8cM8QXJvJOlkEJfWIyh7obA5Q==
+-----END EC PRIVATE KEY-----
+"""
+
 
 mkcred = b64decode(
     b"""
@@ -373,6 +382,35 @@ class TestUtils(TSS2_EsapiTest):
                 mode=TPMU_SYM_MODE(aes=TPM2_ALG.CFB),
             ),
         )
+
+        public = TPM2B_PUBLIC.from_pem(rsa_public_key)
+        sensitive = TPM2B_SENSITIVE.from_pem(rsa_private_key)
+
+        enckey, duplicate, outsymseed = wrap(
+            parent.publicArea, public, sensitive, b"", None
+        )
+
+        unwrapped_sensitive = unwrap(
+            parent.publicArea, parent_priv, public, duplicate, outsymseed
+        )
+
+        self.assertEqual(sensitive.marshal(), unwrapped_sensitive.marshal())
+
+    def test_unwrap_ec_p521_parent_rsa_child(self):
+
+        parent_priv = TPMT_SENSITIVE.from_pem(p521_parent_key, password=None)
+        parent = TPM2B_PUBLIC.from_pem(
+            p521_parent_key,
+            symmetric=TPMT_SYM_DEF_OBJECT(
+                algorithm=TPM2_ALG.AES,
+                keyBits=TPMU_SYM_KEY_BITS(aes=128),
+                mode=TPMU_SYM_MODE(aes=TPM2_ALG.CFB),
+            ),
+        )
+        self.assertEqual(
+            parent.publicArea.parameters.eccDetail.curveID, TPM2_ECC.NIST_P521
+        )
+        self.assertEqual(len(bytes(parent.publicArea.unique.ecc.x)), 66)
 
         public = TPM2B_PUBLIC.from_pem(rsa_public_key)
         sensitive = TPM2B_SENSITIVE.from_pem(rsa_private_key)
