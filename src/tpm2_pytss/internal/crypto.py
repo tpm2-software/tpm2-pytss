@@ -595,7 +595,8 @@ def __ecc_secret_to_seed(
     shared_key = key.exchange(ec.ECDH(), peer_public_key)
 
     pubnum = key.public_key().public_numbers()
-    xbytes = pubnum.x.to_bytes(key.key_size // 8, "big")
+    plength = ceil(key.curve.key_size / 8)
+    xbytes = pubnum.x.to_bytes(plength, "big")
     seed = kdfe(hashAlg, shared_key, label, exbytes, xbytes, halg.digest_size * 8)
     return seed
 
