@@ -124,6 +124,7 @@ class _FAPI_CB_UDATA:
         self.cur_exc = None
         self.udata = udata
         self.cb = cb
+        self.cdata_ref = None
 
 
 @ffi.def_extern()
@@ -139,7 +140,9 @@ def _fapi_auth_callback(object_path, description, auth, user_data):
         )
 
         auth_bytes = got_auth.decode() if isinstance(got_auth, str) else got_auth
-        auth[0] = _cffi_malloc("char[]", auth_bytes)
+        auth_cdata = _cffi_malloc("char[]", auth_bytes)
+        cb_udata.cdata_ref = auth_cdata
+        auth[0] = auth_cdata
     except Exception as e:
         rc = e.rc if isinstance(e, TSS2_Exception) else TSS2_RC.FAPI_RC_NOT_IMPLEMENTED
         cb_udata.cur_exc = e
@@ -196,7 +199,9 @@ def _fapi_sign_callback(
             cb_udata.udata,
         )
         signature_size[0] = len(sig)
-        signature[0] = _cffi_malloc("char[]", sig)
+        signature_cdata = _cffi_malloc("char[]", sig)
+        cb_udata.cdata_ref = signature_cdata
+        signature[0] = signature_cdata
     except Exception as e:
         rc = e.rc if isinstance(e, TSS2_Exception) else TSS2_RC.FAPI_RC_GENERAL_FAILURE
         cb_udata.cur_exc = e
