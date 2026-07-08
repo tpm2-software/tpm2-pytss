@@ -118,11 +118,9 @@ class TestTCTI(TSS2_EsapiTest):
 
     def test_custom_pytcti_esapi(self):
 
-        t = MyTCTI(self.tcti)
-        e = ESAPI(t)
-        e.get_random(4)
-
-        e.startup(TPM2_SU.CLEAR)
+        with MyTCTI(self.tcti) as t, ESAPI(t) as e:
+            e.get_random(4)
+            e.startup(TPM2_SU.CLEAR)
 
     def test_custom_pytcti_C_wrapper_transmit_receive(self):
 
@@ -208,8 +206,7 @@ class TestTCTI(TSS2_EsapiTest):
             MyTCTI(None, b"THISISTOOBIG")
 
     def test_custom_pytcti_ctx_manager_finalize(self):
-        with MyTCTI(self.tcti) as t:
-            e = ESAPI(t)
+        with MyTCTI(self.tcti) as t, ESAPI(t) as e:
             r = e.get_random(4)
             self.assertEqual(len(r), 4)
             e.startup(TPM2_SU.CLEAR)
