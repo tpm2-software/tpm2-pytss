@@ -15,6 +15,8 @@ from .TSS2_BaseTest import TSS2_EsapiTest
 if not _lib_version_atleast("tss2-policy", "4.0.0"):
     raise unittest.SkipTest("tss2-policy not installed or version is less then 4.0.0")
 
+from tpm2_pytss.policy import policy as policy
+
 
 def lowercase_dict(src):
     if not isinstance(src, dict):
@@ -124,18 +126,18 @@ class TestPolicy(TSS2_EsapiTest):
         def test():
             pass
 
-        p = policy(polstr, TPM2_ALG.SHA256)
-        p.set_callback(policy_cb_types.CALC_PCR, test)
-        cb = p._get_callback(policy_cb_types.CALC_PCR)
-        self.assertEqual(cb, test)
+        with policy(polstr, TPM2_ALG.SHA256) as p:
+            p.set_callback(policy_cb_types.CALC_PCR, test)
+            cb = p._get_callback(policy_cb_types.CALC_PCR)
+            self.assertEqual(cb, test)
 
-        p.set_callback(policy_cb_types.CALC_PCR, None)
-        cb = p._get_callback(policy_cb_types.CALC_PCR)
-        self.assertEqual(cb, None)
+            p.set_callback(policy_cb_types.CALC_PCR, None)
+            cb = p._get_callback(policy_cb_types.CALC_PCR)
+            self.assertEqual(cb, None)
 
-        with self.assertRaises(ValueError) as e:
-            p.set_callback(1234, test)
-        self.assertEqual(str(e.exception), "unsupported callback type 1234")
+            with self.assertRaises(ValueError) as e:
+                p.set_callback(1234, test)
+            self.assertEqual(str(e.exception), "unsupported callback type 1234")
 
     def test_calc_pcr_callback(self):
         pol = {
