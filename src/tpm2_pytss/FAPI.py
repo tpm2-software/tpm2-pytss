@@ -540,7 +540,7 @@ class FAPI:
             self._ctx, path, ciphertext, len(ciphertext), plaintext, plaintext_size
         )
         _chkrc(ret)
-        return bytes(ffi.unpack(plaintext[0], plaintext_size[0]))
+        return bytes(ffi.unpack(_get_dptr(plaintext, lib.Fapi_Free), plaintext_size[0]))
 
     def create_seal(
         self,
@@ -869,15 +869,18 @@ class FAPI:
         )
         _chkrc(ret)
 
-        policy_str = ffi.string(policy[0]).decode(self.encoding)
+        policy_ptr = _get_dptr(policy, lib.Fapi_Free)
+        policy_str = ffi.string(policy_ptr).decode(self.encoding)
 
+        tpm_2b_public_ptr = _get_dptr(tpm_2b_public, lib.Fapi_Free)
         tpm_2b_public_buffer = bytes(
-            ffi.buffer(tpm_2b_public[0], tpm_2b_public_size[0])
+            ffi.buffer(tpm_2b_public_ptr, tpm_2b_public_size[0])
         )
         tpm_2b_public_unmarsh, _ = TPM2B_PUBLIC.unmarshal(tpm_2b_public_buffer)
 
+        tpm_2b_private_ptr = _get_dptr(tpm_2b_private, lib.Fapi_Free)
         tpm_2b_private_buffer = bytes(
-            ffi.buffer(tpm_2b_private[0], tpm_2b_private_size[0])
+            ffi.buffer(tpm_2b_private_ptr, tpm_2b_private_size[0])
         )
         tpm_2b_private_unmarsh, _ = TPM2B_PRIVATE.unmarshal(tpm_2b_private_buffer)
 
