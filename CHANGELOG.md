@@ -4,9 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 3.0.0-rc0 - 2025-09-21
+## 3.0.0-rc1 - 2025-07-18
 ### Fixed
 - Restore environment when exiting FAPIConfig
+- Fix ESAPI.hierarchy_control support for PLATFORM_NV hierarchy
+- Fix FAPI callback buffer lifetimes (fixes issues on free-threaded python)
+- Fix ECC seed length calculation in `__ecc_secret_to_seed`
+- Fix memory leak in FAPI
 
 ### Added
 - Add a context manager for ESYS handles, which flushes the handle at exit.
@@ -21,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add support for passing prehashed data to `TPMT_SIGNATURE.verify_signature`.
 - Add the marshal/unmarshal methods to union types, as they require a selector.
 - Add the equal dunder to struct types, allowing comparing two different instances of the same type.
+- Add support for python 3.14
 
 ### Changed
 - Make the symmetric argument to `start_auth_session` optional.
@@ -29,9 +34,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Make the validition ticket for the sign command optional, defaults to a NULL ticket.
 - The argument order for `ESAPI.policy_signed`, `ESAPI.policy_ticket` and `ESAPI.policy_authorize` has changed.
   This is to make expiration, nonce_tpm, policy_ref and cp_hash_a arguments optional, with expiration being set to the max value and the rest are empty buffers by default.
+- Drop asn1crypto and use the new ASN.1 serializer/deserializer in cryptography
 
 ### Removed
 - Remove support for the tools encoder/decoder.
+- Drop support for python 3.9
 
 ## 2.3.0 - 2024-06-26
 ### Fixed
