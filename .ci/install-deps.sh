@@ -44,7 +44,8 @@ sudo DEBIAN_FRONTEND=noninteractive apt-get install -y \
     socat \
     libseccomp-dev \
     libjson-glib-dev \
-    libltdl-dev
+    libltdl-dev \
+    valgrind
 
 #
 # Install tpm2-tss
