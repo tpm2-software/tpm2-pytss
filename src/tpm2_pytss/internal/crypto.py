@@ -641,8 +641,8 @@ def _check_hmac(
 def _encrypt(
     cipher: Type[CipherAlgorithm], mode: Type[modes.Mode], key: bytes, data: bytes
 ) -> bytes:
-    iv = len(key) * b"\x00"
     ci = cipher(key)
+    iv = (ci.block_size >> 3) * b"\x00"
     ciph = Cipher(ci, mode(iv), backend=default_backend())
     encr = ciph.encryptor()
     encdata = encr.update(data) + encr.finalize()
@@ -652,8 +652,8 @@ def _encrypt(
 def _decrypt(
     cipher: Type[CipherAlgorithm], mode: Type[modes.Mode], key: bytes, data: bytes
 ) -> bytes:
-    iv = len(key) * b"\x00"
     ci = cipher(key)
+    iv = (ci.block_size >> 3) * b"\x00"
     ciph = Cipher(ci, mode(iv), backend=default_backend())
     decr = ciph.decryptor()
     plaintextdata = decr.update(data) + decr.finalize()

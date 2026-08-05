@@ -221,6 +221,17 @@ class TestUtils(TSS2_EsapiTest):
         certinfo = self.ectx.activate_credential(handle, phandle, credblob, secret)
         self.assertEqual(b"credential data", bytes(certinfo))
 
+    def test_MakeCredential_ecc_aes256(self):
+        insens = TPM2B_SENSITIVE_CREATE()
+        phandle, parent, _, _, _ = self.ectx.create_primary(insens, "ecc::aes256cfb")
+        private, public, _, _, _ = self.ectx.create(phandle, insens, "ecc")
+        credblob, secret = make_credential(
+            parent, b"credential data", public.get_name()
+        )
+        handle = self.ectx.load(phandle, private, public)
+        certinfo = self.ectx.activate_credential(handle, phandle, credblob, secret)
+        self.assertEqual(b"credential data", bytes(certinfo))
+
     def test_make_credential_ecc_camellia(self):
         self.skipIfAlgNotSupported(TPM2_ALG.CAMELLIA)
         insens = TPM2B_SENSITIVE_CREATE()
