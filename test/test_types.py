@@ -1703,7 +1703,12 @@ class TypesTest(unittest.TestCase):
         load_pem_private_key(pem, password=None)
 
         # with a password
-        pem = priv.to_pem(pub.publicArea, password=b"foo")
+        try:
+            pem = priv.to_pem(pub.publicArea, password=b"foo")
+        except ValueError as e:
+            if "FIPS mode" in str(e):
+                self.skipTest(str(e))
+            raise
         with self.assertRaises(TypeError):
             load_pem_private_key(pem, password=None)
 
@@ -1725,7 +1730,12 @@ class TypesTest(unittest.TestCase):
         load_pem_private_key(pem, password=None)
 
         # with a password
-        pem = priv.to_pem(pub.publicArea, password=b"foo")
+        try:
+            pem = priv.to_pem(pub.publicArea, password=b"foo")
+        except ValueError as e:
+            if "FIPS mode" in str(e):
+                self.skipTest(str(e))
+            raise
         with self.assertRaises(TypeError):
             load_pem_private_key(pem, password=None)
 
