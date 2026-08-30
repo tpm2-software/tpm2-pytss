@@ -110,3 +110,38 @@ jobs:
       env:
         LINT: 1
       run: ./.ci/run.sh
+
+  valgrind:
+    runs-on: ubuntu-latest
+    # Keep this advisory until all definite leaks are fixed.
+    continue-on-error: true
+    timeout-minutes: 120
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v6
+
+    - name: Set up Python 3.x
+      uses: actions/setup-python@v6
+      with:
+        python-version: 3.x
+
+    - name: Install dependencies
+      env:
+        TPM2_TSS_VERSION: 4.1.3
+        TPM2_TSS_FAPI: true
+        VALGRIND: 1
+      run: ./.ci/install-deps.sh
+
+    - name: Check
+      env:
+        VALGRIND: 1
+        VALGRIND_LOG_DIR: /tmp/tpm2-pytss-valgrind
+      run: ./.ci/run.sh
+
+    - name: Upload Valgrind logs
+      if: always()
+      uses: actions/upload-artifact@v7
+      with:
+        name: valgrind-logs
+        path: /tmp/tpm2-pytss-valgrind/*.log
+        if-no-files-found: ignore
