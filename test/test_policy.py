@@ -862,3 +862,23 @@ class TestPolicy(TSS2_EsapiTest):
             p.set_callback(policy_cb_types.EXEC_POLACTION, bad_cb)
             p.execute(self.ectx, session)
         self.assertEqual(str(e.exception), "callback exception")
+
+    def test_polauthnv_cb_copies_nv_public(self):
+        from tpm2_pytss.policy import _policy_cb_exec_polauthnv, ffi
+
+        src = ffi.new("TPMS_NV_PUBLIC *", {"nvIndex": 0x1000000})
+        captured = None
+
+        def cb(nv_public, hash_alg):
+            nonlocal captured
+            captured = nv_public
+
+        with policy('{"description": "", "policy": []}', TPM2_ALG.SHA256) as p:
+            p._callbacks[policy_cb_types.EXEC_POLAUTHNV] = cb
+            handle = ffi.new_handle(p)
+            rc = _policy_cb_exec_polauthnv(src, TPM2_ALG.SHA256, handle)
+            self.assertEqual(rc, TPM2_RC.SUCCESS)
+
+        # Simulate libtss2-policy freeing/reusing the buffer
+        src[0].nvIndex = 0xDEADBEEF
+        self.assertEqual(captured.nvIndex, 0x1000000)

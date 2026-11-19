@@ -326,7 +326,7 @@ def _policy_cb_exec_polauthnv(nv_public, hash_alg, userdata):
     if not cb:
         return TSS2_RC.POLICY_RC_NULL_CALLBACK
     try:
-        nvp = TPMS_NV_PUBLIC(nv_public)
+        nvp = TPMS_NV_PUBLIC(ffi.new("TPMS_NV_PUBLIC *", nv_public[0]))
         halg = TPM2_ALG(hash_alg)
         cb(nvp, halg)
     except Exception as e:
